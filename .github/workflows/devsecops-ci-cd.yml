@@ -26,6 +26,7 @@ permissions:
 env:
   NODE_VERSION: '22'
   SEMGREP_RULES: 'auto'
+  VITE_API_BASE_URL: 'https://www.pragatix.in'
 
 # ═════════════════════════════════════════════════════════════════════════════
 jobs:
