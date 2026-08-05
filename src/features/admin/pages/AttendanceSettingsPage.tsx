@@ -4,11 +4,11 @@ import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
 interface Props {
-  academicYear: string;
+  academicYear?: string;
   onBack: () => void;
 }
 
-export default function AttendanceSettingsPage({ academicYear, onBack }: Props) {
+export default function AttendanceSettingsPage({ academicYear = '1', onBack }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
