@@ -1,4 +1,4 @@
-name: Frontend CI
+name: PragatiX React Application CI
 
 on:
   push:
