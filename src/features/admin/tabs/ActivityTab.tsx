@@ -125,8 +125,13 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
         ) : (
           <div className="space-y-4">
             {stages.map(stage => {
-              const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE' || true);
+              const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE');
               const statusText = stage.status || (active ? 'ACTIVE' : 'UPCOMING');
+              const displayOrder = stage.displayOrder ?? stage.order ?? 0;
+              const expectedXp = stage.expectedXp ?? stage.totalXp ?? 0;
+              const mThresh = stage.mustThreshold ?? stage.mThreshold ?? 0;
+              const iThresh = stage.individualThreshold ?? stage.iThreshold ?? 0;
+              const gThresh = stage.groupThreshold ?? stage.gThreshold ?? 0;
 
               return (
                 <div 
@@ -145,29 +150,31 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
                       <h3 className="font-bold text-xl text-slate-900">{stage.name}</h3>
                       <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase border tracking-wider ${
                         statusText === 'ACTIVE' 
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                          : 'bg-blue-50 text-blue-700 border-blue-200'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+                          : statusText === 'UPCOMING'
+                          ? 'bg-blue-50 text-blue-800 border-blue-300'
+                          : 'bg-slate-100 text-slate-700 border-slate-300'
                       }`}>
                         {statusText}
                       </span>
                     </div>
 
-                    {/* Metrics Row (Order, XP, M, I, G) */}
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-semibold">
-                      <span className="text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                        Order: {stage.displayOrder || stage.id || 1}
+                    {/* Metrics Row (Order, XP, M, I, G) - 1:1 Flutter Alignment */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                      <span className="text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
+                        Order: {displayOrder}
                       </span>
-                      <span className="text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-                        XP: {stage.totalXp || 60}
+                      <span className="text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                        XP: {expectedXp}
                       </span>
-                      <span className="text-rose-600 font-bold">
-                        M: {stage.mustThreshold ?? 150}
+                      <span className="text-red-800 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md">
+                        M: {mThresh}
                       </span>
-                      <span className="text-blue-600 font-bold">
-                        I: {stage.individualThreshold ?? 150}
+                      <span className="text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                        I: {iThresh}
                       </span>
-                      <span className="text-emerald-600 font-bold">
-                        G: {stage.groupThreshold ?? 150}
+                      <span className="text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                        G: {gThresh}
                       </span>
                     </div>
                   </div>
