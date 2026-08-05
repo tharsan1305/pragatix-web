@@ -18,8 +18,13 @@ import ActivityListPage from './activity/pages/ActivityListPage';
 import CreateActivityPage from './activity/pages/CreateActivityPage';
 import EditActivityPage from './activity/pages/EditActivityPage';
 import AssignFacultyPage from './activity/pages/AssignFacultyPage';
+import CaptainRewardYearSelectionPage from './pages/CaptainRewardYearSelectionPage';
+import CaptainRewardSettingsPage from './pages/CaptainRewardSettingsPage';
+import AttendanceSettingsYearSelectionPage from './pages/AttendanceSettingsYearSelectionPage';
+import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
+import AnalyticsTab from './tabs/AnalyticsTab';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, Activity, Users, AlertCircle, User, CalendarCheck, Award } from 'lucide-react';
+import { LayoutDashboard, Activity, Users, AlertCircle, User, CalendarCheck, Award, BarChart3 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(0);
@@ -49,11 +54,11 @@ export default function AdminDashboard() {
 
   const tabs: { name: string; icon: any; Component: React.ComponentType<any> }[] = [
     { name: 'Overview', icon: LayoutDashboard, Component: OverviewTab },
-    { name: 'Attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
-    { name: 'Badges', icon: Award, Component: AdminBadgeRequestsTab },
     { name: 'Activity', icon: Activity, Component: ActivityTab },
+    { name: 'Attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
     { name: 'Groups', icon: Users, Component: TeacherGroupManagementTab },
-    { name: 'Requests', icon: AlertCircle, Component: RemovalRequestsTab },
+    { name: 'Requests', icon: Award, Component: AdminBadgeRequestsTab },
+    { name: 'Analytics', icon: BarChart3, Component: AnalyticsTab },
     { name: 'Profile', icon: User, Component: AdminProfileTab }
   ];
 
@@ -97,6 +102,16 @@ export default function AdminDashboard() {
         return <EditActivityPage onBack={popView} activity={currentView.props?.activity} />;
       case 'assign_faculty':
         return <AssignFacultyPage activity={currentView.props?.activity} onBack={popView} />;
+      case 'captain_reward_year_selection':
+        return <CaptainRewardYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('captain_reward_settings', { academicYear: yr })} />;
+      case 'captain_reward_settings':
+        return <CaptainRewardSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} />;
+      case 'attendance_settings_year_selection':
+        return <AttendanceSettingsYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('attendance_settings', { academicYear: yr })} />;
+      case 'attendance_settings':
+        return <AttendanceSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} />;
+      case 'analytics':
+        return <AnalyticsTab />;
       default:
         return renderActiveTabComponent();
     }

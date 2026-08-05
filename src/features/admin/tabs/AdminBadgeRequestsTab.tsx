@@ -12,6 +12,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
   const [filteredRequests, setFilteredRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('PENDING');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [rejectingReq, setRejectingReq] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState<string>('');
@@ -44,9 +45,29 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
     }
   };
 
-  const filterList = (list: any[], status: string) => {
+  const filterList = (list: any[], status: string, search: string = searchQuery) => {
     setSelectedStatus(status);
-    setFilteredRequests(list.filter(r => (r.status || 'PENDING').toUpperCase() === status.toUpperCase()));
+    const statusUpper = status.toUpperCase();
+    const query = search.toLowerCase().trim();
+
+    const filtered = list.filter(r => {
+      const matchStatus = (r.status || 'PENDING').toUpperCase() === statusUpper;
+      if (!matchStatus) return false;
+      if (!query) return true;
+
+      const studentName = (r.studentName || r.student?.fullName || r.fullName || '').toLowerCase();
+      const regNo = (r.regNo || r.registerNumber || r.student?.registerNumber || '').toLowerCase();
+      const badgeName = (r.badgeName || r.badge?.title || r.badgeTitle || '').toLowerCase();
+      const deptName = (r.departmentName || '').toLowerCase();
+
+      return studentName.includes(query) || regNo.includes(query) || badgeName.includes(query) || deptName.includes(query);
+    });
+
+    setFilteredRequests(filtered);
+  };
+
+  const getStatusCount = (status: string) => {
+    return requests.filter(r => (r.status || 'PENDING').toUpperCase() === status.toUpperCase()).length;
   };
 
   const handleApprove = async (id: number) => {
@@ -120,25 +141,44 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
           </button>
         </div>
 
-        {/* Status Filter Chips & Search */}
-        <div className="flex flex-col sm:flex-row justify-between gap-3">
+        {/* Status Filter Chips & Search Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex space-x-2">
             {['PENDING', 'APPROVED', 'REJECTED'].map(st => {
               const active = selectedStatus === st;
+              const count = getStatusCount(st);
               return (
                 <button
                   key={st}
-                  onClick={() => filterList(requests, st)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  onClick={() => filterList(requests, st, searchQuery)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 ${
                     active 
                       ? 'bg-white text-slate-900 shadow-sm' 
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
-                  {st}
+                  <span>{st}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    active ? 'bg-slate-900 text-white' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {count}
+                  </span>
                 </button>
               );
             })}
+          </div>
+
+          <div className="w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search by name, regNo, badge..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                filterList(requests, selectedStatus, e.target.value);
+              }}
+              className="w-full px-3 py-1.5 bg-slate-800 text-white placeholder-slate-400 text-xs rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
           </div>
         </div>
       </div>

@@ -33,9 +33,10 @@ const LEVEL_THRESHOLDS = [
 
 interface DashboardTabProps {
   onSelectTab?: (tabIndex: number) => void;
+  onOpenStreaks?: () => void;
 }
 
-export default function DashboardTab({ onSelectTab }: DashboardTabProps) {
+export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTabProps) {
   const navigate = useNavigate();
   const { token } = useAuth();
   const { xpByCategory, streaks, history, isLoading: isXpLoading, totalXp, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
@@ -162,7 +163,7 @@ export default function DashboardTab({ onSelectTab }: DashboardTabProps) {
   const levelInfo = getLevelInfo(displayXp);
   const progress = Math.min(1, Math.max(0, (displayXp - levelInfo.min) / (levelInfo.max - levelInfo.min)));
 
-  const maxStreak = streaks.reduce((max, s) => {
+  const maxStreak = (streaks || []).reduce((max, s) => {
     const current = s?.currentStreak || 0;
     return !s?.isBroken && current > max ? current : max;
   }, 0);
@@ -176,9 +177,10 @@ export default function DashboardTab({ onSelectTab }: DashboardTabProps) {
     );
   }
 
-  const individualXp = xpByCategory["individualXp"] ?? xpByCategory["INDIVIDUAL"] ?? 0;
-  const groupXp = xpByCategory["groupXp"] ?? xpByCategory["GROUP"] ?? 0;
-  const mustXp = xpByCategory["mustXp"] ?? xpByCategory["MUST"] ?? 0;
+  const safeXpCategory = xpByCategory || {};
+  const individualXp = safeXpCategory["individualXp"] ?? safeXpCategory["INDIVIDUAL"] ?? 0;
+  const groupXp = safeXpCategory["groupXp"] ?? safeXpCategory["GROUP"] ?? 0;
+  const mustXp = safeXpCategory["mustXp"] ?? safeXpCategory["MUST"] ?? 0;
 
   const chartData = [
     { name: 'Individual', xp: individualXp, fill: '#a855f7' },
@@ -336,7 +338,18 @@ export default function DashboardTab({ onSelectTab }: DashboardTabProps) {
 
         {/* Active Streaks */}
         <div id="streaks-section">
-          <h3 className="text-lg font-bold text-slate-800 mb-3">Active Streaks</h3>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-bold text-slate-800">Active Streaks</h3>
+            {onOpenStreaks && (
+              <button
+                onClick={onOpenStreaks}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1"
+              >
+                <span>View All Records</span>
+                <span>→</span>
+              </button>
+            )}
+          </div>
           {streaks.length === 0 ? (
             <p className="text-slate-500 text-sm">No active streaks recorded.</p>
           ) : (

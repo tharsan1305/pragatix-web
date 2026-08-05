@@ -4,10 +4,11 @@ import DashboardTab from '../student/tabs/DashboardTab';
 import PointReviewTab from '../student/tabs/PointReviewTab';
 import LeaderboardTab from '../student/tabs/LeaderboardTab';
 import CaptainGroupTab from './tabs/CaptainGroupTab';
+import ActivitiesTab from '../student/tabs/ActivitiesTab';
 import LevelsBadgesTab from '../student/tabs/LevelsBadgesTab';
 import ProfileTab from '../student/tabs/ProfileTab';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, History, Trophy, Users, Medal, User } from 'lucide-react';
+import { LayoutDashboard, History, Trophy, Users, Ticket, Medal, User } from 'lucide-react';
 
 export default function CaptainDashboardPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -27,6 +28,7 @@ export default function CaptainDashboardPage() {
     { name: 'Point Review', icon: History, component: <PointReviewTab /> },
     { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
     { name: 'My Group', icon: Users, component: <CaptainGroupTab /> },
+    { name: 'Activities', icon: Ticket, component: <ActivitiesTab /> },
     { name: 'Levels & Badges', icon: Medal, component: <LevelsBadgesTab /> },
     { name: 'Profile', icon: User, component: <ProfileTab /> }
   ];
@@ -46,11 +48,10 @@ export default function CaptainDashboardPage() {
             <button
               key={idx}
               onClick={() => handleTabChange(idx)}
-              className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === idx 
-                  ? 'bg-indigo-600 text-white border-l-4 border-indigo-400' 
+              className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${activeTab === idx
+                  ? 'bg-indigo-600 text-white border-l-4 border-indigo-400'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white border-l-4 border-transparent'
-              }`}
+                }`}
             >
               <tab.icon className={`w-5 h-5 mr-3 ${activeTab === idx ? 'text-indigo-200' : 'text-slate-400'}`} />
               {tab.name}
@@ -67,7 +68,7 @@ export default function CaptainDashboardPage() {
           </div>
           <Footer />
         </div>
-        
+
         {/* Bottom Nav (Mobile) */}
         <div className="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50">
           <div className="flex justify-around items-center h-16">

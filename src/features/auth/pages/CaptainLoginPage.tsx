@@ -22,8 +22,10 @@ export const CaptainLoginPage: React.FC = () => {
 
       const { token, user } = response.data;
       localStorage.setItem('spdms_token', token);
+      localStorage.setItem('token', token);
       localStorage.setItem('spdms_user', JSON.stringify(user));
-      localStorage.setItem('auth_token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userRole', 'CAPTAIN');
 
       navigate('/captain/dashboard');
     } catch (err: any) {

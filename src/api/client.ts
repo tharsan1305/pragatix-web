@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { ApiConfig } from '../config/apiConfig';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || ApiConfig.baseUrl || 'https://www.pragatix.in';
-
+const baseURL = import.meta.env.VITE_API_BASE_URL !== undefined
+  ? import.meta.env.VITE_API_BASE_URL
+  : (ApiConfig.baseUrl || '');
 
 export const apiClient = axios.create({
   baseURL,
@@ -50,4 +51,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-

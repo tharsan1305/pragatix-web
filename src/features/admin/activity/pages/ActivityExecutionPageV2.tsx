@@ -33,7 +33,7 @@ export default function ActivityExecutionPageV2() {
       setData(res);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch activity execution details.');
-    } fontinally: {
+    } finally {
       setLoading(false);
     }
   };

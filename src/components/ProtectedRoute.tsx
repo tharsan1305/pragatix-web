@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { token, user, role, isCaptain, isAdmin, isTeacher } = useAuth();
+  const { token, user, role, isCaptain, isAdmin, isTeacher, isStudent } = useAuth();
 
   // If no token or user is logged in, redirect to login
   if (!token || !user) {
@@ -32,6 +32,9 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
     });
 
     if (!hasAccess) {
+      if (isStudent || isCaptain) return <Navigate to="/student" replace />;
+      if (isTeacher) return <Navigate to="/teacher" replace />;
+      if (isAdmin) return <Navigate to="/admin" replace />;
       return <Navigate to="/login" replace />;
     }
   }

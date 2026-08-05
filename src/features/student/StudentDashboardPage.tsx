@@ -6,29 +6,34 @@ import LeaderboardTab from './tabs/LeaderboardTab';
 import CaptainGroupTab from '../captain/tabs/CaptainGroupTab';
 import ActivitiesTab from './tabs/ActivitiesTab';
 import LevelsBadgesTab from './tabs/LevelsBadgesTab';
+import StudentAttendanceTab from './tabs/StudentAttendanceTab';
 import ProfileTab from './tabs/ProfileTab';
+import ActivityStreaksPage from './pages/ActivityStreaksPage';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, History, Trophy, Users, Ticket, Medal, User } from 'lucide-react';
+import { LayoutDashboard, History, Trophy, Users, Ticket, Medal, User, CalendarCheck } from 'lucide-react';
 
 export default function StudentDashboardPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [isTabLoading, setIsTabLoading] = useState(false);
+  const [activeSubView, setActiveSubView] = useState<string | null>(null);
 
   const handleTabChange = (idx: number) => {
-    if (idx === activeTab) return;
+    if (idx === activeTab && !activeSubView) return;
     setIsTabLoading(true);
     setActiveTab(idx);
+    setActiveSubView(null);
     setTimeout(() => {
       setIsTabLoading(false);
     }, 350);
   };
 
   const tabs = [
-    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} /> },
+    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} onOpenStreaks={() => setActiveSubView('streaks')} /> },
     { name: 'Point Review', icon: History, component: <PointReviewTab /> },
     { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
     { name: 'My Group', icon: Users, component: <CaptainGroupTab /> },
     { name: 'Activities', icon: Ticket, component: <ActivitiesTab /> },
+    { name: 'Attendance', icon: CalendarCheck, component: <StudentAttendanceTab /> },
     { name: 'Levels & Badges', icon: Medal, component: <LevelsBadgesTab /> },
     { name: 'Profile', icon: User, component: <ProfileTab /> }
   ];
@@ -65,7 +70,11 @@ export default function StudentDashboardPage() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <div className="flex-1 overflow-y-auto md:pb-0 pb-20 flex flex-col justify-between">
           <div>
-            {tabs[activeTab].component}
+            {activeSubView === 'streaks' ? (
+              <ActivityStreaksPage onBack={() => setActiveSubView(null)} />
+            ) : (
+              tabs[activeTab].component
+            )}
           </div>
           <Footer />
         </div>

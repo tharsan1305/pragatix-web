@@ -16,6 +16,7 @@ export default function DepartmentsTab({ onBack }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDept, setEditingDept] = useState<any>(null);
   const [formData, setFormData] = useState({ name: '', code: '' });
+  const [deletingDeptId, setDeletingDeptId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchDepartments();
@@ -162,6 +163,7 @@ export default function DepartmentsTab({ onBack }: Props) {
   };
 
   const handleDelete = async (id: number) => {
+    setDeletingDeptId(null);
     const toastId = toast.loading("Deleting department...");
     try {
       await apiClient.delete(`/api/v1/admin/departments/${id}`);
@@ -234,7 +236,7 @@ export default function DepartmentsTab({ onBack }: Props) {
                   <button onClick={() => openModal(dept)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDelete(dept.id)} className="p-2.5 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                  <button onClick={() => setDeletingDeptId(dept.id)} className="p-2.5 text-red-500 hover:bg-red-50 rounded-full transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -346,6 +348,32 @@ export default function DepartmentsTab({ onBack }: Props) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingDeptId !== null && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">Delete Department</h3>
+            <p className="text-xs text-slate-500">
+              Are you sure you want to delete this department? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3 pt-2">
+              <button
+                onClick={() => setDeletingDeptId(null)}
+                className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deletingDeptId)}
+                className="px-5 py-2 bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 rounded-lg shadow-xs"
+              >
+                Confirm Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

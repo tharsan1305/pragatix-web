@@ -100,10 +100,10 @@ export default function ProfileTab() {
           </div>
         </div>
 
-        <div className="mt-auto w-full p-6">
+        <div className="mt-auto w-full max-w-md px-6 py-6">
           <button 
             onClick={() => setShowLogoutModal(true)}
-            className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-sm"
+            className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition-colors shadow-sm"
           >
             <LogOut className="w-5 h-5" />
             Sign Out

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, School, Building2, AlertTriangle, RefreshCw, Activity, Shield, Key } from 'lucide-react';
+import { Users, School, Building2, Trophy, RefreshCw, Activity, Shield, Key } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
 
 interface Props {
@@ -11,7 +11,7 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
     students: 0,
     teachers: 0,
     departments: 0,
-    alerts: 0
+    alerts: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,13 +28,21 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
         const resObj = response.data.data || response.data;
         setStats({
           students: resObj.totalStudents ?? resObj.students ?? resObj.studentCount ?? 0,
-          teachers: resObj.teachersCount ?? resObj.totalTeachers ?? resObj.teachers ?? resObj.teacherCount ?? resObj.totalFaculty ?? resObj.facultyCount ?? 0,
+          teachers:
+            resObj.teachersCount ??
+            resObj.totalTeachers ??
+            resObj.teachers ??
+            resObj.teacherCount ??
+            resObj.totalFaculty ??
+            resObj.facultyCount ??
+            0,
           departments: resObj.totalDepartments ?? resObj.departments ?? resObj.departmentCount ?? 0,
-          alerts: resObj.totalAlerts ?? resObj.alerts ?? resObj.alertCount ?? resObj.pendingBadgeRequests ?? resObj.atRiskCount ?? 0
+          alerts:
+            resObj.totalAlerts ?? resObj.alerts ?? resObj.alertCount ?? resObj.pendingBadgeRequests ?? resObj.atRiskCount ?? 0,
         });
       }
     } catch (error) {
-      console.error("Failed to fetch admin stats", error);
+      console.error('Failed to fetch admin stats', error);
     } finally {
       setIsLoading(false);
     }
@@ -46,138 +54,99 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50">
-      <div className="bg-slate-900 px-6 pt-12 pb-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Admin Overview</h1>
+      {/* Header */}
+      <div className="bg-slate-900 px-6 pt-10 pb-6 text-white shadow-md">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Admin Overview</h1>
           <button onClick={fetchStats} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1">Welcome back, System Admin</h2>
-          <p className="text-sm text-slate-300">Here is a summary of the PragatiX system metrics.</p>
+          <h2 className="text-xl font-bold text-white mb-0.5">Welcome back, System Admin</h2>
+          <p className="text-xs text-slate-300">Here is a summary of the discipline system metrics.</p>
         </div>
       </div>
 
-      <div className="px-6 -mt-4">
+      <div className="px-6 py-6 max-w-5xl mx-auto w-full space-y-6">
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+            <RefreshCw className="w-8 h-8 animate-spin text-indigo-500" />
           </div>
         ) : (
-          <div className="space-y-6 pt-8 pb-10">
+          <>
+            {/* 4 Primary Stat Cards Grid (Matching Flutter overview_tab.dart 1:1) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard
                 title="Students"
                 count={stats.students.toString()}
                 icon={Users}
-                color="text-blue-500"
+                color="text-blue-600"
                 bgColor="bg-blue-50"
+                borderColor="border-blue-100"
                 onClick={() => onPushView('students')}
               />
               <StatCard
                 title="Teachers"
                 count={stats.teachers.toString()}
                 icon={School}
-                color="text-green-500"
-                bgColor="bg-green-50"
+                color="text-emerald-600"
+                bgColor="bg-emerald-50"
+                borderColor="border-emerald-100"
                 onClick={() => onPushView('teachers')}
               />
               <StatCard
                 title="Departments"
                 count={stats.departments.toString()}
                 icon={Building2}
-                color="text-amber-500"
+                color="text-amber-600"
                 bgColor="bg-amber-50"
+                borderColor="border-amber-100"
                 onClick={() => onPushView('departments')}
               />
               <StatCard
-                title="Alerts/Actions"
-                count={stats.alerts.toString()}
-                icon={AlertTriangle}
-                color="text-red-500"
-                bgColor="bg-red-50"
-                onClick={() => onPushView('badge_requests')}
+                title="Leaderboard"
+                count="Top"
+                icon={Trophy}
+                color="text-rose-600"
+                bgColor="bg-rose-50"
+                borderColor="border-rose-100"
+                onClick={() => onPushView('analytics')}
               />
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick System Status Card */}
             <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-3">Quick Navigation</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <button
-                  onClick={() => onPushView('attendance')}
-                  className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center space-y-1"
-                >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <Activity className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-800">Attendance</span>
-                </button>
-
-                <button
-                  onClick={() => onPushView('badge_requests')}
-                  className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 hover:border-amber-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center space-y-1"
-                >
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                    <Shield className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-800">Badge Requests</span>
-                </button>
-
-                <button
-                  onClick={() => onPushView('create_stage')}
-                  className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center space-y-1"
-                >
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                    <School className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-800">Create Stage</span>
-                </button>
-
-                <button
-                  onClick={() => onPushView('students')}
-                  className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 hover:border-purple-400 hover:shadow-md transition-all flex flex-col items-center justify-center text-center space-y-1"
-                >
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-semibold text-slate-800">Students</span>
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Quick System Overview</h3>
-              <div className="bg-white rounded-2xl shadow-md p-4 space-y-4">
-                <OverviewRow icon={Activity} title="Database Status" value="Online & Healthy" statusColor="text-green-600" />
+              <h3 className="text-lg font-bold text-slate-900 mb-3">Quick System Overview</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <OverviewRow icon={Activity} title="Database Status" value="Online & Healthy" statusColor="text-emerald-600" />
                 <div className="h-px bg-slate-100"></div>
                 <OverviewRow icon={Shield} title="Security Level" value="JWT Enabled" statusColor="text-blue-600" />
                 <div className="h-px bg-slate-100"></div>
-                <OverviewRow icon={Key} title="Self-Registration" value="Disabled (Admin Only)" statusColor="text-orange-500" />
+                <OverviewRow icon={Key} title="Self-Registration" value="Disabled (Admin Only)" statusColor="text-amber-600" />
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
   );
 }
 
-function StatCard({ title, count, icon: Icon, color, bgColor, onClick }: any) {
+function StatCard({ title, count, icon: Icon, color, bgColor, borderColor, onClick }: any) {
   return (
-    <div 
+    <div
       onClick={onClick}
-      className={`bg-white rounded-2xl shadow-md p-4 transition-transform ${onClick ? 'cursor-pointer active:scale-95' : ''}`}
+      className={`bg-white rounded-2xl border ${borderColor} shadow-sm p-5 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between`}
     >
       <div className="flex justify-between items-start mb-4">
-        <div className={`p-2 rounded-xl ${bgColor}`}>
+        <div className={`p-2.5 rounded-xl ${bgColor}`}>
           <Icon className={`w-6 h-6 ${color}`} />
         </div>
       </div>
       <div>
-        <h4 className="text-2xl font-bold text-slate-900">{count}</h4>
-        <p className="text-sm font-medium text-slate-600 mt-1">{title}</p>
+        <h4 className="text-3xl font-bold text-slate-900">{count}</h4>
+        <p className="text-xs font-semibold text-slate-500 mt-1">{title}</p>
       </div>
     </div>
   );
@@ -185,13 +154,13 @@ function StatCard({ title, count, icon: Icon, color, bgColor, onClick }: any) {
 
 function OverviewRow({ icon: Icon, title, value, statusColor }: any) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="flex items-center space-x-4">
-        <Icon className="w-5 h-5 text-slate-500" />
-        <span className="font-semibold text-slate-900 text-[15px]">{title}</span>
+    <div className="flex items-center justify-between py-1">
+      <div className="flex items-center space-x-3">
+        <Icon className="w-5 h-5 text-slate-400" />
+        <span className="font-semibold text-slate-800 text-sm">{title}</span>
       </div>
       <div>
-        <span className={`text-[15px] font-bold ${statusColor}`}>{value}</span>
+        <span className={`text-xs font-bold ${statusColor}`}>{value}</span>
       </div>
     </div>
   );

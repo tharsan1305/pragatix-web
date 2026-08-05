@@ -37,8 +37,14 @@ export default function Sidebar({ role }: SidebarProps) {
   };
 
   const handleLogout = () => {
+    // Clear ALL token keys used across the app
+    localStorage.removeItem('spdms_token');
+    localStorage.removeItem('spdms_user');
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    sessionStorage.clear();
     window.location.href = '/login';
   };
 

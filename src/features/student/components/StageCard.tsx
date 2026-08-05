@@ -1,0 +1,74 @@
+import React from 'react';
+import { CheckCircle2, Lock, ChevronRight } from 'lucide-react';
+import type { Stage } from '../types/activity';
+import { ProgressBar } from './ProgressBar';
+
+interface StageCardProps {
+  stage: Stage;
+  onClick: (stage: Stage) => void;
+}
+
+export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
+  const isCompleted = stage.isCompleted || stage.stageStatus === 'COMPLETED';
+  const percentage = Math.round(stage.percentage);
+
+  return (
+    <div
+      onClick={() => onClick(stage)}
+      className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer p-5 space-y-4"
+    >
+      <div className="flex items-center gap-4">
+        {/* Left Circle Avatar Icon matching Flutter */}
+        <div
+          className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+            isCompleted
+              ? 'bg-emerald-100/90 text-emerald-600'
+              : 'bg-indigo-50 text-indigo-500'
+          }`}
+        >
+          {isCompleted ? (
+            <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+          ) : (
+            <Lock className="w-6 h-6 stroke-[2.2]" />
+          )}
+        </div>
+
+        {/* Content Details matching Flutter */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-lg text-slate-800 truncate">
+            {stage.name}
+          </h3>
+          <div
+            className={`text-xs font-bold mt-0.5 ${
+              isCompleted ? 'text-emerald-600' : 'text-amber-600'
+            }`}
+          >
+            {isCompleted
+              ? 'Stage Completed'
+              : `Progress: ${percentage}% • ${stage.completedSubgroups}/${stage.totalSubgroups} Subgroups`}
+          </div>
+        </div>
+
+        {/* Right Chevron Arrow matching Flutter */}
+        <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />
+      </div>
+
+      {/* Embedded Linear Progress Bar & XP breakdown */}
+      <div className="pt-3 border-t border-slate-100 space-y-2">
+        <div className="flex justify-between items-center text-xs text-slate-500 font-medium">
+          <span>Current XP: <strong className="text-slate-900">{stage.currentXp}</strong> / {stage.expectedXp}</span>
+          <span>Subgroups: <strong className="text-slate-900">{stage.completedSubgroups}/{stage.totalSubgroups}</strong></span>
+        </div>
+
+        <ProgressBar
+          progress={percentage}
+          barColor={isCompleted ? 'bg-emerald-500' : 'bg-indigo-600'}
+          backgroundColor="bg-slate-100"
+          heightClass="h-1.5"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default StageCard;
