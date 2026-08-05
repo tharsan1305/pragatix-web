@@ -42,8 +42,8 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
       delete apiClient.defaults.headers.common['Authorization'];
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      if (!window.location.hash.startsWith('#/login')) {
+        window.location.href = '/#/login';
       }
     }
     return Promise.reject(error);

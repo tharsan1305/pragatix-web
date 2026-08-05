@@ -134,8 +134,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setRole(null);
         setSubRolesState([]);
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (!window.location.hash.startsWith('#/login')) {
+          window.location.href = '/#/login';
         }
       }
     };
@@ -154,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     localStorage.removeItem('userRole');
     sessionStorage.clear();
-    window.location.href = '/login';
+    window.location.href = '/#/login';
   }, []);
 
   // Inactivity Session Timeout (30 Minutes)

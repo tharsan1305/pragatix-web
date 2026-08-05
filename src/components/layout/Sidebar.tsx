@@ -45,7 +45,7 @@ export default function Sidebar({ role }: SidebarProps) {
     localStorage.removeItem('user');
     localStorage.removeItem('userRole');
     sessionStorage.clear();
-    window.location.href = '/login';
+    window.location.href = '/#/login';
   };
 
   return (
