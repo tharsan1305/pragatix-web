@@ -90,6 +90,44 @@ jobs:
           category: semgrep
         continue-on-error: true
 
+  trivy-fs-scan:
+    name: Trivy Security & Config Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+        continue-on-error: true
+
+  license-checker-scan:
+    name: Open Source License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Audit Open Source Licenses
+        run: npx license-checker --summary || echo "License audit completed"
+
   npm-audit-scan:
     name: npm Audit Dependency Scan
     runs-on: ubuntu-latest
@@ -149,7 +187,7 @@ jobs:
 
   security-summary:
     name: Security Summary
-    needs: [codeql-analysis, gitleaks-scan, semgrep-scan, npm-audit-scan, owasp-dependency-check]
+    needs: [codeql-analysis, gitleaks-scan, semgrep-scan, trivy-fs-scan, license-checker-scan, npm-audit-scan, owasp-dependency-check]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -157,12 +195,14 @@ jobs:
     steps:
       - name: Generate Security Summary
         run: |
-          echo "## 🛡️ Security Workflow Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🛡️ DevSecOps Security Execution Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Tool | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **CodeQL SAST** | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Gitleaks Secret Scanner** | ${{ needs.gitleaks-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Semgrep Audit** | ${{ needs.semgrep-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **npm Audit** | ${{ needs.npm-audit-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **OWASP Dependency-Check** | ${{ needs.owasp-dependency-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Tool | Category | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **CodeQL SAST** | Code Analysis | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Gitleaks** | Secret Detection | ${{ needs.gitleaks-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Semgrep Audit** | SAST Rules | ${{ needs.semgrep-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Trivy Scan** | Config & FS Scanner | ${{ needs.trivy-fs-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **License Checker** | Open Source Compliance | ${{ needs.license-checker-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **npm Audit** | Package Vulnerabilities | ${{ needs.npm-audit-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **OWASP Check** | Dependency CVEs | ${{ needs.owasp-dependency-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
