@@ -3,7 +3,6 @@ import Footer from '../../components/common/Footer';
 import OverviewTab from './tabs/OverviewTab';
 import ActivityTab from './tabs/ActivityTab';
 import TeacherGroupManagementTab from '../teacher/tabs/TeacherGroupManagementTab';
-import RemovalRequestsTab from '../teacher/tabs/RemovalRequestsTab';
 import AdminProfileTab from './tabs/AdminProfileTab';
 import StudentsTab from './tabs/StudentsTab';
 import TeachersTab from './tabs/TeachersTab';
@@ -24,7 +23,7 @@ import AttendanceSettingsYearSelectionPage from './pages/AttendanceSettingsYearS
 import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
 import AnalyticsTab from './tabs/AnalyticsTab';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, Activity, Users, AlertCircle, User, CalendarCheck, Award, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(0);

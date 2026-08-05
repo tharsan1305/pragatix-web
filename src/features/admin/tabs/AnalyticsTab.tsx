@@ -7,15 +7,11 @@ import {
   TrendingUp,
   TrendingDown,
   Award,
-  AlertTriangle,
-  Users,
   Building2,
   CalendarCheck,
   RefreshCw,
-  Search,
   Download,
   Shield,
-  Activity,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
@@ -24,7 +20,6 @@ export default function AnalyticsTab() {
   // Navigation states: 'LANDING' -> 'STUDENT_MENU' / 'TEACHER_MENU' -> Detailed Dashboards
   const [viewState, setViewState] = useState<'LANDING' | 'STUDENT_MENU' | 'TEACHER_MENU' | 'STUDENT_XP' | 'STUDENT_ATTENDANCE' | 'STUDENT_ACTIVITIES' | 'TEACHER_PERFORMANCE'>('LANDING');
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const [metrics, setMetrics] = useState({
     totalAwardedXp: 12450,
@@ -37,8 +32,6 @@ export default function AnalyticsTab() {
 
   const [deptRankings, setDeptRankings] = useState<any[]>([]);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
-  const [lowXpStudents, setLowXpStudents] = useState<any[]>([]);
-  const [activityContributions, setActivityContributions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -115,34 +108,12 @@ export default function AnalyticsTab() {
 
       // Fetch At-Risk / Low XP from DB
       try {
-        const lowRes = await apiClient.get('/api/v1/analytics/xp/low-xp');
-        if (lowRes?.data?.success && Array.isArray(lowRes.data?.data) && lowRes.data.data.length > 0) {
-          setLowXpStudents(lowRes.data.data);
-        } else if (Array.isArray(lowRes?.data) && lowRes.data.length > 0) {
-          setLowXpStudents(lowRes.data);
-        }
+        await apiClient.get('/api/v1/analytics/xp/low-xp');
       } catch (_) {}
 
       // Fetch Activity Contributions from DB
       try {
-        let actRes;
-        try {
-          actRes = await apiClient.get('/api/v1/admin/activities');
-        } catch (_e) {
-          actRes = await apiClient.get('/api/v1/analytics/xp/activities');
-        }
-
-        if (actRes?.data?.success && Array.isArray(actRes.data?.data) && actRes.data.data.length > 0) {
-          const mappedActs = actRes.data.data.map((a: any) => ({
-            activityName: a.name || a.activityName || 'Activity',
-            category: a.xpCategory || a.category || 'GENERAL',
-            totalAwardedXp: a.awardXp || a.xpReward || a.totalAwardedXp || 0,
-            completionCount: a.completionCount || a.submissionsCount || 0,
-          }));
-          setActivityContributions(mappedActs);
-        } else if (Array.isArray(actRes?.data) && actRes.data.length > 0) {
-          setActivityContributions(actRes.data);
-        }
+        await apiClient.get('/api/v1/admin/activities').catch(() => apiClient.get('/api/v1/analytics/xp/activities'));
       } catch (_) {}
     } catch (e) {
       console.warn('DB Live Stats query error:', e);
