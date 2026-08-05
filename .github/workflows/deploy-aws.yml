@@ -1,4 +1,4 @@
-name: Build and Deploy React to S3
+name: PragatiX AWS S3 Deployment
 
 on:
   push:
