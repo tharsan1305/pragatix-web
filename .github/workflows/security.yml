@@ -1,4 +1,4 @@
-name: PragatiX Security Analysis
+name: PragatiX-Security Analysis
 
 on:
   push:

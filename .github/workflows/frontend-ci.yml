@@ -1,4 +1,4 @@
-name: PragatiX React Application CI
+name: Build and Test
 
 on:
   push:

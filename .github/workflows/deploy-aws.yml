@@ -1,4 +1,4 @@
-name: PragatiX AWS S3 Deployment
+name: AWS S3 Deploy
 
 on:
   push:
