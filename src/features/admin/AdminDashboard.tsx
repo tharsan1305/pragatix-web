@@ -21,6 +21,7 @@ import CaptainRewardYearSelectionPage from './pages/CaptainRewardYearSelectionPa
 import CaptainRewardSettingsPage from './pages/CaptainRewardSettingsPage';
 import AttendanceSettingsYearSelectionPage from './pages/AttendanceSettingsYearSelectionPage';
 import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
+import AcademicCalendarPage from './pages/AcademicCalendarPage';
 import AnalyticsTab from './tabs/AnalyticsTab';
 import PageLoader from '../../components/common/PageLoader';
 import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3 } from 'lucide-react';
@@ -108,7 +109,9 @@ export default function AdminDashboard() {
       case 'attendance_settings_year_selection':
         return <AttendanceSettingsYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('attendance_settings', { academicYear: yr })} />;
       case 'attendance_settings':
-        return <AttendanceSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} />;
+        return <AttendanceSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} onNavigateAcademicCalendar={() => pushView('academic_calendar', { academicYear: currentView.props?.academicYear })} />;
+      case 'academic_calendar':
+        return <AcademicCalendarPage academicYear={currentView.props?.academicYear} onBack={popView} />;
       case 'analytics':
         return <AnalyticsTab />;
       default:

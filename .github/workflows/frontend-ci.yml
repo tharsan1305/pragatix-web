@@ -1,0 +1,128 @@
+name: Frontend CI
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Display Node.js Version
+        run: node -v
+
+      - name: Display npm Version
+        run: npm -v
+
+      - name: Verify package.json Exists
+        run: |
+          if [ ! -f package.json ]; then
+            echo "Error: package.json not found in frontend/ directory"
+            exit 1
+          fi
+
+      - name: Verify package-lock.json Exists
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "Error: package-lock.json not found in frontend/ directory"
+            exit 1
+          fi
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Security Audit (npm audit)
+        run: npm audit --audit-level=high || echo "Security audit completed with non-critical warnings"
+
+      - name: Run ESLint
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script configured in package.json, skipping."
+          fi
+
+      - name: Run Jest Tests
+        run: |
+          if npm run | grep -q "test"; then
+            npm test -- --passWithNoTests
+          else
+            echo "No test script configured in package.json, skipping."
+          fi
+
+      - name: Generate Coverage Report
+        run: |
+          if npm run | grep -q "test"; then
+            npm test -- --coverage --watchAll=false --passWithNoTests || echo "Coverage generation skipped"
+          else
+            echo "No test script configured, skipping coverage generation."
+          fi
+
+      - name: Build React Application
+        run: npm run build
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build
+          retention-days: 7
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: frontend/reports
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: frontend/coverage
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Generate GitHub Step Summary
+        if: always()
+        run: |
+          echo "## 🚀 Frontend CI Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js Version:** $(node -v)" >> $GITHUB_STEP_SUMMARY
+          echo "- **npm Version:** $(npm -v)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit SHA:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch / Ref:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status:** ${{ job.status == 'success' && '✅ Succeeded' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY

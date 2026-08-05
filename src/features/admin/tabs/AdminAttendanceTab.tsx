@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
 import AttendanceSettingsPage from '../pages/AttendanceSettingsPage';
+import AcademicCalendarPage from '../pages/AcademicCalendarPage';
 
 interface Props {
   onBack?: () => void;
@@ -37,6 +38,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   const [isHoliday, setIsHoliday] = useState<boolean>(false);
   const [summary, setSummary] = useState<any>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'present' | 'absent'>('all');
 
@@ -52,17 +54,17 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         apiClient.get('/api/v1/admin/departments').catch(() => ({ data: { data: [] } }))
       ]);
 
-      const fetchedYears = yearRes.data?.data || [];
-      const fetchedDepts = deptRes.data?.data || [];
+      const fetchedYears = Array.isArray(yearRes.data?.data) ? yearRes.data.data : (Array.isArray(yearRes.data) ? yearRes.data : []);
+      const fetchedDepts = Array.isArray(deptRes.data?.data) ? deptRes.data.data : (Array.isArray(deptRes.data) ? deptRes.data : []);
 
       setYears(fetchedYears);
       setDepartments(fetchedDepts);
 
-      if (fetchedYears.length > 0) {
+      if (fetchedYears.length > 0 && fetchedYears[0]?.id) {
         setYearId(fetchedYears[0].id.toString());
       }
 
-      if (fetchedDepts.length > 0) {
+      if (fetchedDepts.length > 0 && fetchedDepts[0]?.id) {
         if (isYearAdmin) {
           const firstDeptId = fetchedDepts[0].id.toString();
           setDepartmentId(firstDeptId);
@@ -71,7 +73,8 @@ export default function AdminAttendanceTab({ onBack }: Props) {
       }
     } catch (e) {
       console.error("Error loading filters:", e);
-      toast.error('Error loading filters');
+      setYears([]);
+      setDepartments([]);
     } finally {
       setIsLoadingLookups(false);
     }
@@ -85,7 +88,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
     }
     try {
       const res = await apiClient.get(`/api/v1/admin/sections?departmentId=${deptId}`);
-      const fetchedSecs = res.data?.data || [];
+      const fetchedSecs = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
       setFilteredSections(fetchedSecs);
       setSectionId('');
     } catch (e) {
@@ -142,7 +145,6 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         setIsHoliday(true);
         setSummary(null);
       } else {
-        // Fallback mockup calculation if backend tables are empty for immediate testing parity
         toast.error('Could not load summary from server. Displaying cached dashboard.');
         generateMockSummary();
       }
@@ -192,88 +194,49 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      let yearNo = '-1';
-      if (!isYearAdmin && yearId) {
-        const found = years.find(y => y.id.toString() === yearId);
-        if (found) {
-          yearNo = found.yearNo?.toString() || found.yearName?.toString() || yearId;
-        }
+      let studentList: any[] = [];
+      if (summary?.students && Array.isArray(summary.students) && summary.students.length > 0) {
+        studentList = summary.students;
+      } else {
+        const pList = Array.isArray(summary?.presentStudents) ? summary.presentStudents : [];
+        const aList = Array.isArray(summary?.absentStudents) ? summary.absentStudents : [];
+        studentList = [
+          ...pList.map((s: any) => ({ ...s, status: 'PRESENT' })),
+          ...aList.map((s: any) => ({ ...s, status: 'ABSENT' }))
+        ];
       }
 
-      const params = new URLSearchParams({
-        yearNo: yearNo,
-        startDate: selectedDate,
-        endDate: selectedDate,
-      });
-
-      if (departmentId) params.append('departmentId', departmentId);
-      if (sectionId) params.append('sectionId', sectionId);
-      if (period) params.append('period', period);
-
-      // Attempt live endpoint export
-      try {
-        const res = await apiClient.get(`/api/v1/analytics/attendance/export?${params.toString()}`, {
-          responseType: 'blob'
-        });
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `attendance_report_${selectedDate}.xlsx`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        toast.success('Attendance report exported to Excel!');
+      if (studentList.length === 0) {
+        toast.error('No attendance records available to export.');
         return;
-      } catch (_err) {
-        // Fallback CSV export
-        exportCSVFallback();
       }
+
+      const rows = [
+        ['S.No', 'Register Number', 'Student Name', 'Status', 'Date', 'Period'],
+        ...studentList.map((s: any, idx: number) => [
+          idx + 1,
+          s.registerNumber || s.regNo || 'N/A',
+          s.studentName || s.fullName || 'Student',
+          s.status || (s.isPresent ? 'PRESENT' : 'ABSENT'),
+          selectedDate,
+          period || 'All Periods'
+        ])
+      ];
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.map(val => `"${val}"`).join(',')).join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `attendance_dashboard_${selectedDate}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Attendance report downloaded as CSV!');
     } catch (e) {
       toast.error('Failed to export report');
     } finally {
       setIsExporting(false);
     }
-  };
-
-  const exportCSVFallback = () => {
-    let studentList: any[] = [];
-    if (summary?.students && summary.students.length > 0) {
-      studentList = summary.students;
-    } else {
-      const pList = summary?.presentStudents || [];
-      const aList = summary?.absentStudents || [];
-      studentList = [
-        ...pList.map((s: any) => ({ ...s, status: 'PRESENT' })),
-        ...aList.map((s: any) => ({ ...s, status: 'ABSENT' }))
-      ];
-    }
-
-    if (studentList.length === 0) {
-      toast.error('No attendance records available to export.');
-      return;
-    }
-
-    const rows = [
-      ['S.No', 'Register Number', 'Student Name', 'Status', 'Date', 'Period'],
-      ...studentList.map((s: any, idx: number) => [
-        idx + 1,
-        s.registerNumber || s.regNo || 'N/A',
-        s.studentName || s.fullName || 'Student',
-        s.status || (s.isPresent ? 'PRESENT' : 'ABSENT'),
-        selectedDate,
-        period || 'All Periods'
-      ])
-    ];
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.map(val => `"${val}"`).join(',')).join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `attendance_dashboard_${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Attendance report downloaded as CSV!');
   };
 
   // Extract student list for display
@@ -284,22 +247,23 @@ export default function AdminAttendanceTab({ onBack }: Props) {
     if (summary.students && Array.isArray(summary.students) && summary.students.length > 0) {
       list = summary.students;
     } else {
-      const pList = (summary.presentStudents || []).map((s: any) => ({ ...s, status: 'PRESENT' }));
-      const aList = (summary.absentStudents || []).map((s: any) => ({ ...s, status: 'ABSENT' }));
+      const pList = Array.isArray(summary.presentStudents) ? summary.presentStudents.map((s: any) => ({ ...s, status: 'PRESENT' })) : [];
+      const aList = Array.isArray(summary.absentStudents) ? summary.absentStudents.map((s: any) => ({ ...s, status: 'ABSENT' })) : [];
       list = [...pList, ...aList];
     }
 
     if (activeTab === 'present') {
-      list = list.filter((s: any) => s.status === 'PRESENT' || s.isPresent === true || s.status === 'P');
+      list = list.filter((s: any) => s && (s.status === 'PRESENT' || s.isPresent === true || s.status === 'P'));
     } else if (activeTab === 'absent') {
-      list = list.filter((s: any) => s.status === 'ABSENT' || s.isPresent === false || s.status === 'A');
+      list = list.filter((s: any) => s && (s.status === 'ABSENT' || s.isPresent === false || s.status === 'A'));
     }
 
-    if (searchQuery.trim()) {
+    if (searchQuery && searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       list = list.filter((s: any) => {
-        const name = (s.studentName || s.fullName || '').toLowerCase();
-        const reg = (s.registerNumber || s.regNo || '').toLowerCase();
+        if (!s) return false;
+        const name = String(s.studentName || s.fullName || '').toLowerCase();
+        const reg = String(s.registerNumber || s.regNo || '').toLowerCase();
         return name.includes(q) || reg.includes(q);
       });
     }
@@ -308,16 +272,26 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   };
 
   const processedStudents = getProcessedStudents();
-  const totalCount = summary?.totalStudents ?? (summary?.students?.length || ((summary?.presentStudents?.length || 0) + (summary?.absentStudents?.length || 0))) ?? 0;
-  const presentCount = summary?.totalPresent ?? summary?.presentStudents?.length ?? (summary?.students ? summary.students.filter((s: any) => s.status === 'PRESENT' || s.isPresent).length : 0);
-  const absentCount = summary?.totalAbsent ?? summary?.absentStudents?.length ?? (summary?.students ? summary.students.filter((s: any) => s.status === 'ABSENT' || !s.isPresent).length : 0);
-  const attendancePct = summary?.attendancePercentage !== undefined 
-    ? Number(summary.attendancePercentage).toFixed(1) 
-    : (totalCount > 0 ? ((presentCount / totalCount) * 100).toFixed(1) : '0.0');
+  const totalCount = summary?.totalStudents ?? (summary?.students?.length || (Array.isArray(summary?.presentStudents) ? (summary.presentStudents.length + (summary.absentStudents?.length || 0)) : 0));
+  const presentCount = summary?.totalPresent ?? (Array.isArray(summary?.presentStudents) ? summary.presentStudents.length : (summary?.students?.filter((s: any) => s.status === 'PRESENT' || s.isPresent).length || 0));
+  const absentCount = summary?.totalAbsent ?? (Array.isArray(summary?.absentStudents) ? summary.absentStudents.length : (summary?.students?.filter((s: any) => s.status === 'ABSENT' || !s.isPresent).length || 0));
+  const attendancePct = summary?.attendancePercentage ?? (totalCount > 0 ? Math.round((presentCount / totalCount) * 1000) / 10 : 0);
+
+  if (showCalendar) {
+    return <AcademicCalendarPage onBack={() => setShowCalendar(false)} />;
+  }
 
   // If Settings View Active
   if (showSettings) {
-    return <AttendanceSettingsPage onBack={() => setShowSettings(false)} />;
+    return (
+      <AttendanceSettingsPage 
+        onBack={() => setShowSettings(false)} 
+        onNavigateAcademicCalendar={() => {
+          setShowSettings(false);
+          setShowCalendar(true);
+        }} 
+      />
+    );
   }
 
   return (

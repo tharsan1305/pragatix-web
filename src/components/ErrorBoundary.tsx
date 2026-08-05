@@ -38,9 +38,19 @@ export class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
             <h2 className="text-xl font-bold mb-2 text-slate-100">Something went wrong</h2>
-            <p className="text-slate-400 text-sm mb-6">
+            <p className="text-slate-400 text-sm mb-4">
               An unexpected application error occurred. Click below to reload the page safely.
             </p>
+
+            {this.state.error && (
+              <div className="mb-4 text-left bg-slate-900/80 p-3 rounded-xl border border-red-500/20 text-xs text-red-300 font-mono overflow-auto max-h-40">
+                <p className="font-bold text-red-400 mb-1">{this.state.error.name}: {this.state.error.message}</p>
+                {this.state.error.stack && (
+                  <pre className="text-[10px] text-slate-400 whitespace-pre-wrap leading-tight">{this.state.error.stack.split('\n').slice(0, 5).join('\n')}</pre>
+                )}
+              </div>
+            )}
+
             <button
               onClick={this.handleReload}
               className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl transition shadow-lg shadow-orange-500/25"
