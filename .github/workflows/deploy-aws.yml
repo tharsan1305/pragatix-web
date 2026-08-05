@@ -36,7 +36,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
         continue-on-error: true
 
-      - name: Deploy Build to S3
+      - name: Deploy Build to S3 Root
         run: |
-          aws s3 sync dist/ s3://${{ vars.S3_BUCKET_NAME }}/frontend/ --delete
+          aws s3 sync dist/ s3://${{ vars.S3_BUCKET_NAME }}/ --delete
         continue-on-error: true
