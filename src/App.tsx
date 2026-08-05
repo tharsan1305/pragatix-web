@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './features/auth/LoginPage';
 import AdminDashboard from './features/admin/AdminDashboard';
 import TeacherDashboard from './features/teacher/TeacherDashboard';
@@ -41,7 +41,7 @@ function NavigationTransition({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <NavigationTransition>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -165,7 +165,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </NavigationTransition>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
 
