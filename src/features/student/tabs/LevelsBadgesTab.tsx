@@ -5,14 +5,14 @@ import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
 
 const LEVELS = [
-  { level: 1, title: "Explorer", xpMin: 0, xpMax: 100, stage: "Foundation", objective: "Build participation habits", unlocks: "Onboarding missions, basic badges, attend all sessions" },
-  { level: 2, title: "Builder", xpMin: 101, xpMax: 500, stage: "Foundation", objective: "Develop consistency & discipline", unlocks: "Study groups, quiz battles, attendance streaks" },
-  { level: 3, title: "Innovator", xpMin: 501, xpMax: 1500, stage: "Skill-Building", objective: "Build technical & collaborative skills", unlocks: "Skill pathways unlocked, mini-projects, peer collaboration" },
-  { level: 4, title: "Specialist", xpMin: 1501, xpMax: 3000, stage: "Skill-Building", objective: "Demonstrate competency & peer support", unlocks: "Advanced missions, certification tracks, own deliverables" },
-  { level: 5, title: "Leader", xpMin: 3001, xpMax: 5000, stage: "Leadership", objective: "Guide peers, lead teams strategically", unlocks: "Mentorship roles, leadership missions, project lead" },
-  { level: 6, title: "Mentor", xpMin: 5001, xpMax: 7000, stage: "Leadership", objective: "Sustain ecosystem & peer development", unlocks: "Governance participation, ecosystem stewardship" },
-  { level: 7, title: "Architect", xpMin: 7001, xpMax: 10000, stage: "Mastery", objective: "Influence ecosystem growth & innovation", unlocks: "Industry opportunities, innovation access, strategic leadership" },
-  { level: 8, title: "Industry Ready", xpMin: 10001, xpMax: 99999, stage: "Mastery", objective: "Professional-level readiness - placement & alumni", unlocks: "Full privileges, alumni bridge, institutional ambassador" }
+  { level: 1, title: "Explorer", xpMin: 0, xpMax: 100, stage: "STAGE 1", objective: "Build participation habits", unlocks: "Onboarding missions, basic badges, attend all sessions" },
+  { level: 2, title: "Builder", xpMin: 101, xpMax: 500, stage: "STAGE 2", objective: "Develop consistency & discipline", unlocks: "Study groups, quiz battles, attendance streaks" },
+  { level: 3, title: "Innovator", xpMin: 501, xpMax: 1500, stage: "STAGE 3", objective: "Build technical & collaborative skills", unlocks: "Skill pathways unlocked, mini-projects, peer collaboration" },
+  { level: 4, title: "Specialist", xpMin: 1501, xpMax: 3000, stage: "STAGE 4", objective: "Demonstrate competency & peer support", unlocks: "Advanced missions, certification tracks, own deliverables" },
+  { level: 5, title: "Leader", xpMin: 3001, xpMax: 5000, stage: "STAGE 5", objective: "Guide peers, lead teams strategically", unlocks: "Mentorship roles, leadership missions, project lead" },
+  { level: 6, title: "Mentor", xpMin: 5001, xpMax: 7000, stage: "STAGE 6", objective: "Sustain ecosystem & peer development", unlocks: "Governance participation, ecosystem stewardship" },
+  { level: 7, title: "Architect", xpMin: 7001, xpMax: 10000, stage: "STAGE 7", objective: "Influence ecosystem growth & innovation", unlocks: "Industry opportunities, innovation access, strategic leadership" },
+  { level: 8, title: "Industry Ready", xpMin: 10001, xpMax: 99999, stage: "STAGE 8", objective: "Professional-level readiness - placement & alumni", unlocks: "Full privileges, alumni bridge, institutional ambassador" }
 ];
 
 const PATHWAYS = [
@@ -258,7 +258,7 @@ export default function LevelsBadgesTab() {
               
               <div className="flex justify-between text-sm font-bold mb-2">
                 <span>{studentXp} XP Points</span>
-                <span className="text-indigo-200">Target: {currentLevel.xpMax} XP</span>
+                <span className="text-indigo-200">Target: {currentLevel.xpMax} XP (Remaining: {Math.max(0, currentLevel.xpMax - studentXp + 1)})</span>
               </div>
               
               <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">

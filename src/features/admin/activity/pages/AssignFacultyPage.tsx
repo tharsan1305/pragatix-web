@@ -5,11 +5,13 @@ import { activityService } from '../api/activityService';
 import type { ActivityModel } from '../types/ActivityTypes';
 
 interface Props {
-  activity: ActivityModel;
+  activity?: ActivityModel;
+  activityId?: number;
   onBack: () => void;
 }
 
-export default function AssignFacultyPage({ activity, onBack }: Props) {
+export default function AssignFacultyPage({ activity: initialActivity, activityId, onBack }: Props) {
+  const [currentActivity, setCurrentActivity] = useState<ActivityModel | undefined>(initialActivity);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
@@ -23,32 +25,40 @@ export default function AssignFacultyPage({ activity, onBack }: Props) {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [initialActivity, activityId]);
 
   const loadData = async () => {
+    setLoading(true);
     try {
+      let targetActivity = initialActivity;
+      if (!targetActivity && activityId) {
+        const acts = await activityService.fetchActivities(0, 0, '');
+        targetActivity = acts.find((a: any) => String(a.id) === String(activityId));
+      }
+      setCurrentActivity(targetActivity);
+
       const [tData, sData] = await Promise.all([
         activityService.fetchUsers(),
         activityService.fetchSections()
       ]);
-      setTeachers(tData);
-      setSections(sData);
+      setTeachers(tData || []);
+      setSections(sData || []);
 
       // Pre-fill assignments from activity
-      if (activity.assignmentSummary?.length) {
-        const globalAssign = activity.assignmentSummary.find(a => a.sectionId === 0 || !a.sectionId);
+      if (targetActivity?.assignmentSummary?.length) {
+        const globalAssign = targetActivity.assignmentSummary.find(a => a.sectionId === 0 || !a.sectionId);
         if (globalAssign) {
           setGlobalEnabled(true);
           setGlobalTeacherId(String(globalAssign.teacherId));
         }
 
-        const secAssignments = activity.assignmentSummary.filter(a => a.sectionId && a.sectionId !== 0);
+        const secAssignments = targetActivity.assignmentSummary.filter(a => a.sectionId && a.sectionId !== 0);
         setAssignments(secAssignments.map(a => ({
           sectionId: String(a.sectionId),
           teacherId: String(a.teacherId)
         })));
         
-        setCcEnabled(activity.assignmentMode === 'CLASS_COORDINATOR');
+        setCcEnabled(targetActivity.assignmentMode === 'CLASS_COORDINATOR');
       }
     } catch (error) {
       console.error(error);
@@ -85,7 +95,13 @@ export default function AssignFacultyPage({ activity, onBack }: Props) {
         }
       }
 
-      await activityService.saveAssignments(activity.id, globalEnabled, formattedAssignments, ccEnabled);
+      const targetId = currentActivity?.id || activityId;
+      if (!targetId) {
+        toast.error("Invalid activity ID");
+        return;
+      }
+
+      await activityService.saveAssignments(targetId, globalEnabled, formattedAssignments, ccEnabled);
       toast.dismiss(toastId);
       toast.success('Assignments saved successfully!');
       onBack();
@@ -108,7 +124,7 @@ export default function AssignFacultyPage({ activity, onBack }: Props) {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-white">Assign Faculty</h1>
-          <p className="text-slate-400 text-sm">{activity.name}</p>
+          <p className="text-slate-400 text-sm">{currentActivity?.name || 'Activity'}</p>
         </div>
       </div>
 

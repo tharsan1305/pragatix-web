@@ -108,7 +108,9 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   };
 
   const fetchSummary = async () => {
-    if (!isYearAdmin && !yearId) {
+    const activeYearId = isYearAdmin ? '-1' : (yearId || (years.length > 0 && years[0]?.id ? String(years[0].id) : ''));
+
+    if (!isYearAdmin && !activeYearId) {
       toast.error('Please select Academic Year');
       return;
     }
@@ -120,24 +122,18 @@ export default function AdminAttendanceTab({ onBack }: Props) {
     try {
       const params = new URLSearchParams({
         date: selectedDate,
-        yearId: isYearAdmin ? '-1' : yearId,
+        yearId: activeYearId,
       });
 
-      if (departmentId) params.append('departmentId', departmentId);
-      if (sectionId) params.append('sectionId', sectionId);
-      if (period) params.append('period', period);
+      if (departmentId && departmentId.trim().length > 0) params.append('departmentId', departmentId);
+      if (sectionId && sectionId.trim().length > 0) params.append('sectionId', sectionId);
+      if (period && period.trim().length > 0) params.append('period', period);
 
-      let res;
-      try {
-        res = await apiClient.get(`/api/admin/attendance/summary?${params.toString()}`);
-      } catch (_err) {
-        res = await apiClient.get(`/api/v1/admin/attendance/summary?${params.toString()}`);
-      }
+      const res = await apiClient.get(`/api/admin/attendance/summary?${params.toString()}`);
+      const summaryData = res.data?.data || res.data;
 
-      if (res.data?.success) {
-        setSummary(res.data.data);
-      } else if (res.data) {
-        setSummary(res.data);
+      if (summaryData) {
+        setSummary(summaryData);
       }
     } catch (e: any) {
       const errMsg = e.response?.data?.message || e.message || '';
@@ -145,6 +141,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         setIsHoliday(true);
         setSummary(null);
       } else {
+        console.warn('Backend server response warning:', e);
         toast.error('Could not load summary from server. Displaying cached dashboard.');
         generateMockSummary();
       }
@@ -558,52 +555,86 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                 </div>
               </div>
 
-              {/* Data Table matching Flutter screenshot 1:1 */}
+              {/* Data Table matching Flutter admin_attendance_tab.dart 1:1 */}
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      <th className="py-3 px-4 w-16 text-center">S.No</th>
-                      <th className="py-3 px-4">Reg No</th>
+                    <tr className="border-b border-slate-200 bg-[#1E293B] text-[11px] font-bold text-white uppercase tracking-wider">
+                      <th className="py-3 px-3 w-12 text-center">#</th>
+                      <th className="py-3 px-3">Reg. No</th>
                       <th className="py-3 px-4">Student Name</th>
-                      <th className="py-3 px-4 text-center w-24">Status</th>
+                      {period ? (
+                        <th className="py-3 px-3 text-center w-20">Period {period}</th>
+                      ) : (
+                        <>
+                          <th className="py-3 px-2 text-center w-10">P1</th>
+                          <th className="py-3 px-2 text-center w-10">P2</th>
+                          <th className="py-3 px-2 text-center w-10">P3</th>
+                          <th className="py-3 px-2 text-center w-10">P4</th>
+                          <th className="py-3 px-2 text-center w-10">P5</th>
+                          <th className="py-3 px-2 text-center w-10">P6</th>
+                          <th className="py-3 px-2 text-center w-10">P7</th>
+                          <th className="py-3 px-2 text-center w-10">P8</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-sm">
+                  <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                     {processedStudents.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="py-10 text-center text-slate-400 text-xs font-medium">
+                        <td colSpan={period ? 4 : 11} className="py-10 text-center text-slate-400 text-xs font-medium">
                           No attendance records found matching filters.
                         </td>
                       </tr>
                     ) : (
                       processedStudents.map((st: any, idx: number) => {
-                        const isPresent = st.status === 'PRESENT' || st.isPresent === true || st.status === 'P';
                         const regNo = st.registerNumber || st.regNo || 'N/A';
                         const name = st.studentName || st.fullName || 'Student';
+                        const periodStatuses = st.periodStatuses || {};
+
+                        const renderPeriodCell = (pNum: number) => {
+                          const status = (periodStatuses[pNum] || periodStatuses[String(pNum)] || (st.status === 'PRESENT' ? 'P' : (st.status === 'ABSENT' ? 'A' : '—'))).toUpperCase();
+                          
+                          let bg = 'bg-slate-100 text-slate-400';
+                          if (status === 'P' || status === 'PRESENT') bg = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
+                          else if (status === 'A' || status === 'ABSENT') bg = 'bg-rose-100 text-rose-800 border-rose-200 font-bold';
+                          else if (status === 'OD') bg = 'bg-blue-100 text-blue-800 border-blue-200 font-bold';
+                          else if (status === 'L') bg = 'bg-amber-100 text-amber-800 border-amber-200 font-bold';
+
+                          return (
+                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-xs border ${bg}`}>
+                              {status === 'PRESENT' ? 'P' : (status === 'ABSENT' ? 'A' : status)}
+                            </span>
+                          );
+                        };
 
                         return (
-                          <tr key={st.studentId || st.id || idx} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="py-3.5 px-4 text-center font-medium text-slate-500 text-xs">
+                          <tr key={st.studentId || st.id || idx} className={idx % 2 === 0 ? 'bg-white hover:bg-slate-50/80 transition-colors' : 'bg-slate-50/40 hover:bg-slate-50/80 transition-colors'}>
+                            <td className="py-3 px-3 text-center font-medium text-slate-500 text-xs">
                               {idx + 1}
                             </td>
-                            <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 text-xs sm:text-sm">
+                            <td className="py-3 px-3 font-mono font-semibold text-slate-700 text-xs">
                               {regNo}
                             </td>
-                            <td className="py-3.5 px-4 font-semibold text-slate-900 text-xs sm:text-sm">
+                            <td className="py-3 px-4 font-semibold text-slate-900 text-xs sm:text-sm">
                               {name}
                             </td>
-                            <td className="py-3.5 px-4 text-center">
-                              {isPresent ? (
-                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100/80 text-[#16A34A] font-extrabold text-sm border border-emerald-300/60 shadow-xs">
-                                  P
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-100/80 text-[#DC2626] font-extrabold text-sm border border-rose-300/60 shadow-xs">
-                                  A
-                                </span>
-                              )}
-                            </td>
+                            {period ? (
+                              <td className="py-3 px-3 text-center">
+                                {renderPeriodCell(Number(period))}
+                              </td>
+                            ) : (
+                              <>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(1)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(2)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(3)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(4)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(5)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(6)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(7)}</td>
+                                <td className="py-2 px-1 text-center">{renderPeriodCell(8)}</td>
+                              </>
+                            )}
                           </tr>
                         );
                       })

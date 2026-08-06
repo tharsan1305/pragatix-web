@@ -13,6 +13,7 @@ export default function StudentAttendanceTab() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [stats, setStats] = useState({
     percentage: 100,
+    monthlyPercentage: 100,
     presentDays: 0,
     absentDays: 0,
     totalDays: 0,
@@ -28,30 +29,39 @@ export default function StudentAttendanceTab() {
     setIsLoading(true);
     setError(null);
     try {
-      let res;
-      try {
-        res = await apiClient.get('/api/v1/attendance/student/me');
-      } catch (_e) {
-        res = await apiClient.get('/api/v1/student/attendance');
+      const [summaryRes, historyRes] = await Promise.allSettled([
+        apiClient.get('/api/student/attendance/summary'),
+        apiClient.get('/api/student/attendance/history')
+      ]);
+
+      let summaryData: any = null;
+      if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
+        summaryData = summaryRes.value.data.data || summaryRes.value.data;
       }
 
-      if (res.data?.success && res.data?.data) {
-        const d = res.data.data;
-        const recList = d.records || d.logs || [];
-        setRecords(recList);
+      let historyData: any[] = [];
+      if (historyRes.status === 'fulfilled' && historyRes.value?.data) {
+        historyData = Array.isArray(historyRes.value.data.data) 
+          ? historyRes.value.data.data 
+          : (Array.isArray(historyRes.value.data) ? historyRes.value.data : []);
+      }
 
-        const present = d.presentDays ?? recList.filter((r: any) => r.status === 'PRESENT').length;
-        const absent = d.absentDays ?? recList.filter((r: any) => r.status === 'ABSENT').length;
-        const total = d.totalDays ?? recList.length;
-        const pct = total > 0 ? Math.round((present / total) * 100) : (d.percentage ?? 100);
+      if (summaryData) {
+        const present = summaryData.totalPresentDays ?? 0;
+        const absent = summaryData.totalAbsentDays ?? 0;
+        const overallPct = summaryData.attendancePercentage ?? 100;
+        const monthlyPct = summaryData.monthlyAttendancePercentage ?? overallPct;
 
         setStats({
-          percentage: pct,
+          percentage: Math.round(overallPct),
+          monthlyPercentage: Math.round(monthlyPct),
           presentDays: present,
           absentDays: absent,
-          totalDays: total,
+          totalDays: present + absent,
         });
       }
+
+      setRecords(historyData);
     } catch (e: any) {
       console.warn('Failed to load student attendance:', e);
       setError(e.response?.data?.message || 'Failed to load attendance record');

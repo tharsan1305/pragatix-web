@@ -148,12 +148,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setRole(null);
     setSubRolesState([]);
-    localStorage.removeItem('spdms_token');
-    localStorage.removeItem('spdms_user');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
+    localStorage.clear();
     sessionStorage.clear();
+    try {
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
+      });
+    } catch (_) {}
     window.location.href = '/login';
   }, []);
 
