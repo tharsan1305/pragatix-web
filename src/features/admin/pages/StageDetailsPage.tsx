@@ -131,7 +131,7 @@ export default function StageDetailsPage({
       const response = await apiClient.get('/api/v1/admin/stages');
       if (response.data?.success && Array.isArray(response.data?.data)) {
         const stages = response.data.data;
-        const currentStage = stages.find((s: any) => String(s.id) === String(stageId));
+        const currentStage = stages.find((s: any) => s.id === stageId);
         if (currentStage) {
           setStageDetails(currentStage);
           

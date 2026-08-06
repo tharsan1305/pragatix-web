@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import DashboardTab from './tabs/DashboardTab';
 import PointReviewTab from './tabs/PointReviewTab';
@@ -14,42 +13,22 @@ import PageLoader from '../../components/common/PageLoader';
 import { LayoutDashboard, History, Trophy, Users, Ticket, Medal, User, CalendarCheck } from 'lucide-react';
 
 export default function StudentDashboardPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(0);
   const [isTabLoading, setIsTabLoading] = useState(false);
-
-  const tabSlugs = ['dashboard', 'points', 'leaderboard', 'group', 'activities', 'attendance', 'badges', 'profile'];
-  
-  const currentTabSlug = searchParams.get('tab') || 'dashboard';
-  let activeTab = tabSlugs.indexOf(currentTabSlug);
-  if (activeTab === -1) activeTab = 0;
-
-  const activeSubView = searchParams.get('view');
+  const [activeSubView, setActiveSubView] = useState<string | null>(null);
 
   const handleTabChange = (idx: number) => {
-    const slug = tabSlugs[idx] || 'dashboard';
-    if (slug !== currentTabSlug || activeSubView) {
-      setIsTabLoading(true);
-      setSearchParams({ tab: slug });
-      setTimeout(() => {
-        setIsTabLoading(false);
-      }, 350);
-    }
-  };
-
-  const openSubView = (name: string) => {
-    setSearchParams({ tab: currentTabSlug, view: name });
-  };
-
-  const closeSubView = () => {
-    if (window.history.length > 1 && activeSubView) {
-      window.history.back();
-    } else {
-      setSearchParams({ tab: currentTabSlug });
-    }
+    if (idx === activeTab && !activeSubView) return;
+    setIsTabLoading(true);
+    setActiveTab(idx);
+    setActiveSubView(null);
+    setTimeout(() => {
+      setIsTabLoading(false);
+    }, 350);
   };
 
   const tabs = [
-    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} onOpenStreaks={() => openSubView('streaks')} /> },
+    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} onOpenStreaks={() => setActiveSubView('streaks')} /> },
     { name: 'Point Review', icon: History, component: <PointReviewTab /> },
     { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
     { name: 'My Group', icon: Users, component: <CaptainGroupTab /> },
@@ -92,7 +71,7 @@ export default function StudentDashboardPage() {
         <div className="flex-1 overflow-y-auto md:pb-0 pb-20 flex flex-col justify-between">
           <div>
             {activeSubView === 'streaks' ? (
-              <ActivityStreaksPage onBack={closeSubView} />
+              <ActivityStreaksPage onBack={() => setActiveSubView(null)} />
             ) : (
               tabs[activeTab].component
             )}

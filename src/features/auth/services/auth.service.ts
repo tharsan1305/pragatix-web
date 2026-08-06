@@ -1,5 +1,4 @@
 import { apiClient } from '../../../api/client';
-import { isTokenExpired } from '../../../store/authContext';
 
 export interface LoginCredentials {
   username: string;
@@ -56,22 +55,6 @@ export const authService = {
       return authService.loginStudent(credentials.username, credentials.password, credentials.turnstileToken);
     } else {
       return authService.loginStaff(credentials);
-    }
-  },
-
-  // Auth helper methods
-  isAuthenticated: (): boolean => {
-    const token = localStorage.getItem('spdms_token') || localStorage.getItem('token');
-    return !!token && !isTokenExpired(token);
-  },
-
-  getCurrentUser: (): any | null => {
-    const stored = localStorage.getItem('spdms_user') || localStorage.getItem('user');
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored);
-    } catch (_) {
-      return null;
     }
   }
 };

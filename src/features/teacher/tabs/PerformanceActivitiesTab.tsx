@@ -85,12 +85,8 @@ export default function PerformanceActivitiesTab() {
     setIsLoading(true);
     try {
       const response = await apiClient.get('/api/v1/admin/my-activities');
-      if (response.data?.success && Array.isArray(response.data?.data)) {
-        setMyActivities(response.data.data);
-      } else if (Array.isArray(response.data)) {
-        setMyActivities(response.data);
-      } else if (Array.isArray(response.data?.data)) {
-        setMyActivities(response.data.data);
+      if (response.data.success) {
+        setMyActivities(response.data.data || []);
       }
     } catch (e) {
       console.error("Failed to fetch activities", e);

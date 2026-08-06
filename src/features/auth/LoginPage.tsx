@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,30 +19,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { token, user, isAdmin, isTeacher, loading, isTokenExpired, login } = useAuth();
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [_turnstileReset, setTurnstileReset] = useState<number>(0);
-
-  const fromLocation = (location.state as any)?.from;
-
-  // Auto-redirect if user is already logged in with a valid token
-  useEffect(() => {
-    if (!loading && token && user && !isTokenExpired(token)) {
-      if (fromLocation && fromLocation.pathname && fromLocation.pathname !== '/login') {
-        navigate(fromLocation.pathname + (fromLocation.search || ''), { replace: true });
-        return;
-      }
-      if (isAdmin) {
-        navigate('/admin', { replace: true });
-      } else if (isTeacher) {
-        navigate('/teacher', { replace: true });
-      } else {
-        navigate('/student', { replace: true });
-      }
-    }
-  }, [token, user, isAdmin, isTeacher, loading, isTokenExpired, navigate, fromLocation]);
 
   const {
     register,
@@ -67,72 +47,44 @@ export default function LoginPage() {
         localStorage.setItem('spdms_user', JSON.stringify(response));
       }
       
-      // Determine the user's TRUE role from backend response first
-      const userTypeUpper = String((response as any).userType || '').toUpperCase();
-      const rawRolesArray: any[] = (response as any).roles || [];
-      const rolesUpper = rawRolesArray.map((r: any) => {
-        if (typeof r === 'string') return r.toUpperCase();
-        if (typeof r === 'object' && r) return String(r.name || r.authority || r.role || '').toUpperCase();
-        return String(r).toUpperCase();
-      });
+      // Determine the user's role from the backend response
+      let finalRole = 'STUDENT';
+      const userType = (response as any).userType || '';
+      const roles: string[] = (response as any).roles || [];
+      const isCaptain = (response as any).isCaptain === true || 
+                        (response as any).captain === true || 
+                        (response as any).teamRole === 'CAPTAIN' || 
+                        (response as any).teamRole === 'VICE_CAPTAIN';
 
-      let finalRole = '';
-
-      if (
-        rolesUpper.includes('ROLE_ADMIN') || 
-        rolesUpper.includes('ADMIN') || 
-        rolesUpper.includes('ROLE_SUPER_ADMIN') || 
-        rolesUpper.includes('SUPER_ADMIN') || 
-        userTypeUpper === 'ADMIN' || 
-        userTypeUpper === 'SUPER_ADMIN'
-      ) {
-        finalRole = 'ADMIN';
-      } else if (
-        rolesUpper.includes('ROLE_TEACHER') || 
-        rolesUpper.includes('TEACHER') || 
-        rolesUpper.includes('ROLE_CLASS_COORDINATOR') || 
-        rolesUpper.includes('CLASS_COORDINATOR') || 
-        userTypeUpper === 'TEACHER'
-      ) {
-        finalRole = 'TEACHER';
-      } else if (
-        rolesUpper.includes('ROLE_CAPTAIN') || 
-        rolesUpper.includes('CAPTAIN') || 
-        (response as any).isCaptain === true || 
-        userTypeUpper === 'CAPTAIN'
-      ) {
-        finalRole = 'CAPTAIN';
-      } else if (
-        rolesUpper.includes('ROLE_STUDENT') || 
-        rolesUpper.includes('STUDENT') || 
-        userTypeUpper === 'STUDENT'
-      ) {
-        finalRole = 'STUDENT';
+      if (data.role === 'Admin' || data.role === 'Teacher') {
+        if (roles.includes('ROLE_ADMIN') || userType === 'ADMIN') {
+          finalRole = 'ADMIN';
+        } else if (userType === 'TEACHER' || roles.includes('ROLE_TEACHER') || roles.includes('ROLE_DISCIPLINE_COMMITTEE')) {
+          finalRole = 'TEACHER';
+        } else {
+          // If response contains admin or teacher data, allow login
+          finalRole = data.role === 'Admin' ? 'ADMIN' : 'TEACHER';
+        }
       } else {
-        // Fallback to form selection if backend roles array is unpopulated
-        finalRole = data.role.toUpperCase();
+        finalRole = (isCaptain || userType === 'CAPTAIN') ? 'CAPTAIN' : 'STUDENT';
       }
 
       // Construct complete user object
-      const userObj = {
+      const user = {
         ...(typeof response === 'object' ? response : {}),
         id: (response as any).id || (response as any).studentId || (response as any).username || 'unknown',
-        ...(finalRole === 'STUDENT' ? { studentId: (response as any).studentId || (response as any).username } : {}),
+        studentId: (response as any).username || (response as any).studentId || (response as any).id,
         username: data.username,
         role: finalRole,
-        roles: rolesUpper.length > 0 ? rolesUpper : [finalRole, `ROLE_${finalRole}`],
+        roles: [finalRole, `ROLE_${finalRole}`],
         isCaptain: finalRole === 'CAPTAIN',
         name: (response as any).fullName || (response as any).name || (response as any).firstName || data.username,
       };
       
-      login(token, userObj);
+      login(token, user);
       
-      // Navigate to destination using replace: true to prevent back-button loops
-      if (fromLocation && fromLocation.pathname && fromLocation.pathname !== '/login') {
-        navigate(fromLocation.pathname + (fromLocation.search || ''), { replace: true });
-      } else {
-        navigate(`/${finalRole.toLowerCase()}`, { replace: true });
-      }
+      // Navigate to the correct dashboard
+      navigate(`/${finalRole.toLowerCase()}`);
       
     } catch (err: any) {
       setError(err.message || 'Connection failed. Ensure backend is running.');
@@ -144,7 +96,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-8">
       <div className="bg-[#f3f4f7] rounded-[36px] p-8 max-w-md w-full shadow-2xl border border-white/20">
-        {/* Header Section */}
+        {/* Header Section matching reference image */}
         <div className="flex flex-col items-center mb-6 text-center">
           <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-white shadow-lg p-3 flex items-center justify-center overflow-hidden border border-slate-200/60">
             <img 
@@ -210,6 +162,8 @@ export default function LoginPage() {
             </div>
             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>
+
+
 
           <button
             type="submit"

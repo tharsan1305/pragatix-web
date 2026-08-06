@@ -64,36 +64,12 @@ export const activityService = {
 
   fetchDepartments: async (): Promise<any[]> => {
     const response = await apiClient.get('/api/v1/admin/departments');
-    if (response.data?.success && Array.isArray(response.data?.data)) {
-      return response.data.data;
-    } else if (Array.isArray(response.data)) {
-      return response.data;
-    }
-    return [];
+    return response.data.data;
   },
 
   fetchUsers: async (): Promise<any[]> => {
     const response = await apiClient.get('/api/v1/admin/users');
-    if (response.data?.success && Array.isArray(response.data?.data)) {
-      return response.data.data;
-    } else if (Array.isArray(response.data)) {
-      return response.data;
-    }
-    return [];
-  },
-
-  fetchAssignments: async (activityId: number): Promise<any[]> => {
-    try {
-      const response = await apiClient.get(`/api/v1/admin/activities/${activityId}/assignments`);
-      if (response.data?.success && Array.isArray(response.data?.data)) {
-        return response.data.data;
-      } else if (Array.isArray(response.data)) {
-        return response.data;
-      }
-    } catch (e) {
-      console.warn('Failed to fetch assignments from API', e);
-    }
-    return [];
+    return response.data.data;
   },
 
   fetchClassCoordinators: async (): Promise<any[]> => {
@@ -120,7 +96,7 @@ export const activityService = {
         const stageRes = await apiClient.get('/api/v1/admin/stages');
         if (stageRes.data?.success && Array.isArray(stageRes.data?.data) && stageRes.data.data.length > 0) {
           const stages = stageRes.data.data;
-          let matchedStage = stageId ? stages.find((s: any) => String(s.id) === String(stageId)) : stages[0];
+          let matchedStage = stageId ? stages.find((s: any) => s.id === stageId) : stages[0];
           if (!matchedStage) matchedStage = stages[0];
 
           if (matchedStage?.subgroups && matchedStage.subgroups.length > 0) {
@@ -186,17 +162,8 @@ export const activityService = {
 
 
   fetchSections: async (): Promise<any[]> => {
-    try {
-      const response = await apiClient.get('/api/v1/admin/sections');
-      if (response.data?.success && Array.isArray(response.data?.data)) {
-        return response.data.data;
-      } else if (Array.isArray(response.data)) {
-        return response.data;
-      }
-    } catch (e) {
-      console.warn('Failed to fetch sections directly', e);
-    }
-    return [];
+    const response = await apiClient.get('/api/v1/admin/sections');
+    return response.data.data;
   },
 
   assignActivity: async (activityId: number, sectionId: number | null, teacherId: number): Promise<any> => {

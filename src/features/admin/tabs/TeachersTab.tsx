@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X, BookOpen } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import ConfirmationModal from '../../../components/common/ConfirmationModal';
@@ -23,8 +23,6 @@ export default function TeachersTab({ onBack }: Props) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
-  const [isManageSubjectsOpen, setIsManageSubjectsOpen] = useState(false);
-  const [newSubjectName, setNewSubjectName] = useState('');
   
   const [formData, setFormData] = useState({
     username: '', password: '', fullName: '', email: '', 
@@ -54,37 +52,6 @@ export default function TeachersTab({ onBack }: Props) {
       console.error(e);
       // Fallback roles if API fails
       setLookups(prev => ({ ...prev, roles: [{name: 'ROLE_ADMIN'}, {name: 'ROLE_TEACHER'}, {name: 'ROLE_STUDENT'}] }));
-    }
-  };
-
-  const handleAddSubject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSubjectName.trim()) return;
-    const toastId = toast.loading("Adding subject...");
-    try {
-      await apiClient.post('/api/v1/admin/subjects', { name: newSubjectName.trim() });
-      toast.dismiss(toastId);
-      toast.success("Subject added successfully");
-      setNewSubjectName('');
-      fetchLookups();
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      console.error(e);
-      toast.error(e.response?.data?.message || 'Failed to add subject');
-    }
-  };
-
-  const handleDeleteSubject = async (id: number) => {
-    const toastId = toast.loading("Deleting subject...");
-    try {
-      await apiClient.delete(`/api/v1/admin/subjects/${id}`);
-      toast.dismiss(toastId);
-      toast.success("Subject deleted successfully");
-      fetchLookups();
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      console.error(e);
-      toast.error(e.response?.data?.message || 'Failed to delete subject');
     }
   };
 
@@ -239,22 +206,13 @@ export default function TeachersTab({ onBack }: Props) {
   return (
     <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
       <div className="bg-slate-900 px-6 pt-12 pb-4 shadow-md z-10">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-4">
-            {onBack && (
-              <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            )}
-            <h1 className="text-2xl font-bold text-white">Staff Management</h1>
-          </div>
-          <button
-            onClick={() => setIsManageSubjectsOpen(true)}
-            className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
-          >
-            <BookOpen className="w-4 h-4 text-rose-400" />
-            <span>Manage Subjects</span>
-          </button>
+        <div className="flex items-center space-x-4 mb-2">
+          {onBack && (
+            <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <h1 className="text-2xl font-bold text-white flex-1">Staff Management</h1>
         </div>
       </div>
 
@@ -463,72 +421,6 @@ export default function TeachersTab({ onBack }: Props) {
         onConfirm={confirmDeleteUser}
         onCancel={() => setDeleteConfirmModal({ open: false, userId: null, username: '' })}
       />
-
-      {/* Manage Subjects Modal */}
-      {isManageSubjectsOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-5 h-5 text-rose-500" />
-                <h3 className="text-lg font-bold text-slate-900">Manage Subjects</h3>
-              </div>
-              <button onClick={() => setIsManageSubjectsOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddSubject} className="flex space-x-2">
-              <input
-                type="text"
-                value={newSubjectName}
-                onChange={e => setNewSubjectName(e.target.value)}
-                placeholder="New Subject Name (e.g. Mathematics)"
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-xl outline-none text-sm focus:ring-2 focus:ring-slate-900"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#EA4335] text-white font-bold text-xs hover:bg-red-600 rounded-xl shadow-xs shrink-0"
-              >
-                Add
-              </button>
-            </form>
-
-            <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Configured Subjects</h4>
-              <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/50">
-                {lookups.subjects.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-slate-400 italic">No subjects created yet.</div>
-                ) : (
-                  lookups.subjects.map(s => (
-                    <div key={s.id} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors">
-                      <span className="text-sm font-semibold text-slate-800">{s.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSubject(s.id)}
-                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Delete Subject"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => setIsManageSubjectsOpen(false)}
-                className="px-5 py-2 bg-slate-900 text-white font-semibold text-xs rounded-xl hover:bg-slate-800"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
