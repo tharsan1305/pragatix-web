@@ -220,7 +220,7 @@ export default function ActivityListPage({
               <ActivityCard
                 key={activity.id}
                 activity={activity}
-                onEdit={() => onPushView('edit_activity', { activity, subgroupId: effectiveSubgroupId })}
+                onEdit={() => onPushView('edit_activity', { activity, activityId: activity.id, subgroupId: effectiveSubgroupId })}
                 onUnmap={() => setUnmapActivityTarget(activity)}
                 onDelete={() => setDeleteActivityTarget(activity)}
                 onAssign={() => onPushView('assign_faculty', { activity, subgroupId: effectiveSubgroupId })}

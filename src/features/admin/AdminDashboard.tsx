@@ -143,7 +143,7 @@ export default function AdminDashboard() {
       case 'create_activity':
         return <CreateActivityPage onBack={popView} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} />;
       case 'edit_activity':
-        return <EditActivityPage onBack={popView} activity={currentViewProps.activity} />;
+        return <EditActivityPage onBack={popView} activity={currentViewProps.activity} activityId={currentViewProps.activityId ? Number(currentViewProps.activityId) : undefined} />;
       case 'assign_faculty':
         return <AssignFacultyPage activity={currentViewProps.activity} onBack={popView} />;
       case 'captain_reward_year_selection':
