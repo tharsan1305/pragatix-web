@@ -129,9 +129,15 @@ export default function StageDetailsPage({
     setError(null);
     try {
       const response = await apiClient.get('/api/v1/admin/stages');
-      if (response.data?.success && Array.isArray(response.data?.data)) {
-        const stages = response.data.data;
-        const currentStage = stages.find((s: any) => s.id === stageId);
+      const fetchedData = response.data?.data || response.data;
+      if (Array.isArray(fetchedData)) {
+        const stages = fetchedData;
+        const currentStage = stages.find((s: any) => 
+          String(s.id) === String(stageId) || 
+          Number(s.id) === Number(stageId) || 
+          (stageName && String(s.name || '').toLowerCase() === String(stageName).toLowerCase())
+        );
+
         if (currentStage) {
           setStageDetails(currentStage);
           
@@ -167,6 +173,14 @@ export default function StageDetailsPage({
               { id: 3, name: 'Group', threshold: grpTh, category: 'group' }
             ]);
           }
+        } else if (stages.length > 0) {
+          const fallbackStage = stages[0];
+          setStageDetails(fallbackStage);
+          setSubgroups([
+            { id: 1, name: 'Must', threshold: fallbackStage.mustThreshold ?? 150, category: 'must' },
+            { id: 2, name: 'Individual', threshold: fallbackStage.individualThreshold ?? 150, category: 'individual' },
+            { id: 3, name: 'Group', threshold: fallbackStage.groupThreshold ?? 150, category: 'group' }
+          ]);
         } else {
           setError(`Stage with ID ${stageId} not found.`);
         }
