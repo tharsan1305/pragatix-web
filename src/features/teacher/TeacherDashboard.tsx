@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import { useAuth } from '../../store/authContext';
 import apiClient from '../../services/apiClient';
@@ -16,18 +17,9 @@ import { Activity, Trophy, AlertCircle, Users, BarChart3, User, CalendarDays, Ca
 
 export default function TeacherDashboard() {
   const { subRoles, setSubRoles } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
   const [isTabLoading, setIsTabLoading] = useState(false);
-
-  const handleTabChange = (idx: number) => {
-    if (idx === activeTab) return;
-    setIsTabLoading(true);
-    setActiveTab(idx);
-    setTimeout(() => {
-      setIsTabLoading(false);
-    }, 350);
-  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,15 +44,12 @@ export default function TeacherDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center">Loading Teacher Profile...</div>;
-  }
-
   const isCC = subRoles.some(r => r.toUpperCase() === 'CC');
   const isHOD = subRoles.includes('HOD');
 
   const availableTabs = [
     { 
+      slug: 'events',
       name: isCC ? 'Dashboard' : 'Events', 
       icon: CalendarDays, 
       component: <PerformanceActivitiesTab /> 
@@ -68,25 +57,43 @@ export default function TeacherDashboard() {
   ];
 
   if (isCC) {
-    availableTabs.push({ name: 'Activities', icon: Activity, component: <ActivityTab /> });
-    availableTabs.push({ name: 'CC Inbox', icon: Inbox, component: <CCInboxTab /> });
+    availableTabs.push({ slug: 'activities', name: 'Activities', icon: Activity, component: <ActivityTab /> });
+    availableTabs.push({ slug: 'inbox', name: 'CC Inbox', icon: Inbox, component: <CCInboxTab /> });
   }
 
   availableTabs.push(
-    { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
-    { name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
-    { name: 'Requests', icon: AlertCircle, component: <RemovalRequestsTab /> },
-    { name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> }
+    { slug: 'leaderboard', name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
+    { slug: 'attendance', name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
+    { slug: 'requests', name: 'Requests', icon: AlertCircle, component: <RemovalRequestsTab /> },
+    { slug: 'groups', name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> }
   );
 
   if (isHOD) {
-    availableTabs.push({ name: 'HOD Report', icon: BarChart3, component: <HodPerformanceTab /> });
+    availableTabs.push({ slug: 'report', name: 'HOD Report', icon: BarChart3, component: <HodPerformanceTab /> });
   }
 
-  availableTabs.push({ name: 'Profile', icon: User, component: <ProfileTab /> });
+  availableTabs.push({ slug: 'profile', name: 'Profile', icon: User, component: <ProfileTab /> });
 
-  // Ensure activeTab is within bounds (e.g. if roles change)
+  const currentTabSlug = searchParams.get('tab') || 'events';
+  let activeTab = availableTabs.findIndex(t => t.slug === currentTabSlug);
+  if (activeTab === -1) activeTab = 0;
+
   const currentTabComponent = availableTabs[activeTab]?.component || availableTabs[0].component;
+
+  const handleTabChange = (idx: number) => {
+    const slug = availableTabs[idx]?.slug || 'events';
+    if (slug !== currentTabSlug) {
+      setIsTabLoading(true);
+      setSearchParams({ tab: slug });
+      setTimeout(() => {
+        setIsTabLoading(false);
+      }, 350);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading Teacher Profile...</div>;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 flex-col md:flex-row">

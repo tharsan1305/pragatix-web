@@ -53,7 +53,7 @@ export default function ActivityListPage({
   // Secure parameter resolution
   const effectiveSubgroupId = directSubgroupId ?? subgroup?.id ?? subgroup?.subgroupId ?? null;
   const effectiveStageId = directStageId ?? subgroup?.stageId ?? null;
-  const effectiveSubgroupName = directSubgroupName ?? subgroup?.name ?? subgroup?.subgroupName ?? 'Must';
+  const effectiveSubgroupName = directSubgroupName ?? subgroup?.name ?? subgroup?.subgroupName ?? undefined;
 
   const fetchActivities = async () => {
     setIsLoading(true);
@@ -137,7 +137,7 @@ export default function ActivityListPage({
       await activityService.mapActivityToStage(
         Number(effectiveStageId),
         act.id,
-        effectiveSubgroupName
+        effectiveSubgroupName || 'Must'
       );
       toast.dismiss(toastId);
       toast.success("Activity mapped successfully");
@@ -149,8 +149,8 @@ export default function ActivityListPage({
     }
   };
 
-  const getCleanName = (fullName: string) => {
-    if (!fullName) return 'Activities';
+  const getCleanName = (fullName?: string) => {
+    if (!fullName) return 'All Activities';
     const lower = fullName.toLowerCase();
     if (lower.endsWith(' (must)')) return fullName.substring(0, fullName.length - 7);
     if (lower.endsWith(' (individual)')) return fullName.substring(0, fullName.length - 13);
@@ -159,7 +159,7 @@ export default function ActivityListPage({
   };
 
   const cleanTitle = getCleanName(effectiveSubgroupName);
-  const categoryLabel = (subgroup?.category || effectiveSubgroupName || 'MUST').toUpperCase();
+  const categoryLabel = (subgroup?.category || effectiveSubgroupName || 'ALL').toUpperCase();
 
   // Filter out already mapped activities by case-insensitive name comparison
   const existingNames = new Set(activities.map(a => (a.name || '').toLowerCase()));

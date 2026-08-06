@@ -19,14 +19,32 @@ export interface UserData {
   [key: string]: any;
 }
 
+export function isTokenExpired(tokenStr: string | null): boolean {
+  if (!tokenStr) return true;
+  try {
+    const parts = tokenStr.split('.');
+    if (parts.length !== 3) return false; // If not standard JWT format, assume valid
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload && typeof payload.exp === 'number') {
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    }
+    return false;
+  } catch (_) {
+    return false;
+  }
+}
+
 interface AuthContextType {
   token: string | null;
   user: UserData | null;
   role: string | null;
   subRoles: string[];
+  loading: boolean;
   login: (tokenValue: string, userData: UserData | string) => void;
   setSubRoles: (roles: string[]) => void;
   logout: () => void;
+  isTokenExpired: (t?: string | null) => boolean;
   isAdmin: boolean;
   isTeacher: boolean;
   isCaptain: boolean;
@@ -40,10 +58,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem('spdms_token') || localStorage.getItem('token')
-  );
-  
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [token, setToken] = useState<string | null>(() => {
+    const storedToken = localStorage.getItem('spdms_token') || localStorage.getItem('token');
+    if (storedToken && isTokenExpired(storedToken)) {
+      localStorage.removeItem('spdms_token');
+      localStorage.removeItem('token');
+      return null;
+    }
+    return storedToken;
+  });
+
   const [user, setUser] = useState<UserData | null>(() => {
     const stored = localStorage.getItem('spdms_user') || localStorage.getItem('user');
     if (!stored) return null;
@@ -57,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<string | null>(
     () => localStorage.getItem('userRole') || (user?.roles && user.roles[0]) || null
   );
-  
+
   const [subRoles, setSubRolesState] = useState<string[]>(user?.subRoles || []);
 
   useEffect(() => {
@@ -85,10 +111,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     else localStorage.removeItem('userRole');
   }, [role]);
 
-  // Parity with Flutter: Validate token against backend on app load
+  // Initial Auth Check on Mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      if (!token) return;
+      if (!token || isTokenExpired(token)) {
+        if (token && isTokenExpired(token)) {
+          logout();
+        }
+        setLoading(false);
+        return;
+      }
       try {
         const response = await apiClient.get('/api/v1/auth/me');
         if (response.data && response.data.success) {
@@ -96,13 +128,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser((prev) => ({ ...prev, ...freshData }));
         }
       } catch (error: any) {
-        // Only log out if backend explicitly responds with 401 Unauthorized
         if (error.response && error.response.status === 401) {
-          console.warn("Token expired or unauthorized, logging out.");
+          console.warn("Token unauthorized on initial check, logging out.");
           logout();
         } else {
           console.warn("Could not reach auth check endpoint; preserving stored session.");
         }
+      } finally {
+        setLoading(false);
       }
     };
     checkAuthStatus();
@@ -110,37 +143,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback((newToken: string, userData: UserData | string) => {
     setToken(newToken);
+    localStorage.setItem('spdms_token', newToken);
+    localStorage.setItem('token', newToken);
+
     if (typeof userData === 'string') {
       setRole(userData);
-      setUser({ username: userData, roles: [userData] });
+      const userObj = { username: userData, roles: [userData] };
+      setUser(userObj);
+      localStorage.setItem('spdms_user', JSON.stringify(userObj));
     } else {
       setUser(userData);
+      localStorage.setItem('spdms_user', JSON.stringify(userData));
       const primaryRole = (userData.roles && userData.roles[0]) ? userData.roles[0] : (userData.role || userData.userType || null);
-      if (primaryRole) setRole(primaryRole);
+      if (primaryRole) {
+        setRole(primaryRole);
+        localStorage.setItem('userRole', primaryRole);
+      }
       if (userData.subRoles) setSubRolesState(userData.subRoles);
     }
+    setLoading(false);
   }, []);
 
   const setSubRoles = useCallback((roles: string[]) => {
     setSubRolesState(roles);
     setUser((prevUser) => prevUser ? { ...prevUser, subRoles: roles } : null);
-  }, []);
-
-  // Multi-tab logout synchronization
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'spdms_token' && !e.newValue) {
-        setToken(null);
-        setUser(null);
-        setRole(null);
-        setSubRolesState([]);
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const logout = useCallback(() => {
@@ -154,8 +180,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     localStorage.removeItem('userRole');
     sessionStorage.clear();
-    window.location.href = '/login';
+    setLoading(false);
   }, []);
+
+  // Multi-tab logout synchronization
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'spdms_token' && !e.newValue) {
+        logout();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [logout]);
 
   // Inactivity Session Timeout (30 Minutes)
   useEffect(() => {
@@ -175,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const activityEvents = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart'];
     activityEvents.forEach((evt) => window.addEventListener(evt, resetInactivityTimer));
 
-    resetInactivityTimer(); // Start initial timer
+    resetInactivityTimer();
 
     return () => {
       clearTimeout(timeoutId);
@@ -193,9 +230,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isDC = !!(subRoles.includes('Discipline Commitee') || user?.subRoles?.includes('Discipline Commitee'));
 
   const contextValue = useMemo(() => ({
-    token, user, role, subRoles, login, setSubRoles, logout,
+    token, user, role, subRoles, loading, login, setSubRoles, logout,
+    isTokenExpired: (t?: string | null) => isTokenExpired(t !== undefined ? t : token),
     isAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC
-  }), [token, user, role, subRoles, login, setSubRoles, logout, isAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC]);
+  }), [token, user, role, subRoles, loading, login, setSubRoles, logout, isAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC]);
 
   return (
     <AuthContext.Provider value={contextValue}>

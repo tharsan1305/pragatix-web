@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Users, School, Building2, Trophy, RefreshCw, Activity, Shield, Key } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
+import { useAuth } from '../../../store/authContext';
 
 interface Props {
   onPushView?: (name: string, props?: any) => void;
 }
 
 export default function OverviewTab({ onPushView = () => {} }: Props) {
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     students: 0,
     teachers: 0,
@@ -14,6 +16,27 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
     alerts: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  const roles: any[] = user?.roles || [];
+  const assignedYear: string | undefined = user?.academicYear;
+
+  const isSuperAdmin = roles.some((r: any) => {
+    const name = typeof r === 'string' ? r : (r?.name || '');
+    return name === 'ROLE_SUPER_ADMIN' || name === 'ROLE_SUPERADMIN' || name === 'SUPER_ADMIN';
+  }) || user?.isSuperAdmin;
+
+  let titlePrefix = 'Admin';
+  let welcomeText = 'System Admin';
+
+  if (isSuperAdmin) {
+    titlePrefix = 'Super Admin';
+    welcomeText = 'Super Admin';
+  } else if (assignedYear) {
+    let cleanYear = assignedYear.replaceAll('_', ' ').toLowerCase();
+    cleanYear = cleanYear.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+    titlePrefix = `${cleanYear} Admin`;
+    welcomeText = `${cleanYear} Admin`;
+  }
 
   const fetchStats = async () => {
     setIsLoading(true);
@@ -57,13 +80,13 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
       {/* Header */}
       <div className="bg-slate-900 px-6 pt-10 pb-6 text-white shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Admin Overview</h1>
+          <h1 className="text-2xl font-bold">{titlePrefix} Overview</h1>
           <button onClick={fetchStats} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-white mb-0.5">Welcome back, System Admin</h2>
+          <h2 className="text-xl font-bold text-white mb-0.5">Welcome back, {welcomeText}</h2>
           <p className="text-xs text-slate-300">Here is a summary of the discipline system metrics.</p>
         </div>
       </div>

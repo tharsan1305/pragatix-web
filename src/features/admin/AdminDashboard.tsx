@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import OverviewTab from './tabs/OverviewTab';
 import ActivityTab from './tabs/ActivityTab';
@@ -9,6 +10,7 @@ import TeachersTab from './tabs/TeachersTab';
 import DepartmentsTab from './tabs/DepartmentsTab';
 import AdminAttendanceTab from './tabs/AdminAttendanceTab';
 import AdminBadgeRequestsTab from './tabs/AdminBadgeRequestsTab';
+import SuperAdminManagementTab from './tabs/SuperAdminManagementTab';
 import GroupActivityExecutionPage from './activity/pages/GroupActivityExecutionPage';
 import CreateStagePage from './pages/CreateStagePage';
 import EditStagePage from './pages/EditStagePage';
@@ -24,31 +26,74 @@ import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
 import AcademicCalendarPage from './pages/AcademicCalendarPage';
 import AnalyticsTab from './tabs/AnalyticsTab';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../../store/authContext';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState(0);
+  const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isTabLoading, setIsTabLoading] = useState(false);
-  const [viewStack, setViewStack] = useState<{name: string, props?: any}[]>([]);
 
-  const pushView = (name: string, props?: any) => {
-    setViewStack([...viewStack, { name, props }]);
+  const isSuperAdmin = user?.roles?.some((r: any) => {
+    const name = typeof r === 'string' ? r : (r?.name || '');
+    return name === 'ROLE_SUPER_ADMIN' || name === 'ROLE_SUPERADMIN' || name === 'SUPER_ADMIN';
+  }) || user?.isSuperAdmin || false;
+
+  const tabSlugs = [
+    'overview',
+    'activity',
+    'attendance',
+    'groups',
+    'requests',
+    ...(isSuperAdmin ? ['admins'] : []),
+    'analytics',
+    'profile'
+  ];
+
+  const currentTabSlug = searchParams.get('tab') || 'overview';
+  const foundIdx = tabSlugs.indexOf(currentTabSlug);
+  const activeTab = foundIdx !== -1 ? foundIdx : 0;
+
+  const currentViewName = searchParams.get('view');
+  
+  const currentViewProps = useMemo(() => {
+    const p: Record<string, any> = {};
+    searchParams.forEach((value, key) => {
+      if (key !== 'tab' && key !== 'view') {
+        p[key] = value;
+      }
+    });
+    return p;
+  }, [searchParams]);
+
+  const pushView = (name: string, props?: Record<string, any>) => {
+    const newParams: Record<string, string> = { tab: currentTabSlug, view: name };
+    if (props) {
+      Object.entries(props).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && typeof v !== 'object') {
+          newParams[k] = String(v);
+        }
+      });
+    }
+    setSearchParams(newParams);
   };
 
   const popView = () => {
-    setViewStack(viewStack.slice(0, -1));
+    if (window.history.length > 1 && searchParams.get('view')) {
+      window.history.back();
+    } else {
+      setSearchParams({ tab: currentTabSlug });
+    }
   };
 
   const handleTabClick = (idx: number) => {
-    if (idx !== activeTab) {
+    const slug = tabSlugs[idx] || 'overview';
+    if (slug !== currentTabSlug || currentViewName) {
       setIsTabLoading(true);
-      setActiveTab(idx);
-      setViewStack([]);
+      setSearchParams({ tab: slug });
       setTimeout(() => {
         setIsTabLoading(false);
       }, 350);
-    } else {
-      setViewStack([]); // clicking same tab resets to root
     }
   };
 
@@ -58,30 +103,29 @@ export default function AdminDashboard() {
     { name: 'Attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
     { name: 'Groups', icon: Users, Component: TeacherGroupManagementTab },
     { name: 'Requests', icon: Award, Component: AdminBadgeRequestsTab },
+    ...(isSuperAdmin ? [{ name: 'Admins', icon: ShieldCheck, Component: SuperAdminManagementTab }] : []),
     { name: 'Analytics', icon: BarChart3, Component: AnalyticsTab },
     { name: 'Profile', icon: User, Component: AdminProfileTab }
   ];
 
   const renderActiveTabComponent = () => {
-    const ActiveComp = tabs[activeTab].Component;
-    if (activeTab === 0 || activeTab === 3) {
-      return <ActiveComp onPushView={pushView} />;
-    }
-    return <ActiveComp />;
+    const ActiveComp = tabs[activeTab]?.Component || OverviewTab;
+    return <ActiveComp onPushView={pushView} />;
   };
 
   const renderCurrentView = () => {
-    if (viewStack.length === 0) {
+    if (!currentViewName) {
       return renderActiveTabComponent();
     }
-    const currentView = viewStack[viewStack.length - 1];
-    switch (currentView.name) {
+    switch (currentViewName) {
       case 'attendance':
         return <AdminAttendanceTab onBack={popView} />;
       case 'badge_requests':
         return <AdminBadgeRequestsTab onBack={popView} />;
+      case 'super_admin_management':
+        return <SuperAdminManagementTab onBack={popView} />;
       case 'group_activity_execution':
-        return <GroupActivityExecutionPage onBack={popView} activityId={currentView.props?.activityId} assignmentId={currentView.props?.assignmentId} />;
+        return <GroupActivityExecutionPage onBack={popView} activityId={currentViewProps.activityId} assignmentId={currentViewProps.assignmentId} />;
       case 'students':
         return <StudentsTab onBack={popView} />;
       case 'teachers':
@@ -91,27 +135,28 @@ export default function AdminDashboard() {
       case 'create_stage':
         return <CreateStagePage onBack={popView} />;
       case 'edit_stage':
-        return <EditStagePage onBack={popView} stage={currentView.props?.stage} />;
+        return <EditStagePage onBack={popView} stage={currentViewProps.stage} />;
       case 'stage_details':
-        return <StageDetailsPage onBack={popView} stageId={currentView.props?.stageId} stageName={currentView.props?.stageName} stageDescription={currentView.props?.stageDescription} teachersList={currentView.props?.teachersList} onPushView={pushView} />;
+        return <StageDetailsPage onBack={popView} stageId={currentViewProps.stageId} stageName={currentViewProps.stageName} stageDescription={currentViewProps.stageDescription} teachersList={currentViewProps.teachersList} onPushView={pushView} />;
+      case 'all_activities':
       case 'activity_list':
-        return <ActivityListPage onBack={popView} subgroup={currentView.props?.subgroup} subgroupId={currentView.props?.subgroupId} stageId={currentView.props?.stageId} subgroupName={currentView.props?.subgroupName} onPushView={pushView} />;
+        return <ActivityListPage onBack={popView} subgroup={currentViewProps.subgroup} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} onPushView={pushView} />;
       case 'create_activity':
-        return <CreateActivityPage onBack={popView} subgroupId={currentView.props?.subgroupId} stageId={currentView.props?.stageId} subgroupName={currentView.props?.subgroupName} />;
+        return <CreateActivityPage onBack={popView} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} />;
       case 'edit_activity':
-        return <EditActivityPage onBack={popView} activity={currentView.props?.activity} />;
+        return <EditActivityPage onBack={popView} activity={currentViewProps.activity} />;
       case 'assign_faculty':
-        return <AssignFacultyPage activity={currentView.props?.activity} onBack={popView} />;
+        return <AssignFacultyPage activity={currentViewProps.activity} onBack={popView} />;
       case 'captain_reward_year_selection':
         return <CaptainRewardYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('captain_reward_settings', { academicYear: yr })} />;
       case 'captain_reward_settings':
-        return <CaptainRewardSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} />;
+        return <CaptainRewardSettingsPage academicYear={currentViewProps.academicYear} onBack={popView} />;
       case 'attendance_settings_year_selection':
         return <AttendanceSettingsYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('attendance_settings', { academicYear: yr })} />;
       case 'attendance_settings':
-        return <AttendanceSettingsPage academicYear={currentView.props?.academicYear} onBack={popView} onNavigateAcademicCalendar={() => pushView('academic_calendar', { academicYear: currentView.props?.academicYear })} />;
+        return <AttendanceSettingsPage academicYear={currentViewProps.academicYear} onBack={popView} onNavigateAcademicCalendar={() => pushView('academic_calendar', { academicYear: currentViewProps.academicYear })} />;
       case 'academic_calendar':
-        return <AcademicCalendarPage academicYear={currentView.props?.academicYear} onBack={popView} />;
+        return <AcademicCalendarPage academicYear={currentViewProps.academicYear} onBack={popView} />;
       case 'analytics':
         return <AnalyticsTab />;
       default:

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../store/authContext';
+import PageLoader from './common/PageLoader';
 
 interface Props {
   children: React.ReactNode;
@@ -8,11 +9,17 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { token, user, role, isCaptain, isAdmin, isTeacher, isStudent } = useAuth();
+  const location = useLocation();
+  const { token, user, role, loading, isTokenExpired, isCaptain, isAdmin, isTeacher, isStudent } = useAuth();
 
-  // If no token or user is logged in, redirect to login
-  if (!token || !user) {
-    return <Navigate to="/login" replace />;
+  // Show page loader while initializing auth state
+  if (loading) {
+    return <PageLoader message="Verifying session..." fullScreen={true} />;
+  }
+
+  // If no token, user is missing, or token is expired, redirect to login with current location
+  if (!token || !user || isTokenExpired(token)) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If roles restriction is specified, check against current role
@@ -35,7 +42,7 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
       if (isStudent || isCaptain) return <Navigate to="/student" replace />;
       if (isTeacher) return <Navigate to="/teacher" replace />;
       if (isAdmin) return <Navigate to="/admin" replace />;
-      return <Navigate to="/login" replace />;
+      return <Navigate to="/login" state={{ from: location }} replace />;
     }
   }
 

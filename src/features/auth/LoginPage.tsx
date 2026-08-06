@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,10 +19,30 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const location = useLocation();
+  const { token, user, role, loading, isTokenExpired, login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [_turnstileReset, setTurnstileReset] = useState<number>(0);
+
+  const fromLocation = (location.state as any)?.from;
+
+  // Auto-redirect if user is already logged in with a valid token
+  useEffect(() => {
+    if (!loading && token && user && !isTokenExpired(token)) {
+      if (fromLocation && fromLocation.pathname && fromLocation.pathname !== '/login') {
+        navigate(fromLocation.pathname + (fromLocation.search || ''), { replace: true });
+        return;
+      }
+      const userRole = (role || user.role || 'STUDENT').toUpperCase();
+      let targetPath = '/student';
+      if (userRole === 'ADMIN' || userRole === 'ROLE_ADMIN') targetPath = '/admin';
+      else if (userRole === 'TEACHER' || userRole === 'ROLE_TEACHER') targetPath = '/teacher';
+      else if (userRole === 'CAPTAIN' || user.isCaptain) targetPath = '/captain';
+      
+      navigate(targetPath, { replace: true });
+    }
+  }, [token, user, role, loading, isTokenExpired, navigate, fromLocation]);
 
   const {
     register,
@@ -62,7 +82,6 @@ export default function LoginPage() {
         } else if (userType === 'TEACHER' || roles.includes('ROLE_TEACHER') || roles.includes('ROLE_DISCIPLINE_COMMITTEE')) {
           finalRole = 'TEACHER';
         } else {
-          // If response contains admin or teacher data, allow login
           finalRole = data.role === 'Admin' ? 'ADMIN' : 'TEACHER';
         }
       } else {
@@ -70,7 +89,7 @@ export default function LoginPage() {
       }
 
       // Construct complete user object
-      const user = {
+      const userObj = {
         ...(typeof response === 'object' ? response : {}),
         id: (response as any).id || (response as any).studentId || (response as any).username || 'unknown',
         studentId: (response as any).username || (response as any).studentId || (response as any).id,
@@ -81,10 +100,14 @@ export default function LoginPage() {
         name: (response as any).fullName || (response as any).name || (response as any).firstName || data.username,
       };
       
-      login(token, user);
+      login(token, userObj);
       
-      // Navigate to the correct dashboard
-      navigate(`/${finalRole.toLowerCase()}`);
+      // Navigate to destination using replace: true to prevent back-button loops
+      if (fromLocation && fromLocation.pathname && fromLocation.pathname !== '/login') {
+        navigate(fromLocation.pathname + (fromLocation.search || ''), { replace: true });
+      } else {
+        navigate(`/${finalRole.toLowerCase()}`, { replace: true });
+      }
       
     } catch (err: any) {
       setError(err.message || 'Connection failed. Ensure backend is running.');
@@ -96,7 +119,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-8">
       <div className="bg-[#f3f4f7] rounded-[36px] p-8 max-w-md w-full shadow-2xl border border-white/20">
-        {/* Header Section matching reference image */}
+        {/* Header Section */}
         <div className="flex flex-col items-center mb-6 text-center">
           <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-white shadow-lg p-3 flex items-center justify-center overflow-hidden border border-slate-200/60">
             <img 
@@ -162,8 +185,6 @@ export default function LoginPage() {
             </div>
             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>
-
-
 
           <button
             type="submit"

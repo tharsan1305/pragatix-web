@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear tokens and user info
+      // Clear tokens and user info from storage
       localStorage.removeItem('spdms_token');
       localStorage.removeItem('spdms_user');
       localStorage.removeItem('auth_token');
@@ -42,7 +42,9 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
       delete apiClient.defaults.headers.common['Authorization'];
-      if (window.location.pathname !== '/login') {
+
+      // Only perform redirect if not already on the login page
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
     }
