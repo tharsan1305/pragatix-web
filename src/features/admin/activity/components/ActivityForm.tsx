@@ -44,6 +44,24 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
   const [customFrequencies, setCustomFrequencies] = useState<any[]>([]);
 
   useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        name: initialData.name || prev.name || '',
+        description: initialData.description || prev.description || '',
+        justification: initialData.justification || prev.justification || '',
+        awardXp: initialData.awardXp ?? (initialData.xp ? parseInt(String(initialData.xp)) || 50 : 50),
+        awardFrequency: initialData.awardFrequency || initialData.frequency || prev.awardFrequency || 'Daily',
+        type: initialData.type || prev.type || 'Individual',
+        xpCategory: initialData.xpCategory || prev.xpCategory || 'Academic',
+        status: initialData.status || prev.status || 'ACTIVE',
+        displayOrder: initialData.displayOrder ?? prev.displayOrder ?? 1,
+      }));
+    }
+  }, [initialData]);
+
+  useEffect(() => {
     activityService.fetchCustomFrequencies().then(setCustomFrequencies).catch(console.error);
   }, []);
 

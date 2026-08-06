@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { activityService } from '../api/activityService';
 import type { ActivityModel } from '../types/ActivityTypes';
@@ -7,17 +7,38 @@ import ActivityForm from '../components/ActivityForm';
 
 interface EditActivityPageProps {
   onBack: () => void;
-  activity: ActivityModel;
+  activity?: ActivityModel;
+  activityId?: number;
 }
 
-export default function EditActivityPage({ onBack, activity }: EditActivityPageProps) {
+export default function EditActivityPage({ onBack, activity: initialActivity, activityId }: EditActivityPageProps) {
+  const [activity, setActivity] = useState<ActivityModel | undefined>(initialActivity);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(!initialActivity && !!activityId);
+
+  useEffect(() => {
+    if (!initialActivity && activityId) {
+      setIsLoading(true);
+      activityService.fetchActivities(0, 0, '')
+        .then((acts) => {
+          const found = acts.find((a: any) => String(a.id) === String(activityId));
+          if (found) setActivity(found);
+        })
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
+    }
+  }, [initialActivity, activityId]);
 
   const handleSubmit = async (data: any) => {
+    const targetId = activity?.id || activityId;
+    if (!targetId) {
+      toast.error("Invalid activity ID");
+      return;
+    }
     setIsSubmitting(true);
     const toastId = toast.loading("Updating event...");
     try {
-      await activityService.updateActivity(activity.id, data);
+      await activityService.updateActivity(targetId, data);
       toast.dismiss(toastId);
       toast.success("Event updated successfully!");
       onBack();
@@ -51,12 +72,19 @@ export default function EditActivityPage({ onBack, activity }: EditActivityPageP
       </div>
 
       <div className="flex-1 p-6">
-        <ActivityForm 
-          initialData={activity} 
-          onSubmit={handleSubmit} 
-          onCancel={onBack}
-          isSubmitting={isSubmitting} 
-        />
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
+            <RefreshCw className="w-10 h-10 animate-spin text-[#EA4335]" />
+            <p className="text-sm font-semibold text-slate-600">Fetching event details...</p>
+          </div>
+        ) : (
+          <ActivityForm 
+            initialData={activity} 
+            onSubmit={handleSubmit} 
+            onCancel={onBack}
+            isSubmitting={isSubmitting} 
+          />
+        )}
       </div>
     </div>
   );
