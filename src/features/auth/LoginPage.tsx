@@ -67,25 +67,50 @@ export default function LoginPage() {
         localStorage.setItem('spdms_user', JSON.stringify(response));
       }
       
-      // Determine the user's role from the backend response
-      let finalRole = 'STUDENT';
-      const userType = (response as any).userType || '';
-      const roles: string[] = (response as any).roles || [];
-      const isCaptain = (response as any).isCaptain === true || 
-                        (response as any).captain === true || 
-                        (response as any).teamRole === 'CAPTAIN' || 
-                        (response as any).teamRole === 'VICE_CAPTAIN';
+      // Determine the user's TRUE role from backend response first
+      const userTypeUpper = String((response as any).userType || '').toUpperCase();
+      const rawRolesArray: any[] = (response as any).roles || [];
+      const rolesUpper = rawRolesArray.map((r: any) => {
+        if (typeof r === 'string') return r.toUpperCase();
+        if (typeof r === 'object' && r) return String(r.name || r.authority || r.role || '').toUpperCase();
+        return String(r).toUpperCase();
+      });
 
-      if (data.role === 'Admin' || data.role === 'Teacher') {
-        if (roles.includes('ROLE_ADMIN') || userType === 'ADMIN') {
-          finalRole = 'ADMIN';
-        } else if (userType === 'TEACHER' || roles.includes('ROLE_TEACHER') || roles.includes('ROLE_DISCIPLINE_COMMITTEE')) {
-          finalRole = 'TEACHER';
-        } else {
-          finalRole = data.role === 'Admin' ? 'ADMIN' : 'TEACHER';
-        }
+      let finalRole = '';
+
+      if (
+        rolesUpper.includes('ROLE_ADMIN') || 
+        rolesUpper.includes('ADMIN') || 
+        rolesUpper.includes('ROLE_SUPER_ADMIN') || 
+        rolesUpper.includes('SUPER_ADMIN') || 
+        userTypeUpper === 'ADMIN' || 
+        userTypeUpper === 'SUPER_ADMIN'
+      ) {
+        finalRole = 'ADMIN';
+      } else if (
+        rolesUpper.includes('ROLE_TEACHER') || 
+        rolesUpper.includes('TEACHER') || 
+        rolesUpper.includes('ROLE_CLASS_COORDINATOR') || 
+        rolesUpper.includes('CLASS_COORDINATOR') || 
+        userTypeUpper === 'TEACHER'
+      ) {
+        finalRole = 'TEACHER';
+      } else if (
+        rolesUpper.includes('ROLE_CAPTAIN') || 
+        rolesUpper.includes('CAPTAIN') || 
+        (response as any).isCaptain === true || 
+        userTypeUpper === 'CAPTAIN'
+      ) {
+        finalRole = 'CAPTAIN';
+      } else if (
+        rolesUpper.includes('ROLE_STUDENT') || 
+        rolesUpper.includes('STUDENT') || 
+        userTypeUpper === 'STUDENT'
+      ) {
+        finalRole = 'STUDENT';
       } else {
-        finalRole = (isCaptain || userType === 'CAPTAIN') ? 'CAPTAIN' : 'STUDENT';
+        // Fallback to form selection if backend roles array is unpopulated
+        finalRole = data.role.toUpperCase();
       }
 
       // Construct complete user object
@@ -95,7 +120,7 @@ export default function LoginPage() {
         ...(finalRole === 'STUDENT' ? { studentId: (response as any).studentId || (response as any).username } : {}),
         username: data.username,
         role: finalRole,
-        roles: [finalRole, `ROLE_${finalRole}`],
+        roles: rolesUpper.length > 0 ? rolesUpper : [finalRole, `ROLE_${finalRole}`],
         isCaptain: finalRole === 'CAPTAIN',
         name: (response as any).fullName || (response as any).name || (response as any).firstName || data.username,
       };
