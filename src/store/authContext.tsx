@@ -220,10 +220,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [token, logout]);
 
-  const isAdmin = !!(user?.roles?.includes('ROLE_ADMIN') || role === 'ADMIN' || role === 'ROLE_ADMIN');
-  const isTeacher = !!(user?.roles?.includes('ROLE_TEACHER') || role === 'TEACHER' || role === 'ROLE_TEACHER');
-  const isCaptain = !!(user?.roles?.includes('ROLE_CAPTAIN') || user?.isCaptain || role === 'CAPTAIN' || subRoles.includes('CAPTAIN'));
-  const isStudent = !!(user?.studentId || role === 'STUDENT' || role === 'ROLE_STUDENT');
+  const roleList = useMemo<string[]>(() => {
+    const rawRoles: any = user?.roles;
+    const list: string[] = [];
+    if (typeof rawRoles === 'string') list.push(rawRoles.toUpperCase());
+    else if (Array.isArray(rawRoles)) {
+      rawRoles.forEach((r: any) => {
+        if (typeof r === 'string') list.push(r.toUpperCase());
+        else if (typeof r === 'object' && r !== null) {
+          const val = r.name || r.authority || r.role || '';
+          if (val) list.push(String(val).toUpperCase());
+        }
+      });
+    }
+    if (role) list.push(String(role).toUpperCase());
+    if (user?.role) list.push(String(user.role).toUpperCase());
+    if (user?.userType) list.push(String(user.userType).toUpperCase());
+    return list;
+  }, [user, role]);
+
+  const isAdmin = useMemo<boolean>(() => {
+    return Boolean(
+      roleList.some(r => 
+        r === 'ADMIN' || r === 'ROLE_ADMIN' || 
+        r === 'SUPER_ADMIN' || r === 'ROLE_SUPER_ADMIN' || 
+        r === 'SUPERADMIN' || r === 'ROLE_SUPERADMIN'
+      ) || user?.isSuperAdmin
+    );
+  }, [roleList, user]);
+
+  const isTeacher = useMemo<boolean>(() => {
+    return Boolean(
+      roleList.some(r => 
+        r === 'TEACHER' || r === 'ROLE_TEACHER' || 
+        r === 'CLASS_COORDINATOR' || r === 'ROLE_CLASS_COORDINATOR' || 
+        r === 'DISCIPLINE_COMMITTEE' || r === 'ROLE_DISCIPLINE_COMMITTEE'
+      ) || subRoles.length > 0 || (user?.subRoles && user.subRoles.length > 0)
+    );
+  }, [roleList, subRoles, user]);
+
+  const isCaptain = useMemo<boolean>(() => {
+    return Boolean(
+      roleList.some(r => r === 'CAPTAIN' || r === 'ROLE_CAPTAIN') || user?.isCaptain || subRoles.includes('CAPTAIN')
+    );
+  }, [roleList, user, subRoles]);
+
+  const isStudent = useMemo<boolean>(() => {
+    if (isAdmin || isTeacher) return false;
+    return Boolean(
+      roleList.some(r => r === 'STUDENT' || r === 'ROLE_STUDENT') || (user?.studentId && !isAdmin && !isTeacher)
+    );
+  }, [roleList, isAdmin, isTeacher, user]);
+
   const isParent = !!(user?.sprNo || role === 'PARENT' || role === 'ROLE_PARENT');
   const isHOD = !!(subRoles.includes('HOD') || user?.subRoles?.includes('HOD'));
   const isCC = !!(subRoles.includes('CC') || user?.subRoles?.includes('CC'));

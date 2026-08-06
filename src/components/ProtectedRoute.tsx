@@ -34,14 +34,14 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
       }
       if (allowedUpper === 'CAPTAIN' && isCaptain) return true;
       if (allowedUpper === 'ADMIN' && isAdmin) return true;
-      if (allowedUpper === 'TEACHER' && isTeacher) return true;
+      if (allowedUpper === 'TEACHER' && (isTeacher || userRoles.includes('CLASS_COORDINATOR') || userRoles.includes('ROLE_CLASS_COORDINATOR'))) return true;
       return false;
     });
 
     if (!hasAccess) {
-      if (isStudent || isCaptain) return <Navigate to="/student" replace />;
-      if (isTeacher) return <Navigate to="/teacher" replace />;
       if (isAdmin) return <Navigate to="/admin" replace />;
+      if (isTeacher) return <Navigate to="/teacher" replace />;
+      if (isStudent || isCaptain) return <Navigate to="/student" replace />;
       return <Navigate to="/login" state={{ from: location }} replace />;
     }
   }

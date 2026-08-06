@@ -20,7 +20,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { token, user, role, loading, isTokenExpired, login } = useAuth();
+  const { token, user, isAdmin, isTeacher, loading, isTokenExpired, login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string>('');
   const [_turnstileReset, setTurnstileReset] = useState<number>(0);
@@ -34,15 +34,15 @@ export default function LoginPage() {
         navigate(fromLocation.pathname + (fromLocation.search || ''), { replace: true });
         return;
       }
-      const userRole = (role || user.role || 'STUDENT').toUpperCase();
-      let targetPath = '/student';
-      if (userRole === 'ADMIN' || userRole === 'ROLE_ADMIN') targetPath = '/admin';
-      else if (userRole === 'TEACHER' || userRole === 'ROLE_TEACHER') targetPath = '/teacher';
-      else if (userRole === 'CAPTAIN' || user.isCaptain) targetPath = '/captain';
-      
-      navigate(targetPath, { replace: true });
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else if (isTeacher) {
+        navigate('/teacher', { replace: true });
+      } else {
+        navigate('/student', { replace: true });
+      }
     }
-  }, [token, user, role, loading, isTokenExpired, navigate, fromLocation]);
+  }, [token, user, isAdmin, isTeacher, loading, isTokenExpired, navigate, fromLocation]);
 
   const {
     register,
@@ -92,7 +92,7 @@ export default function LoginPage() {
       const userObj = {
         ...(typeof response === 'object' ? response : {}),
         id: (response as any).id || (response as any).studentId || (response as any).username || 'unknown',
-        studentId: (response as any).username || (response as any).studentId || (response as any).id,
+        ...(finalRole === 'STUDENT' ? { studentId: (response as any).studentId || (response as any).username } : {}),
         username: data.username,
         role: finalRole,
         roles: [finalRole, `ROLE_${finalRole}`],
