@@ -24,7 +24,6 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
 
   const isCompleted = activity.isCompleted || activity.status === 'COMPLETED';
   const isLocked = activity.status === 'LOCKED';
-  const isPending = !isCompleted && !isLocked;
   const allowStudentRequest = activity.allowStudentRequest === true;
 
   const handleSubmit = async (e: React.FormEvent) => {

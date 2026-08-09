@@ -3,6 +3,7 @@ import { Plus, X, Upload, CheckCircle2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
+import apiClient from '../../../services/apiClient';
 
 const CATEGORY_CONFIG: Record<string, any> = {
   "totalXp": { color: "#4f46e5", bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", priority: "MEDIUM", decay: "Permanent ✓" },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, Plus, X, Award, Link2, CheckCircle2 } from 'lucide-react';
+import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, X, Award, Link2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -215,8 +215,6 @@ export default function LevelsBadgesTab() {
   const currentLevel = getCurrentLevelInfo();
   const levelProgress = Math.min(1, Math.max(0, (studentXp - currentLevel.xpMin) / (currentLevel.xpMax - currentLevel.xpMin)));
   const isEligibleForPathway = currentLevel.level >= 3;
-
-  const allAvailableBadgeOptions = Object.values(badgesByTier).flat();
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
