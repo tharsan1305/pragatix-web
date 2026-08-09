@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, School, Building2, Trophy, RefreshCw, Activity, Shield, Key } from 'lucide-react';
+import { Users, School, Building2, Trophy, RefreshCw } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
 
 interface Props {
@@ -75,7 +75,7 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
           </div>
         ) : (
           <>
-            {/* 4 Primary Stat Cards Grid (Matching Flutter overview_tab.dart 1:1) */}
+            {/* Admin Overview Stat Cards (Matching Flutter overview_tab.dart 1:1) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard
                 title="Students"
@@ -114,18 +114,6 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
                 onClick={() => onPushView('analytics')}
               />
             </div>
-
-            {/* Quick System Status Card */}
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-3">Quick System Overview</h3>
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
-                <OverviewRow icon={Activity} title="Database Status" value="Online & Healthy" statusColor="text-emerald-600" />
-                <div className="h-px bg-slate-100"></div>
-                <OverviewRow icon={Shield} title="Security Level" value="JWT Enabled" statusColor="text-blue-600" />
-                <div className="h-px bg-slate-100"></div>
-                <OverviewRow icon={Key} title="Self-Registration" value="Disabled (Admin Only)" statusColor="text-amber-600" />
-              </div>
-            </div>
           </>
         )}
       </div>
@@ -147,20 +135,6 @@ function StatCard({ title, count, icon: Icon, color, bgColor, borderColor, onCli
       <div>
         <h4 className="text-3xl font-bold text-slate-900">{count}</h4>
         <p className="text-xs font-semibold text-slate-500 mt-1">{title}</p>
-      </div>
-    </div>
-  );
-}
-
-function OverviewRow({ icon: Icon, title, value, statusColor }: any) {
-  return (
-    <div className="flex items-center justify-between py-1">
-      <div className="flex items-center space-x-3">
-        <Icon className="w-5 h-5 text-slate-400" />
-        <span className="font-semibold text-slate-800 text-sm">{title}</span>
-      </div>
-      <div>
-        <span className={`text-xs font-bold ${statusColor}`}>{value}</span>
       </div>
     </div>
   );

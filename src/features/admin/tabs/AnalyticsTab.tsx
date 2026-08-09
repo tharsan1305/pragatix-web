@@ -22,16 +22,17 @@ export default function AnalyticsTab() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [metrics, setMetrics] = useState({
-    totalAwardedXp: 12450,
-    totalPenaltiesXp: 850,
-    activeStudents: 142,
-    atRiskStudents: 8,
-    avgAttendancePct: 91.5,
-    onDutyRequests: 14,
+    totalAwardedXp: 0,
+    totalPenaltiesXp: 0,
+    activeStudents: 0,
+    atRiskStudents: 0,
+    avgAttendancePct: 0,
+    onDutyRequests: 0,
   });
 
   const [deptRankings, setDeptRankings] = useState<any[]>([]);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
+  const [activityContributions, _setActivityContributions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -40,18 +41,48 @@ export default function AnalyticsTab() {
   const fetchAnalyticsData = async () => {
     setIsLoading(true);
     try {
-      const [statsRes, leaderboardRes, attendanceRes] = await Promise.all([
+      const [statsRes, leaderboardRes, attendanceRes, studentsRes] = await Promise.all([
         apiClient.get('/api/v1/admin/stats').catch(() => null),
         apiClient.get('/api/v1/leaderboard').catch(() => null),
         apiClient.get('/api/v1/analytics/attendance/overview').catch(() => null),
+        apiClient.get('/api/v1/students?page=0&size=1000').catch(() => null),
       ]);
+
+      let totalStudentsCount = 0;
+      let totalAwarded = 0;
+      let lowXpCount = 0;
+
+      if (studentsRes?.data) {
+        const studentList = Array.isArray(studentsRes.data.data?.content)
+          ? studentsRes.data.data.content
+          : Array.isArray(studentsRes.data.data)
+          ? studentsRes.data.data
+          : Array.isArray(studentsRes.data)
+          ? studentsRes.data
+          : [];
+        
+        totalStudentsCount = studentList.length;
+        studentList.forEach((s: any) => {
+          const score = s.score ?? s.xp ?? s.points ?? 0;
+          if (score > 0) totalAwarded += score;
+          if (score < 100) lowXpCount++;
+        });
+      }
 
       if (statsRes?.data) {
         const d = statsRes.data.data || statsRes.data;
         setMetrics((prev) => ({
           ...prev,
-          activeStudents: d.totalStudents ?? d.students ?? prev.activeStudents,
-          atRiskStudents: d.totalAlerts ?? d.alerts ?? prev.atRiskStudents,
+          activeStudents: d.totalStudents ?? d.students ?? (totalStudentsCount || prev.activeStudents),
+          atRiskStudents: d.totalAlerts ?? d.alerts ?? (lowXpCount || prev.atRiskStudents),
+          totalAwardedXp: d.totalXp ?? (totalAwarded || prev.totalAwardedXp),
+        }));
+      } else if (totalStudentsCount > 0) {
+        setMetrics((prev) => ({
+          ...prev,
+          activeStudents: totalStudentsCount,
+          atRiskStudents: lowXpCount,
+          totalAwardedXp: totalAwarded || prev.totalAwardedXp,
         }));
       }
 
@@ -64,10 +95,10 @@ export default function AnalyticsTab() {
         if (list.length > 0) {
           const mappedTop = list.slice(0, 10).map((item: any, index: number) => ({
             studentId: item.studentId || item.registerNumber || item.username || `REG-${index + 1}`,
-            studentName: item.studentName || item.fullName || item.name || 'Student',
-            department: item.department || item.departmentName || 'General',
-            section: item.section || item.sectionName || 'A',
-            totalXp: item.totalXp ?? item.xp ?? item.score ?? 0,
+            studentName: item.fullName || item.studentName || item.name || 'Student',
+            department: item.departmentName || item.department || 'General',
+            section: item.sectionName || item.section || 'A',
+            totalXp: item.score ?? item.totalXp ?? item.xp ?? 0,
             rank: index + 1,
           }));
           setTopPerformers(mappedTop);
@@ -83,26 +114,30 @@ export default function AnalyticsTab() {
         }));
       }
 
-      // Fetch Dept Rankings from DB
+      // Fetch Department Rankings from DB (support GroupedXpDTO with groupName)
       try {
         let deptRes;
         try {
-          deptRes = await apiClient.get('/api/v1/admin/departments');
-        } catch (_e) {
           deptRes = await apiClient.get('/api/v1/analytics/xp/departments');
+        } catch (_e) {
+          deptRes = await apiClient.get('/api/v1/admin/departments');
         }
 
-        if (deptRes?.data?.success && Array.isArray(deptRes.data?.data) && deptRes.data.data.length > 0) {
-          const mappedDepts = deptRes.data.data.map((d: any) => ({
-            name: d.name || d.departmentName || 'Department',
-            code: d.code || d.departmentCode || 'DEPT',
-            totalXp: d.totalXp || d.xp || 0,
-            studentCount: d.studentCount || d.totalStudents || 0,
-            averageXp: d.averageXp || d.avgXp || 0,
+        const rawDepts = Array.isArray(deptRes?.data?.data)
+          ? deptRes.data.data
+          : Array.isArray(deptRes?.data)
+          ? deptRes.data
+          : [];
+
+        if (rawDepts.length > 0) {
+          const mappedDepts = rawDepts.map((d: any) => ({
+            name: d.groupName || d.name || d.departmentName || 'Department',
+            code: d.code || d.departmentCode || d.groupName || 'DEPT',
+            totalXp: d.totalXp ?? d.xp ?? 0,
+            studentCount: d.studentCount ?? d.totalStudents ?? 0,
+            averageXp: Math.round(d.averageXp ?? d.avgXp ?? 0),
           }));
           setDeptRankings(mappedDepts);
-        } else if (Array.isArray(deptRes?.data) && deptRes.data.length > 0) {
-          setDeptRankings(deptRes.data);
         }
       } catch (_) {}
 
@@ -116,7 +151,7 @@ export default function AnalyticsTab() {
         await apiClient.get('/api/v1/admin/activities').catch(() => apiClient.get('/api/v1/analytics/xp/activities'));
       } catch (_) {}
     } catch (e) {
-      console.warn('DB Live Stats query error:', e);
+      console.warn('Live Analytics query warning:', e);
     } finally {
       setIsLoading(false);
     }
@@ -430,31 +465,30 @@ export default function AnalyticsTab() {
                   </div>
 
                   <div className="divide-y divide-slate-100">
-                    {(deptRankings.length > 0
-                      ? deptRankings
-                      : [
-                          { name: 'Computer Science & Engineering', code: 'CSE', totalXp: 4850, studentCount: 45, averageXp: 107 },
-                          { name: 'Cyber Security', code: 'CYBER', totalXp: 3920, studentCount: 38, averageXp: 103 },
-                          { name: 'Electronics & Communication', code: 'ECE', totalXp: 2150, studentCount: 30, averageXp: 71 },
-                        ]
-                    ).map((d, i) => (
-                      <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center border border-amber-300">
-                            #{i + 1}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-slate-800 text-sm">{d.name}</h4>
-                            <p className="text-xs text-slate-400">Code: {d.code} • {d.studentCount} Active Students</p>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <div className="font-bold text-slate-900 text-base">{d.totalXp.toLocaleString()} XP</div>
-                          <div className="text-xs text-slate-400">Avg {d.averageXp} XP / Student</div>
-                        </div>
+                    {deptRankings.length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 text-sm">
+                        No department rankings data returned from backend API.
                       </div>
-                    ))}
+                    ) : (
+                      deptRankings.map((d, i) => (
+                        <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center border border-amber-300">
+                              #{i + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-slate-800 text-sm">{d.name}</h4>
+                              <p className="text-xs text-slate-400">Code: {d.code} • {d.studentCount} Active Students</p>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="font-bold text-slate-900 text-base">{d.totalXp.toLocaleString()} XP</div>
+                            <div className="text-xs text-slate-400">Avg {d.averageXp} XP / Student</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
@@ -472,7 +506,7 @@ export default function AnalyticsTab() {
                   <div className="p-5 bg-teal-50 rounded-2xl border border-teal-200">
                     <span className="text-xs font-semibold text-teal-800">Institute Average Attendance</span>
                     <div className="text-3xl font-bold text-teal-900 mt-2">{metrics.avgAttendancePct}%</div>
-                    <p className="text-[11px] text-teal-700 mt-1">Exceeds 75% minimum threshold</p>
+                    <p className="text-[11px] text-teal-700 mt-1">Exceeds minimum threshold</p>
                   </div>
 
                   <div className="p-5 bg-indigo-50 rounded-2xl border border-indigo-200">
@@ -482,9 +516,9 @@ export default function AnalyticsTab() {
                   </div>
 
                   <div className="p-5 bg-purple-50 rounded-2xl border border-purple-200">
-                    <span className="text-xs font-semibold text-purple-800">Compliance Rate</span>
-                    <div className="text-3xl font-bold text-purple-900 mt-2">94.8%</div>
-                    <p className="text-[11px] text-purple-700 mt-1">High compliance across sections</p>
+                    <span className="text-xs font-semibold text-purple-800">Tracked Students</span>
+                    <div className="text-3xl font-bold text-purple-900 mt-2">{metrics.activeStudents}</div>
+                    <p className="text-[11px] text-purple-700 mt-1">Students enrolled in attendance roster</p>
                   </div>
                 </div>
               </div>
@@ -499,22 +533,24 @@ export default function AnalyticsTab() {
                 </div>
 
                 <div className="space-y-3">
-                  {[
-                    { activityName: 'Daily Attendance', category: 'MUST', totalAwardedXp: 5400, completionCount: 180 },
-                    { activityName: 'Technical Workshop', category: 'SKILL', totalAwardedXp: 3200, completionCount: 64 },
-                    { activityName: 'Sports Tournament', category: 'EXTRACURRICULAR', totalAwardedXp: 2100, completionCount: 42 },
-                  ].map((act, i) => (
-                    <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-800 text-sm">{act.activityName}</h4>
-                        <p className="text-xs text-slate-400">Category: {act.category} • {act.completionCount} Student Executions</p>
-                      </div>
-
-                      <span className="px-4 py-1.5 bg-indigo-50 text-indigo-700 font-bold text-sm rounded-xl border border-indigo-200">
-                        {act.totalAwardedXp} XP Total
-                      </span>
+                  {activityContributions.length === 0 ? (
+                    <div className="p-8 text-center text-slate-400 text-sm bg-slate-50 rounded-xl border border-slate-200">
+                      No activity contribution data returned from backend API.
                     </div>
-                  ))}
+                  ) : (
+                    activityContributions.map((act, i) => (
+                      <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-slate-800 text-sm">{act.activityName}</h4>
+                          <p className="text-xs text-slate-400">Category: {act.category} • {act.completionCount} Student Executions</p>
+                        </div>
+
+                        <span className="px-4 py-1.5 bg-indigo-50 text-indigo-700 font-bold text-sm rounded-xl border border-indigo-200">
+                          {act.totalAwardedXp} XP Total
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

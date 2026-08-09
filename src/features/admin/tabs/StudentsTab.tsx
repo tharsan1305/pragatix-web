@@ -405,7 +405,12 @@ export default function StudentsTab({ onBack }: Props) {
                       {name ? name[0].toUpperCase() : 'S'}
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 text-[15px]">{name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-bold text-slate-900 text-[15px]">{name}</h3>
+                        <span className="text-[11px] font-extrabold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                          {student.score ?? student.xp ?? student.points ?? 0} XP
+                        </span>
+                      </div>
                       <p className="text-xs text-slate-500">{deptName} • {year} • {section}</p>
                       <p className="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-wider">REG: {regNo} | SPR: {sprNo}</p>
                     </div>

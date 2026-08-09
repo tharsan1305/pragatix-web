@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Unlock, AlertTriangle } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import type { Stage, Activity } from '../types/activity';
 import { ActivityService } from '../services/activityService';
 import { StageCard } from '../components/StageCard';
@@ -8,7 +8,6 @@ import { ActivityDetailsModal } from '../components/ActivityDetailsModal';
 
 export const ActivitiesTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [isSimulationActive, setIsSimulationActive] = useState(false);
   const [stages, setStages] = useState<Stage[]>([]);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
@@ -17,9 +16,13 @@ export const ActivitiesTab: React.FC = () => {
     setIsLoading(true);
     try {
       const fetchedStages = await ActivityService.fetchStudentStages();
+      
+      // Match Flutter: Display all configured stages (Stage 1, Stage 2, Stage 3) sorted by displayOrder
+      fetchedStages.sort((a, b) => (a.displayOrder || a.id) - (b.displayOrder || b.id));
+
       setStages(fetchedStages);
 
-      // If a stage is currently selected in modal, keep data updated
+      // If a stage is currently selected, keep data updated
       if (selectedStage) {
         const updated = fetchedStages.find((s) => s.id === selectedStage.id);
         if (updated) setSelectedStage(updated);
@@ -44,31 +47,20 @@ export const ActivitiesTab: React.FC = () => {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
+    <div className="bg-slate-50 min-h-screen pb-32">
       {/* Top App Header */}
       <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <h1 className="text-xl font-bold">Activities & Stages</h1>
         <button
-          onClick={() => setIsSimulationActive(!isSimulationActive)}
-          className={`p-2 rounded-full transition-colors ${
-            isSimulationActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 hover:bg-white/20'
-          }`}
-          title="Toggle Simulator Mode"
+          onClick={loadData}
+          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+          title="Refresh Stages"
         >
-          {isSimulationActive ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       <div className="p-5 max-w-3xl mx-auto space-y-6">
-        {/* Simulator Banner */}
-        {isSimulationActive && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-3 items-center">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <span className="text-xs font-bold text-amber-900">
-              Teacher Simulation Active (Click checkboxes to simulate approving marks)
-            </span>
-          </div>
-        )}
 
         {/* Journey Header */}
         <div>

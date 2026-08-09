@@ -69,7 +69,7 @@ export default function LeaderboardTab() {
           departmentName: s.departmentName ?? '',
           year: s.year ?? '',
           section: s.section ?? '',
-          score: s.score ?? 0,
+          score: s.totalXp ?? s.score ?? s.xp ?? 0,
           teamRole: s.teamRole ?? '',
         }));
         setFilteredList(students);
@@ -167,7 +167,7 @@ export default function LeaderboardTab() {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col pb-16">
+    <div className="bg-slate-50 min-h-screen flex flex-col pb-32">
       <div className="bg-slate-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md">
         <h1 className="text-xl font-bold">Leaderboard</h1>
       </div>

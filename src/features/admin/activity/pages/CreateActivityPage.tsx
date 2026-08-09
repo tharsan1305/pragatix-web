@@ -5,6 +5,7 @@ import ActivityForm from '../components/ActivityForm';
 
 interface CreateActivityPageProps {
   onBack: () => void;
+  onSuccess?: () => void;
   subgroupId?: number;
   stageId?: number;
   subgroupName?: string;
@@ -12,6 +13,7 @@ interface CreateActivityPageProps {
 
 export default function CreateActivityPage({ 
   onBack, 
+  onSuccess,
   subgroupId, 
   stageId, 
   subgroupName = 'Must' 
@@ -26,8 +28,12 @@ export default function CreateActivityPage({
       await activityService.createActivity(data, subgroupId, stageId, subgroupName);
       setToast({ message: 'Activity created successfully!', type: 'success' });
       setTimeout(() => {
-        onBack();
-      }, 1200);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          onBack();
+        }
+      }, 1000);
     } catch (err: any) {
       console.error('Failed to create activity:', err);
       const msg = err.response?.data?.message || err.message || 'Failed to create activity';

@@ -46,15 +46,22 @@ export class ActivityService {
         let categoryXp = 0;
         const activities: Activity[] = activitiesList.map((act: any) => {
           const rewardXp = parseInt(act.rewardXp || act.xp || act.xpReward || "0", 10) || 0;
-          const awardedXp = parseInt(act.awardedXp || act.rewardXp || act.xp || "0", 10) || 0;
+          const awardedXp = (act.awardedXp !== undefined && act.awardedXp !== null) 
+            ? (parseInt(act.awardedXp, 10) || 0) 
+            : 0;
           const status: ActivityStatus = act.status === 'COMPLETED' || act.isDone 
             ? 'COMPLETED' 
             : (act.status === 'LOCKED' ? 'LOCKED' : 'PENDING');
           const isCompleted = status === 'COMPLETED';
 
           if (isCompleted) {
-            categoryXp += awardedXp || rewardXp;
+            categoryXp += awardedXp;
           }
+
+          const rawEv = act.evidence || act.requiredEvidence;
+          const evidenceArr = Array.isArray(rawEv)
+            ? rawEv.map(e => String(e))
+            : (rawEv ? [String(rawEv)] : []);
 
           return {
             id: Number(act.id || 0),
@@ -68,6 +75,11 @@ export class ActivityService {
             buttonText: act.buttonText || 'Request Completion',
             requestStatus: act.requestStatus || (isCompleted ? 'APPROVED' : 'NONE'),
             evidenceUrl: act.evidenceUrl || act.proofUrl || '',
+            facultyName: act.facultyName || act.faculty || act.owner || act.creatorName || '',
+            frequency: act.frequency || act.activityFrequency || '',
+            evidence: evidenceArr,
+            statusPillText: act.statusPillText || act.status || (isCompleted ? 'COMPLETED' : 'NOT_STARTED'),
+            allowStudentRequest: act.allowStudentRequest === true || act.allowRequest === true || act.canRequest === true,
           };
         });
 

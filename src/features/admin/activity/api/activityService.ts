@@ -1,6 +1,7 @@
 import apiClient from '../../../../services/apiClient';
 import type {
   ActivityModel,
+  ActivityOptionModel,
   GroupedActivityModel,
   MyActivityStudentsResponseModel
 } from '../types/ActivityTypes';
@@ -16,33 +17,58 @@ export const activityService = {
     return response.data;
   },
 
-  fetchGroupedActivities: async (subgroupName?: string): Promise<GroupedActivityModel[]> => {
+  fetchGroupedActivities: async (subgroupName?: string, stageId?: number, subgroupId?: number): Promise<GroupedActivityModel[]> => {
     let url = '/api/v1/admin/activities/grouped';
     if (subgroupName && subgroupName.trim().length > 0) {
       url += `?subgroup=${encodeURIComponent(subgroupName)}`;
     }
-    const response = await apiClient.get(url);
-    if (response.data?.success && Array.isArray(response.data?.data)) {
-      return response.data.data;
-    } else if (Array.isArray(response.data)) {
-      return response.data;
+    try {
+      const response = await apiClient.get(url);
+      if (response.data?.success && Array.isArray(response.data?.data)) {
+        return response.data.data;
+      } else if (Array.isArray(response.data)) {
+        return response.data;
+      }
+    } catch (e) {
+      // 403 Forbidden for non-Admin roles; fallback gracefully for Teachers/CCs
     }
+
+    try {
+      const rawList = await activityService.fetchActivities(subgroupId, stageId, subgroupName);
+      if (rawList && rawList.length > 0) {
+        const key = subgroupName || 'Activities';
+        const options: ActivityOptionModel[] = rawList.map((a: any) => ({
+          id: a.id,
+          name: a.name || a.activityName || 'Activity',
+          description: a.description || '',
+          awardXp: a.awardXp ?? a.points ?? 0,
+          awardFrequency: a.awardFrequency || a.frequency || 'DAILY',
+          type: a.type || a.activityType || 'INDIVIDUAL',
+        }));
+        return [{ subgroup: key, activities: options }];
+      }
+    } catch (fallbackErr) {
+      console.error("Fallback activity fetch failed:", fallbackErr);
+    }
+
     return [];
   },
 
   fetchActivities: async (subgroupId?: number, stageId?: number, subgroupName?: string): Promise<ActivityModel[]> => {
     const endpoints: string[] = [];
+    const isAll = !subgroupName || subgroupName.toLowerCase().includes('all');
+    const cleanSubgroup = isAll ? undefined : subgroupName;
 
-    if (stageId && subgroupName) {
-      endpoints.push(`/api/v1/admin/stages/${stageId}/activities?subgroup=${encodeURIComponent(subgroupName)}`);
+    if (stageId && cleanSubgroup) {
+      endpoints.push(`/api/v1/admin/stages/${stageId}/activities?subgroup=${encodeURIComponent(cleanSubgroup)}`);
     }
 
     if (subgroupId) {
       endpoints.push(`/api/v1/admin/subgroups/${subgroupId}/activities`);
     }
 
-    if (subgroupName) {
-      endpoints.push(`/api/v1/admin/activities?subgroup=${encodeURIComponent(subgroupName)}`);
+    if (cleanSubgroup) {
+      endpoints.push(`/api/v1/admin/activities?subgroup=${encodeURIComponent(cleanSubgroup)}`);
     }
 
     endpoints.push('/api/v1/admin/activities');
@@ -50,10 +76,9 @@ export const activityService = {
     for (const url of endpoints) {
       try {
         const response = await apiClient.get(url);
-        if (response.data?.success && Array.isArray(response.data?.data)) {
-          return response.data.data;
-        } else if (Array.isArray(response.data)) {
-          return response.data;
+        const data = response.data?.data ?? response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          return data;
         }
       } catch (e) {
         // Try next endpoint matching Flutter behavior
@@ -138,8 +163,40 @@ export const activityService = {
   },
 
   updateActivity: async (activityId: number, body: Partial<ActivityModel>): Promise<any> => {
-    const response = await apiClient.put(`/api/v1/admin/activities/${activityId}`, body);
-    return response.data;
+    const payload: any = { ...body };
+    
+    if (payload.subgroup) {
+      let sgStr = typeof payload.subgroup === 'object' ? ((payload.subgroup as any).name || (payload.subgroup as any).category || '') : String(payload.subgroup);
+      sgStr = sgStr.trim();
+      
+      const lower = sgStr.toLowerCase();
+      if (lower.includes('must')) {
+        payload.subgroup = 'Must';
+      } else if (lower.includes('individual')) {
+        payload.subgroup = 'Individual';
+      } else if (lower.includes('group')) {
+        payload.subgroup = 'Group';
+      } else if (sgStr === '[object Object]' || sgStr.length === 0) {
+        delete payload.subgroup;
+      } else {
+        payload.subgroup = sgStr;
+      }
+    } else {
+      delete payload.subgroup;
+    }
+
+    try {
+      const response = await apiClient.put(`/api/v1/admin/activities/${activityId}`, payload);
+      return response.data;
+    } catch (e: any) {
+      if (e.response?.data?.message?.includes('subgroup')) {
+        const retryPayload: any = { ...payload };
+        delete retryPayload.subgroup;
+        const retryRes = await apiClient.put(`/api/v1/admin/activities/${activityId}`, retryPayload);
+        return retryRes.data;
+      }
+      throw e;
+    }
   },
 
   deleteActivity: async (activityId: number): Promise<void> => {

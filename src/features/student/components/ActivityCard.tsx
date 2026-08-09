@@ -11,7 +11,7 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onClick })
   const isCompleted = activity.isCompleted || activity.status === 'COMPLETED';
   const isLocked = activity.status === 'LOCKED';
   const rewardXp = activity.rewardXp || 0;
-  const awardedXp = activity.awardedXp || rewardXp;
+  const awardedXp = (activity.awardedXp !== undefined && activity.awardedXp !== null) ? activity.awardedXp : 0;
 
   return (
     <div

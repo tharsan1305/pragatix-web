@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { activityService } from '../api/activityService';
 import type { ActivityModel, GroupedActivityModel, ActivityOptionModel } from '../types/ActivityTypes';
 import ActivityCard from '../components/ActivityCard';
+import { useAuth } from '../../../../store/authContext';
 
 interface ActivityListPageProps {
   onBack?: () => void;
@@ -38,6 +39,12 @@ export default function ActivityListPage({
   subgroupName: directSubgroupName,
   onPushView = () => {} 
 }: ActivityListPageProps) {
+  const { user, isAdmin: isAuthAdmin } = useAuth();
+  const isAdmin = isAuthAdmin || (user?.roles?.some((r: any) => {
+    const clean = String(r).trim().toUpperCase();
+    return clean === 'ADMIN' || clean === 'ROLE_ADMIN' || clean === 'SUPER_ADMIN' || clean === 'ROLE_SUPER_ADMIN';
+  }) ?? false);
+
   const [activities, setActivities] = useState<ActivityModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,11 +122,14 @@ export default function ActivityListPage({
     setIsSelectExistingModalOpen(true);
     setIsFetchingGrouped(true);
     try {
-      const data = await activityService.fetchGroupedActivities(effectiveSubgroupName);
+      const data = await activityService.fetchGroupedActivities(
+        effectiveSubgroupName,
+        effectiveStageId ? Number(effectiveStageId) : undefined,
+        effectiveSubgroupId ? Number(effectiveSubgroupId) : undefined
+      );
       setGroupedActivities(data || []);
     } catch (err: any) {
       console.error('Error loading grouped activities:', err);
-      toast.error(`Error loading activities: ${err.response?.data?.message || err.message}`);
       setGroupedActivities([]);
     } finally {
       setIsFetchingGrouped(false);
@@ -231,16 +241,18 @@ export default function ActivityListPage({
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-20 right-6 z-20">
-        <button
-          onClick={() => setIsAddOptionsModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-[#EA4335] text-white px-5 py-3.5 rounded-2xl shadow-lg hover:bg-red-600 transition-all font-semibold active:scale-95"
-        >
-          <Plus className="w-5 h-5" />
-          Add Activity
-        </button>
-      </div>
+      {/* Floating Action Button (Admin Only matching Flutter 1:1) */}
+      {isAdmin && (
+        <div className="fixed bottom-20 right-6 z-20">
+          <button
+            onClick={() => setIsAddOptionsModalOpen(true)}
+            className="flex items-center justify-center gap-2 bg-[#EA4335] text-white px-5 py-3.5 rounded-2xl shadow-lg hover:bg-red-600 transition-all font-semibold active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-5 h-5" />
+            Add Activity
+          </button>
+        </div>
+      )}
 
       {/* Flutter Parity Modal 1: Remove Activity from Stage Dialog */}
       {unmapActivityTarget && (

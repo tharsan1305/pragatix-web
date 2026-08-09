@@ -2,17 +2,15 @@ import { useState, useEffect } from 'react';
 import Footer from '../../components/common/Footer';
 import { useAuth } from '../../store/authContext';
 import apiClient from '../../services/apiClient';
-import PerformanceActivitiesTab from './tabs/PerformanceActivitiesTab';
 import ActivityTab from './tabs/ActivityTab';
 import LeaderboardTab from './tabs/LeaderboardTab';
-import RemovalRequestsTab from './tabs/RemovalRequestsTab';
 import TeacherGroupManagementTab from './tabs/TeacherGroupManagementTab';
 import HodPerformanceTab from './tabs/HodPerformanceTab';
 import ProfileTab from './tabs/ProfileTab';
 import AttendanceTab from './tabs/AttendanceTab';
 import CCInboxTab from './tabs/CCInboxTab';
 import PageLoader from '../../components/common/PageLoader';
-import { Activity, Trophy, AlertCircle, Users, BarChart3, User, CalendarDays, CalendarCheck, Inbox } from 'lucide-react';
+import { Activity, Trophy, Users, BarChart3, User, CalendarCheck, Gavel } from 'lucide-react';
 
 export default function TeacherDashboard() {
   const { subRoles, setSubRoles } = useAuth();
@@ -22,12 +20,29 @@ export default function TeacherDashboard() {
 
   const handleTabChange = (idx: number) => {
     if (idx === activeTab) return;
+    window.history.pushState({ tabIdx: idx, view: 'root' }, '');
     setIsTabLoading(true);
     setActiveTab(idx);
     setTimeout(() => {
       setIsTabLoading(false);
     }, 350);
   };
+
+  useEffect(() => {
+    if (!window.history.state || typeof window.history.state.tabIdx !== 'number') {
+      window.history.replaceState({ tabIdx: 0, view: 'root' }, '');
+    }
+
+    const handleDashboardPopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state && typeof state.tabIdx === 'number') {
+        setActiveTab(state.tabIdx);
+      }
+    };
+
+    window.addEventListener('popstate', handleDashboardPopState);
+    return () => window.removeEventListener('popstate', handleDashboardPopState);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -56,28 +71,26 @@ export default function TeacherDashboard() {
     return <div className="flex h-screen items-center justify-center">Loading Teacher Profile...</div>;
   }
 
-  const isCC = subRoles.some(r => r.toUpperCase() === 'CC');
-  const isHOD = subRoles.includes('HOD');
+  const isCC = subRoles.some(r => {
+    const clean = r.toString().trim().toUpperCase();
+    return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
+  });
+  const isHOD = subRoles.some(r => {
+    const clean = r.toString().trim().toUpperCase();
+    return clean === 'HOD' || clean === 'ROLE_HOD';
+  });
+  const canManageGroups = isCC || isHOD;
 
   const availableTabs = [
-    { 
-      name: isCC ? 'Dashboard' : 'Events', 
-      icon: CalendarDays, 
-      component: <PerformanceActivitiesTab /> 
-    }
+    { name: 'Activities', icon: Activity, component: <ActivityTab /> },
+    { name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
+    { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
+    { name: 'Requests', icon: Gavel, component: <CCInboxTab /> },
   ];
 
-  if (isCC) {
-    availableTabs.push({ name: 'Activities', icon: Activity, component: <ActivityTab /> });
-    availableTabs.push({ name: 'CC Inbox', icon: Inbox, component: <CCInboxTab /> });
+  if (canManageGroups) {
+    availableTabs.push({ name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> });
   }
-
-  availableTabs.push(
-    { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
-    { name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
-    { name: 'Requests', icon: AlertCircle, component: <RemovalRequestsTab /> },
-    { name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> }
-  );
 
   if (isHOD) {
     availableTabs.push({ name: 'HOD Report', icon: BarChart3, component: <HodPerformanceTab /> });

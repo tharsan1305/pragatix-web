@@ -138,7 +138,12 @@ export default function StudentsDirectoryPage() {
                   </div>
                 </div>
                 <h3 className="font-bold text-slate-800 text-lg truncate">{student.fullName}</h3>
-                <p className="text-indigo-600 font-bold text-sm mb-2">{student.studentId}</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-indigo-600 font-bold text-sm">{student.studentId}</p>
+                  <span className="text-xs font-extrabold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                    {student.score ?? student.xp ?? student.points ?? 0} XP
+                  </span>
+                </div>
                 <div className="text-sm text-slate-500 space-y-1">
                   <p>Dept: {student.departmentName || 'N/A'}</p>
                   <p>Year: {student.year || 'N/A'} • Sec: {student.section || 'N/A'}</p>

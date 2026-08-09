@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User as UserIcon, LogOut } from 'lucide-react';
+import { User as UserIcon, Lock, LogOut, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -7,93 +7,80 @@ import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../../../components/common/LogoutModal';
 
 export default function ProfileTab() {
-  const { token, logout } = useAuth();
+  const { token, user: authUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   
-  const [profile, setProfile] = useState({
-    studentName: "Sharugesh",
-    studentId: "24CS036",
-    email: "sharugesh@college.edu",
-    department: "Computer Science",
-    section: "A",
-    year: "III",
-    sprNo: "SPR-2024-089",
-    semester: "VI Semester",
-    phone: "+91 98765 43210",
+  const [profile, setProfile] = useState<any>({
+    fullName: authUser?.fullName || "surendar",
+    username: authUser?.username || authUser?.sprNo || "99",
+    email: authUser?.email || "saarendar@gmail.com",
+    phone: authUser?.phone || "1234567890",
+    department: authUser?.department || "Cyber Security",
+    accountStatus: "Active",
     role: "STUDENT",
-    teamName: "No Team",
-    level: "1",
-    rank: 0,
+    studentDetails: {
+      registerNumber: authUser?.username || "99",
+      academicYear: authUser?.year || "First Year",
+      section: authUser?.section || "A",
+      isCaptain: authUser?.isCaptain || false,
+      isViceCaptain: authUser?.isViceCaptain || false,
+      currentXp: authUser?.totalXp ?? authUser?.score ?? -10,
+      attendancePercentage: 100,
+      rank: authUser?.rank || 265,
+    }
   });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (token === "debug_token") {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const response = await apiClient.get('/api/v1/auth/me');
-        if (response.data.success) {
-          const resData = response.data.data;
-          
-          let roleVal = resData.userType ? resData.userType.toString().replace(/_/g, ' ') : (resData.teamRole ? resData.teamRole.replace(/_/g, ' ') : "STUDENT");
-          if (resData.isCaptain) roleVal = "CAPTAIN";
-          if (resData.isViceCaptain) roleVal = "VICE CAPTAIN";
-
-          let teamNameVal = resData.teamName || "";
-          let levelVal = resData.currentLevel || resData.level || "1";
-          let rankVal = resData.rank || 0;
-
-          // Try fetching team details for team name if not in auth/me
-          try {
-            const teamRes = await apiClient.get('/api/v1/teams/my-team/details');
-            if (teamRes.data.success && teamRes.data.data) {
-              const tData = teamRes.data.data;
-              if (!teamNameVal) teamNameVal = tData.teamName || tData.name || "";
-              
-              // Check if user's role inside team is captain/vice captain
-              const meInTeam = tData.members?.find((m: any) => m.studentId === resData.username || m.studentName === resData.fullName);
-              if (meInTeam) {
-                if (meInTeam.teamRole === 'CAPTAIN') roleVal = "CAPTAIN";
-                if (meInTeam.teamRole === 'VICE_CAPTAIN') roleVal = "VICE CAPTAIN";
-                if (meInTeam.rankInsideTeam) rankVal = meInTeam.rankInsideTeam;
-                if (meInTeam.currentLevel) levelVal = meInTeam.currentLevel;
-              }
-            }
-          } catch (_) {
-            // ignore team fetch error fallback
-          }
-
-          setProfile({
-            studentName: resData.fullName || profile.studentName,
-            studentId: resData.username || profile.studentId,
-            email: resData.email || profile.email,
-            section: resData.section || profile.section,
-            year: resData.year || profile.year,
-            sprNo: resData.sprNo || profile.sprNo,
-            semester: resData.semester || profile.semester,
-            phone: resData.phone || profile.phone,
-            department: resData.department || profile.department,
-            role: roleVal,
-            teamName: teamNameVal || "No Team",
-            level: String(levelVal),
-            rank: rankVal,
-          });
-        }
-      } catch {
-        // keep mock values
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchProfile();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      // Call GET /api/v1/profile/me matching Flutter ProfileRepository.getMyProfile
+      let response;
+      try {
+        response = await apiClient.get('/api/v1/profile/me');
+      } catch (_) {
+        response = await apiClient.get('/api/v1/auth/me');
+      }
+
+      if (response.data?.success && response.data?.data) {
+        const d = response.data.data;
+        const stDetails = d.studentDetails || {};
+
+        const isCap = d.isCaptain || stDetails.isCaptain || d.teamRole === 'CAPTAIN';
+        const isVice = d.isViceCaptain || stDetails.isViceCaptain || d.teamRole === 'VICE_CAPTAIN';
+
+        setProfile({
+          fullName: d.fullName || d.name || profile.fullName,
+          username: d.username || d.regNo || d.registerNumber || profile.username,
+          email: d.email || profile.email,
+          phone: d.phone || profile.phone,
+          department: d.department || d.departmentName || profile.department,
+          accountStatus: d.accountStatus || d.status || "Active",
+          role: d.role ? String(d.role).replace(/_/g, ' ') : (d.userType ? String(d.userType).replace(/_/g, ' ') : "STUDENT"),
+          studentDetails: {
+            registerNumber: stDetails.registerNumber || d.registerNumber || d.username || profile.studentDetails.registerNumber,
+            academicYear: stDetails.academicYear || d.year || d.academicYear || profile.studentDetails.academicYear,
+            section: stDetails.section || d.section || profile.studentDetails.section,
+            isCaptain: isCap,
+            isViceCaptain: isVice,
+            currentXp: stDetails.currentXp ?? d.totalXp ?? d.score ?? profile.studentDetails.currentXp,
+            attendancePercentage: stDetails.attendancePercentage ?? d.attendancePercentage ?? profile.studentDetails.attendancePercentage,
+            rank: stDetails.rank ?? d.rank ?? profile.studentDetails.rank,
+          }
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to load profile details:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
@@ -105,68 +92,101 @@ export default function ProfileTab() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <RefreshCw className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
-  const ProfileRow = ({ label, value }: { label: string; value: string }) => (
-    <div className="flex justify-between items-center py-2.5">
-      <div className="text-[13px] font-medium text-slate-500">{label}</div>
-      <div className="text-[13px] font-bold text-slate-800 text-right">{value}</div>
+  const leadershipRole = profile.studentDetails?.isCaptain 
+    ? 'Captain' 
+    : (profile.studentDetails?.isViceCaptain ? 'Vice Captain' : 'Member');
+
+  const SharedProfileRow = ({ label, value }: { label: string; value: string | number }) => (
+    <div className="flex justify-between items-center py-2">
+      <span className="text-xs font-semibold text-slate-500">{label}</span>
+      <span className="text-xs font-bold text-slate-800 text-right">{value}</span>
     </div>
   );
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
-      {/* Header */}
-      <div className="bg-slate-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md">
-        <h1 className="text-xl font-bold">My Profile</h1>
+      {/* Header Bar matching Flutter AppBar */}
+      <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex items-center justify-between">
+        <h1 className="text-xl font-bold">Profile</h1>
+        <button
+          onClick={fetchProfile}
+          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+          title="Refresh Profile"
+        >
+          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
-      <div className="p-6 max-w-lg mx-auto">
-        <div className="flex flex-col items-center mt-4 mb-6">
-          <div className="w-28 h-28 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mb-4 shadow-sm">
-            <UserIcon className="w-14 h-14 text-indigo-600" />
+      <div className="p-4 max-w-lg mx-auto space-y-4">
+        {/* Profile Avatar Header Card matching Flutter SharedProfileHeader */}
+        <div className="flex flex-col items-center py-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-3 shadow-inner">
+            <UserIcon className="w-10 h-10 text-slate-500" />
           </div>
           
-          <h2 className="text-2xl font-bold text-slate-800 text-center">{profile.studentName}</h2>
-          <div className="text-sm font-medium text-slate-500 mt-1">Register ID: {profile.studentId}</div>
+          <h2 className="text-xl font-extrabold text-slate-900 text-center">{profile.fullName}</h2>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+            {profile.role}
+          </span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <ProfileRow label="Role" value={profile.role} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Team Name" value={profile.teamName} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Level" value={profile.level} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Rank" value={`#${profile.rank}`} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Full Name" value={profile.studentName} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Register No." value={profile.studentId} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="SPR No." value={profile.sprNo} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Academic Year" value={`${profile.year} Year - Sec ${profile.section}`} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Semester" value={profile.semester} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Department" value={profile.department} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Email Address" value={profile.email} />
-          <div className="h-px bg-slate-100 my-1" />
-          <ProfileRow label="Phone No." value={profile.phone} />
+        {/* Card 1: Personal Information matching Flutter _buildCommonInfoCard */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-1">
+          <h3 className="text-sm font-bold text-slate-900 mb-2">Personal Information</h3>
+          <div className="h-px bg-slate-100 -mx-4 mb-2" />
+          
+          <SharedProfileRow label="Username" value={profile.username} />
+          <SharedProfileRow label="Email" value={profile.email} />
+          <SharedProfileRow label="Phone" value={profile.phone} />
+          <SharedProfileRow label="Department" value={profile.department} />
+          <SharedProfileRow label="Status" value={profile.accountStatus} />
         </div>
 
-        <button 
-          onClick={() => setShowLogoutModal(true)}
-          className="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
-        >
-          <LogOut className="w-5 h-5" />
-          Sign Out
-        </button>
+        {/* Card 2 & 3: Academic Details & Performance matching Flutter _buildStudentCard */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-4">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 mb-2">Academic Details</h3>
+            <div className="h-px bg-slate-100 -mx-4 mb-2" />
+
+            <SharedProfileRow label="Register Number" value={profile.studentDetails.registerNumber} />
+            <SharedProfileRow label="Academic Year" value={profile.studentDetails.academicYear} />
+            <SharedProfileRow label="Section" value={profile.studentDetails.section} />
+            <SharedProfileRow label="Leadership Role" value={leadershipRole} />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 mb-2 pt-2">Performance</h3>
+            <div className="h-px bg-slate-100 -mx-4 mb-2" />
+
+            <SharedProfileRow label="Current XP" value={profile.studentDetails.currentXp} />
+            <SharedProfileRow label="Attendance" value={`${profile.studentDetails.attendancePercentage}%`} />
+            <SharedProfileRow label="Rank" value={profile.studentDetails.rank} />
+          </div>
+        </div>
+
+        {/* Quick Actions matching Flutter _buildQuickActions */}
+        <div className="space-y-3 pt-2">
+          <button
+            onClick={() => toast.success("Password change feature coming soon")}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            <Lock className="w-4 h-4" />
+            <span>Change Password</span>
+          </button>
+
+          <button
+            onClick={() => setShowLogoutModal(true)}
+            className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
       <LogoutModal

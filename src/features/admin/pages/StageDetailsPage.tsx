@@ -12,6 +12,7 @@ interface Props {
   stageName: string;
   stageDescription?: string;
   teachersList?: any[];
+  isTeacherView?: boolean;
   onBack: () => void;
   onPushView?: (name: string, props?: any) => void;
 }
@@ -20,6 +21,7 @@ export default function StageDetailsPage({
   stageId, 
   stageName, 
   stageDescription = '', 
+  isTeacherView = false,
   onBack,
   onPushView = () => {} 
 }: Props) {
@@ -331,13 +333,15 @@ export default function StageDetailsPage({
         <div>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold text-slate-900">Activity Categories</h3>
-            <button 
-              onClick={() => openModal()}
-              className="flex items-center space-x-1.5 bg-[#EA4335] hover:bg-red-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-transform active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Subgroup</span>
-            </button>
+            {!isTeacherView && (
+              <button 
+                onClick={() => openModal()}
+                className="flex items-center space-x-1.5 bg-[#EA4335] hover:bg-red-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-transform active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Subgroup</span>
+              </button>
+            )}
           </div>
 
           {isLoading ? (
@@ -405,23 +409,27 @@ export default function StageDetailsPage({
                         ) : acts.length === 0 ? (
                           <div className="text-center py-6 text-slate-500 text-sm">
                             <p className="font-medium text-slate-700 mb-1">No activities in this category yet.</p>
-                            <button
-                              onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                              className="text-xs font-bold text-blue-600 hover:underline mt-1 inline-flex items-center gap-1"
-                            >
-                              <Plus className="w-3.5 h-3.5" /> Add First Activity
-                            </button>
+                            {!isTeacherView && (
+                              <button
+                                onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
+                                className="text-xs font-bold text-blue-600 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Add First Activity
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <div className="space-y-3">
                             <div className="flex justify-between items-center px-1 mb-2">
                               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Activities in {subName}</span>
-                              <button
-                                onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                                className="flex items-center gap-1 bg-[#EA4335] text-white hover:bg-red-600 px-3 py-1 rounded-lg text-xs font-bold transition-colors"
-                              >
-                                <Plus className="w-3.5 h-3.5" /> Add Activity
-                              </button>
+                              {!isTeacherView && (
+                                <button
+                                  onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
+                                  className="flex items-center gap-1 bg-[#EA4335] text-white hover:bg-red-600 px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                >
+                                  <Plus className="w-3.5 h-3.5" /> Add Activity
+                                </button>
+                              )}
                             </div>
                             {acts.map((activity) => (
                               <ActivityCard

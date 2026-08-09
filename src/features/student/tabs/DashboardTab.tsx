@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'rechar
 import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
 import apiClient from '../../../services/apiClient';
+import { FireStreakIcon } from '../components/FireStreakIcon';
 
 interface ProfileData {
   studentName: string;
@@ -38,22 +39,26 @@ interface DashboardTabProps {
 
 export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTabProps) {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user: authUser } = useAuth();
   const { xpByCategory, streaks, history, isLoading: isXpLoading, totalXp, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [teamDetails, setTeamDetails] = useState<any>(null);
-  const [profile, setProfile] = useState<ProfileData>({
-    studentName: "",
-    studentId: "",
-    department: "",
-    section: "",
-    year: "",
-    score: 0,
-    rank: 1,
-    currentStage: 1,
-    isCaptain: false,
-    isViceCaptain: false,
+  const [profile, setProfile] = useState<ProfileData>(() => {
+    const regNo = authUser?.username || authUser?.regNo || authUser?.sprNo || "";
+    return {
+      studentName: authUser?.fullName || authUser?.name || "",
+      studentId: regNo,
+      department: authUser?.department || authUser?.departmentName || "",
+      section: authUser?.section || authUser?.sectionName || "",
+      year: authUser?.year || "",
+      score: authUser?.totalXp ?? authUser?.score ?? 0,
+      rank: authUser?.rank || 1,
+      currentStage: authUser?.currentStage ?? authUser?.stage ?? 1,
+      isCaptain: authUser?.isCaptain ?? (authUser?.teamRole === 'CAPTAIN'),
+      isViceCaptain: authUser?.isViceCaptain ?? (authUser?.teamRole === 'VICE_CAPTAIN'),
+      teamRole: authUser?.teamRole,
+    };
   });
 
   const fetchTeamDetails = async (studentId?: string) => {
@@ -115,7 +120,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
             section: p.section || prev.section,
             year: p.year || prev.year,
             department: p.department || prev.department,
-            score: p.score ?? p.totalXp ?? prev.score,
+            score: p.totalXp ?? p.score ?? prev.score,
             rank: p.rank || prev.rank,
             currentStage: p.stage ?? prev.currentStage,
             isCaptain: p.isCaptain ?? (p.teamRole === 'CAPTAIN'),
@@ -142,7 +147,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
   }, [token]);
 
   useEffect(() => {
-    if (profile.studentId && profile.studentId !== "24IT077" && !isLoading) {
+    if (profile.studentId && !isLoading) {
       fetchSummary(profile.studentId);
       fetchHistory(profile.studentId);
       fetchStreaks(profile.studentId);
@@ -159,15 +164,34 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
     return LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
   };
 
-  const displayXp = totalXp || profile.score || 0;
+  const [activeStageExpectedXp, setActiveStageExpectedXp] = useState<number>(200);
+
+  useEffect(() => {
+    const fetchStageInfo = async () => {
+      try {
+        const fetchedStages = await apiClient.get('/api/v1/students/stages');
+        if (fetchedStages.data?.success && Array.isArray(fetchedStages.data?.data)) {
+          const list = fetchedStages.data.data;
+          const active = list.find((s: any) => s.isActive === true || s.active === true || s.stageStatus === 'ACTIVE');
+          if (active && active.expectedXp) {
+            setActiveStageExpectedXp(Number(active.expectedXp));
+          }
+        }
+      } catch (_) {}
+    };
+    fetchStageInfo();
+  }, []);
+
+  const displayXp = profile.score !== undefined && profile.score !== null ? profile.score : (totalXp ?? 0);
   const levelInfo = getLevelInfo(displayXp);
   const progress = Math.min(1, Math.max(0, (displayXp - levelInfo.min) / (levelInfo.max - levelInfo.min)));
 
   const maxStreak = (streaks || []).reduce((max, s) => {
-    const current = s?.currentStreak || 0;
-    return !s?.isBroken && current > max ? current : max;
+    const current = s?.currentStreak || s?.streakCount || 0;
+    const isBroken = s?.isBroken === true || s?.status === 'Broken' || s?.status === 'BROKEN';
+    return !isBroken && current > max ? current : max;
   }, 0);
-  const displayStreak = maxStreak > 0 ? maxStreak : 37;
+  const displayStreak = maxStreak;
 
   if (isLoading || isXpLoading) {
     return (
@@ -189,58 +213,37 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
+    <div className="bg-slate-50 min-h-screen pb-32">
       {/* Header */}
       <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
         <h1 className="text-xl font-bold">Student Dashboard</h1>
         <div className="flex items-center gap-3">
+          <FireStreakIcon streakCount={displayStreak} onClick={onOpenStreaks} />
+
           <button
-            onClick={() => {
-              const streaksEl = document.getElementById('streaks-section');
-              if (streaksEl) streaksEl.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full font-black text-sm cursor-pointer transition-colors"
-            title="Active Streaks"
-          >
-            <span>🔥</span>
-            <span>{displayStreak}</span>
-          </button>
-          <button
-            onClick={() => {
-              if (onSelectTab) {
-                onSelectTab(3);
-              } else if (profile.isCaptain) {
-                navigate('/captain');
-              } else {
-                const groupEl = document.getElementById('my-group-section');
-                if (groupEl) groupEl.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="p-2 bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+            onClick={() => onSelectTab && onSelectTab(3)}
+            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-full text-slate-300 hover:text-white transition-colors"
             title="My Group"
           >
-            <Users className="w-5 h-5 text-white" />
+            <Users className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="p-5 max-w-3xl mx-auto space-y-6">
-        {/* Welcome Section */}
-        <div>
-          <p className="text-slate-500 font-medium text-sm mb-1">Welcome back,</p>
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-slate-800">{profile.studentName}</h2>
-            {profile.isCaptain ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm">
-                <Stars className="w-3.5 h-3.5" />
-                👑 CAPTAIN
-              </span>
-            ) : profile.isViceCaptain ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-sm">
-                <Award className="w-3.5 h-3.5 text-slate-200" />
-                🥈 VICE CAPTAIN
-              </span>
-            ) : null}
+      <div className="p-6 max-w-2xl mx-auto space-y-6">
+        {/* Welcome Banner */}
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-slate-500 text-sm">Welcome back,</div>
+            <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+              {profile.studentName}
+              {(profile.isCaptain || profile.isViceCaptain) && (
+                <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500 text-slate-950 uppercase tracking-wider shadow-sm flex items-center gap-1">
+                  <Award className="w-3 h-3" />
+                  {profile.isCaptain ? 'CAPTAIN' : 'VICE CAPTAIN'}
+                </span>
+              )}
+            </h2>
           </div>
         </div>
 
@@ -283,10 +286,10 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
           </p>
         </div>
 
-        {/* Stage Progress Card (Matching Flutter) */}
+        {/* Stage Progress Card (Matching Flutter activeStageDetails) */}
         {(() => {
-          const currentStage = Math.max(1, profile.currentStage || 3);
-          const stageMaxXp = currentStage === 3 ? 60 : (currentStage === 1 ? 500 : 1200);
+          const currentStage = Math.max(1, profile.currentStage || 1);
+          const stageMaxXp = activeStageExpectedXp || 200;
           const stagePct = Math.min(100, Math.round((displayXp / stageMaxXp) * 100));
 
           return (
@@ -295,7 +298,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                 <h3 className="font-bold text-slate-800 text-base">Stage {currentStage} Progress</h3>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                  Ended
+                  Active
                 </span>
               </div>
 

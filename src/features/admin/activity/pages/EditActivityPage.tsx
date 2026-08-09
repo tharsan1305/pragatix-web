@@ -7,11 +7,13 @@ import ActivityForm from '../components/ActivityForm';
 
 interface EditActivityPageProps {
   onBack: () => void;
+  onSuccess?: () => void;
   activity?: ActivityModel;
   activityId?: number;
+  subgroupId?: number | string;
 }
 
-export default function EditActivityPage({ onBack, activity: initialActivity, activityId }: EditActivityPageProps) {
+export default function EditActivityPage({ onBack, onSuccess, activity: initialActivity, activityId }: EditActivityPageProps) {
   const [activity, setActivity] = useState<ActivityModel | undefined>(initialActivity);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialActivity && !!activityId);
@@ -41,7 +43,11 @@ export default function EditActivityPage({ onBack, activity: initialActivity, ac
       await activityService.updateActivity(targetId, data);
       toast.dismiss(toastId);
       toast.success("Event updated successfully!");
-      onBack();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onBack();
+      }
     } catch (err: any) {
       toast.dismiss(toastId);
       console.error(err);

@@ -12,9 +12,15 @@ export default function AdminProfileTab() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    name: "System Administrator",
-    email: "admin@spdms.com",
-    role: "ADMIN"
+    name: "Second Year Admin",
+    username: "admin",
+    email: "admin@jjcet.ac.in",
+    phone: "+91 98765 43210",
+    department: "Academic Administration",
+    role: "ADMIN",
+    assignedYear: "1",
+    totalStudents: 0,
+    totalGroups: 0
   });
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -26,16 +32,22 @@ export default function AdminProfileTab() {
     const fetchProfile = async () => {
       try {
         const response = await apiClient.get('/api/v1/auth/me');
-        if (response.data.success) {
+        if (response.data?.success && response.data?.data) {
           const d = response.data.data;
           setProfileData({
-            name: d.fullName || d.username || "System Administrator",
-            email: d.email || "admin@spdms.com",
-            role: d.role || "ADMIN"
+            name: d.fullName || d.username || 'Second Year Admin',
+            username: d.username || 'admin',
+            email: d.email || 'admin@jjcet.ac.in',
+            phone: d.phone || d.phoneNumber || '+91 98765 43210',
+            department: d.department || 'Academic Administration',
+            role: (d.roles && d.roles.length > 0) ? d.roles.join(', ') : (d.role || 'ADMIN'),
+            assignedYear: d.academicYear || '1',
+            totalStudents: d.totalStudentsInYear ?? 0,
+            totalGroups: d.totalGroups ?? 0
           });
         }
-      } catch {
-        // Fallback
+      } catch (e) {
+        console.error("Failed to fetch admin profile:", e);
       } finally {
         setIsLoading(false);
       }
@@ -96,25 +108,52 @@ export default function AdminProfileTab() {
         <h2 className="text-[22px] font-bold text-[#1E293B]">{profileData.name}</h2>
         <p className="text-[15px] text-gray-500 mt-1 mb-8">{profileData.email}</p>
 
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-sm px-5 py-5 space-y-5">
-            <div className="flex justify-between items-center">
-              <span className="text-[15px] text-gray-500">Role</span>
-              <span className="text-[15px] font-bold text-[#1E293B]">
-                {profileData.role.replace("ROLE_", "")}
-              </span>
+        <div className="w-full max-w-md space-y-4">
+          {/* Personal Information */}
+          <div className="bg-white rounded-2xl shadow-sm px-5 py-5 space-y-4">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider text-center border-b border-slate-100 pb-2">Personal Information</h3>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Username</span>
+              <span className="font-bold text-[#1E293B]">{profileData.username}</span>
             </div>
             <div className="h-px bg-slate-100" />
-            
-            <div className="flex justify-between items-center">
-              <span className="text-[15px] text-gray-500">Access Level</span>
-              <span className="text-[15px] font-bold text-[#1E293B]">Full System Access</span>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Email</span>
+              <span className="font-bold text-[#1E293B]">{profileData.email}</span>
             </div>
             <div className="h-px bg-slate-100" />
-            
-            <div className="flex justify-between items-center">
-              <span className="text-[15px] text-gray-500">System</span>
-              <span className="text-[15px] font-bold text-[#1E293B]">PragatiX (SPDMS)</span>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Phone</span>
+              <span className="font-bold text-[#1E293B]">{profileData.phone}</span>
+            </div>
+            <div className="h-px bg-slate-100" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Department</span>
+              <span className="font-bold text-[#1E293B]">{profileData.department}</span>
+            </div>
+            <div className="h-px bg-slate-100" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Status</span>
+              <span className="font-bold text-emerald-600">Active</span>
+            </div>
+          </div>
+
+          {/* Academic Statistics */}
+          <div className="bg-white rounded-2xl shadow-sm px-5 py-5 space-y-4">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider text-center border-b border-slate-100 pb-2">Academic Statistics</h3>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Assigned Year</span>
+              <span className="font-bold text-[#1E293B]">{profileData.assignedYear}</span>
+            </div>
+            <div className="h-px bg-slate-100" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Total Students</span>
+              <span className="font-bold text-[#1E293B]">{profileData.totalStudents}</span>
+            </div>
+            <div className="h-px bg-slate-100" />
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-500">Total Groups</span>
+              <span className="font-bold text-[#1E293B]">{profileData.totalGroups}</span>
             </div>
           </div>
         </div>

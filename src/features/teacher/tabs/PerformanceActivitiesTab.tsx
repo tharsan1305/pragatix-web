@@ -84,8 +84,13 @@ export default function PerformanceActivitiesTab() {
   const fetchMyActivities = async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get('/api/v1/admin/my-activities');
-      if (response.data.success) {
+      let response;
+      try {
+        response = await apiClient.get('/api/v1/admin/my-activities');
+      } catch (err) {
+        response = await apiClient.get('/api/v1/teacher/my-activities');
+      }
+      if (response.data?.success) {
         setMyActivities(response.data.data || []);
       }
     } catch (e) {
@@ -214,8 +219,12 @@ export default function PerformanceActivitiesTab() {
       if (sec) url += `&sectionId=${sec.id}`;
       
       const res = await apiClient.get(url);
-      if (res.data.success) {
-        setEligibleStudents(res.data.data.students || []);
+      if (res.data?.success) {
+        const rawList: any[] = res.data.data.students || [];
+        const sortedList = [...rawList].sort((a, b) => 
+          (a.fullName || '').localeCompare(b.fullName || '')
+        );
+        setEligibleStudents(sortedList);
         setAssignmentId(res.data.data.assignment?.id || null);
       }
     } catch (e) {

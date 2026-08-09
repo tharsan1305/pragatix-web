@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, X, Upload, CheckCircle2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
 
 const CATEGORY_CONFIG: Record<string, any> = {
+  "totalXp": { color: "#4f46e5", bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", priority: "MEDIUM", decay: "Permanent ✓" },
+  "mustXp": { color: "#fbbf24", bg: "bg-amber-500", text: "text-amber-500", border: "border-amber-500", priority: "MEDIUM", decay: "Permanent ✓" },
+  "groupXp": { color: "#22c55e", bg: "bg-green-500", text: "text-green-500", border: "border-green-500", priority: "HIGH", decay: "Permanent ✓" },
+  "individualXp": { color: "#a855f7", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", priority: "HIGH", decay: "Permanent ✓" },
   "ACADEMIC": { color: "#3b82f6", bg: "bg-blue-500", text: "text-blue-500", border: "border-blue-500", priority: "HIGH", decay: "Streak decays if broken ↺" },
   "SKILL": { color: "#a855f7", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", priority: "HIGH", decay: "Permanent ✓" },
   "COMMUNICATION": { color: "#6366f1", bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", priority: "HIGH", decay: "Permanent ✓" },
@@ -61,7 +66,31 @@ const ACTIVITY_MASTER = [
 ];
 
 export default function PointReviewTab() {
-  const { xpByCategory, history, streaks, submitXpClaim } = useXpStore();
+  const { user } = useAuth();
+  const { xpByCategory, history, streaks, submitXpClaim, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
+  
+  useEffect(() => {
+    const loadData = async () => {
+      let regNo = user?.username || user?.regNo || user?.sprNo || "";
+      if (!regNo) {
+        try {
+          const res = await apiClient.get('/api/v1/auth/me');
+          if (res.data?.success && res.data?.data) {
+            regNo = res.data.data.username || res.data.data.sprNo || "";
+          }
+        } catch (e) {
+          console.error("Failed to load user info in PointReviewTab", e);
+        }
+      }
+      if (regNo) {
+        fetchSummary(regNo);
+        fetchHistory(regNo);
+        fetchStreaks(regNo);
+      }
+    };
+
+    loadData();
+  }, [user, fetchSummary, fetchHistory, fetchStreaks]);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);

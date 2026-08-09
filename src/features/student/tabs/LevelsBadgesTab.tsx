@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, Plus, X } from 'lucide-react';
+import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, Plus, X, Award, Link2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -68,6 +68,7 @@ export default function LevelsBadgesTab() {
   const [pendingBadgeNames, setPendingBadgeNames] = useState<string[]>([]);
   
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  const [selectedBadgeObj, setSelectedBadgeObj] = useState<any>(null);
   const [selectedBadgeToClaim, setSelectedBadgeToClaim] = useState("");
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -368,15 +369,6 @@ export default function LevelsBadgesTab() {
 
         {activeTab === 'badges' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-end">
-              <button 
-                onClick={() => setIsSubmitModalOpen(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md flex gap-2 items-center transition-transform hover:scale-105"
-              >
-                <Plus className="w-4 h-4" /> Claim New Badge
-              </button>
-            </div>
-
             {Object.entries(badgesByTier).map(([tierName, badges]) => (
               <div key={tierName}>
                 <div className="flex items-center gap-3 mb-4">
@@ -390,11 +382,19 @@ export default function LevelsBadgesTab() {
                     const isPending = pendingBadgeNames.includes(badge.name);
                     
                     return (
-                      <div key={badge.name} className={`rounded-2xl border p-4 flex flex-col justify-between relative overflow-hidden transition-all ${
-                        isEarned ? 'bg-indigo-50/70 border-indigo-200 shadow-sm' :
-                        isPending ? 'bg-amber-50/70 border-amber-200 shadow-sm' :
-                        'bg-white border-slate-200 opacity-70'
-                      }`}>
+                      <div 
+                        key={badge.name} 
+                        onClick={() => {
+                          setSelectedBadgeObj(badge);
+                          setSelectedBadgeToClaim(badge.id || badge.name);
+                          setIsSubmitModalOpen(true);
+                        }}
+                        className={`rounded-2xl border p-4 flex flex-col justify-between relative overflow-hidden transition-all cursor-pointer hover:shadow-md ${
+                          isEarned ? 'bg-indigo-50/70 border-indigo-200 shadow-sm' :
+                          isPending ? 'bg-amber-50/70 border-amber-200 shadow-sm' :
+                          'bg-white border-slate-200 opacity-80'
+                        }`}
+                      >
                         <div>
                           <div className="w-10 h-10 rounded-full mb-3 flex items-center justify-center bg-white shadow-sm border border-slate-100">
                             {isEarned ? <ShieldCheck className="w-5 h-5 text-indigo-600" /> :
@@ -431,62 +431,117 @@ export default function LevelsBadgesTab() {
         )}
       </div>
 
-      {/* Claim Badge Modal */}
+      {/* Claim Badge Modal matching Flutter Badge Approval Workflow */}
       {isSubmitModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl overflow-hidden">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-slate-800">Claim New Badge</h3>
-              <button onClick={() => setIsSubmitModalOpen(false)} className="p-1 text-slate-400 hover:bg-slate-100 rounded-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative animate-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 shrink-0">
+                <Award className="w-7 h-7" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                  {selectedBadgeObj?.name || selectedBadgeToClaim || "Badge Details"}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 uppercase">
+                    {selectedBadgeObj?.rarity || "COMMON"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    Authority: {selectedBadgeObj?.authority || "Faculty"}
+                  </span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsSubmitModalOpen(false)} 
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
-            <form onSubmit={submitBadgeClaim} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Select Badge *</label>
-                <select 
-                  required
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                  value={selectedBadgeToClaim}
-                  onChange={e => setSelectedBadgeToClaim(e.target.value)}
-                >
-                  <option value="" disabled>Select...</option>
-                  {allAvailableBadgeOptions.map((b, i) => {
-                    if (earnedBadgeNames.includes(b.name) || pendingBadgeNames.includes(b.name)) return null;
-                    return <option key={`${b.id || b.name}-${i}`} value={b.id || b.name}>{b.name}</option>
-                  })}
-                </select>
-              </div>
+
+            {/* Description */}
+            <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              {selectedBadgeObj?.description || "Maintain high discipline and participation standards to earn this badge."}
+            </p>
+
+            {/* 6-Step Approval Workflow matching Flutter Screen */}
+            <div className="space-y-2 pt-1">
+              <h4 className="text-xs font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
               
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Evidence URL / Details *</label>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-slate-800">Claim Submitted</div>
+                    <div className="text-[10px] text-slate-400">Student requests badge via portal</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</div>
+                  <div>
+                    <div className="font-semibold text-slate-700">Evaluator Review</div>
+                    <div className="text-[10px] text-slate-400">Verifies eligibility (1-3 days)</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</div>
+                  <div>
+                    <div className="font-semibold text-slate-700">Faculty Check</div>
+                    <div className="text-[10px] text-slate-400">Quality committee check (2-5 days)</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</div>
+                  <div>
+                    <div className="font-semibold text-slate-700">Maker-Checker Sign-off</div>
+                    <div className="text-[10px] text-slate-400">Approval authority sign-off (1-2 days)</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</div>
+                  <div>
+                    <div className="font-semibold text-slate-700">Badge Issued</div>
+                    <div className="text-[10px] text-slate-400">Awarded to student profile</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</div>
+                  <div>
+                    <div className="font-semibold text-slate-700">Audit Logging</div>
+                    <div className="text-[10px] text-slate-400">Permanent record logged</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Submission Form matching Flutter Proof Link Input */}
+            <form onSubmit={submitBadgeClaim} className="space-y-3 pt-2">
+              <div className="relative">
+                <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input 
                   type="url"
                   required
-                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                  placeholder="Link to project, cert, etc."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  placeholder="Proof Link (Required)"
                   value={evidenceUrl}
                   onChange={e => setEvidenceUrl(e.target.value)}
                 />
               </div>
-              
-              <div className="flex justify-end gap-3 pt-4">
-                <button 
-                  type="button"
-                  onClick={() => setIsSubmitModalOpen(false)}
-                  className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-xs font-bold shadow-md transition-colors disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Claim'}
-                </button>
-              </div>
+
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl text-sm font-bold shadow-md transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Claim'}
+              </button>
             </form>
           </div>
         </div>

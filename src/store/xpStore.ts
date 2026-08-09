@@ -13,56 +13,10 @@ interface XpState {
   submitXpClaim: (category: string, activityName: string, xpPoints: number, evidenceUrl: string) => Promise<boolean>;
 }
 
-const mockXpByCategory = {
-  "ACADEMIC": 120,
-  "SKILL": 100,
-  "COMMUNICATION": 40,
-  "LEADERSHIP": 30,
-  "INNOVATION": 60,
-  "PLACEMENT": 80,
-  "DISCIPLINE": 20,
-  "COMMUNITY": 60,
-  "SPORTS": 50,
-  "CULTURAL": 40,
-};
-
-const mockHistory = [
-  {
-    "id": 1,
-    "category": "SKILL",
-    "activityName": "C Coding 5 problems",
-    "xpPoints": 50,
-    "submittedAt": new Date(Date.now() - 86400000).toISOString(),
-    "status": "APPROVED"
-  },
-  {
-    "id": 2,
-    "category": "DISCIPLINE",
-    "activityName": "Late entry to class",
-    "xpPoints": -10,
-    "submittedAt": new Date(Date.now() - 86400000 * 3).toISOString(),
-    "status": "APPROVED"
-  },
-  {
-    "id": 3,
-    "category": "ACADEMIC",
-    "activityName": "95% Attendance",
-    "xpPoints": 30,
-    "submittedAt": new Date(Date.now() - 86400000 * 5).toISOString(),
-    "status": "APPROVED"
-  }
-];
-
-const mockStreaks = [
-  { "streakType": "C_CODING", "currentStreak": 12, "isBroken": false },
-  { "streakType": "MONDAY_JOURNAL", "currentStreak": 4, "isBroken": false },
-  { "streakType": "LIBRARY", "currentStreak": 0, "isBroken": true },
-];
-
 export const useXpStore = create<XpState>((set) => ({
-  xpByCategory: mockXpByCategory,
-  history: mockHistory,
-  streaks: mockStreaks,
+  xpByCategory: {},
+  history: [],
+  streaks: [],
   isLoading: false,
   totalXp: 0,
 
@@ -94,10 +48,12 @@ export const useXpStore = create<XpState>((set) => ({
     try {
       const response = await apiClient.get(`/api/v1/xp/${studentId}/history?page=0&size=50`);
       if (response.data.success && response.data.data) {
-        set({ history: response.data.data.content || [] });
+        const dataObj = response.data.data;
+        const list = Array.isArray(dataObj) ? dataObj : (dataObj.content || []);
+        set({ history: list });
       }
-    } catch (_error) {
-      // fallback handled by default mock data
+    } catch (error) {
+      console.error('Failed to fetch XP history for student:', studentId, error);
     } finally {
       set({ isLoading: false });
     }
@@ -106,12 +62,20 @@ export const useXpStore = create<XpState>((set) => ({
   fetchStreaks: async (studentId) => {
     set({ isLoading: true });
     try {
-      const response = await apiClient.get(`/api/v1/xp/${studentId}/streaks`);
-      if (response.data.success && response.data.data) {
-        set({ streaks: response.data.data || [] });
+      let response;
+      try {
+        response = await apiClient.get(`/api/v1/xp/${studentId}/streaks`);
+      } catch (_) {
+        response = await apiClient.get('/api/v1/students/me/activity-streaks');
+      }
+
+      if (response.data?.success && Array.isArray(response.data.data)) {
+        set({ streaks: response.data.data });
+      } else {
+        set({ streaks: [] });
       }
     } catch (_error) {
-      // fallback handled by default mock data
+      set({ streaks: [] });
     } finally {
       set({ isLoading: false });
     }

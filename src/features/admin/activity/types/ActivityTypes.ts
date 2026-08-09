@@ -31,6 +31,9 @@ export interface ActivityModel {
   activityType?: string;
   assignmentMode: string;
   allowStudentRequest?: boolean;
+  subgroup?: string | Record<string, any>;
+  subgroupId?: number;
+  stageId?: number;
 }
 
 export interface ExecutionStudentModel {

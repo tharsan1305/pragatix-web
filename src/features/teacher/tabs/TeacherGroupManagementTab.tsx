@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X } from 'lucide-react';
+import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, CheckCircle2, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
@@ -81,6 +81,10 @@ export default function TeacherGroupManagementTab() {
   
   const [activeAddTeamId, setActiveAddTeamId] = useState<number | null>(null);
   const [studentIdInput, setStudentIdInput] = useState('');
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
+  const [memberSearchResults, setMemberSearchResults] = useState<any[]>([]);
+  const [isSearchingMembers, setIsSearchingMembers] = useState(false);
+  const [selectedMemberToAssign, setSelectedMemberToAssign] = useState<any>(null);
   
   const [activeChangeCaptainTeam, setActiveChangeCaptainTeam] = useState<GroupData | null>(null);
   const [selectedNewCaptainRegNo, setSelectedNewCaptainRegNo] = useState('');
@@ -95,6 +99,65 @@ export default function TeacherGroupManagementTab() {
   useEffect(() => {
     fetchGroups();
   }, []);
+
+  // Live debounced search effect with auto-fetch on modal open & fallback APIs
+  useEffect(() => {
+    if (!activeAddTeamId) {
+      setMemberSearchResults([]);
+      setIsSearchingMembers(false);
+      return;
+    }
+
+    const fetchStudentsForModal = async () => {
+      setIsSearchingMembers(true);
+      const query = memberSearchQuery.trim();
+      try {
+        let response;
+        if (query) {
+          response = await apiClient.get(`/api/v1/students/team-member-search?keyword=${encodeURIComponent(query)}`);
+        } else {
+          // Modal opened: fetch initial active student list
+          response = await apiClient.get('/api/v1/students/team-member-search?keyword=a').catch(() => null);
+          if (!response || !response.data?.data || response.data.data.length === 0) {
+            response = await apiClient.get('/api/v1/students?page=0&size=50').catch(() => null);
+          }
+        }
+
+        let list: any[] = [];
+        if (Array.isArray(response?.data?.data)) {
+          list = response.data.data;
+        } else if (Array.isArray(response?.data?.data?.content)) {
+          list = response.data.data.content;
+        } else if (Array.isArray(response?.data?.content)) {
+          list = response.data.content;
+        } else if (Array.isArray(response?.data)) {
+          list = response.data;
+        }
+
+        // Fallback search if primary query returned empty
+        if (list.length === 0 && query) {
+          const fallbackRes = await apiClient.get(`/api/v1/students/search?keyword=${encodeURIComponent(query)}`).catch(() => null);
+          if (Array.isArray(fallbackRes?.data?.data?.content)) {
+            list = fallbackRes.data.data.content;
+          } else if (Array.isArray(fallbackRes?.data?.data)) {
+            list = fallbackRes.data.data;
+          } else if (Array.isArray(fallbackRes?.data?.content)) {
+            list = fallbackRes.data.content;
+          }
+        }
+
+        setMemberSearchResults(list);
+      } catch (e) {
+        console.error("Error searching students for team member assignment:", e);
+        setMemberSearchResults([]);
+      } finally {
+        setIsSearchingMembers(false);
+      }
+    };
+
+    const timer = setTimeout(fetchStudentsForModal, memberSearchQuery.trim() ? 300 : 0);
+    return () => clearTimeout(timer);
+  }, [memberSearchQuery, activeAddTeamId]);
 
   const fetchGroups = async () => {
     setIsLoading(true);
@@ -135,7 +198,7 @@ export default function TeacherGroupManagementTab() {
       setSections(["All", ...Array.from(sectionSet).sort()]);
     } catch (e: any) {
       console.error("Error fetching teams", e);
-      toast.error("Failed to load groups");
+      setGroups([]);
     } finally {
       setIsLoading(false);
     }
@@ -213,21 +276,34 @@ export default function TeacherGroupManagementTab() {
   const openAddMemberModal = (teamId: number) => {
     setActiveAddTeamId(teamId);
     setStudentIdInput('');
+    setMemberSearchQuery('');
+    setMemberSearchResults([]);
+    setSelectedMemberToAssign(null);
   };
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeAddTeamId || !studentIdInput.trim()) return;
+    const regNoToAdd = selectedMemberToAssign
+      ? (selectedMemberToAssign.regNo || selectedMemberToAssign.registerNumber || selectedMemberToAssign.reg_no)
+      : studentIdInput.trim();
+
+    if (!activeAddTeamId || !regNoToAdd) {
+      toast.error("Please search and select a student or enter a Register No.");
+      return;
+    }
     
     setIsSubmitting(true);
     const toastId = toast.loading("Adding member to group...");
     try {
-      const response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/add-member?regNo=${encodeURIComponent(studentIdInput.trim())}&studentId=${encodeURIComponent(studentIdInput.trim())}`);
+      const response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/add-member?regNo=${encodeURIComponent(regNoToAdd)}&studentId=${encodeURIComponent(regNoToAdd)}`);
       toast.dismiss(toastId);
       if (response.data.success) {
         toast.success("Member added successfully");
         setActiveAddTeamId(null);
         setStudentIdInput('');
+        setMemberSearchQuery('');
+        setMemberSearchResults([]);
+        setSelectedMemberToAssign(null);
         fetchGroups();
       } else {
         toast.error(response.data.message || "Failed to add member");
@@ -784,42 +860,151 @@ export default function TeacherGroupManagementTab() {
         </div>
       )}
 
-      {/* Add Member Modal */}
+      {/* Add Member Modal matching Flutter StudentSearchDialog 1:1 */}
       {activeAddTeamId && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 pb-2">
-              <h2 className="text-lg font-bold text-slate-800">Add Group Member</h2>
-              <p className="text-xs text-slate-500 mt-1">Enter student registration number or ID to assign to this group.</p>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl max-h-[85vh]">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800">Add Team Member</h2>
+                  <p className="text-xs text-slate-500 font-medium">Search students by Name, Reg No, or SPR No</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveAddTeamId(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
-            <form onSubmit={handleAddMember} className="p-6 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-600 mb-1 block">Student Register No / ID *</label>
+            <form onSubmit={handleAddMember} className="p-5 flex-1 flex flex-col overflow-hidden space-y-4">
+              {/* Search Box */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input 
-                  required 
                   type="text" 
-                  value={studentIdInput} 
-                  onChange={e => setStudentIdInput(e.target.value)} 
-                  placeholder="e.g. 24CS01, 24CSC122"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none text-sm font-semibold"
+                  value={memberSearchQuery} 
+                  onChange={e => {
+                    setMemberSearchQuery(e.target.value);
+                    setStudentIdInput(e.target.value);
+                  }} 
+                  placeholder="Search by Name, Reg No, or SPR No..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm font-semibold transition-all"
+                  autoFocus
                 />
               </div>
+
+              {/* Live Search Results Container */}
+              <div className="flex-1 overflow-y-auto min-h-[220px] max-h-[320px] pr-1 space-y-2.5">
+                {isSearchingMembers ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-2">
+                    <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
+                    <span className="text-xs font-semibold">Searching students...</span>
+                  </div>
+                ) : memberSearchQuery.trim() && memberSearchResults.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-center">
+                    <UsersRound className="w-8 h-8 text-slate-300 mb-2" />
+                    <p className="text-sm font-semibold text-slate-600">No students found</p>
+                    <p className="text-xs text-slate-400 mt-1">Try searching by full name or exact register number</p>
+                  </div>
+                ) : memberSearchResults.length > 0 ? (
+                  memberSearchResults.map((s: any) => {
+                    const isSelected = selectedMemberToAssign?.id === s.id || (selectedMemberToAssign?.regNo && selectedMemberToAssign.regNo === s.regNo);
+                    const isAlreadyInThisTeam = Number(s.teamId) === Number(activeAddTeamId);
+
+                    return (
+                      <div 
+                        key={s.id || s.regNo}
+                        onClick={() => {
+                          if (isAlreadyInThisTeam) return;
+                          setSelectedMemberToAssign(s);
+                          setStudentIdInput(s.regNo || s.registerNumber || '');
+                        }}
+                        className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                          isAlreadyInThisTeam 
+                            ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed'
+                            : isSelected 
+                              ? 'bg-indigo-50/60 border-indigo-600 ring-2 ring-indigo-600/20 shadow-xs' 
+                              : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:bg-slate-50/60'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                            isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {s.fullName ? s.fullName.charAt(0).toUpperCase() : 'S'}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-800">{s.fullName}</h4>
+                            <p className="text-xs text-slate-500 font-medium mt-0.5">
+                              Reg: <span className="font-semibold text-slate-700">{s.regNo || s.registerNumber}</span>
+                              {s.sprNo && <> • SPR: <span className="font-semibold text-slate-700">{s.sprNo}</span></>}
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {s.departmentName || s.department || ''} • Year {s.year || 1} • Sec {s.section || 'A'}
+                            </p>
+                            {s.teamName && (
+                              <p className={`text-[11px] font-semibold mt-0.5 ${isAlreadyInThisTeam ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                Current Team: {s.teamName}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          {isAlreadyInThisTeam ? (
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Added</span>
+                            </span>
+                          ) : isSelected ? (
+                            <CheckCircle2 className="w-6 h-6 text-indigo-600 fill-indigo-100" />
+                          ) : (
+                            <span className="text-xs text-indigo-600 font-semibold hover:underline">Select</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-6 px-4 bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 text-center">
+                    <p className="text-xs font-semibold text-slate-600">Type above to search live student directory</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Or enter registration number directly in the search field</p>
+                  </div>
+                )}
+              </div>
               
-              <div className="flex justify-end space-x-3 pt-4">
+              {/* Footer Buttons */}
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
                 <button 
                   type="button" 
                   onClick={() => setActiveAddTeamId(null)} 
-                  className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors text-sm"
+                  className="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors text-sm"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  disabled={isSubmitting}
-                  className="px-5 py-2 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors shadow-sm disabled:opacity-70 text-sm"
+                  disabled={isSubmitting || (!selectedMemberToAssign && !studentIdInput.trim())}
+                  className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center space-x-1.5"
                 >
-                  {isSubmitting ? 'Adding...' : 'Add Member'}
+                  {isSubmitting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      <span>Add Member</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

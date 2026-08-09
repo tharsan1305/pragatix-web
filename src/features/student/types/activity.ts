@@ -14,6 +14,11 @@ export interface Activity {
   buttonText?: string;
   requestStatus?: string;
   evidenceUrl?: string;
+  facultyName?: string;
+  frequency?: string;
+  evidence?: string[];
+  statusPillText?: string;
+  allowStudentRequest?: boolean;
 }
 
 export interface Subgroup {

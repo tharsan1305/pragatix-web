@@ -139,7 +139,8 @@ export default function AdminDashboard() {
       case 'stage_details':
         return <StageDetailsPage onBack={popView} stageId={Number(currentViewProps.stageId) || currentViewProps.stageId} stageName={currentViewProps.stageName || ''} stageDescription={currentViewProps.stageDescription || ''} teachersList={currentViewProps.teachersList} onPushView={pushView} />;
       case 'activity_list':
-        return <ActivityListPage onBack={popView} subgroup={currentViewProps.subgroup} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} onPushView={pushView} />;
+      case 'all_activities':
+        return <ActivityListPage onBack={popView} subgroup={currentViewProps.subgroup} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName || (currentViewName === 'all_activities' ? 'All Activities' : undefined)} onPushView={pushView} />;
       case 'create_activity':
         return <CreateActivityPage onBack={popView} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} />;
       case 'edit_activity':

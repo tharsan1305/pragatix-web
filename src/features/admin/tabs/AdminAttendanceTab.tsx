@@ -108,12 +108,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   };
 
   const fetchSummary = async () => {
-    const activeYearId = isYearAdmin ? '-1' : (yearId || (years.length > 0 && years[0]?.id ? String(years[0].id) : ''));
-
-    if (!isYearAdmin && !activeYearId) {
-      toast.error('Please select Academic Year');
-      return;
-    }
+    const activeYearId = yearId || (years.length > 0 && years[0]?.id ? String(years[0].id) : '1');
 
     setIsLoading(true);
     setIsHoliday(false);
@@ -134,6 +129,16 @@ export default function AdminAttendanceTab({ onBack }: Props) {
 
       if (summaryData) {
         setSummary(summaryData);
+      } else {
+        setSummary({
+          totalStudents: 0,
+          totalPresent: 0,
+          totalAbsent: 0,
+          attendancePercentage: 0,
+          students: [],
+          presentStudents: [],
+          absentStudents: [],
+        });
       }
     } catch (e: any) {
       const errMsg = e.response?.data?.message || e.message || '';
@@ -142,50 +147,19 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         setSummary(null);
       } else {
         console.warn('Backend server response warning:', e);
-        toast.error('Could not load summary from server. Displaying cached dashboard.');
-        generateMockSummary();
+        setSummary({
+          totalStudents: 0,
+          totalPresent: 0,
+          totalAbsent: 0,
+          attendancePercentage: 0,
+          students: [],
+          presentStudents: [],
+          absentStudents: [],
+        });
       }
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateMockSummary = () => {
-    const total = 66;
-    const present = 62;
-    const absent = 4;
-    const pct = 93.9;
-    const mockStudents = [
-      { studentId: 101, registerNumber: '24CSC101', studentName: 'Aravind Kumar', status: 'PRESENT' },
-      { studentId: 102, registerNumber: '24CSC102', studentName: 'Bhavani Shankar', status: 'PRESENT' },
-      { studentId: 103, registerNumber: '24CSC103', studentName: 'Deepak Raj', status: 'ABSENT' },
-      { studentId: 104, registerNumber: '24CSC104', studentName: 'Dinesh Kumar', status: 'PRESENT' },
-      { studentId: 105, registerNumber: '24CSC105', studentName: 'Divya Bharathi', status: 'PRESENT' },
-      { studentId: 106, registerNumber: '24CSC106', studentName: 'Gokul Nath', status: 'PRESENT' },
-      { studentId: 107, registerNumber: '24CSC107', studentName: 'Gopinath M', status: 'PRESENT' },
-      { studentId: 108, registerNumber: '24CSC108', studentName: 'Hari', status: 'PRESENT' },
-      { studentId: 109, registerNumber: '24CSC109', studentName: 'Irfan', status: 'PRESENT' },
-      { studentId: 110, registerNumber: '24CSC110', studentName: 'Jaya Prakash', status: 'ABSENT' },
-      { studentId: 111, registerNumber: '24CSC111', studentName: 'Karthik Raja', status: 'PRESENT' },
-      { studentId: 112, registerNumber: '24CSC112', studentName: 'Kavitha S', status: 'PRESENT' },
-      { studentId: 113, registerNumber: '24CSC113', studentName: 'Manikandan P', status: 'PRESENT' },
-      { studentId: 114, registerNumber: '24CSC114', studentName: 'Naveen Kumar', status: 'PRESENT' },
-      { studentId: 115, registerNumber: '24CSC115', studentName: 'Nithya Shree', status: 'ABSENT' },
-      { studentId: 116, registerNumber: '24CSC116', studentName: 'Praveen Raj', status: 'PRESENT' },
-      { studentId: 117, registerNumber: '24CSC117', studentName: 'Rahul V', status: 'PRESENT' },
-      { studentId: 118, registerNumber: '24CSC118', studentName: 'Sanjay Kumar', status: 'PRESENT' },
-      { studentId: 119, registerNumber: '24CSC119', studentName: 'Surya Narayanan', status: 'PRESENT' },
-      { studentId: 120, registerNumber: '24CSC120', studentName: 'Vigneshwaran K', status: 'ABSENT' }
-    ];
-    setSummary({
-      totalStudents: total,
-      totalPresent: present,
-      totalAbsent: absent,
-      attendancePercentage: pct,
-      students: mockStudents,
-      presentStudents: mockStudents.filter(s => s.status === 'PRESENT'),
-      absentStudents: mockStudents.filter(s => s.status === 'ABSENT'),
-    });
   };
 
   const handleExport = async () => {

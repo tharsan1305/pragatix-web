@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Footer from '../../components/common/Footer';
 import DashboardTab from './tabs/DashboardTab';
 import PointReviewTab from './tabs/PointReviewTab';
@@ -17,8 +17,26 @@ export default function StudentDashboardPage() {
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [activeSubView, setActiveSubView] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!window.history.state || typeof window.history.state.tabIdx !== 'number') {
+      window.history.replaceState({ tabIdx: 0, view: 'root' }, '');
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state && typeof state.tabIdx === 'number') {
+        setActiveTab(state.tabIdx);
+        setActiveSubView(state.subView || null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleTabChange = (idx: number) => {
     if (idx === activeTab && !activeSubView) return;
+    window.history.pushState({ tabIdx: idx, view: 'root' }, '');
     setIsTabLoading(true);
     setActiveTab(idx);
     setActiveSubView(null);
@@ -68,7 +86,7 @@ export default function StudentDashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <div className="flex-1 overflow-y-auto md:pb-0 pb-20 flex flex-col justify-between">
+        <div className="flex-1 overflow-y-auto md:pb-0 pb-32 flex flex-col justify-between">
           <div>
             {activeSubView === 'streaks' ? (
               <ActivityStreaksPage onBack={() => setActiveSubView(null)} />

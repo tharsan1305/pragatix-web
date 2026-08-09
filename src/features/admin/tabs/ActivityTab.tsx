@@ -6,9 +6,12 @@ import ConfirmationModal from '../../../components/common/ConfirmationModal';
 
 interface Props {
   onPushView?: (name: string, props?: any) => void;
+  initialYear?: string;
+  onBackToYearSelection?: () => void;
 }
 
-export default function ActivityTab({ onPushView = () => {} }: Props) {
+export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRST_YEAR', onBackToYearSelection: _onBackToYearSelection }: Props) {
+  const [academicYear, _setAcademicYear] = useState(initialYear);
   const [stages, setStages] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,8 +24,8 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
 
   useEffect(() => {
     fetchTeachers();
-    fetchStages();
-  }, []);
+    fetchStages(academicYear);
+  }, [academicYear]);
 
   const fetchTeachers = async () => {
     try {
@@ -36,10 +39,13 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
     }
   };
 
-  const fetchStages = async () => {
+  const fetchStages = async (selectedYear = academicYear) => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get('/api/v1/admin/stages');
+      const url = selectedYear && selectedYear !== 'ALL'
+        ? `/api/v1/admin/stages?academicYear=${selectedYear}`
+        : '/api/v1/admin/stages';
+      const response = await apiClient.get(url);
       if (response.data?.success) {
         setStages(response.data.data || []);
       }
@@ -83,29 +89,29 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50">
-      {/* Header Bar */}
+      {/* Header Bar (Matching Flutter 1:1) */}
       <div className="bg-slate-900 px-6 pt-12 pb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-white">Activity & Thresholds</h1>
-        <button onClick={fetchStages} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={() => fetchStages()} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Controls Bar */}
+        {/* Controls Bar (Matching Flutter 1:1) */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-lg font-bold text-slate-800">Configure Stages & Thresholds</h2>
           <div className="flex flex-wrap items-center gap-3">
             <button 
               onClick={() => onPushView('all_activities')}
-              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95"
+              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
             >
               <ListFilter className="w-4 h-4" />
               <span>All Activities</span>
             </button>
             <button 
               onClick={() => onPushView('create_stage')}
-              className="flex items-center space-x-2 bg-[#EA4335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95"
+              className="flex items-center space-x-2 bg-[#EA4335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Stage</span>
@@ -124,7 +130,7 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
           </div>
         ) : (
           <div className="space-y-4">
-            {stages.map(stage => {
+            {stages.map((stage: any) => {
               const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE');
               const statusText = stage.status || (active ? 'ACTIVE' : 'UPCOMING');
               const displayOrder = stage.displayOrder ?? stage.order ?? 0;
@@ -141,7 +147,8 @@ export default function ActivityTab({ onPushView = () => {} }: Props) {
                     stageId: stage.id, 
                     stageName: stage.name, 
                     stageDescription: stage.description,
-                    teachersList: teachers 
+                    teachersList: teachers,
+                    selectedYear: academicYear 
                   })}
                 >
                   <div className="flex-1 pr-4 space-y-3">

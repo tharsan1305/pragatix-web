@@ -83,8 +83,8 @@ export default function LoginPage() {
       
       login(token, user);
       
-      // Navigate to the correct dashboard
-      navigate(`/${finalRole.toLowerCase()}`);
+      // Navigate to the correct dashboard with history replacement
+      navigate(`/${finalRole.toLowerCase()}`, { replace: true });
       
     } catch (err: any) {
       setError(err.message || 'Connection failed. Ensure backend is running.');
@@ -97,16 +97,17 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-8">
       <div className="bg-[#f3f4f7] rounded-[36px] p-8 max-w-md w-full shadow-2xl border border-white/20">
         {/* Header Section matching reference image */}
+        {/* Header Section matching PragatiX official branding */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-white shadow-lg p-3 flex items-center justify-center overflow-hidden border border-slate-200/60">
+          <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-3xl bg-white shadow-xl p-3 flex items-center justify-center overflow-hidden border border-slate-200/80 mb-3">
             <img 
               src={logoImg} 
               alt="PragatiX Logo" 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2 className="text-2xl font-extrabold mt-4 tracking-tight">
-            <span className="italic text-indigo-600 font-black">PragatiX</span>{' '}
+          <h2 className="text-2xl font-extrabold tracking-tight">
+            <span className="text-indigo-600 font-black">PragatiX</span>{' '}
             <span className="text-slate-800 font-extrabold">Login</span>
           </h2>
         </div>

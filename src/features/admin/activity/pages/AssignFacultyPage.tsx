@@ -7,7 +7,9 @@ import type { ActivityModel } from '../types/ActivityTypes';
 interface Props {
   activity?: ActivityModel;
   activityId?: number;
+  subgroupId?: number | string;
   onBack: () => void;
+  onSuccess?: () => void;
 }
 
 export default function AssignFacultyPage({ activity: initialActivity, activityId, onBack }: Props) {
