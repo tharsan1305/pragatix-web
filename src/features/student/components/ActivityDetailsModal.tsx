@@ -23,7 +23,6 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
   if (!activity) return null;
 
   const isCompleted = activity.isCompleted || activity.status === 'COMPLETED';
-  const isLocked = activity.status === 'LOCKED';
   const allowStudentRequest = activity.allowStudentRequest === true;
 
   const handleSubmit = async (e: React.FormEvent) => {

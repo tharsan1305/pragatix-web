@@ -37,7 +37,6 @@ interface DashboardTabProps {
 }
 
 export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTabProps) {
-  const navigate = useNavigate();
   const { token, user: authUser } = useAuth();
   const { xpByCategory, streaks, history, isLoading: isXpLoading, totalXp, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
 
