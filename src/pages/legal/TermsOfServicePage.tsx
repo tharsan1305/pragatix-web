@@ -89,7 +89,7 @@ export default function TermsOfServicePage() {
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mt-4">
           <p className="text-slate-600 text-sm mb-1"><strong>J.J. College of Engineering and Technology</strong></p>
           <p className="text-slate-600 text-sm mb-1">Ammapettai, Poolangulathupatti, Tiruchirappalli, Tamil Nadu 620009</p>
-          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
+          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
         </div>
 
         <p className="mt-6 text-sm text-slate-500 italic">Approved by: Principal's Office, JJCET</p>

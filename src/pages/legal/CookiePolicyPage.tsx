@@ -55,7 +55,7 @@ export default function CookiePolicyPage() {
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">6. Contact Us</h2>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
           <p className="text-slate-600 text-sm mb-1"><strong>Institution:</strong> J.J. College of Engineering and Technology</p>
-          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
+          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
         </div>
       </main>
 

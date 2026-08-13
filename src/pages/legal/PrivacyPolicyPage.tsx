@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">2. Information We Collect</h2>
         <p className="text-slate-600 leading-relaxed text-sm">We collect only the personal data necessary for the operation of PragatiX:</p>
         <ul className="list-disc list-inside space-y-2 mb-4 text-slate-600 text-sm">
-          <li><strong>Identity Data:</strong> Name, roll number/register number, gender, date of birth, role, department, year/section</li>
+          <li><strong>Identity Data:</strong> Name, roll number/register number, role, department, year/section</li>
           <li><strong>Contact Data:</strong> Email address, mobile number, permanent address (of students and staff)</li>
           <li><strong>Academic Data:</strong> Attendance records, marks/grades, examination results</li>
           <li><strong>Discipline Data:</strong> Discipline/XP scores, badges, complaints, rewards</li>
@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-slate-600 text-sm mb-1"><strong>Jagadeesan R V</strong></p>
           <p className="text-slate-600 text-sm mb-1">Placement Head / Admin Officer</p>
           <p className="text-slate-600 text-sm mb-1">J.J. College of Engineering and Technology</p>
-          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
+          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
           <p className="text-slate-600 text-sm"><strong>Phone:</strong> 73058 11776</p>
         </div>
 

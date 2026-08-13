@@ -75,7 +75,7 @@ export default function DataSafetyPolicyPage() {
         <p className="text-slate-600 leading-relaxed text-sm">Yes. All data transmitted between the app and our servers is encrypted using industry-standard TLS.</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">5. Can Users Request Data Deletion?</h2>
-        <p className="text-slate-600 leading-relaxed text-sm">Yes. Users may request deletion of their account and personal data by emailing jjcetpm@jjcet.ac.in - see our <Link to="/data-deletion" className="text-indigo-600 hover:text-indigo-800 underline">Account &amp; Data Deletion Policy</Link> for the full process. Requests are handled in accordance with the Digital Personal Data Protection Act, 2023, and are subject to applicable academic and legal retention requirements.</p>
+        <p className="text-slate-600 leading-relaxed text-sm">Yes. Users may request deletion of their account and personal data by emailing principal@jjcet.ac.in - see our <Link to="/data-deletion" className="text-indigo-600 hover:text-indigo-800 underline">Account &amp; Data Deletion Policy</Link> for the full process. Requests are handled in accordance with the Digital Personal Data Protection Act, 2023, and are subject to applicable academic and legal retention requirements.</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">6. Security Practices</h2>
         <ul className="list-disc list-inside space-y-2 mb-4 text-slate-600 text-sm">

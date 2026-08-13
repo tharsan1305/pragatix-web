@@ -20,8 +20,8 @@ export default function ContactUsPage() {
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 className="font-semibold text-slate-800 mb-2">General &amp; PragatiX Support</h4>
             <p className="text-slate-600 leading-relaxed text-sm mb-2">For login issues, account access, attendance/marks queries, or general questions about PragatiX.</p>
-            <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
-            <p className="text-slate-600 text-sm"><strong>Phone:</strong> 90431 09694 / 97509 68800</p>
+            <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
+            <p className="text-slate-600 text-sm"><strong>Phone:</strong> 73058 11776 / 97509 68800</p>
           </div>
 
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
@@ -41,7 +41,7 @@ export default function ContactUsPage() {
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
             <h4 className="font-semibold text-slate-800 mb-2">Account &amp; Data Deletion</h4>
             <p className="text-slate-600 leading-relaxed text-sm mb-2">To request deletion of your PragatiX account and data.</p>
-            <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
+            <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
             <p className="text-slate-600 text-sm">See <Link to="/data-deletion" className="text-indigo-600 hover:text-indigo-800 underline">Account &amp; Data Deletion Policy</Link> for the request template.</p>
           </div>
         </div>
