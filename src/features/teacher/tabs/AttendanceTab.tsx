@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle, Check, CalendarX } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
@@ -14,6 +14,8 @@ interface Student {
 interface LookupOption {
   id: number;
   name: string;
+  code?: string;
+  yearNo?: number;
 }
 
 export default function AttendanceTab() {
@@ -22,151 +24,418 @@ export default function AttendanceTab() {
   const [hasSearched, setHasSearched] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isHoliday, setIsHoliday] = useState(false);
 
-  // Form State
-  const [yearId, setYearId] = useState<number>(1);
-  const [departmentId, setDepartmentId] = useState<number>(1);
+  // Form State — matching Flutter teacher_attendance_tab.dart 1:1
+  const [academicYearId, setAcademicYearId] = useState<number | ''>('');
+  const [yearId, setYearId] = useState<number | ''>('');
+  const [departmentId, setDepartmentId] = useState<number | ''>('');
   const [sectionId, setSectionId] = useState<number | ''>('');
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [period, setPeriod] = useState<number>(1);
 
-  // Dynamic Lookup options
-  const [years, setYears] = useState<LookupOption[]>([
-    { id: 1, name: "First Year" },
-    { id: 2, name: "Second Year" },
-    { id: 3, name: "Third Year" },
-    { id: 4, name: "Fourth Year" }
-  ]);
+  // Dynamic Lookup options matching Flutter
+  const [_academicYears, setAcademicYears] = useState<LookupOption[]>([]);
+  const [years, setYears] = useState<LookupOption[]>([]);
+  const [departments, setDepartments] = useState<LookupOption[]>([]);
+  const [sections, setSections] = useState<LookupOption[]>([]);
 
-  const [departments, setDepartments] = useState<LookupOption[]>([
-    { id: 1, name: "Cyber Security" },
-    { id: 2, name: "Computer Science" },
-    { id: 3, name: "Information Technology" }
-  ]);
+  // 1. Fetch Next Available Period from Backend
+  const fetchNextAvailablePeriod = useCallback(async (
+    targetDate: string,
+    deptId: number | '',
+    yId?: number | '',
+    secId?: number | ''
+  ) => {
+    if (!deptId) return;
+    try {
+      let url = `/api/teacher/attendance/next-period?date=${targetDate}&departmentId=${deptId}`;
+      if (yId !== '' && yId !== undefined) {
+        url += `&yearId=${yId}`;
+      }
+      if (secId !== '' && secId !== undefined && secId !== null) {
+        url += `&sectionId=${secId}`;
+      }
 
-  const [sections, setSections] = useState<LookupOption[]>([
-    { id: 1, name: "A" },
-    { id: 2, name: "B" },
-    { id: 3, name: "C" }
-  ]);
+      const res = await apiClient.get(url);
+      if (res.data && res.data.success && typeof res.data.data === 'number') {
+        setPeriod(res.data.data);
+      }
+    } catch (err) {
+      console.warn('Could not fetch next available period', err);
+    }
+  }, []);
 
+  // 2. Fetch Initial Lookups matching Flutter _loadLookups()
   useEffect(() => {
-    const fetchLookups = async () => {
+    const fetchInitialLookups = async () => {
       try {
-        const [yearsRes, deptsRes, secsRes] = await Promise.allSettled([
+        const [acadYearsRes, yearsRes, deptsRes, secsRes, profileRes, ccDetailsRes] = await Promise.allSettled([
+          apiClient.get('/api/v1/admin/academic-years'),
           apiClient.get('/api/v1/admin/years'),
           apiClient.get('/api/v1/admin/departments'),
-          apiClient.get('/api/v1/admin/sections')
+          apiClient.get('/api/v1/admin/sections'),
+          apiClient.get('/api/v1/auth/me'),
+          apiClient.get('/api/v1/cc/class-details')
         ]);
 
-        if (yearsRes.status === 'fulfilled' && yearsRes.value?.data?.data?.length) {
-          const formatted = yearsRes.value.data.data.map((y: any) => ({
+        let loadedAcadYears: LookupOption[] = [];
+        let loadedYears: LookupOption[] = [];
+        let loadedDepts: LookupOption[] = [];
+        let loadedSecs: LookupOption[] = [];
+        let userProfile: any = null;
+        let ccData: any = null;
+
+        // Parse Academic Years
+        if (acadYearsRes.status === 'fulfilled') {
+          const raw = Array.isArray(acadYearsRes.value?.data?.data)
+            ? acadYearsRes.value.data.data
+            : (Array.isArray(acadYearsRes.value?.data) ? acadYearsRes.value.data : []);
+          loadedAcadYears = raw.map((ay: any) => ({
+            id: ay.id,
+            name: ay.yearName || ay.name || `Academic Year ${ay.id}`
+          }));
+        }
+        setAcademicYears(loadedAcadYears);
+        if (loadedAcadYears.length > 0) {
+          setAcademicYearId(loadedAcadYears[0].id);
+        }
+
+        // Parse Years
+        if (yearsRes.status === 'fulfilled') {
+          const raw = Array.isArray(yearsRes.value?.data?.data)
+            ? yearsRes.value.data.data
+            : (Array.isArray(yearsRes.value?.data) ? yearsRes.value.data : []);
+          loadedYears = raw.map((y: any) => ({
             id: y.id,
-            name: y.yearName || y.name || `Year ${y.id}`
+            name: y.yearName || y.name || (y.yearNo ? `Year ${y.yearNo}` : `Year ${y.id}`),
+            yearNo: y.yearNo
           }));
-          setYears(formatted);
-          if (formatted.length > 0) setYearId(formatted[0].id);
         }
+        if (loadedYears.length === 0) {
+          loadedYears = [
+            { id: 1, name: 'First Year', yearNo: 1 },
+            { id: 2, name: 'Second Year', yearNo: 2 },
+            { id: 3, name: 'Third Year', yearNo: 3 },
+            { id: 4, name: 'Fourth Year', yearNo: 4 }
+          ];
+        }
+        setYears(loadedYears);
 
-        if (deptsRes.status === 'fulfilled' && deptsRes.value?.data?.data?.length) {
-          const formatted = deptsRes.value.data.data.map((d: any) => ({
+        // Parse Departments
+        if (deptsRes.status === 'fulfilled') {
+          const raw = Array.isArray(deptsRes.value?.data?.data)
+            ? deptsRes.value.data.data
+            : (Array.isArray(deptsRes.value?.data) ? deptsRes.value.data : []);
+          loadedDepts = raw.map((d: any) => ({
             id: d.id,
-            name: d.name || d.deptName || d.code || `Department ${d.id}`
+            name: d.name || d.deptName || d.code || `Department ${d.id}`,
+            code: d.code
           }));
-          setDepartments(formatted);
-          if (formatted.length > 0) setDepartmentId(formatted[0].id);
+        }
+        if (loadedDepts.length === 0) {
+          loadedDepts = [
+            { id: 1, name: 'Cyber Security' },
+            { id: 2, name: 'Information Technology' },
+            { id: 3, name: 'Computer Science and Engineering' },
+            { id: 4, name: 'Electrical & Electronics Engineering' },
+            { id: 5, name: 'Electronics & Communication Engineering' },
+            { id: 6, name: 'Mechanical Engineering' },
+            { id: 7, name: 'Civil Engineering' }
+          ];
+        }
+        setDepartments(loadedDepts);
+
+        // Parse Sections
+        if (secsRes.status === 'fulfilled') {
+          const raw = Array.isArray(secsRes.value?.data?.data)
+            ? secsRes.value.data.data
+            : (Array.isArray(secsRes.value?.data) ? secsRes.value.data : []);
+          loadedSecs = raw.map((s: any) => ({
+            id: s.id,
+            name: s.sectionName || s.name || `Section ${s.id}`
+          }));
+        }
+        setSections(loadedSecs);
+
+        if (ccDetailsRes.status === 'fulfilled' && (ccDetailsRes.value?.data?.data || ccDetailsRes.value?.data)) {
+          ccData = ccDetailsRes.value.data.data || ccDetailsRes.value.data;
         }
 
-        if (secsRes.status === 'fulfilled' && secsRes.value?.data?.data?.length) {
-          const formatted = secsRes.value.data.data.map((s: any) => ({
-            id: s.id,
-            name: s.name || s.sectionName || `Section ${s.id}`
-          }));
-          setSections(formatted);
+        if (profileRes.status === 'fulfilled' && (profileRes.value?.data?.data || profileRes.value?.data)) {
+          userProfile = profileRes.value.data.data || profileRes.value.data;
+        }
+
+        // Auto pre-select based on CC class-details or Teacher profile
+        let resolvedYearId: number | '' = '';
+        let resolvedDeptId: number | '' = '';
+        let resolvedSecId: number | '' = '';
+
+        if (ccData) {
+          if (ccData.departmentId) resolvedDeptId = Number(ccData.departmentId);
+          if (ccData.sectionId) resolvedSecId = Number(ccData.sectionId);
+          if (ccData.year || ccData.yearName) {
+            const yrTarget = (ccData.yearName || ccData.year || '').toString().toLowerCase();
+            const match = loadedYears.find(y => {
+              const yStr = y.name.toLowerCase();
+              return yStr === yrTarget || yStr.includes(yrTarget) || (yrTarget === '1' && yStr.includes('first'));
+            });
+            if (match) resolvedYearId = match.id;
+          }
+        }
+
+        if (userProfile && resolvedDeptId === '') {
+          const directDeptId = userProfile.departmentId || userProfile.department?.id;
+          const directSecId = userProfile.sectionId || userProfile.section?.id;
+          const assignedYearStr = userProfile.year?.toString() || userProfile.academicYear?.toString();
+          const assignedDeptStr = userProfile.departmentName || userProfile.department?.name || userProfile.department?.toString();
+
+          if (directDeptId && loadedDepts.some(d => d.id === Number(directDeptId))) {
+            resolvedDeptId = Number(directDeptId);
+          } else if (assignedDeptStr && loadedDepts.length > 0) {
+            const match = loadedDepts.find(d => d.name.toLowerCase().includes(assignedDeptStr.toLowerCase()));
+            if (match) resolvedDeptId = match.id;
+          }
+
+          if (assignedYearStr && loadedYears.length > 0) {
+            const match = loadedYears.find(y => {
+              const yStr = y.name.toString().toLowerCase();
+              const target = assignedYearStr.toLowerCase();
+              return yStr === target || yStr.includes(target) || (target === '1' && yStr.includes('first')) || (target === '2' && yStr.includes('second'));
+            });
+            if (match) resolvedYearId = match.id;
+          }
+
+          if (directSecId) {
+            resolvedSecId = Number(directSecId);
+          }
+        }
+
+        // Fallbacks
+        if (resolvedYearId === '' && loadedYears.length > 0) resolvedYearId = loadedYears[0].id;
+        if (resolvedDeptId === '' && loadedDepts.length > 0) resolvedDeptId = loadedDepts[0].id;
+
+        setYearId(resolvedYearId);
+        setDepartmentId(resolvedDeptId);
+        if (resolvedSecId !== '') setSectionId(resolvedSecId);
+
+        if (resolvedDeptId !== '') {
+          fetchSectionsForDept(Number(resolvedDeptId));
+          const todayDate = new Date().toISOString().split('T')[0];
+          fetchNextAvailablePeriod(todayDate, Number(resolvedDeptId), Number(resolvedYearId), Number(resolvedSecId));
+          fetchStudentRoster(Number(resolvedYearId), Number(resolvedDeptId), Number(resolvedSecId), todayDate, period);
         }
       } catch (err) {
-        console.warn('Could not load dynamic lookups, using default values', err);
+        console.warn('Could not load dynamic lookups', err);
       }
     };
 
-    fetchLookups();
+    fetchInitialLookups();
   }, []);
 
-  const loadStudents = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    setHasSearched(true);
+  const fetchSectionsForDept = async (deptId: number): Promise<LookupOption[]> => {
+    if (!deptId) {
+      setSections([]);
+      setSectionId('');
+      return [];
+    }
     try {
-      let url = `/api/teacher/attendance/students?date=${date}&period=${period}&yearId=${yearId}&departmentId=${departmentId}`;
-      if (sectionId !== '') {
-        url += `&sectionId=${sectionId}`;
+      let res;
+      try {
+        res = await apiClient.get(`/api/v1/admin/sections?departmentId=${deptId}`);
+      } catch {
+        try {
+          res = await apiClient.get(`/api/v1/students/filters/sections?departmentId=${deptId}`);
+        } catch {
+          res = await apiClient.get(`/api/v1/admin/departments/${deptId}/sections`);
+        }
+      }
+      const fetchedSecs = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
+      let formatted = fetchedSecs.map((s: any) => ({
+        id: s.id,
+        name: s.sectionName || s.name || `Section ${s.id}`
+      }));
+
+      if (formatted.length === 0) {
+        formatted = [
+          { id: 1, name: 'Section A' },
+          { id: 2, name: 'Section B' },
+          { id: 3, name: 'Section C' }
+        ];
       }
 
-      const response = await apiClient.get(url);
-      if (response.data && response.data.success) {
-        const fetchedStudents = (response.data.data || []).map((s: any) => ({
+      setSections(formatted);
+      if (formatted.length === 1) {
+        setSectionId(formatted[0].id);
+      }
+      return formatted;
+    } catch (e) {
+      const fallbackSecs = [
+        { id: 1, name: 'Section A' },
+        { id: 2, name: 'Section B' },
+        { id: 3, name: 'Section C' }
+      ];
+      setSections(fallbackSecs);
+      return fallbackSecs;
+    }
+  };
+
+  const fetchStudentRoster = async (
+    yId: number | '',
+    dId: number | '',
+    sId: number | '',
+    targetDate: string,
+    targetPeriod: number
+  ) => {
+    if (!dId) return;
+    setLoading(true);
+    setErrorMsg(null);
+    setIsHoliday(false);
+    setHasSearched(true);
+    try {
+      let url = `/api/teacher/attendance/students?date=${targetDate}&period=${targetPeriod}&departmentId=${dId}`;
+      if (yId !== '') {
+        url += `&yearId=${yId}`;
+      }
+      if (sId !== '' && sId !== null) {
+        url += `&sectionId=${sId}`;
+      }
+
+      let response = await apiClient.get(url);
+      let rawList = response.data?.data || response.data;
+      let fetchedStudents = Array.isArray(rawList) ? rawList : [];
+
+      // Fallback: If strict yearId filter returned 0 students, query without yearId
+      if (fetchedStudents.length === 0 && yId !== '') {
+        let fallbackUrl = `/api/teacher/attendance/students?date=${targetDate}&period=${targetPeriod}&departmentId=${dId}`;
+        if (sId !== '' && sId !== null) fallbackUrl += `&sectionId=${sId}`;
+        const fallbackRes = await apiClient.get(fallbackUrl);
+        const fallbackRaw = fallbackRes.data?.data || fallbackRes.data;
+        if (Array.isArray(fallbackRaw) && fallbackRaw.length > 0) {
+          fetchedStudents = fallbackRaw;
+        }
+      }
+
+      if (fetchedStudents.length > 0) {
+        const formatted = fetchedStudents.map((s: any) => ({
           studentId: s.studentId || s.id,
           studentName: s.studentName || s.fullName || 'Student',
           registerNumber: s.registerNumber || s.regNo || s.username || '',
-          status: s.status || 'PRESENT',
+          status: (s.status ? String(s.status).toUpperCase() : 'PRESENT') as 'PRESENT' | 'ABSENT',
           remarks: s.remarks || ''
         }));
-        setStudents(fetchedStudents);
+        setStudents(formatted);
       } else {
-        setErrorMsg(response.data?.message || 'Failed to fetch students from server.');
         setStudents([]);
+        setErrorMsg('No students found matching the selected Year, Department, and Section.');
       }
     } catch (err: any) {
-      console.error('Failed to fetch students', err);
-      setErrorMsg(err?.response?.data?.message || err?.message || 'Error connecting to backend server.');
-      setStudents([]);
+      console.error('Failed to load students for attendance', err);
+      const msg = err?.response?.data?.message || err?.message || '';
+      if (msg.includes('Holiday')) {
+        setIsHoliday(true);
+        setStudents([]);
+      } else {
+        setStudents([]);
+        setErrorMsg(msg || 'Failed to load students list');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleAttendance = (studentId: number) => {
+  const handleDepartmentChange = (newDeptId: number | '') => {
+    setDepartmentId(newDeptId);
+    setSectionId('');
+    if (typeof newDeptId === 'number') {
+      fetchSectionsForDept(newDeptId);
+      fetchNextAvailablePeriod(date, newDeptId, yearId, '');
+    } else {
+      setSections([]);
+    }
+  };
+
+  const handleYearChange = (newYearId: number | '') => {
+    setYearId(newYearId);
+    if (departmentId) {
+      fetchNextAvailablePeriod(date, departmentId, newYearId, sectionId);
+    }
+  };
+
+  const handleDateChange = (newDate: string) => {
+    setDate(newDate);
+    if (departmentId) {
+      fetchNextAvailablePeriod(newDate, departmentId, yearId, sectionId);
+    }
+  };
+
+  const loadStudents = async () => {
+    if (!yearId || !departmentId) {
+      toast.error('Please select Year and Department');
+      return;
+    }
+    fetchStudentRoster(yearId, departmentId, sectionId, date, period);
+  };
+
+  const markAllPresent = () => {
+    setStudents(prev => prev.map(s => ({ ...s, status: 'PRESENT' })));
+  };
+
+  const markAllAbsent = () => {
+    setStudents(prev => prev.map(s => ({ ...s, status: 'ABSENT' })));
+  };
+
+  const setStudentStatus = (studentId: number, status: 'PRESENT' | 'ABSENT') => {
     setStudents(prev =>
-      prev.map(s => {
-        if (s.studentId === studentId) {
-          return { ...s, status: s.status === 'PRESENT' ? 'ABSENT' : 'PRESENT' };
-        }
-        return s;
-      })
+      prev.map(s => s.studentId === studentId ? { ...s, status } : s)
     );
   };
 
   const submitAttendance = async () => {
     if (students.length === 0) return;
 
+    if (!yearId || !departmentId) {
+      toast.error('Year and Department are required to save attendance');
+      return;
+    }
+
     setSubmitting(true);
     const toastId = toast.loading("Saving attendance...");
     try {
+      const parsedYearId = Number(yearId);
+      const parsedDeptId = Number(departmentId);
+      const parsedSecId = sectionId === '' || sectionId === null ? undefined : Number(sectionId);
+      const parsedPeriod = Number(period) || 1;
+      const parsedAcadYearId = academicYearId === '' ? parsedYearId : Number(academicYearId);
+
       const payload = {
         date,
-        period,
-        academicYearId: 1,
-        yearId,
-        departmentId,
-        sectionId: sectionId === '' ? null : sectionId,
-        records: students.map(s => ({
-          studentId: s.studentId,
-          status: s.status,
-          remarks: s.remarks || ''
-        }))
+        period: parsedPeriod,
+        academicYearId: parsedAcadYearId,
+        yearId: parsedYearId,
+        departmentId: parsedDeptId,
+        sectionId: parsedSecId,
+        records: students.map((s) => ({
+          studentId: Number(s.studentId),
+          status: String(s.status).toUpperCase(),
+          remarks: s.remarks && s.remarks.trim() !== '' ? s.remarks.trim() : null,
+        })),
       };
 
       const response = await apiClient.post('/api/teacher/attendance/save', payload);
       toast.dismiss(toastId);
-      if (response.data && response.data.success) {
+      if (response.data && (response.data.success || response.status === 200)) {
         toast.success('Attendance saved successfully!');
+        // Automatically unlock and advance to next available period (matching Flutter)
+        fetchNextAvailablePeriod(date, parsedDeptId, parsedYearId, parsedSecId);
       } else {
         toast.error(response.data?.message || 'Failed to save attendance');
       }
     } catch (err: any) {
       toast.dismiss(toastId);
       console.error('Failed to save attendance', err);
-      toast.error(err?.response?.data?.message || 'Error saving attendance');
+      const errDetail = err?.response?.data?.message || 'Error saving attendance';
+      toast.error(errDetail);
     } finally {
       setSubmitting(false);
     }
@@ -188,9 +457,10 @@ export default function AttendanceTab() {
             <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Year</label>
             <select
               value={yearId}
-              onChange={(e) => setYearId(Number(e.target.value))}
+              onChange={(e) => handleYearChange(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
+              <option value="">Select Year</option>
               {years.map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
             </select>
           </div>
@@ -199,9 +469,10 @@ export default function AttendanceTab() {
             <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Department</label>
             <select
               value={departmentId}
-              onChange={(e) => setDepartmentId(Number(e.target.value))}
+              onChange={(e) => handleDepartmentChange(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
+              <option value="">Select Department</option>
               {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
           </div>
@@ -223,7 +494,7 @@ export default function AttendanceTab() {
             <input
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => handleDateChange(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
             />
           </div>
@@ -235,14 +506,16 @@ export default function AttendanceTab() {
               onChange={(e) => setPeriod(Number(e.target.value))}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map(p => <option key={p} value={p}>Period {p}</option>)}
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(p => (
+                <option key={p} value={p}>Period {p}</option>
+              ))}
             </select>
           </div>
 
           <button
             onClick={loadStudents}
             disabled={loading}
-            className="w-full mt-4 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-lg font-bold shadow-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full mt-4 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-lg font-bold shadow-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : null}
             {loading ? 'Loading...' : 'Load Students'}
@@ -267,6 +540,14 @@ export default function AttendanceTab() {
                 </div>
               ))}
             </div>
+          ) : isHoliday ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-rose-50/50 rounded-xl border border-rose-200">
+              <CalendarX className="w-16 h-16 text-rose-500 mb-4" />
+              <h3 className="font-bold text-rose-800 text-xl mb-2">Holiday Configured</h3>
+              <p className="text-sm font-semibold text-rose-600 max-w-md">
+                Attendance cannot be marked. Today is configured as a Holiday in the academic calendar.
+              </p>
+            </div>
           ) : !hasSearched ? (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
               <UsersRound className="w-16 h-16 mb-4 opacity-30" />
@@ -288,43 +569,79 @@ export default function AttendanceTab() {
             </div>
           ) : (
             <>
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-2">
                 <h2 className="font-bold text-slate-800 text-lg">Student List</h2>
                 <div className="text-sm font-medium text-slate-500">
                   Total: {students.length} | Present: {students.filter(s => s.status === 'PRESENT').length} | Absent: {students.filter(s => s.status === 'ABSENT').length}
                 </div>
               </div>
 
+              {/* Quick Mark All Action Links - Matching Flutter 1:1 */}
+              <div className="flex items-center gap-4 text-xs font-semibold text-rose-500 mb-3">
+                <button 
+                  type="button" 
+                  onClick={markAllPresent} 
+                  className="hover:underline cursor-pointer transition-colors"
+                >
+                  Mark All Present
+                </button>
+                <button 
+                  type="button" 
+                  onClick={markAllAbsent} 
+                  className="hover:underline cursor-pointer transition-colors"
+                >
+                  Mark All Absent
+                </button>
+              </div>
+
               <div className="flex-1 overflow-y-auto pr-2 space-y-3">
                 {students.map((student) => (
-                  <div key={student.studentId} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <div key={student.studentId} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
                     <div>
                       <div className="font-bold text-slate-800">{student.studentName}</div>
                       <div className="text-xs text-slate-500 mt-0.5">{student.registerNumber}</div>
                     </div>
 
-                    <button
-                      onClick={() => toggleAttendance(student.studentId)}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                        student.status === 'PRESENT'
-                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-300'
-                          : 'bg-rose-100 text-rose-700 hover:bg-rose-200 border border-rose-300'
-                      }`}
-                    >
-                      {student.status}
-                    </button>
+                    {/* Segmented [ P | A ] Control - Matching Flutter 1:1 */}
+                    <div className="inline-flex rounded-full border border-slate-200 p-1 bg-white shadow-inner">
+                      <button
+                        type="button"
+                        onClick={() => setStudentStatus(student.studentId, 'PRESENT')}
+                        className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                          student.status === 'PRESENT'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {student.status === 'PRESENT' && <Check className="w-3.5 h-3.5" />}
+                        <span>P</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStudentStatus(student.studentId, 'ABSENT')}
+                        className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                          student.status === 'ABSENT'
+                            ? 'bg-rose-500 text-white shadow-sm'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        {student.status === 'ABSENT' && <Check className="w-3.5 h-3.5" />}
+                        <span>A</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-200">
+              {/* Purple Pill Save Attendance Button - Matching Flutter 1:1 */}
+              <div className="pt-4 mt-4 border-t border-slate-200 flex justify-center">
                 <button
                   onClick={submitAttendance}
                   disabled={submitting}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   <Save className="w-5 h-5" />
-                  {submitting ? 'Saving...' : 'Submit Attendance'}
+                  <span>{submitting ? 'Saving...' : 'Save Attendance'}</span>
                 </button>
               </div>
             </>

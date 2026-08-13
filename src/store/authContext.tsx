@@ -28,6 +28,7 @@ interface AuthContextType {
   setSubRoles: (roles: string[]) => void;
   logout: () => void;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isTeacher: boolean;
   isCaptain: boolean;
   isStudent: boolean;
@@ -93,10 +94,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await apiClient.get('/api/v1/auth/me');
         if (response.data && response.data.success) {
           const freshData = response.data.data;
-          setUser((prev) => ({ ...prev, ...freshData }));
+          // Merge fresh profile data but PRESERVE the roles array that was constructed
+          // during login (which contains all backend roles + normalized role names).
+          // The backend /api/v1/auth/me response may return a simplified role set that
+          // does not include ROLE_SUPERADMIN — do not overwrite with it.
+          setUser((prev) => ({
+            ...prev,
+            ...freshData,
+            // Keep stored roles if they are richer than what the backend returns
+            roles: (prev?.roles && prev.roles.length > 0) ? prev.roles : (freshData.roles || prev?.roles || []),
+            isSuperAdmin: prev?.isSuperAdmin ?? freshData.isSuperAdmin ?? false,
+          }));
         }
       } catch (error: any) {
-        // Only log out if backend explicitly responds with 401 Unauthorized
         if (error.response && error.response.status === 401) {
           console.warn("Token expired or unauthorized, logging out.");
           logout();
@@ -106,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
     checkAuthStatus();
-  }, []);
+  }, [token]);
 
   const login = useCallback((newToken: string, userData: UserData | string) => {
     setToken(newToken);
@@ -184,9 +194,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [token, logout]);
 
-  const isAdmin = !!(user?.roles?.includes('ROLE_ADMIN') || role === 'ADMIN' || role === 'ROLE_ADMIN');
-  const isTeacher = !!(user?.roles?.includes('ROLE_TEACHER') || role === 'TEACHER' || role === 'ROLE_TEACHER');
-  const isCaptain = !!(user?.roles?.includes('ROLE_CAPTAIN') || user?.isCaptain || role === 'CAPTAIN' || subRoles.includes('CAPTAIN'));
+  // Helper: normalize a role string for comparison
+  const hasRole = (targetRoles: string[], ...candidates: string[]) =>
+    candidates.some(c => targetRoles.includes(c));
+
+  const userRoles: string[] = user?.roles || [];
+  const isSuperAdmin = !!(
+    hasRole(userRoles, 'ROLE_SUPERADMIN', 'ROLE_SUPER_ADMIN', 'SUPERADMIN', 'SUPER_ADMIN') ||
+    user?.isSuperAdmin === true ||
+    user?.userType === 'SUPER_ADMIN' || user?.userType === 'SUPERADMIN' ||
+    role === 'SUPER_ADMIN' || role === 'SUPERADMIN'
+  );
+  const isAdmin = !!(
+    hasRole(userRoles, 'ROLE_ADMIN', 'ADMIN', 'ROLE_SUPERADMIN', 'ROLE_SUPER_ADMIN', 'SUPERADMIN', 'SUPER_ADMIN') ||
+    user?.isSuperAdmin === true ||
+    isSuperAdmin ||
+    role === 'ADMIN' || role === 'ROLE_ADMIN'
+  );
+  const isTeacher = !!(hasRole(userRoles, 'ROLE_TEACHER', 'TEACHER') || role === 'TEACHER' || role === 'ROLE_TEACHER');
+  const isCaptain = !!(hasRole(userRoles, 'ROLE_CAPTAIN') || user?.isCaptain || role === 'CAPTAIN' || subRoles.includes('CAPTAIN'));
   const isStudent = !!(user?.studentId || role === 'STUDENT' || role === 'ROLE_STUDENT');
   const isParent = !!(user?.sprNo || role === 'PARENT' || role === 'ROLE_PARENT');
   const isHOD = !!(subRoles.includes('HOD') || user?.subRoles?.includes('HOD'));
@@ -195,8 +221,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const contextValue = useMemo(() => ({
     token, user, role, subRoles, login, setSubRoles, logout,
-    isAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC
-  }), [token, user, role, subRoles, login, setSubRoles, logout, isAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC]);
+    isAdmin, isSuperAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC
+  }), [token, user, role, subRoles, login, setSubRoles, logout, isAdmin, isSuperAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC]);
 
   return (
     <AuthContext.Provider value={contextValue}>

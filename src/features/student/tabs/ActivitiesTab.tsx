@@ -15,9 +15,10 @@ export const ActivitiesTab: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const fetchedStages = await ActivityService.fetchStudentStages();
-      
-      // Match Flutter: Display all configured stages (Stage 1, Stage 2, Stage 3) sorted by displayOrder
+      const allStages = await ActivityService.fetchStudentStages();
+
+      // Match Flutter's activities_tab.dart: hide future locked stages, show only completed + current
+      const fetchedStages = allStages.filter((s) => !(s.isLocked && !s.isCompleted));
       fetchedStages.sort((a, b) => (a.displayOrder || a.id) - (b.displayOrder || b.id));
 
       setStages(fetchedStages);

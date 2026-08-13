@@ -316,7 +316,7 @@ export default function TeachersTab({ onBack }: Props) {
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-slate-600 mb-1 block">Password *</label>
-                      <input required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                      <input required type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
                     </div>
                   </>
                 )}

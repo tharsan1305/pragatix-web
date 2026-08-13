@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import { useAuth } from '../../store/authContext';
 import apiClient from '../../services/apiClient';
@@ -14,35 +15,9 @@ import { Activity, Trophy, Users, BarChart3, User, CalendarCheck, Gavel } from '
 
 export default function TeacherDashboard() {
   const { subRoles, setSubRoles } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
   const [isTabLoading, setIsTabLoading] = useState(false);
-
-  const handleTabChange = (idx: number) => {
-    if (idx === activeTab) return;
-    window.history.pushState({ tabIdx: idx, view: 'root' }, '');
-    setIsTabLoading(true);
-    setActiveTab(idx);
-    setTimeout(() => {
-      setIsTabLoading(false);
-    }, 350);
-  };
-
-  useEffect(() => {
-    if (!window.history.state || typeof window.history.state.tabIdx !== 'number') {
-      window.history.replaceState({ tabIdx: 0, view: 'root' }, '');
-    }
-
-    const handleDashboardPopState = (event: PopStateEvent) => {
-      const state = event.state;
-      if (state && typeof state.tabIdx === 'number') {
-        setActiveTab(state.tabIdx);
-      }
-    };
-
-    window.addEventListener('popstate', handleDashboardPopState);
-    return () => window.removeEventListener('popstate', handleDashboardPopState);
-  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -67,10 +42,6 @@ export default function TeacherDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) {
-    return <div className="flex h-screen items-center justify-center">Loading Teacher Profile...</div>;
-  }
-
   const isCC = subRoles.some(r => {
     const clean = r.toString().trim().toUpperCase();
     return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
@@ -82,21 +53,40 @@ export default function TeacherDashboard() {
   const canManageGroups = isCC || isHOD;
 
   const availableTabs = [
-    { name: 'Activities', icon: Activity, component: <ActivityTab /> },
-    { name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
-    { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
-    { name: 'Requests', icon: Gavel, component: <CCInboxTab /> },
+    { id: 'activities', name: 'Activities', icon: Activity, component: <ActivityTab /> },
+    { id: 'attendance', name: 'Attendance', icon: CalendarCheck, component: <AttendanceTab /> },
+    { id: 'leaderboard', name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
+    { id: 'requests', name: 'Requests', icon: Gavel, component: <CCInboxTab /> },
   ];
 
   if (canManageGroups) {
-    availableTabs.push({ name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> });
+    availableTabs.push({ id: 'groups', name: 'Groups', icon: Users, component: <TeacherGroupManagementTab /> });
   }
 
   if (isHOD) {
-    availableTabs.push({ name: 'HOD Report', icon: BarChart3, component: <HodPerformanceTab /> });
+    availableTabs.push({ id: 'hod_report', name: 'HOD Report', icon: BarChart3, component: <HodPerformanceTab /> });
   }
 
-  availableTabs.push({ name: 'Profile', icon: User, component: <ProfileTab /> });
+  availableTabs.push({ id: 'profile', name: 'Profile', icon: User, component: <ProfileTab /> });
+
+  const currentTabSlug = searchParams.get('tab') || 'activities';
+  const foundIdx = availableTabs.findIndex(t => t.id === currentTabSlug);
+  const activeTab = foundIdx !== -1 ? foundIdx : 0;
+
+  const handleTabChange = (idx: number) => {
+    if (idx === activeTab) return;
+    const targetTab = availableTabs[idx];
+    if (!targetTab) return;
+    setIsTabLoading(true);
+    setSearchParams({ tab: targetTab.id });
+    setTimeout(() => {
+      setIsTabLoading(false);
+    }, 350);
+  };
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center">Loading Teacher Profile...</div>;
+  }
 
   // Ensure activeTab is within bounds (e.g. if roles change)
   const currentTabComponent = availableTabs[activeTab]?.component || availableTabs[0].component;

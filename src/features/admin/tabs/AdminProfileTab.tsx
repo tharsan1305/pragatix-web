@@ -3,21 +3,19 @@ import { LogOut, Shield, KeyRound, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
-import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../../../components/common/LogoutModal';
 
 export default function AdminProfileTab() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
+  const { logout, isSuperAdmin } = useAuth();
   
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState({
-    name: "Second Year Admin",
+    name: isSuperAdmin ? "Super Admin" : "Admin",
     username: "admin",
     email: "admin@jjcet.ac.in",
     phone: "+91 98765 43210",
     department: "Academic Administration",
-    role: "ADMIN",
+    role: isSuperAdmin ? "SUPER_ADMIN" : "ADMIN",
     assignedYear: "1",
     totalStudents: 0,
     totalGroups: 0
@@ -35,13 +33,13 @@ export default function AdminProfileTab() {
         if (response.data?.success && response.data?.data) {
           const d = response.data.data;
           setProfileData({
-            name: d.fullName || d.username || 'Second Year Admin',
+            name: d.fullName || d.username || (isSuperAdmin ? 'Super Admin' : 'Admin'),
             username: d.username || 'admin',
             email: d.email || 'admin@jjcet.ac.in',
             phone: d.phone || d.phoneNumber || '+91 98765 43210',
             department: d.department || 'Academic Administration',
-            role: (d.roles && d.roles.length > 0) ? d.roles.join(', ') : (d.role || 'ADMIN'),
-            assignedYear: d.academicYear || '1',
+            role: (d.roles && d.roles.length > 0) ? d.roles.join(', ') : (isSuperAdmin ? 'SUPER_ADMIN' : 'ADMIN'),
+            assignedYear: d.academicYear || 'All Years',
             totalStudents: d.totalStudentsInYear ?? 0,
             totalGroups: d.totalGroups ?? 0
           });
@@ -53,34 +51,31 @@ export default function AdminProfileTab() {
       }
     };
     fetchProfile();
-  }, []);
+  }, [isSuperAdmin]);
 
   const handleConfirmLogout = () => {
     setIsLogoutModalOpen(false);
     logout();
-    toast.success("Signed out successfully");
-    navigate('/login');
   };
 
-  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+  const handleChangePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPassword || newPassword.trim().length < 4) {
-      toast.error("Password must be at least 4 characters.");
+    handlePasswordReset();
+  };
+
+  const handlePasswordReset = async () => {
+    if (!newPassword.trim()) {
+      toast.error("Password cannot be empty");
       return;
     }
-
     setIsChangingPass(true);
-    const toastId = toast.loading("Updating password...");
     try {
-      await apiClient.post('/api/v1/auth/change-password', { newPassword: newPassword.trim() });
-      toast.dismiss(toastId);
-      toast.success("Password updated successfully!");
+      await apiClient.post('/api/v1/auth/change-password', { newPassword });
+      toast.success("Password changed successfully");
       setIsPasswordModalOpen(false);
       setNewPassword('');
     } catch (e: any) {
-      toast.dismiss(toastId);
-      console.error(e);
-      toast.error(e.response?.data?.message || "Failed to update password");
+      toast.error(e.response?.data?.message || "Failed to change password");
     } finally {
       setIsChangingPass(false);
     }
@@ -97,7 +92,7 @@ export default function AdminProfileTab() {
   return (
     <div className="flex flex-col h-full bg-[#F1F5F9]">
       <div className="bg-slate-900 text-white px-4 py-4 shadow-sm z-10 flex items-center">
-        <h1 className="text-xl font-bold">Admin Profile</h1>
+        <h1 className="text-xl font-bold">{isSuperAdmin ? 'Super Admin Profile' : 'Admin Profile'}</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col items-center pt-10 pb-6 px-6">

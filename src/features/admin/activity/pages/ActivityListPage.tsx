@@ -12,6 +12,7 @@ interface ActivityListPageProps {
   subgroupId?: number;
   stageId?: number;
   subgroupName?: string;
+  academicYear?: string;
   onPushView?: (name: string, props?: any) => void;
 }
 
@@ -37,13 +38,21 @@ export default function ActivityListPage({
   subgroupId: directSubgroupId,
   stageId: directStageId,
   subgroupName: directSubgroupName,
+  academicYear: directAcademicYear,
   onPushView = () => {} 
 }: ActivityListPageProps) {
-  const { user, isAdmin: isAuthAdmin } = useAuth();
+  const { user, subRoles, isAdmin: isAuthAdmin } = useAuth();
   const isAdmin = isAuthAdmin || (user?.roles?.some((r: any) => {
     const clean = String(r).trim().toUpperCase();
     return clean === 'ADMIN' || clean === 'ROLE_ADMIN' || clean === 'SUPER_ADMIN' || clean === 'ROLE_SUPER_ADMIN';
   }) ?? false);
+
+  const isCc = subRoles.some((r: any) => {
+    const clean = String(r).trim().toUpperCase();
+    return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
+  });
+
+  const canAssign = isAdmin || isCc;
 
   const [activities, setActivities] = useState<ActivityModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,6 +70,7 @@ export default function ActivityListPage({
   const effectiveSubgroupId = directSubgroupId ?? subgroup?.id ?? subgroup?.subgroupId ?? null;
   const effectiveStageId = directStageId ?? subgroup?.stageId ?? null;
   const effectiveSubgroupName = directSubgroupName ?? subgroup?.name ?? subgroup?.subgroupName ?? 'Must';
+  const effectiveAcademicYear = directAcademicYear ?? subgroup?.academicYear ?? '1st Year';
 
   const fetchActivities = async () => {
     setIsLoading(true);
@@ -105,7 +115,7 @@ export default function ActivityListPage({
     if (!deleteActivityTarget) return;
     const toastId = toast.loading("Deleting activity from system...");
     try {
-      await activityService.deleteActivity(deleteActivityTarget.id);
+      await activityService.deleteActivity(deleteActivityTarget.id, true);
       toast.dismiss(toastId);
       toast.success("Activity deleted from system successfully");
       setDeleteActivityTarget(null);
@@ -230,11 +240,20 @@ export default function ActivityListPage({
               <ActivityCard
                 key={activity.id}
                 activity={activity}
-                onEdit={() => onPushView('edit_activity', { activity, activityId: activity.id, subgroupId: effectiveSubgroupId })}
-                onUnmap={() => setUnmapActivityTarget(activity)}
-                onDelete={() => setDeleteActivityTarget(activity)}
-                onAssign={() => onPushView('assign_faculty', { activity, subgroupId: effectiveSubgroupId })}
-                onTap={() => {}}
+                isReadOnly={!canAssign}
+                isCc={isCc}
+                onEdit={isAdmin ? () => onPushView('edit_activity', { activity, activityId: activity.id, subgroupId: effectiveSubgroupId }) : undefined}
+                onUnmap={isAdmin ? () => setUnmapActivityTarget(activity) : undefined}
+                onDelete={isAdmin ? () => setDeleteActivityTarget(activity) : undefined}
+                onAssign={canAssign ? () => onPushView('assign_faculty', { activity, activityId: activity.id, subgroupId: effectiveSubgroupId, stageId: effectiveStageId }) : undefined}
+                onTap={() => {
+                  const type = (activity.type || 'individual').toLowerCase();
+                  if (type.includes('group')) {
+                    onPushView('group_activity_year', { activityId: activity.id, stageId: effectiveStageId });
+                  } else {
+                    onPushView('teacher_workflow', { activity, stageId: effectiveStageId, subgroupName: effectiveSubgroupName, academicYear: effectiveAcademicYear || (activity as any)?.academicYear });
+                  }
+                }}
               />
             ))}
           </div>

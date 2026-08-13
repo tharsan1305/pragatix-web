@@ -1,15 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, X, Upload, CheckCircle2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
 import apiClient from '../../../services/apiClient';
+import { ActivityService } from '../services/activityService';
+
+interface ClaimableActivity {
+  name: string;
+  xp: number;
+  category: string;
+  stage: number;
+  cap: string;
+}
+
+const DEFAULT_CATEGORY_CONFIG = { color: "#9e9e9e", priority: "MEDIUM", decay: "Permanent" };
 
 const CATEGORY_CONFIG: Record<string, any> = {
-  "totalXp": { color: "#4f46e5", bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", priority: "MEDIUM", decay: "Permanent ✓" },
-  "mustXp": { color: "#fbbf24", bg: "bg-amber-500", text: "text-amber-500", border: "border-amber-500", priority: "MEDIUM", decay: "Permanent ✓" },
-  "groupXp": { color: "#22c55e", bg: "bg-green-500", text: "text-green-500", border: "border-green-500", priority: "HIGH", decay: "Permanent ✓" },
-  "individualXp": { color: "#a855f7", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", priority: "HIGH", decay: "Permanent ✓" },
   "ACADEMIC": { color: "#3b82f6", bg: "bg-blue-500", text: "text-blue-500", border: "border-blue-500", priority: "HIGH", decay: "Streak decays if broken ↺" },
   "SKILL": { color: "#a855f7", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", priority: "HIGH", decay: "Permanent ✓" },
   "COMMUNICATION": { color: "#6366f1", bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", priority: "HIGH", decay: "Permanent ✓" },
@@ -22,90 +29,69 @@ const CATEGORY_CONFIG: Record<string, any> = {
   "CULTURAL": { color: "#06b6d4", bg: "bg-cyan-500", text: "text-cyan-500", border: "border-cyan-500", priority: "MEDIUM", decay: "Permanent ✓" },
 };
 
-const ACTIVITY_MASTER = [
-  // Stage 1
-  { name: "95% Attendance", xp: 30, category: "ACADEMIC", stage: 1, cap: "cap 120/mo" },
-  { name: "Assignment On Time", xp: 10, category: "ACADEMIC", stage: 1, cap: "no cap" },
-  { name: "MS Word 5 pages", xp: 50, category: "SKILL", stage: 1, cap: "once" },
-  { name: "MS Excel 1 sheet", xp: 50, category: "SKILL", stage: 1, cap: "once" },
-  { name: "MS PowerPoint 10 slides", xp: 50, category: "SKILL", stage: 1, cap: "once" },
-  { name: "Oral Presentation 2min", xp: 40, category: "PLACEMENT", stage: 1, cap: "cap 120/mo" },
-  { name: "Resume First Draft", xp: 50, category: "PLACEMENT", stage: 1, cap: "once" },
-  { name: "Keyboard Typing 20 WPM", xp: 20, category: "SKILL", stage: 1, cap: "once" },
-  { name: "Duolingo 3-day Streak", xp: 15, category: "PLACEMENT", stage: 1, cap: "cap 45/mo" },
-  { name: "Newspaper Word of Day", xp: 5, category: "ACADEMIC", stage: 1, cap: "cap 25/wk" },
-  { name: "Domain Activity Report", xp: 50, category: "SKILL", stage: 1, cap: "cap 150/mo" },
-  { name: "Certificate Course", xp: 100, category: "SKILL", stage: 1, cap: "cap 200/sem" },
-
-  // Stage 2
-  { name: "Join/Initiate Club", xp: 100, category: "LEADERSHIP", stage: 2, cap: "cap 100" },
-  { name: "Club Meeting Attended", xp: 15, category: "LEADERSHIP", stage: 2, cap: "cap 60/wk" },
-  { name: "Non-Tech Event Inside", xp: 40, category: "COMMUNITY", stage: 2, cap: "cap 80/mo" },
-  { name: "Non-Tech Event Outside", xp: 80, category: "COMMUNITY", stage: 2, cap: "cap 160/mo" },
-  { name: "NPTEL Week 1 Complete", xp: 75, category: "SKILL", stage: 2, cap: "cap 150/mo" },
-  { name: "Technical Workshop", xp: 50, category: "SKILL", stage: 2, cap: "cap 100/mo" },
-  { name: "Mock Interview", xp: 80, category: "PLACEMENT", stage: 2, cap: "cap 160 bi-wk" },
-  { name: "Peer Teaching 30min", xp: 40, category: "LEADERSHIP", stage: 2, cap: "cap 80 bi-wk" },
-  { name: "CoE Project Idea Group", xp: 100, category: "INNOVATION", stage: 2, cap: "cap 100/mo" },
-  { name: "Hackathon Registration Group", xp: 60, category: "INNOVATION", stage: 2, cap: "cap 60/mo" },
-  { name: "Mini Event Organised", xp: 80, category: "LEADERSHIP", stage: 2, cap: "cap 80/mo" },
-  { name: "NPTEL/Cert Course Enrolled", xp: 150, category: "SKILL", stage: 2, cap: "cap 150/sem" },
-
-  // Stage 3
-  { name: "Mini Project Proposal", xp: 100, category: "INNOVATION", stage: 3, cap: "once" },
-  { name: "Mini Project Demo Group", xp: 300, category: "INNOVATION", stage: 3, cap: "end Month 3" },
-  { name: "Mini Project Individual", xp: 150, category: "INNOVATION", stage: 3, cap: "mid Month 3" },
-  { name: "External Technical Event", xp: 150, category: "INNOVATION", stage: 3, cap: "cap 300/mo" },
-  { name: "Hackathon Participation Group", xp: 200, category: "INNOVATION", stage: 3, cap: "cap 200/mo" },
-  { name: "Hackathon Winning Group", xp: 400, category: "INNOVATION", stage: 3, cap: "no cap" },
-  { name: "Research Paper Draft", xp: 300, category: "INNOVATION", stage: 3, cap: "end Month 3" },
-  { name: "Industry/Consultancy", xp: 200, category: "PLACEMENT", stage: 3, cap: "cap 200/grp" },
-  { name: "Resume Final Version", xp: 100, category: "PLACEMENT", stage: 3, cap: "once" },
-  { name: "Internship Application", xp: 80, category: "PLACEMENT", stage: 3, cap: "cap 160/mo" },
-  { name: "Final Oral Presentation", xp: 100, category: "PLACEMENT", stage: 3, cap: "once" },
-  { name: "All Streaks Maintained Bonus", xp: 100, category: "DISCIPLINE", stage: 3, cap: "end Month 3" },
-];
-
 export default function PointReviewTab() {
   const { user } = useAuth();
   const { xpByCategory, history, streaks, submitXpClaim, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
-  
+
+  const [currentStage, setCurrentStage] = useState(1);
+  const [allActivities, setAllActivities] = useState<ClaimableActivity[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const loadData = async () => {
       let regNo = user?.username || user?.regNo || user?.sprNo || "";
-      if (!regNo) {
-        try {
-          const res = await apiClient.get('/api/v1/auth/me');
-          if (res.data?.success && res.data?.data) {
-            regNo = res.data.data.username || res.data.data.sprNo || "";
-          }
-        } catch (e) {
-          console.error("Failed to load user info in PointReviewTab", e);
+      try {
+        const res = await apiClient.get('/api/v1/auth/me');
+        if (res.data?.success && res.data?.data) {
+          if (!regNo) regNo = res.data.data.username || res.data.data.sprNo || "";
+          setCurrentStage(res.data.data.stage ?? 1);
         }
+      } catch (e) {
+        console.error("Failed to load user info in PointReviewTab", e);
       }
       if (regNo) {
         fetchSummary(regNo);
         fetchHistory(regNo);
         fetchStreaks(regNo);
       }
+
+      // Match Flutter's XpProvider.fetchStages flattening: stage -> subgroup -> activities
+      try {
+        const stages = await ActivityService.fetchStudentStages();
+        const flattened: ClaimableActivity[] = [];
+        for (const stage of stages) {
+          for (const sub of stage.subgroups) {
+            for (const act of sub.activities) {
+              flattened.push({
+                name: act.activityName,
+                xp: act.rewardXp,
+                category: act.category || 'OTHER',
+                stage: stage.displayOrder || 1,
+                cap: act.frequency || 'Once',
+              });
+            }
+          }
+        }
+        setAllActivities(flattened);
+      } catch (e) {
+        console.error("Failed to load activities for claim wizard", e);
+      }
     };
 
     loadData();
   }, [user, fetchSummary, fetchHistory, fetchStreaks]);
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
+  const [selectedActivity, setSelectedActivity] = useState<ClaimableActivity | null>(null);
   const [evidenceDesc, setEvidenceDesc] = useState("");
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const codingStreak = streaks.find((s: any) => s.streakType === "C_CODING");
   const hasCodingBonus = codingStreak && (codingStreak.currentStreak >= 7) && !codingStreak.isBroken;
-
-  const currentStage = 1; // Assuming 1 for now, we'd normally get from auth or profile context
 
   const openModal = () => {
     setCurrentStep(1);
@@ -132,7 +118,7 @@ export default function PointReviewTab() {
 
     if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
-    } else {
+    } else if (selectedActivity) {
       setIsSubmitting(true);
       const toastId = toast.loading("Submitting XP claim...");
       const url = evidenceDesc.trim();
@@ -155,8 +141,8 @@ export default function PointReviewTab() {
     }
   };
 
-  const filteredActivities = ACTIVITY_MASTER.filter(act => 
-    (selectedCategory ? act.category === selectedCategory : true) && 
+  const filteredActivities = allActivities.filter(act =>
+    (selectedCategory ? act.category === selectedCategory : true) &&
     act.stage <= currentStage
   );
 
@@ -181,7 +167,7 @@ export default function PointReviewTab() {
           <h2 className="text-lg font-bold text-slate-800 mb-3">XP Category Summary</h2>
           <div className="flex overflow-x-auto gap-3 pb-4 snap-x">
             {Object.entries(xpByCategory).map(([cat, val], idx) => {
-              const conf = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["SKILL"];
+              const conf = CATEGORY_CONFIG[cat] || DEFAULT_CATEGORY_CONFIG;
               return (
                 <div key={idx} className="snap-start shrink-0 w-[180px] bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col justify-between h-[120px]">
                   <div className="flex justify-between items-start">
@@ -211,7 +197,7 @@ export default function PointReviewTab() {
               {history.map((log: any, idx: number) => {
                 const cat = log.category || "SKILL";
                 const isPositive = log.xpPoints > 0;
-                const conf = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG["SKILL"];
+                const conf = CATEGORY_CONFIG[cat] || DEFAULT_CATEGORY_CONFIG;
                 const status = log.status || "APPROVED";
                 
                 return (
@@ -294,7 +280,7 @@ export default function PointReviewTab() {
                     value={selectedActivity?.name || ""}
                     onChange={(e) => {
                       const act = filteredActivities.find(a => a.name === e.target.value);
-                      setSelectedActivity(act);
+                      setSelectedActivity(act ?? null);
                     }}
                   >
                     <option value="" disabled>Choose an activity</option>
@@ -318,11 +304,18 @@ export default function PointReviewTab() {
                   />
 
                   <label className="block text-sm font-bold text-slate-700 mb-2">Upload File Document (Optional)</label>
-                  <button 
-                    onClick={() => {
-                      // Fake file picker
-                      setSelectedFileName("evidence_document_v1.pdf");
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setSelectedFileName(file.name);
                     }}
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
                     className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl transition-colors font-medium text-sm border border-slate-200 border-dashed"
                   >
                     <Upload className="w-4 h-4" />

@@ -162,12 +162,12 @@ export default function CaptainGroupTab() {
         ) : (
           <div className="space-y-2.5">
             {teamMembers.map((member: any, idx: number) => {
-              const rankInTeam = member.rankInsideTeam || member.rank || (idx + 1);
-              const isCaptain = member.isCaptain || member.teamRole === 'CAPTAIN' || member.studentName === captainName;
-              const isViceCaptain = member.isViceCaptain || member.teamRole === 'VICE_CAPTAIN' || member.studentName === viceCaptainName;
-              const name = member.studentName || member.fullName || 'Student';
-              const memberXp = member.totalXp ?? member.score ?? 0;
-              const memberStage = member.stageLevel ? `Stage ${member.stageLevel}` : 'Stage 1 - Builder';
+              const rankInTeam = member.rankInsideTeam ?? (idx + 1);
+              const isCaptain = member.teamRole === 'CAPTAIN';
+              const isViceCaptain = member.teamRole === 'VICE_CAPTAIN';
+              const name = member.studentName || 'Student';
+              const memberXp = member.totalXp ?? 0;
+              const memberStage = `${member.currentStage ?? 'Stage 1'} - ${member.currentLevel ?? 'Explorer'}`;
 
               return (
                 <div

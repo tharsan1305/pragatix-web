@@ -2,20 +2,15 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, Check, RefreshCw, Clock, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
-import { useAuth } from '../../../store/authContext';
+import { getSafeHref } from '../../../core/utils/url';
 
 interface Props {
   onBack?: () => void;
 }
 
 export default function CCInboxTab({ onBack }: Props) {
-  const { subRoles } = useAuth();
-  const isCC = subRoles.some((r: any) => {
-    const clean = String(r).trim().toUpperCase();
-    return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
-  });
 
-  const [mainTab, setMainTab] = useState<'MY_CLASS' | 'MY_REQUESTS'>(isCC ? 'MY_CLASS' : 'MY_REQUESTS');
+  const [mainTab, setMainTab] = useState<'MY_CLASS' | 'MY_REQUESTS'>('MY_CLASS');
   const [inbox, setInbox] = useState<any[]>([]);
   const [myRequests, setMyRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -25,9 +20,9 @@ export default function CCInboxTab({ onBack }: Props) {
   const [rejectReason, setRejectReason] = useState<string>('');
 
   useEffect(() => {
-    if (isCC) fetchCcInbox();
+    fetchCcInbox();
     fetchMyRequests();
-  }, [isCC]);
+  }, []);
 
   const handleMainTabChange = (tab: 'MY_CLASS' | 'MY_REQUESTS') => {
     setMainTab(tab);
@@ -39,12 +34,35 @@ export default function CCInboxTab({ onBack }: Props) {
     try {
       const combined: any[] = [];
 
-      // 1. Fetch Activity Completion Requests submitted by students matching Flutter ActivityCompletionService.getInbox()
+      // 1. Fetch Class Badge Requests matching Flutter CCBadgeRequestsPage (/api/cc/badge-requests)
+      try {
+        const badgeRes = await apiClient.get('/api/cc/badge-requests');
+        if (badgeRes.data?.success && Array.isArray(badgeRes.data.data)) {
+          const badgeItems = badgeRes.data.data.map((item: any) => ({
+            ...item,
+            isBadgeRequest: true,
+            isActivityRequest: false,
+            title: item.badgeName || item.badge?.name || 'Class Badge Request',
+            badgeName: item.badgeName || item.badge?.name || 'Badge Request',
+            studentName: item.studentName || item.studentRegNo || item.student?.fullName || 'Student',
+            studentRegNo: item.studentRegNo || item.studentId || item.regNo || '',
+            description: item.reason || item.note || 'Student submitted badge claim request.',
+            proofUrl: item.proofUrl || item.proofLink || item.evidenceUrl || '',
+            date: item.requestedAt || item.createdAt || item.date,
+          }));
+          combined.push(...badgeItems);
+        }
+      } catch (e) {
+        console.error("Failed to fetch CC badge requests:", e);
+      }
+
+      // 2. Fetch Activity Completion Requests submitted by students
       try {
         const actRes = await apiClient.get('/api/activity-requests/inbox');
         if (actRes.data?.success && Array.isArray(actRes.data.data)) {
           const actItems = actRes.data.data.map((item: any) => ({
             ...item,
+            isBadgeRequest: false,
             isActivityRequest: true,
             title: item.activityName || 'Activity Completion Request',
             studentName: item.studentName || item.studentRegNo || 'Student',
@@ -58,7 +76,7 @@ export default function CCInboxTab({ onBack }: Props) {
         console.error("Failed to fetch activity requests inbox:", e);
       }
 
-      // 2. Fetch Penalty requests
+      // 3. Fetch Penalty requests
       try {
         let penRes;
         try {
@@ -70,7 +88,7 @@ export default function CCInboxTab({ onBack }: Props) {
         if (penRes.data?.success) {
           const raw = penRes.data.data;
           const penItems = Array.isArray(raw) ? raw : (raw?.content || []);
-          combined.push(...penItems.map((item: any) => ({ ...item, isActivityRequest: false })));
+          combined.push(...penItems.map((item: any) => ({ ...item, isBadgeRequest: false, isActivityRequest: false })));
         }
       } catch (e) {
         console.error("Failed to fetch penalty CC inbox:", e);
@@ -106,11 +124,15 @@ export default function CCInboxTab({ onBack }: Props) {
   };
 
   const handleApprove = async (item: any) => {
+    const isBadge = item.isBadgeRequest || item.badgeName;
     const isAct = item.isActivityRequest || item.activityName;
-    const toastId = toast.loading(isAct ? "Approving activity request..." : "Approving penalty request...");
+    const label = isBadge ? "badge request" : isAct ? "activity request" : "penalty request";
+    const toastId = toast.loading(`Approving ${label}...`);
     try {
       let response;
-      if (isAct) {
+      if (isBadge) {
+        response = await apiClient.put(`/api/cc/badge-requests/${item.id}/approve`);
+      } else if (isAct) {
         response = await apiClient.put(`/api/activity-requests/${item.id}/approve`);
       } else {
         try {
@@ -121,7 +143,7 @@ export default function CCInboxTab({ onBack }: Props) {
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
-        toast.success(isAct ? "Activity request approved successfully!" : "Penalty approved successfully!");
+        toast.success(`Request approved successfully!`);
         fetchCcInbox();
         fetchMyRequests();
       }
@@ -135,11 +157,17 @@ export default function CCInboxTab({ onBack }: Props) {
   const handleRejectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectingItem) return;
+    const isBadge = rejectingItem.isBadgeRequest || rejectingItem.badgeName;
     const isAct = rejectingItem.isActivityRequest || rejectingItem.activityName;
-    const toastId = toast.loading(isAct ? "Rejecting activity request..." : "Rejecting penalty request...");
+    const label = isBadge ? "badge request" : isAct ? "activity request" : "penalty request";
+    const toastId = toast.loading(`Rejecting ${label}...`);
     try {
       let response;
-      if (isAct) {
+      if (isBadge) {
+        response = await apiClient.put(`/api/cc/badge-requests/${rejectingItem.id}/reject`, {
+          reason: rejectReason
+        });
+      } else if (isAct) {
         response = await apiClient.put(`/api/activity-requests/${rejectingItem.id}/reject`, {
           reason: rejectReason
         });
@@ -156,7 +184,7 @@ export default function CCInboxTab({ onBack }: Props) {
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
-        toast.success(isAct ? "Activity request rejected" : "Penalty rejected");
+        toast.success(`Request rejected`);
         setRejectingItem(null);
         setRejectReason('');
         fetchCcInbox();
@@ -221,16 +249,14 @@ export default function CCInboxTab({ onBack }: Props) {
       {/* Main Tabs (My Class Requests vs My Submitted Requests) */}
       <div className="bg-slate-900/90 border-t border-slate-800 px-4 md:px-6 py-3 flex flex-wrap gap-4 justify-between items-center">
         <div className="flex space-x-2">
-          {isCC && (
-            <button
-              onClick={() => handleMainTabChange('MY_CLASS')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                mainTab === 'MY_CLASS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              Class Inbox ({inbox.length})
-            </button>
-          )}
+          <button
+            onClick={() => handleMainTabChange('MY_CLASS')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              mainTab === 'MY_CLASS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            Class Inbox ({inbox.length})
+          </button>
           <button
             onClick={() => handleMainTabChange('MY_REQUESTS')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -270,7 +296,6 @@ export default function CCInboxTab({ onBack }: Props) {
         ) : (
           <div className="space-y-4">
             {currentList.map(req => {
-              const isAct = req.isActivityRequest || req.activityName;
               const studentName = req.studentName || req.studentRegNo || req.student?.fullName || req.fullName || 'Student';
               const regNo = req.studentRegNo || req.registerNumber || req.regNo || req.student?.registerNumber || 'N/A';
               const activity = req.activityName || req.penaltyActivity || 'Activity Request';
@@ -289,13 +314,18 @@ export default function CCInboxTab({ onBack }: Props) {
                 status === 'REJECTED' ? 'bg-rose-50 text-rose-600 border-rose-200' :
                 'bg-amber-50 text-amber-600 border-amber-200';
 
+              const isBadge = req.isBadgeRequest || req.badgeName;
+              const isAct = req.isActivityRequest || req.activityName;
+              const badgeLabel = isBadge ? 'Badge Request' : isAct ? 'Activity Request' : 'Penalty Request';
+              const badgeClass = isBadge ? 'bg-purple-100 text-purple-800' : isAct ? 'bg-indigo-100 text-indigo-800' : 'bg-rose-100 text-rose-800';
+
               return (
                 <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-3">
                   {/* Top Header Row: Student Name + Type + Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${isAct ? 'bg-indigo-100 text-indigo-800' : 'bg-rose-100 text-rose-800'}`}>
-                        {isAct ? 'Activity Request' : 'Penalty Request'}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${badgeClass}`}>
+                        {badgeLabel}
                       </span>
                       <h3 className="font-bold text-slate-900 text-base">{studentName}</h3>
                     </div>
@@ -329,7 +359,7 @@ export default function CCInboxTab({ onBack }: Props) {
                     {proofUrl && (
                       <div className="pt-1">
                         <a
-                          href={proofUrl}
+                          href={getSafeHref(proofUrl)}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold border border-blue-200 transition"

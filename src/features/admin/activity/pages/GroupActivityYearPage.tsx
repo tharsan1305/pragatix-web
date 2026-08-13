@@ -12,15 +12,22 @@ const FIXED_YEARS = [
 
 const getYearAliases = (fy: any) => {
   const no = fy.yearNo;
-  if (no === 1) return ["1", "1st year", "i", "first year", "1st"];
-  if (no === 2) return ["2", "2nd year", "ii", "second year", "2nd"];
-  if (no === 3) return ["3", "3rd year", "iii", "third year", "3rd"];
-  if (no === 4) return ["4", "4th year", "iv", "fourth year", "4th"];
+  if (no === 1) return ["1", "1st year", "i", "first year", "1st", "first_year"];
+  if (no === 2) return ["2", "2nd year", "ii", "second year", "2nd", "second_year"];
+  if (no === 3) return ["3", "3rd year", "iii", "third year", "3rd", "third_year"];
+  if (no === 4) return ["4", "4th year", "iv", "fourth year", "4th", "fourth_year"];
   return [];
 };
 
-export default function GroupActivityYearPage() {
-  const { activityId } = useParams();
+interface Props {
+  onBack?: () => void;
+  onPushView?: (name: string, props?: any) => void;
+  activityId?: number;
+}
+
+export default function GroupActivityYearPage({ onBack, onPushView, activityId: propActivityId }: Props = {}) {
+  const params = useParams();
+  const activityId = propActivityId ?? (params.activityId ? Number(params.activityId) : undefined);
   const navigate = useNavigate();
   const [availableYears, setAvailableYears] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +46,11 @@ export default function GroupActivityYearPage() {
         const yrs = res.data.data || [];
         const filtered = FIXED_YEARS.filter(fy => {
           const aliases = getYearAliases(fy);
-          return yrs.some((y: any) => aliases.includes(String(y).toLowerCase().trim()));
+          return yrs.some((y: any) => {
+            const raw = String(y).toLowerCase().trim();
+            const normalized = raw.replace(/_/g, ' ');
+            return aliases.includes(raw) || aliases.includes(normalized);
+          });
         });
         setAvailableYears(filtered.length > 0 ? filtered : FIXED_YEARS);
       } else {
@@ -53,10 +64,23 @@ export default function GroupActivityYearPage() {
     }
   };
 
+  const handleBack = () => {
+    if (onBack) onBack();
+    else navigate(-1);
+  };
+
+  const handleSelectYear = (y: any) => {
+    if (onPushView) {
+      onPushView('group_activity_dept', { activityId, year: y });
+    } else {
+      navigate(`/teacher/group-activity/${activityId}/dept`, { state: { year: y } });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       <div className="bg-slate-900 px-6 pt-10 pb-6 flex items-center space-x-4 shadow-md">
-        <button onClick={() => navigate(-1)} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={handleBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
@@ -83,7 +107,7 @@ export default function GroupActivityYearPage() {
             {availableYears.map(y => (
               <button
                 key={y.yearNo}
-                onClick={() => navigate(`/teacher/group-activity/${activityId}/dept`, { state: { year: y } })}
+                onClick={() => handleSelectYear(y)}
                 className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold text-base text-slate-800 flex justify-between items-center transition-all hover:shadow-sm"
               >
                 <span>{y.yearName}</span>

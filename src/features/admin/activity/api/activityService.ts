@@ -54,7 +54,41 @@ export const activityService = {
     return [];
   },
 
-  fetchActivities: async (subgroupId?: number, stageId?: number, subgroupName?: string): Promise<ActivityModel[]> => {
+  fetchActivities: async (subgroupId?: number, stageId?: number, subgroupName?: string, isCcOverride?: boolean): Promise<ActivityModel[]> => {
+    const userString = localStorage.getItem('spdms_user') || localStorage.getItem('user');
+    let isCc = !!isCcOverride;
+    if (!isCc && userString) {
+      try {
+        const u = JSON.parse(userString);
+        const subs = u.subRoles || [];
+        const roles = u.roles || [];
+        isCc = subs.some((r: any) => {
+          const rStr = String(r).toUpperCase().trim();
+          return rStr === 'CC' || rStr === 'CLASS_COORDINATOR' || rStr === 'ROLE_CC' || rStr === 'ROLE_CLASS_COORDINATOR';
+        }) || roles.some((r: any) => {
+          const rStr = String(r).toUpperCase().trim();
+          return rStr === 'CLASS_COORDINATOR' || rStr === 'ROLE_CLASS_COORDINATOR';
+        });
+      } catch {}
+    }
+
+    if (isCc) {
+      const params: any = {};
+      if (stageId) params.stageId = stageId;
+      if (subgroupName && !subgroupName.toLowerCase().includes('all')) {
+        params.subgroup = subgroupName;
+      }
+      try {
+        const response = await apiClient.get('/api/v1/cc/activities', { params });
+        const data = response.data?.data ?? response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          return data;
+        }
+      } catch (e) {
+        console.warn("Failed to fetch CC activities:", e);
+      }
+    }
+
     const endpoints: string[] = [];
     const isAll = !subgroupName || subgroupName.toLowerCase().includes('all');
     const cleanSubgroup = isAll ? undefined : subgroupName;
@@ -144,13 +178,6 @@ export const activityService = {
 
     const endpoint = `/api/v1/admin/subgroups/${targetSubgroupId}/activities`;
 
-    console.log({
-      subgroupId: targetSubgroupId,
-      stageId,
-      subgroupName,
-      endpoint
-    });
-
     const payload = {
       ...body,
       stageId: stageId || (body as any).stageId,
@@ -199,8 +226,8 @@ export const activityService = {
     }
   },
 
-  deleteActivity: async (activityId: number): Promise<void> => {
-    await apiClient.delete(`/api/v1/admin/activities/${activityId}`);
+  deleteActivity: async (activityId: number, force: boolean = false): Promise<void> => {
+    await apiClient.delete(`/api/v1/admin/activities/${activityId}?force=${force}`);
   },
 
   unmapActivityFromStage: async (stageId: number, activityId: number): Promise<void> => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, ChevronDown, Award, Trophy, FilterX } from 'lucide-react';
+import { RefreshCw, ChevronDown, Trophy, FilterX } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
 
 interface FilterOption {
@@ -28,8 +28,8 @@ export default function TeacherLeaderboardTab() {
       if (departmentId) params.departmentId = departmentId;
 
       const res = await apiClient.get('/api/v1/leaderboard/filters', { params });
-      if (res.data?.success && res.data.data) {
-        const d = res.data.data;
+      const d = res.data?.data || res.data;
+      if (d) {
         if (Array.isArray(d.years)) setYearOptions(d.years);
         if (Array.isArray(d.departments)) setDepartmentOptions(d.departments);
         if (Array.isArray(d.sections)) setSectionOptions(d.sections);
@@ -49,11 +49,17 @@ export default function TeacherLeaderboardTab() {
       if (sectionId) params.sectionId = sectionId;
 
       const response = await apiClient.get('/api/v1/leaderboard', { params });
-      if (response.data?.success && Array.isArray(response.data?.data)) {
-        setLeaderboardList(response.data.data);
-      } else {
-        setLeaderboardList([]);
+      let rawList: any[] = [];
+      if (Array.isArray(response.data)) {
+        rawList = response.data;
+      } else if (Array.isArray(response.data?.data)) {
+        rawList = response.data.data;
+      } else if (response.data?.success && Array.isArray(response.data?.data)) {
+        rawList = response.data.data;
+      } else if (response.data?.content && Array.isArray(response.data.content)) {
+        rawList = response.data.content;
       }
+      setLeaderboardList(rawList);
     } catch (e) {
       console.error('Failed to fetch leaderboard', e);
       setLeaderboardList([]);
@@ -163,7 +169,7 @@ export default function TeacherLeaderboardTab() {
       </div>
 
       {/* Leaderboard List Content */}
-      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
+      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-6">
         {isLoading ? (
           <div className="flex justify-center py-20">
             <RefreshCw className="w-8 h-8 animate-spin text-teal-600" />
@@ -177,58 +183,120 @@ export default function TeacherLeaderboardTab() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {leaderboardList.map((student, idx) => {
-              const rank = student.rank || (idx + 1);
-              const score = student.totalXp ?? student.score ?? student.xp ?? 0;
-              const name = student.fullName || student.studentName || 'Student';
-              const regNo = student.regNo || student.username || '';
-              const isCaptain = student.isCaptain || student.teamRole === 'CAPTAIN';
-
-              return (
-                <div
-                  key={student.regNo || idx}
-                  className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    {/* Rank Indicator */}
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-sm shrink-0">
-                      {rank === 1 ? (
-                        <Trophy className="w-6 h-6 text-amber-500 fill-amber-400" />
-                      ) : rank === 2 ? (
-                        <Award className="w-6 h-6 text-slate-400" />
-                      ) : rank === 3 ? (
-                        <Award className="w-6 h-6 text-amber-700" />
-                      ) : (
-                        <span className="text-slate-500 font-bold">#{rank}</span>
-                      )}
-                    </div>
-
-                    {/* Student Info */}
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 text-sm truncate">{name}</span>
-                        {isCaptain && (
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
-                            👑 CAPTAIN
-                          </span>
-                        )}
+          <>
+            {/* Top 3 Visual Podium Section */}
+            {leaderboardList.length >= 3 && (
+              <div className="bg-slate-900 rounded-3xl p-6 shadow-xl text-white">
+                <h2 className="text-center text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-4">
+                  Top Performers
+                </h2>
+                <div className="flex items-end justify-center gap-2 sm:gap-6 pt-4 pb-2">
+                  {/* 2nd Place (Silver) */}
+                  {leaderboardList[1] && (
+                    <div className="flex flex-col items-center flex-1 max-w-[120px]">
+                      <Trophy className="w-6 h-6 text-slate-300 mb-1" />
+                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+                        {(leaderboardList[1].fullName || leaderboardList[1].studentName || 'S')[0]}
                       </div>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        {student.departmentName} • {student.year} {student.section && `• Sec ${student.section}`} {regNo && `(${regNo})`}
-                      </p>
+                      <span className="font-bold text-xs text-slate-100 truncate w-full text-center mt-2">
+                        {leaderboardList[1].fullName || leaderboardList[1].studentName}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold mb-2">
+                        {leaderboardList[1].totalXp ?? leaderboardList[1].score ?? 0} pts
+                      </span>
+                      <div className="w-full h-24 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-slate-300 text-base shadow-inner">
+                        #2
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 1st Place (Gold) */}
+                  {leaderboardList[0] && (
+                    <div className="flex flex-col items-center flex-1 max-w-[130px]">
+                      <Trophy className="w-8 h-8 text-amber-400 fill-amber-400 mb-1 animate-bounce" />
+                      <div className="w-16 h-16 rounded-full bg-indigo-600 border-2 border-amber-400 flex items-center justify-center text-white font-extrabold text-xl shadow-lg ring-4 ring-amber-400/20">
+                        {(leaderboardList[0].fullName || leaderboardList[0].studentName || 'S')[0]}
+                      </div>
+                      <span className="font-bold text-sm text-amber-300 truncate w-full text-center mt-2">
+                        {leaderboardList[0].fullName || leaderboardList[0].studentName}
+                      </span>
+                      <span className="text-xs text-amber-200/80 font-bold mb-2">
+                        {leaderboardList[0].totalXp ?? leaderboardList[0].score ?? 0} pts
+                      </span>
+                      <div className="w-full h-32 bg-amber-500/20 border border-amber-500/40 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-400 text-xl shadow-inner">
+                        #1
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3rd Place (Bronze) */}
+                  {leaderboardList[2] && (
+                    <div className="flex flex-col items-center flex-1 max-w-[120px]">
+                      <Trophy className="w-6 h-6 text-amber-700 mb-1" />
+                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-amber-700 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+                        {(leaderboardList[2].fullName || leaderboardList[2].studentName || 'S')[0]}
+                      </div>
+                      <span className="font-bold text-xs text-slate-100 truncate w-full text-center mt-2">
+                        {leaderboardList[2].fullName || leaderboardList[2].studentName}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold mb-2">
+                        {leaderboardList[2].totalXp ?? leaderboardList[2].score ?? 0} pts
+                      </span>
+                      <div className="w-full h-20 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-700 text-base shadow-inner">
+                        #3
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Remaining Student List (#4+) */}
+            <div className="space-y-3">
+              {(leaderboardList.length >= 3 ? leaderboardList.slice(3) : leaderboardList).map((student, idx) => {
+                const rank = student.rank || (leaderboardList.length >= 3 ? idx + 4 : idx + 1);
+                const score = student.totalXp ?? student.score ?? student.xp ?? 0;
+                const name = student.fullName || student.studentName || 'Student';
+                const regNo = student.regNo || student.username || '';
+                const isCaptain = student.isCaptain || student.teamRole === 'CAPTAIN';
+
+                return (
+                  <div
+                    key={student.regNo || idx}
+                    className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-all flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      {/* Rank Indicator */}
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center font-extrabold text-xs text-slate-600 shrink-0">
+                        #{rank}
+                      </div>
+
+                      {/* Student Info */}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-slate-900 text-sm truncate">{name}</span>
+                          {isCaptain && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
+                              👑 CAPTAIN
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          {student.departmentName} • {student.year} {student.section && `• Sec ${student.section}`} {regNo && `(${regNo})`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Score */}
+                    <div className="text-right shrink-0 ml-3">
+                      <span className="text-base font-extrabold text-indigo-600">{score}</span>
+                      <span className="text-xs font-bold text-slate-400 ml-1">pts</span>
                     </div>
                   </div>
-
-                  {/* Score */}
-                  <div className="text-right shrink-0 ml-3">
-                    <span className="text-base font-extrabold text-indigo-600">{score}</span>
-                    <span className="text-xs font-bold text-slate-400 ml-1">pts</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

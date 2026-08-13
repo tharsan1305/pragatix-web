@@ -11,10 +11,10 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
 
   const years = [
-    { label: 'First Year', value: 'FIRST_YEAR', badge: 'Year 1', desc: 'Manage Stage 1 & introductory activities' },
-    { label: 'Second Year', value: 'SECOND_YEAR', badge: 'Year 2', desc: 'Manage Stage 2 & intermediate activities' },
-    { label: 'Third Year', value: 'THIRD_YEAR', badge: 'Year 3', desc: 'Manage Stage 3 & advanced project activities' },
-    { label: 'Fourth Year', value: 'FOURTH_YEAR', badge: 'Final Year', desc: 'Manage Stage 4 & placement readiness' },
+    { num: '1', label: 'First Year', value: 'FIRST_YEAR', badge: 'Year 1', desc: 'Manage Stage 1 & introductory activities' },
+    { num: '2', label: 'Second Year', value: 'SECOND_YEAR', badge: 'Year 2', desc: 'Manage Stage 2 & intermediate activities' },
+    { num: '3', label: 'Third Year', value: 'THIRD_YEAR', badge: 'Year 3', desc: 'Manage Stage 3 & advanced project activities' },
+    { num: '4', label: 'Fourth Year', value: 'FOURTH_YEAR', badge: 'Final Year', desc: 'Manage Stage 4 & placement readiness' },
   ];
 
   if (selectedYear) {
@@ -28,17 +28,16 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
+    <div className="flex flex-col min-h-full bg-[#F8FAFC] relative pb-20">
       {/* Top Header Bar matching Flutter */}
-      <div className="bg-[#EA4335] text-white px-6 pt-10 pb-6 shadow-md flex items-center space-x-4">
+      <div className="bg-[#EA4335] text-white px-6 pt-6 pb-4 shadow-md flex items-center space-x-4">
         {onBack && (
           <button onClick={onBack} className="p-2 bg-red-600/60 rounded-full text-white hover:bg-red-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
         <div>
-          <h1 className="text-2xl font-bold">Activity & Thresholds</h1>
-          <p className="text-xs text-red-100 mt-0.5">Admin Management Portal</p>
+          <h1 className="text-xl font-bold">Activity & Thresholds</h1>
         </div>
       </div>
 
@@ -46,7 +45,7 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-extrabold text-slate-900">Select Academic Year</h2>
           <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">
-            Please select an academic year to manage its stages, thresholds, and activities.
+            Please select an academic year to manage its stages and activities.
           </p>
         </div>
 
@@ -59,17 +58,12 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
               className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-red-400 transition-all cursor-pointer flex items-center justify-between group"
             >
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-bold group-hover:bg-red-600 group-hover:text-white transition-colors">
-                  <GraduationCap className="w-6 h-6" />
+                <div className="w-9 h-9 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  {y.num}
                 </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-slate-900 text-lg">{y.label}</h3>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                      {y.badge}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{y.desc}</p>
+                <div className="flex items-center space-x-2">
+                  <GraduationCap className="w-5 h-5 text-slate-700" />
+                  <h3 className="font-bold text-slate-900 text-base">{y.label}</h3>
                 </div>
               </div>
 

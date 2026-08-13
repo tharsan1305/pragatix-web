@@ -3,8 +3,8 @@ import type { ActivityModel } from '../types/ActivityTypes';
 
 interface ActivityCardProps {
   activity: ActivityModel;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   onUnmap?: () => void;
   onAssign?: () => void;
   onTap?: () => void;
@@ -45,7 +45,7 @@ export default function ActivityCard({
         <h3 className="font-bold text-[16px] text-[#1E293B] flex-1 mr-4">{activity.name}</h3>
         {!isReadOnly && (
           <div className="flex items-center gap-2 shrink-0">
-            {onAssign && (
+            {onAssign && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onAssign(); }}
                 className="flex items-center gap-1 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
@@ -55,15 +55,17 @@ export default function ActivityCard({
                 <span>Assign Faculty</span>
               </button>
             )}
-            <button 
-              onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
-              title={isCc ? 'Assign Faculty/Owner' : 'Edit Activity'}
-            >
-              {isCc ? <UserPlus className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
-              <span>{isCc ? 'Assign' : 'Edit'}</span>
-            </button>
-            {onUnmap && (
+            {onEdit && !isCc && (
+              <button 
+                onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
+                title="Edit Activity"
+              >
+                <Pencil className="w-4 h-4" />
+                <span>Edit</span>
+              </button>
+            )}
+            {onUnmap && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onUnmap(); }}
                 className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors border border-amber-200"
@@ -72,7 +74,7 @@ export default function ActivityCard({
                 <MinusCircle className="w-4 h-4" />
               </button>
             )}
-            {!isCc && (
+            {onDelete && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
                 className="flex items-center gap-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"

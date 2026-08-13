@@ -69,7 +69,7 @@ export default function LeaderboardTab() {
           departmentName: s.departmentName ?? '',
           year: s.year ?? '',
           section: s.section ?? '',
-          score: s.totalXp ?? s.score ?? s.xp ?? 0,
+          score: s.score ?? 0,
           teamRole: s.teamRole ?? '',
         }));
         setFilteredList(students);

@@ -28,13 +28,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
     setIsLoading(true);
     setError(null);
     try {
-      let res;
-      try {
-        res = await apiClient.get('/api/v1/xp/streaks');
-      } catch (_e) {
-        res = await apiClient.get('/api/v1/xp/me/streaks');
-      }
-
+      const res = await apiClient.get('/api/v1/students/me/activity-streaks');
       if (res.data?.success && Array.isArray(res.data?.data)) {
         setStreaks(res.data.data);
       } else if (Array.isArray(res.data)) {

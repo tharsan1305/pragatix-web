@@ -102,10 +102,10 @@ export default function PerformanceActivitiesTab() {
 
   const getYearAliases = (fy: any) => {
     const no = fy.yearNo;
-    if (no === 1) return ["1", "1st year", "i", "first year", "1st"];
-    if (no === 2) return ["2", "2nd year", "ii", "second year", "2nd"];
-    if (no === 3) return ["3", "3rd year", "iii", "third year", "3rd"];
-    if (no === 4) return ["4", "4th year", "iv", "fourth year", "4th"];
+    if (no === 1) return ["1", "1st year", "i", "first year", "1st", "first_year"];
+    if (no === 2) return ["2", "2nd year", "ii", "second year", "2nd", "second_year"];
+    if (no === 3) return ["3", "3rd year", "iii", "third year", "3rd", "third_year"];
+    if (no === 4) return ["4", "4th year", "iv", "fourth year", "4th", "fourth_year"];
     return [];
   };
 
@@ -138,9 +138,15 @@ export default function PerformanceActivitiesTab() {
         const yrs = res.data.data || [];
         const filtered = FIXED_YEARS.filter(fy => {
           const aliases = getYearAliases(fy);
-          return yrs.some((y: any) => aliases.includes(String(y).toLowerCase().trim()));
+          return yrs.some((y: any) => {
+            const raw = String(y).toLowerCase().trim();
+            const normalized = raw.replace(/_/g, ' ');
+            return aliases.includes(raw) || aliases.includes(normalized);
+          });
         });
         setAvailableYears(filtered.length > 0 ? filtered : FIXED_YEARS);
+      } else {
+        setAvailableYears(FIXED_YEARS);
       }
     } catch (e) {
       console.error(e);

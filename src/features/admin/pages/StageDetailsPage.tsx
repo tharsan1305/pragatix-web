@@ -13,6 +13,7 @@ interface Props {
   stageDescription?: string;
   teachersList?: any[];
   isTeacherView?: boolean;
+  isCcAssignMode?: boolean;
   onBack: () => void;
   onPushView?: (name: string, props?: any) => void;
 }
@@ -22,6 +23,7 @@ export default function StageDetailsPage({
   stageName, 
   stageDescription = '', 
   isTeacherView = false,
+  isCcAssignMode = false,
   onBack,
   onPushView = () => {} 
 }: Props) {
@@ -91,7 +93,7 @@ export default function StageDetailsPage({
     if (!deleteActivityTarget) return;
     const toastId = toast.loading("Deleting activity from system...");
     try {
-      await activityService.deleteActivity(deleteActivityTarget.id);
+      await activityService.deleteActivity(deleteActivityTarget.id, true);
       toast.dismiss(toastId);
       toast.success("Activity deleted from system successfully");
       setDeleteActivityTarget(null);
@@ -130,7 +132,20 @@ export default function StageDetailsPage({
     setIsLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get('/api/v1/admin/stages');
+      let response;
+      if (isTeacherView) {
+        try {
+          response = await apiClient.get('/api/v1/cc/activities/stages');
+        } catch {
+          try {
+            response = await apiClient.get('/api/v1/cc/stages');
+          } catch {
+            response = await apiClient.get('/api/v1/admin/stages');
+          }
+        }
+      } else {
+        response = await apiClient.get('/api/v1/admin/stages');
+      }
       const fetchedData = response.data?.data || response.data;
       if (Array.isArray(fetchedData)) {
         const stages = fetchedData;
@@ -435,10 +450,13 @@ export default function StageDetailsPage({
                               <ActivityCard
                                 key={activity.id}
                                 activity={activity}
-                                onEdit={() => onPushView('edit_activity', { activity, subgroupId: subId })}
-                                onDelete={() => setDeleteActivityTarget(activity)}
-                                onUnmap={() => setUnmapActivityTarget(activity)}
-                                onAssign={() => onPushView('assign_faculty', { activity, subgroupId: subId })}
+                                isReadOnly={false}
+                                isCc={isTeacherView && !isCcAssignMode}
+                                onTap={isTeacherView && !isCcAssignMode ? () => onPushView('teacher_workflow', { activity, stageId, stageName: displayName, academicYear: stageDetails?.academicYear || (activity as any)?.academicYear }) : undefined}
+                                onEdit={!isTeacherView ? () => onPushView('edit_activity', { activity, subgroupId: subId }) : undefined}
+                                onDelete={!isTeacherView ? () => setDeleteActivityTarget(activity) : undefined}
+                                onUnmap={!isTeacherView ? () => setUnmapActivityTarget(activity) : undefined}
+                                onAssign={() => onPushView('assign_faculty', { activity, activityId: activity.id, subgroupId: subId, stageId, isCcProp: isTeacherView })}
                               />
                             ))}
                           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Trash2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
@@ -9,9 +9,11 @@ interface YearAdmin {
   fullName: string;
   email?: string;
   phone?: string;
+  academicYear?: string;
   yearNo?: number;
   yearName?: string;
   departmentName?: string;
+  active?: boolean;
   createdAt?: string;
 }
 
@@ -31,8 +33,12 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [selectedYear, setSelectedYear] = useState('1');
-  const [years, setYears] = useState<any[]>([]);
+  const [selectedYear, setSelectedYear] = useState('FIRST_YEAR');
+  const [editingAdminId, setEditingAdminId] = useState<number | null>(null);
+
+  // Custom Confirmation Dialog States (Replaces native window.confirm)
+  const [replaceConfirmData, setReplaceConfirmData] = useState<{ existingAdminName: string; yearName: string } | null>(null);
+  const [deleteConfirmData, setDeleteConfirmData] = useState<{ adminId: number; adminName: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -41,16 +47,9 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [adminsRes, yearsRes] = await Promise.all([
-        apiClient.get('/api/v1/admin/years/admins').catch(() => apiClient.get('/api/v1/admin/users?role=ADMIN')),
-        apiClient.get('/api/v1/admin/years').catch(() => ({ data: { data: [] } }))
-      ]);
-
-      const fetchedAdmins = Array.isArray(adminsRes.data?.data) ? adminsRes.data.data : (Array.isArray(adminsRes.data) ? adminsRes.data : []);
-      const fetchedYears = Array.isArray(yearsRes.data?.data) ? yearsRes.data.data : (Array.isArray(yearsRes.data) ? yearsRes.data : []);
-
+      const res = await apiClient.get('/api/v1/superadmin/year-admins');
+      const fetchedAdmins = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
       setAdmins(fetchedAdmins);
-      setYears(fetchedYears);
     } catch (error) {
       console.error('Error loading Year Admins:', error);
       toast.error('Failed to load Year Admins');
@@ -59,51 +58,96 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
     }
   };
 
-  const handleCreateAdmin = async (e: React.FormEvent) => {
+  const handleEditClick = (admin: YearAdmin) => {
+    setEditingAdminId(admin.id);
+    setUsername(admin.username);
+    setPassword('');
+    setFullName(admin.fullName);
+    setEmail(admin.email || '');
+    setPhone(admin.phone || '');
+    setSelectedYear(admin.academicYear || '');
+    setShowAddModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password || !fullName) {
-      toast.error('Username, password, and full name are required');
+    if (!username || !fullName) {
+      toast.error('Username and full name are required');
       return;
     }
 
+    if (!editingAdminId && !password) {
+      toast.error('Password is required for new Year Admin');
+      return;
+    }
+
+    // Check if selected year is already assigned to another active admin
+    if (selectedYear) {
+      const existingAdmin = admins.find(
+        a => a.academicYear === selectedYear && a.id !== editingAdminId && a.active !== false
+      );
+      if (existingAdmin) {
+        setReplaceConfirmData({
+          existingAdminName: existingAdmin.username || existingAdmin.fullName,
+          yearName: formatAcademicYear(existingAdmin)
+        });
+        return;
+      }
+    }
+
+    executeSave();
+  };
+
+  const executeSave = async () => {
+    setReplaceConfirmData(null);
     setIsSubmitting(true);
     try {
-      const payload = {
+      const payload: any = {
         username,
-        password,
         fullName,
-        email,
-        phone,
-        yearId: parseInt(selectedYear),
-        role: 'ROLE_ADMIN'
+        email: email || undefined,
+        phone: phone || undefined,
+        academicYear: selectedYear || null,
+        active: true
       };
 
-      const res = await apiClient.post('/api/v1/admin/years/assign-admin', payload).catch(() =>
-        apiClient.post('/api/v1/admin/users', payload)
-      );
+      if (password) {
+        payload.password = password;
+      }
+
+      let res;
+      if (editingAdminId) {
+        res = await apiClient.put(`/api/v1/superadmin/year-admins/${editingAdminId}`, payload);
+      } else {
+        res = await apiClient.post('/api/v1/superadmin/year-admins', payload);
+      }
 
       if (res.data?.success || res.status === 200 || res.status === 201) {
-        toast.success(`Year Admin ${fullName} created successfully!`);
+        toast.success(editingAdminId ? `Year Admin updated successfully!` : `Year Admin created successfully!`);
         setShowAddModal(false);
         resetForm();
         fetchData();
       } else {
-        toast.error(res.data?.message || 'Failed to create Year Admin');
+        toast.error(res.data?.message || `Failed to ${editingAdminId ? 'update' : 'create'} Year Admin`);
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to create Year Admin');
+      toast.error(err.response?.data?.message || `Failed to ${editingAdminId ? 'update' : 'create'} Year Admin`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteAdmin = async (adminId: number, adminName: string) => {
-    if (!window.confirm(`Are you sure you want to remove Year Admin "${adminName}"?`)) return;
+  const handleDeleteAdmin = (adminId: number, adminName: string) => {
+    setDeleteConfirmData({ adminId, adminName });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteConfirmData) return;
+    const { adminId, adminName } = deleteConfirmData;
+    setDeleteConfirmData(null);
 
     try {
-      await apiClient.delete(`/api/v1/admin/years/admins/${adminId}`).catch(() =>
-        apiClient.delete(`/api/v1/admin/users/${adminId}`)
-      );
+      await apiClient.delete(`/api/v1/superadmin/year-admins/${adminId}`);
       toast.success(`Removed ${adminName}`);
       setAdmins(prev => prev.filter(a => a.id !== adminId));
     } catch (err: any) {
@@ -117,7 +161,23 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
     setFullName('');
     setEmail('');
     setPhone('');
-    setSelectedYear('1');
+    setSelectedYear('FIRST_YEAR');
+    setEditingAdminId(null);
+  };
+
+  const formatAcademicYear = (admin: YearAdmin) => {
+    if (admin.academicYear) {
+      switch (admin.academicYear) {
+        case 'FIRST_YEAR': return 'First Year';
+        case 'SECOND_YEAR': return 'Second Year';
+        case 'THIRD_YEAR': return 'Third Year';
+        case 'FOURTH_YEAR': return 'Fourth Year';
+        default: return admin.academicYear;
+      }
+    }
+    if (admin.yearName) return admin.yearName;
+    if (admin.yearNo) return `Year ${admin.yearNo}`;
+    return 'Not Assigned';
   };
 
   return (
@@ -168,8 +228,10 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Total Admins</span>
             </div>
             <div className="text-center px-4">
-              <span className="block text-2xl font-black text-emerald-400">{years.length || 4}</span>
-              <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Academic Years</span>
+              <span className="block text-2xl font-black text-emerald-400">
+                {admins.filter(a => !!a.academicYear).length} / 4
+              </span>
+              <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Assigned Years</span>
             </div>
           </div>
         </div>
@@ -215,19 +277,28 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteAdmin(admin.id, admin.fullName || admin.username)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                      title="Remove Year Admin"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleEditClick(admin)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        title="Edit Year Admin"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAdmin(admin.id, admin.fullName || admin.username)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Remove Year Admin"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2 pt-2 border-t border-slate-100 text-xs font-medium text-slate-600">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Assigned Year: <strong className="text-slate-800 font-bold">{admin.yearName || `Year ${admin.yearNo || '1'}`}</strong></span>
+                      <span>Assigned Year: <strong className="text-slate-800 font-bold">{formatAcademicYear(admin)}</strong></span>
                     </div>
 
                     {admin.departmentName && (
@@ -265,24 +336,24 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
         )}
       </div>
 
-      {/* Add Year Admin Modal */}
+      {/* Add/Edit Year Admin Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-5 h-5 text-red-500" />
-                <h3 className="font-bold text-lg text-slate-900">Add New Year Admin</h3>
+                <h3 className="font-bold text-lg text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
               </div>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => { setShowAddModal(false); resetForm(); }}
                 className="text-slate-400 hover:text-slate-600 font-bold text-lg p-1"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateAdmin} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name</label>
                 <input
@@ -308,10 +379,12 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Password</label>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+                  Password {editingAdminId && '(Leave blank to keep current)'}
+                </label>
                 <input
                   type="password"
-                  required
+                  required={!editingAdminId}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -326,10 +399,11 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                   onChange={(e) => setSelectedYear(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                 >
-                  <option value="1">First Year (Year 1)</option>
-                  <option value="2">Second Year (Year 2)</option>
-                  <option value="3">Third Year (Year 3)</option>
-                  <option value="4">Fourth Year (Year 4)</option>
+                  <option value="">Not Assigned</option>
+                  <option value="FIRST_YEAR">First Year (Year 1)</option>
+                  <option value="SECOND_YEAR">Second Year (Year 2)</option>
+                  <option value="THIRD_YEAR">Third Year (Year 3)</option>
+                  <option value="FOURTH_YEAR">Fourth Year (Year 4)</option>
                 </select>
               </div>
 
@@ -359,7 +433,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <div className="pt-3 flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => { setShowAddModal(false); resetForm(); }}
                   className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
                 >
                   Cancel
@@ -372,14 +446,79 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                   {isSubmitting ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Creating...</span>
+                      <span>{editingAdminId ? 'Updating...' : 'Creating...'}</span>
                     </>
                   ) : (
-                    <span>Create Year Admin</span>
+                    <span>{editingAdminId ? 'Update Year Admin' : 'Create Year Admin'}</span>
                   )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Custom Replace Assignment Modal */}
+      {replaceConfirmData && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center space-x-3 text-amber-600">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900">Replace Assignment?</h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              <strong className="text-slate-900 font-bold">"{replaceConfirmData.existingAdminName}"</strong> is already assigned to <span className="font-semibold text-slate-800">{replaceConfirmData.yearName}</span>. Do you want to replace them?
+            </p>
+            <div className="pt-2 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setReplaceConfirmData(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeSave}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md"
+              >
+                Replace
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmData && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center space-x-3 text-red-600">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="font-bold text-lg text-slate-900">Confirm Delete</h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Are you sure you want to remove Year Admin <strong className="text-slate-900 font-bold">"{deleteConfirmData.adminName}"</strong>?
+            </p>
+            <div className="pt-2 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmData(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={executeDelete}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

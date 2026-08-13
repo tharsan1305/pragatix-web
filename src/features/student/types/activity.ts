@@ -19,6 +19,7 @@ export interface Activity {
   evidence?: string[];
   statusPillText?: string;
   allowStudentRequest?: boolean;
+  category?: string;
 }
 
 export interface Subgroup {

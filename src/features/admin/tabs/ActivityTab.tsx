@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, Plus, Edit2, Trash2, ChevronRight, ListFilter } from 'lucide-react';
+import { RefreshCw, Plus, Edit2, Trash2, ChevronRight, ListFilter, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import ConfirmationModal from '../../../components/common/ConfirmationModal';
@@ -10,7 +10,7 @@ interface Props {
   onBackToYearSelection?: () => void;
 }
 
-export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRST_YEAR', onBackToYearSelection: _onBackToYearSelection }: Props) {
+export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRST_YEAR', onBackToYearSelection }: Props) {
   const [academicYear, _setAcademicYear] = useState(initialYear);
   const [stages, setStages] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -89,9 +89,25 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
 
   return (
     <div className="flex flex-col min-h-full bg-slate-50">
-      {/* Header Bar (Matching Flutter 1:1) */}
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Activity & Thresholds</h1>
+      {/* Header Bar */}
+      <div className="bg-slate-900 px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          {onBackToYearSelection && (
+            <button
+              onClick={onBackToYearSelection}
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Switch Year</span>
+            </button>
+          )}
+          <h1 className="text-xl font-bold text-white">Activity & Thresholds</h1>
+          {academicYear && (
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/30">
+              {academicYear.replace('_', ' ')}
+            </span>
+          )}
+        </div>
         <button onClick={() => fetchStages()} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>

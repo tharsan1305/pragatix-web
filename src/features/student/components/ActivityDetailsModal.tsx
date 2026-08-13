@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Star, Award, User, RefreshCw, Eye, Send, ExternalLink, CheckCircle } from 'lucide-react';
 import type { Activity } from '../types/activity';
 import { ActivityService } from '../services/activityService';
+import { getSafeHref } from '../../../core/utils/url';
 
 interface ActivityDetailsModalProps {
   activity: Activity | null;
@@ -53,11 +54,9 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
   };
 
   const statusText = activity.statusPillText || activity.status || (isCompleted ? 'COMPLETED' : 'NOT_STARTED');
-  const facultyName = activity.facultyName || 'subashree';
-  const frequency = activity.frequency || 'Per Assignment';
-  const evidenceList = (activity.evidence && activity.evidence.length > 0)
-    ? activity.evidence
-    : ['Direct Observation'];
+  const facultyName = activity.facultyName || '';
+  const frequency = activity.frequency || '';
+  const evidenceList = activity.evidence && activity.evidence.length > 0 ? activity.evidence : [];
   const awardedXp = activity.awardedXp ?? 0;
 
   return (
@@ -172,7 +171,7 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
         {activity.evidenceUrl && (
           <div className="pt-2">
             <a
-              href={activity.evidenceUrl}
+              href={getSafeHref(activity.evidenceUrl)}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs transition flex items-center justify-center gap-2"

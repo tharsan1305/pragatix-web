@@ -1,4 +1,4 @@
-import logoImg from '../../assets/loader-logo.png';
+import logoImg from '../../assets/sg-logo.jpg';
 
 interface PageLoaderProps {
   message?: string;

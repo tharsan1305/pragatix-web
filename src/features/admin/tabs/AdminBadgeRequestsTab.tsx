@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Award, Check, RefreshCw, ExternalLink, ArrowLeft, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
+import { getSafeHref } from '../../../core/utils/url';
 
 interface Props {
   onBack?: () => void;
@@ -27,8 +28,16 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
       let response;
       try {
         response = await apiClient.get('/api/admin/badge-requests');
-      } catch (_e) {
-        response = await apiClient.get('/api/v1/admin/badge-requests');
+      } catch (_e1) {
+        try {
+          response = await apiClient.get('/api/cc/badge-requests');
+        } catch (_e2) {
+          try {
+            response = await apiClient.get('/api/v1/admin/badge-requests');
+          } catch (_e3) {
+            response = await apiClient.get('/api/v1/badges/pending');
+          }
+        }
       }
 
       if (response.data?.success) {
@@ -76,8 +85,12 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
       let response;
       try {
         response = await apiClient.put(`/api/admin/badge-requests/${id}/approve`);
-      } catch (_e) {
-        response = await apiClient.put(`/api/v1/admin/badge-requests/${id}/approve`);
+      } catch (_e1) {
+        try {
+          response = await apiClient.put(`/api/cc/badge-requests/${id}/approve`);
+        } catch (_e2) {
+          response = await apiClient.put(`/api/v1/admin/badge-requests/${id}/approve`);
+        }
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
@@ -101,10 +114,16 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
         response = await apiClient.put(`/api/admin/badge-requests/${rejectingReq.id}/reject`, {
           reason: rejectReason
         });
-      } catch (_e) {
-        response = await apiClient.put(`/api/v1/admin/badge-requests/${rejectingReq.id}/reject`, {
-          reason: rejectReason
-        });
+      } catch (_e1) {
+        try {
+          response = await apiClient.put(`/api/cc/badge-requests/${rejectingReq.id}/reject`, {
+            reason: rejectReason
+          });
+        } catch (_e2) {
+          response = await apiClient.put(`/api/v1/admin/badge-requests/${rejectingReq.id}/reject`, {
+            reason: rejectReason
+          });
+        }
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
@@ -243,9 +262,9 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                   {proofLink && (
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center space-x-2">
                       <ExternalLink className="w-4 h-4 text-blue-600" />
-                      <a 
-                        href={proofLink} 
-                        target="_blank" 
+                      <a
+                        href={getSafeHref(proofLink)}
+                        target="_blank"
                         rel="noopener noreferrer" 
                         className="text-xs font-medium text-blue-600 hover:underline"
                       >

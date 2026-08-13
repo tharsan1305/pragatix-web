@@ -316,7 +316,12 @@ export default function StudentsTab({ onBack }: Props) {
             pass = `${parts[2]}${parts[1]}${parts[0]}`;
           }
         }
-        payload.password = pass || '123456';
+        if (!pass) {
+          toast.dismiss(toastId);
+          toast.error('Set a Password, or provide Date of Birth to derive a default password.');
+          return;
+        }
+        payload.password = pass;
         await apiClient.post('/api/v1/students', payload);
       }
       toast.dismiss(toastId);

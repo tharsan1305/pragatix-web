@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User as UserIcon, Lock, LogOut, RefreshCw } from 'lucide-react';
+import { User as UserIcon, LogOut, RefreshCw, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -7,30 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../../../components/common/LogoutModal';
 
 export default function ProfileTab() {
-  const { token, user: authUser, logout } = useAuth();
+  const { token, logout } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
-  const [profile, setProfile] = useState<any>({
-    fullName: authUser?.fullName || "surendar",
-    username: authUser?.username || authUser?.sprNo || "99",
-    email: authUser?.email || "saarendar@gmail.com",
-    phone: authUser?.phone || "1234567890",
-    department: authUser?.department || "Cyber Security",
-    accountStatus: "Active",
-    role: "STUDENT",
-    studentDetails: {
-      registerNumber: authUser?.username || "99",
-      academicYear: authUser?.year || "First Year",
-      section: authUser?.section || "A",
-      isCaptain: authUser?.isCaptain || false,
-      isViceCaptain: authUser?.isViceCaptain || false,
-      currentXp: authUser?.totalXp ?? authUser?.score ?? -10,
-      attendancePercentage: 100,
-      rank: authUser?.rank || 265,
-    }
-  });
+
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     fetchProfile();
@@ -39,6 +22,7 @@ export default function ProfileTab() {
 
   const fetchProfile = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       // Call GET /api/v1/profile/me matching Flutter ProfileRepository.getMyProfile
       let response;
@@ -52,31 +36,32 @@ export default function ProfileTab() {
         const d = response.data.data;
         const stDetails = d.studentDetails || {};
 
-        const isCap = d.isCaptain || stDetails.isCaptain || d.teamRole === 'CAPTAIN';
-        const isVice = d.isViceCaptain || stDetails.isViceCaptain || d.teamRole === 'VICE_CAPTAIN';
-
         setProfile({
-          fullName: d.fullName || d.name || profile.fullName,
-          username: d.username || d.regNo || d.registerNumber || profile.username,
-          email: d.email || profile.email,
-          phone: d.phone || profile.phone,
-          department: d.department || d.departmentName || profile.department,
-          accountStatus: d.accountStatus || d.status || "Active",
+          fullName: d.fullName || d.name || "",
+          username: d.username || d.regNo || d.registerNumber || "",
+          email: d.email || "",
+          phone: d.phone || "",
+          department: d.department || d.departmentName || "",
+          accountStatus: d.accountStatus || d.status || "",
           role: d.role ? String(d.role).replace(/_/g, ' ') : (d.userType ? String(d.userType).replace(/_/g, ' ') : "STUDENT"),
           studentDetails: {
-            registerNumber: stDetails.registerNumber || d.registerNumber || d.username || profile.studentDetails.registerNumber,
-            academicYear: stDetails.academicYear || d.year || d.academicYear || profile.studentDetails.academicYear,
-            section: stDetails.section || d.section || profile.studentDetails.section,
-            isCaptain: isCap,
-            isViceCaptain: isVice,
-            currentXp: stDetails.currentXp ?? d.totalXp ?? d.score ?? profile.studentDetails.currentXp,
-            attendancePercentage: stDetails.attendancePercentage ?? d.attendancePercentage ?? profile.studentDetails.attendancePercentage,
-            rank: stDetails.rank ?? d.rank ?? profile.studentDetails.rank,
+            registerNumber: stDetails.registerNumber || d.registerNumber || d.username || "",
+            academicYear: stDetails.academicYear || d.year || d.academicYear || "",
+            section: stDetails.section || d.section || "",
+            isCaptain: stDetails.isCaptain ?? d.isCaptain ?? false,
+            isViceCaptain: stDetails.isViceCaptain ?? d.isViceCaptain ?? false,
+            currentXp: stDetails.currentXp ?? d.totalXp ?? d.score ?? 0,
+            attendancePercentage: stDetails.attendancePercentage ?? d.attendancePercentage ?? 0,
+            rank: stDetails.rank ?? d.rank ?? 0,
           }
         });
+      } else {
+        setProfile(null);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn("Failed to load profile details:", e);
+      setError(e.response?.data?.message || "Error loading profile");
+      setProfile(null);
     } finally {
       setIsLoading(false);
     }
@@ -97,8 +82,32 @@ export default function ProfileTab() {
     );
   }
 
-  const leadershipRole = profile.studentDetails?.isCaptain 
-    ? 'Captain' 
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-slate-50 gap-4 p-8 text-center">
+        <AlertCircle className="w-10 h-10 text-rose-500" />
+        <p className="text-sm font-semibold text-rose-600">Error loading profile: {error}</p>
+        <button
+          onClick={fetchProfile}
+          className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-500 font-medium text-sm">Profile not found.</p>
+      </div>
+    );
+  }
+
+  const leadershipRole = profile.studentDetails?.isCaptain
+    ? 'Captain'
     : (profile.studentDetails?.isViceCaptain ? 'Vice Captain' : 'Member');
 
   const SharedProfileRow = ({ label, value }: { label: string; value: string | number }) => (
@@ -171,14 +180,6 @@ export default function ProfileTab() {
 
         {/* Quick Actions matching Flutter _buildQuickActions */}
         <div className="space-y-3 pt-2">
-          <button
-            onClick={() => toast.success("Password change feature coming soon")}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm"
-          >
-            <Lock className="w-4 h-4" />
-            <span>Change Password</span>
-          </button>
-
           <button
             onClick={() => setShowLogoutModal(true)}
             className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm"

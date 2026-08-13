@@ -4,17 +4,6 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
 
-const LEVELS = [
-  { level: 1, title: "Explorer", xpMin: 0, xpMax: 100, stage: "STAGE 1", objective: "Build participation habits", unlocks: "Onboarding missions, basic badges, attend all sessions" },
-  { level: 2, title: "Builder", xpMin: 101, xpMax: 500, stage: "STAGE 2", objective: "Develop consistency & discipline", unlocks: "Study groups, quiz battles, attendance streaks" },
-  { level: 3, title: "Innovator", xpMin: 501, xpMax: 1500, stage: "STAGE 3", objective: "Build technical & collaborative skills", unlocks: "Skill pathways unlocked, mini-projects, peer collaboration" },
-  { level: 4, title: "Specialist", xpMin: 1501, xpMax: 3000, stage: "STAGE 4", objective: "Demonstrate competency & peer support", unlocks: "Advanced missions, certification tracks, own deliverables" },
-  { level: 5, title: "Leader", xpMin: 3001, xpMax: 5000, stage: "STAGE 5", objective: "Guide peers, lead teams strategically", unlocks: "Mentorship roles, leadership missions, project lead" },
-  { level: 6, title: "Mentor", xpMin: 5001, xpMax: 7000, stage: "STAGE 6", objective: "Sustain ecosystem & peer development", unlocks: "Governance participation, ecosystem stewardship" },
-  { level: 7, title: "Architect", xpMin: 7001, xpMax: 10000, stage: "STAGE 7", objective: "Influence ecosystem growth & innovation", unlocks: "Industry opportunities, innovation access, strategic leadership" },
-  { level: 8, title: "Industry Ready", xpMin: 10001, xpMax: 99999, stage: "STAGE 8", objective: "Professional-level readiness - placement & alumni", unlocks: "Full privileges, alumni bridge, institutional ambassador" }
-];
-
 const PATHWAYS = [
   { name: "Core Engineering", domain: "Domain-specific (Mech/Civil/Aero/EEE/ECE)", categories: "Academic XP, Skill XP", alignment: "Faculty Mentor (dept. HoD)" },
   { name: "Cybersecurity", domain: "Security, ethical hacking", categories: "Skill XP, Certification XP", alignment: "Technical Coordinator" },
@@ -23,49 +12,18 @@ const PATHWAYS = [
   { name: "Research", domain: "Academic research, patents", categories: "Research XP, Innovation XP", alignment: "Research Committee" }
 ];
 
-const INITIAL_BADGES_BY_TIER: Record<string, any[]> = {
-  "Foundation": [
-    { name: "Attendance Warrior", description: "Maintain 95% attendance for a full calendar month.", authority: "Faculty", rarity: "Common" },
-    { name: "Participation Star", description: "Actively participate and answer questions in all class hours for a week.", authority: "Faculty", rarity: "Common" },
-    { name: "Punctuality Pro", description: "Arrive before the bell rings without any late entries for 2 consecutive weeks.", authority: "Faculty", rarity: "Common" }
-  ],
-  "Achievement": [
-    { name: "Code Ninja", description: "Complete daily coding challenges on C/Python for 15 consecutive days.", authority: "Faculty + Evaluator", rarity: "Uncommon" },
-    { name: "GPA Master", description: "Score a GPA of 8.5 or higher in the semester examinations.", authority: "Faculty + Evaluator", rarity: "Uncommon" },
-    { name: "Consistency Champion", description: "Maintain all active daily streaks for 30 consecutive days.", authority: "Faculty + Evaluator", rarity: "Uncommon" },
-    { name: "Hackathon Finisher", description: "Participate and submit a working project in an internal department hackathon.", authority: "Faculty + Evaluator", rarity: "Uncommon" }
-  ],
-  "Excellence": [
-    { name: "Full Stack Warrior", description: "Build and host a web application with complete frontend and backend services.", authority: "Program Management", rarity: "Rare" },
-    { name: "Interview Slayer", description: "Clear the first-round technical mock interviews conducted by internal placement cell.", authority: "Program Management", rarity: "Rare" },
-    { name: "Internship Achiever", description: "Secure and successfully complete a verified 4-week industry internship.", authority: "Program Management", rarity: "Rare" },
-    { name: "Event Commander", description: "Lead and organize a technical/non-technical program or seminar in the college.", authority: "Program Management", rarity: "Rare" }
-  ],
-  "Elite": [
-    { name: "Team Captain Badge", description: "Serve as a team captain and lead the group to an Elite status (4500+ XP).", authority: "Governance Council", rarity: "Very Rare" },
-    { name: "Mentor Hero", description: "Conduct peer teaching and mentor at least 5 junior students to improve their grades.", authority: "Governance Council", rarity: "Very Rare" },
-    { name: "Research Pioneer", description: "Submit a research paper draft accepted/reviewed by the department committee.", authority: "Governance Council", rarity: "Very Rare" },
-    { name: "Innovation Catalyst", description: "Develop a working prototype in the CoE/D2P Lab validated by an industry mentor.", authority: "Governance Council", rarity: "Very Rare" }
-  ],
-  "Legacy": [
-    { name: "Startup Builder", description: "Create a viable project proposal incubated or registered as a student startup.", authority: "Dean / Principal", rarity: "Legendary" },
-    { name: "Placement Champion", description: "Get placed in a tier-1 company with a package exceeding threshold limit.", authority: "Dean / Principal", rarity: "Legendary" },
-    { name: "JJCET Legend", description: "Reach a lifetime cumulative score of 3500+ XP points.", authority: "Dean / Principal", rarity: "Legendary" },
-    { name: "Alumni Pioneer", description: "Act as institutional ambassador and secure industry linkage / MoUs for college.", authority: "Dean / Principal", rarity: "Legendary" }
-  ]
-};
+
 
 export default function LevelsBadgesTab() {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<'levels' | 'badges'>('levels');
   const [isLoading, setIsLoading] = useState(true);
   
-  const [studentXp, setStudentXp] = useState(0);
   const [selectedPathway, setSelectedPathway] = useState<string>("None");
-  
-  const [badgesByTier, setBadgesByTier] = useState<Record<string, any[]>>(INITIAL_BADGES_BY_TIER);
-  const [earnedBadgeNames, setEarnedBadgeNames] = useState<string[]>([]);
-  const [pendingBadgeNames, setPendingBadgeNames] = useState<string[]>([]);
+
+  const [badgesByTier, setBadgesByTier] = useState<Record<string, any[]>>({});
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<(number | string)[]>([]);
+  const [pendingBadgeIds, setPendingBadgeIds] = useState<(number | string)[]>([]);
   
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [selectedBadgeObj, setSelectedBadgeObj] = useState<any>(null);
@@ -73,73 +31,57 @@ export default function LevelsBadgesTab() {
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [progressionData, setProgressionData] = useState<any>(null);
+
   useEffect(() => {
     fetchData();
   }, [token]);
 
   const fetchData = async () => {
     try {
-      const profileRes = await apiClient.get('/api/v1/auth/me');
-      if (profileRes.data.success && profileRes.data.data) {
-        const d = profileRes.data.data;
-        const xp = d.totalXp ?? d.score ?? d.currentXp ?? d.xp ?? 0;
-        setStudentXp(xp);
+      const progRes = await apiClient.get('/api/v1/student-level/progression');
+      if (progRes.data.success && progRes.data.data) {
+        setProgressionData(progRes.data.data);
       }
     } catch {
-      // Fallback
+      // Ignore
     }
 
     try {
       const allBadgesRes = await apiClient.get('/api/v1/badges');
-      if (allBadgesRes.data.success && Array.isArray(allBadgesRes.data.data)) {
-        const fetchedBadges: any[] = allBadgesRes.data.data;
-        if (fetchedBadges.length > 0) {
-          const grouped: Record<string, any[]> = {
-            "Foundation": [],
-            "Achievement": [],
-            "Excellence": [],
-            "Elite": [],
-            "Legacy": []
-          };
-          for (const b of fetchedBadges) {
-            const tier = b.tier || b.badgeTier || "Foundation";
-            if (!grouped[tier]) grouped[tier] = [];
-            grouped[tier].push({
-              id: b.id,
-              name: b.name || b.badgeName,
-              description: b.description || 'Badge definition from server',
-              authority: b.approvalAuthority || b.authority || 'Faculty',
-              rarity: b.rarity || 'Common'
-            });
-          }
-          setBadgesByTier(grouped);
+      const rawData = allBadgesRes.data?.data || allBadgesRes.data;
+      if (Array.isArray(rawData)) {
+        const fetchedBadges: any[] = rawData;
+        const grouped: Record<string, any[]> = {};
+        for (const b of fetchedBadges) {
+          const tier = b.tier || b.badgeTier || "Foundation";
+          if (!grouped[tier]) grouped[tier] = [];
+          grouped[tier].push({
+            id: b.id,
+            name: b.name || b.badgeName,
+            description: b.description || 'Badge definition from server',
+            authority: b.approvalAuthority || b.authority || 'Faculty',
+            rarity: b.rarity || 'Common'
+          });
         }
+        setBadgesByTier(grouped);
       }
-    } catch {
-      // Keep initial
+    } catch (e) {
+      console.warn("Could not fetch badges from server", e);
     }
 
     try {
       const badgesRes = await apiClient.get('/api/v1/badges/student/me');
       if (badgesRes.data.success && Array.isArray(badgesRes.data.data)) {
         const list = badgesRes.data.data;
-        setEarnedBadgeNames(list.filter((b: any) => b.status === "APPROVED").map((b: any) => b.badgeName || b.name));
-        setPendingBadgeNames(list.filter((b: any) => b.status === "PENDING").map((b: any) => b.badgeName || b.name));
+        setEarnedBadgeIds(list.filter((b: any) => b.status === "APPROVED").map((b: any) => b.badgeId));
+        setPendingBadgeIds(list.filter((b: any) => b.status === "PENDING").map((b: any) => b.badgeId));
       }
     } catch {
       // Fallback
     }
-    
-    setIsLoading(false);
-  };
 
-  const getCurrentLevelInfo = () => {
-    for (const lvl of LEVELS) {
-      if (studentXp >= lvl.xpMin && studentXp <= lvl.xpMax) {
-        return lvl;
-      }
-    }
-    return LEVELS[LEVELS.length - 1];
+    setIsLoading(false);
   };
 
   const submitBadgeClaim = async (e: React.FormEvent) => {
@@ -150,52 +92,42 @@ export default function LevelsBadgesTab() {
     }
 
     const allOptions = Object.values(badgesByTier).flat();
-    const selectedObj = allOptions.find(b => String(b.id) === String(selectedBadgeToClaim) || b.name === selectedBadgeToClaim);
+    const selectedObj = allOptions.find(b => String(b.id) === String(selectedBadgeToClaim));
     const badgeId = selectedObj?.id;
     const badgeName = selectedObj?.name || selectedBadgeToClaim;
+
+    if (!badgeId) {
+      toast.error("Could not identify the selected badge. Please try again.");
+      return;
+    }
 
     let validUrl = evidenceUrl.trim();
     if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
       validUrl = 'https://' + validUrl;
     }
 
-    const payload = {
-      badgeId: badgeId,
-      badgeName: badgeName,
-      evidenceUrl: validUrl,
-      proofLink: validUrl
-    };
-    
-    console.log("Submitting:", payload);
     setIsSubmitting(true);
     const toastId = toast.loading("Submitting badge request...");
 
     try {
-      let res = await apiClient.post('/api/badge-requests', {
-        badgeId: badgeId || 1,
-        badgeName: badgeName,
+      const res = await apiClient.post('/api/badge-requests', {
+        badgeId,
+        badgeName,
         proofLink: validUrl
       });
 
       toast.dismiss(toastId);
-      if (res.data?.success || res.status === 200) {
+      if (res.data?.success === true) {
         toast.success("Badge request submitted successfully.");
-        setPendingBadgeNames(prev => [...prev, badgeName]);
+        setPendingBadgeIds(prev => [...prev, badgeId]);
         fetchData();
       } else {
-        toast.success(res.data?.message || "Badge request submitted successfully.");
-        setPendingBadgeNames(prev => [...prev, badgeName]);
+        toast.error(res.data?.message || "Failed to submit badge request.");
       }
     } catch (e: any) {
       toast.dismiss(toastId);
       console.error("Badge request submission error:", e);
-      const msg = e.response?.data?.message || e.message;
-      if (msg && !msg.includes("unexpected error")) {
-        toast.error(msg);
-      } else {
-        toast.success("Badge request submitted successfully.");
-      }
-      setPendingBadgeNames(prev => [...prev, badgeName]);
+      toast.error(e.response?.data?.message || e.message || "Failed to submit badge request.");
     } finally {
       setIsSubmitting(false);
       setIsSubmitModalOpen(false);
@@ -212,9 +144,26 @@ export default function LevelsBadgesTab() {
     );
   }
 
-  const currentLevel = getCurrentLevelInfo();
-  const levelProgress = Math.min(1, Math.max(0, (studentXp - currentLevel.xpMin) / (currentLevel.xpMax - currentLevel.xpMin)));
-  const isEligibleForPathway = currentLevel.level >= 3;
+  if (activeTab === 'levels' && !progressionData) {
+    return (
+      <div className="bg-slate-50 min-h-screen flex items-center justify-center p-8">
+        <p className="text-slate-500 font-medium text-sm">Progression data unavailable</p>
+      </div>
+    );
+  }
+
+  const currentLevelNum = progressionData?.currentLevel ?? 1;
+  const currentLevelTitle = progressionData?.currentLevelName ?? '';
+  const displayTotalXp = progressionData?.totalXp ?? 0;
+  const xpMax = progressionData?.currentLevelMaxXp ?? 0;
+  const remainingXp = progressionData?.remainingXp ?? 0;
+  const levelProgress = (progressionData?.progressPercentage ?? 0) / 100;
+  const isEligibleForPathway = currentLevelNum >= 3;
+
+  const dynamicLevelsList = [
+    ...(progressionData?.unlockedLevels || []).map((l: any) => ({ ...l, isUnlockedApi: true })),
+    ...(progressionData?.lockedLevels || []).map((l: any) => ({ ...l, isUnlockedApi: false })),
+  ];
 
   return (
     <div className="bg-slate-50 min-h-screen pb-24">
@@ -248,7 +197,7 @@ export default function LevelsBadgesTab() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <div className="text-xs font-bold text-indigo-200 tracking-wider mb-1">CURRENT LEVEL</div>
-                  <div className="text-2xl font-bold">Lvl {currentLevel.level}: {currentLevel.title}</div>
+                  <div className="text-2xl font-bold">Lvl {currentLevelNum}: {currentLevelTitle}</div>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                   <Zap className="w-6 h-6 text-amber-300 fill-amber-300" />
@@ -256,14 +205,16 @@ export default function LevelsBadgesTab() {
               </div>
               
               <div className="flex justify-between text-sm font-bold mb-2">
-                <span>{studentXp} XP Points</span>
-                <span className="text-indigo-200">Target: {currentLevel.xpMax} XP (Remaining: {Math.max(0, currentLevel.xpMax - studentXp + 1)})</span>
+                <span>{displayTotalXp} XP Points</span>
+                <span className="text-indigo-200">
+                  {progressionData?.isMaxLevel ? 'Maximum Level Achieved' : `Target: ${xpMax} XP (Remaining: ${remainingXp})`}
+                </span>
               </div>
               
               <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-white transition-all duration-1000" 
-                  style={{ width: `${levelProgress * 100}%` }}
+                  style={{ width: `${Math.min(100, Math.max(0, levelProgress * 100))}%` }}
                 />
               </div>
             </div>
@@ -313,14 +264,19 @@ export default function LevelsBadgesTab() {
             <div>
               <h2 className="text-lg font-bold text-slate-800 mb-4">Level Progression Map</h2>
               <div className="space-y-0">
-                {LEVELS.map((lvl, idx) => {
-                  const isCurrent = lvl.level === currentLevel.level;
-                  const isCompleted = lvl.level < currentLevel.level;
-                  const isLocked = lvl.level > currentLevel.level;
+                {dynamicLevelsList.map((lvl: any, idx: number) => {
+                  const lvlNum = lvl.levelNumber ?? lvl.level;
+                  const lvlTitle = lvl.title;
+                  const isCurrent = lvlNum === currentLevelNum;
+                  const isCompleted = lvl.isUnlockedApi !== undefined ? (lvl.isUnlockedApi && !isCurrent) : (lvlNum < currentLevelNum);
+                  const isLocked = lvl.isUnlockedApi !== undefined ? (!lvl.isUnlockedApi && !isCurrent) : (lvlNum > currentLevelNum);
                   const range = `${lvl.xpMin} - ${lvl.xpMax === 99999 ? '10000+' : lvl.xpMax}`;
+                  const objective = lvl.primaryObjective || lvl.objective || 'Build skills & discipline';
+                  const unlocks = lvl.keyUnlocks || lvl.unlocks || 'Level unlocks';
+                  const stageText = lvl.stage ? (typeof lvl.stage === 'number' ? `STAGE ${lvl.stage}` : String(lvl.stage).toUpperCase()) : 'STAGE 1';
 
                   return (
-                    <div key={lvl.level} className="flex gap-4 group">
+                    <div key={lvlNum} className="flex gap-4 group">
                       <div className="flex flex-col items-center">
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
                           isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
@@ -331,7 +287,7 @@ export default function LevelsBadgesTab() {
                            isCurrent ? <Zap className="w-3.5 h-3.5" /> : 
                            <Lock className="w-3.5 h-3.5" />}
                         </div>
-                        {idx < LEVELS.length - 1 && (
+                        {idx < dynamicLevelsList.length - 1 && (
                           <div className={`w-0.5 h-full min-h-[80px] my-1 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-200'}`} />
                         )}
                       </div>
@@ -342,17 +298,17 @@ export default function LevelsBadgesTab() {
                           'bg-white border-slate-200'
                         }`}>
                           <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-bold text-slate-800 text-[15px]">Lvl {lvl.level}: {lvl.title}</h3>
+                            <h3 className="font-bold text-slate-800 text-[15px]">Lvl {lvlNum}: {lvlTitle}</h3>
                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
                               isCurrent ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'
                             }`}>
-                              {lvl.stage.toUpperCase()}
+                              {stageText}
                             </span>
                           </div>
                           <div className="text-emerald-500 text-xs font-bold mb-3">XP Range: {range}</div>
-                          <div className="text-sm text-slate-600 mb-2"><span className="font-medium opacity-80">Objective:</span> {lvl.objective}</div>
+                          <div className="text-sm text-slate-600 mb-2"><span className="font-medium opacity-80">Objective:</span> {objective}</div>
                           <div className="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
-                            Unlocks: {lvl.unlocks}
+                            Unlocks: {unlocks}
                           </div>
                         </div>
                       </div>
@@ -376,15 +332,15 @@ export default function LevelsBadgesTab() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {badges.map(badge => {
-                    const isEarned = earnedBadgeNames.includes(badge.name);
-                    const isPending = pendingBadgeNames.includes(badge.name);
-                    
+                    const isEarned = earnedBadgeIds.some((id) => String(id) === String(badge.id));
+                    const isPending = pendingBadgeIds.some((id) => String(id) === String(badge.id));
+
                     return (
-                      <div 
-                        key={badge.name} 
+                      <div
+                        key={badge.id}
                         onClick={() => {
                           setSelectedBadgeObj(badge);
-                          setSelectedBadgeToClaim(badge.id || badge.name);
+                          setSelectedBadgeToClaim(badge.id);
                           setIsSubmitModalOpen(true);
                         }}
                         className={`rounded-2xl border p-4 flex flex-col justify-between relative overflow-hidden transition-all cursor-pointer hover:shadow-md ${

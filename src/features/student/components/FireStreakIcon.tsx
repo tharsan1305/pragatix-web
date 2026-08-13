@@ -11,17 +11,19 @@ export const FireStreakIcon: React.FC<FireStreakIconProps> = ({ streakCount, onC
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-black transition-all shadow-sm ${
         hasStreak
-          ? 'bg-orange-500/10 border-orange-500/50 text-orange-400 hover:bg-orange-500/20'
-          : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:bg-slate-700'
+          ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-orange-400/60 text-orange-600 hover:scale-105 active:scale-95 shadow-orange-500/10'
+          : 'bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200'
       }`}
-      title={hasStreak ? `${streakCount} Active Streak Days!` : 'No Active Streak'}
+      title={hasStreak ? `${streakCount} Day Active Streak 🔥` : 'No Active Streak'}
     >
-      <span className={hasStreak ? 'text-amber-400 animate-pulse' : 'text-slate-400 grayscale'}>
+      <span className={`text-base leading-none ${hasStreak ? 'animate-pulse drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'grayscale opacity-40'}`}>
         🔥
       </span>
-      <span>{streakCount}</span>
+      <span className={`font-extrabold ${hasStreak ? 'text-orange-600' : 'text-slate-500'}`}>
+        {streakCount} {hasStreak ? 'Days' : ''}
+      </span>
     </button>
   );
 };

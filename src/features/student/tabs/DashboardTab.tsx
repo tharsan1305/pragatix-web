@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Trophy, Shield, Stars, Users, Activity, TrendingUp, Award } from 'lucide-react';
+import { Trophy, Shield, Stars, Users, Activity, TrendingUp, Award, LockKeyhole } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
@@ -20,17 +20,6 @@ interface ProfileData {
   teamRole?: string;
 }
 
-const LEVEL_THRESHOLDS = [
-  { level: 1, title: "Explorer", min: 0, max: 100 },
-  { level: 2, title: "Builder", min: 101, max: 500 },
-  { level: 3, title: "Innovator", min: 501, max: 1500 },
-  { level: 4, title: "Specialist", min: 1501, max: 3000 },
-  { level: 5, title: "Leader", min: 3001, max: 5000 },
-  { level: 6, title: "Mentor", min: 5001, max: 7000 },
-  { level: 7, title: "Architect", min: 7001, max: 10000 },
-  { level: 8, title: "Industry Ready", min: 10001, max: 99999 },
-];
-
 interface DashboardTabProps {
   onSelectTab?: (tabIndex: number) => void;
   onOpenStreaks?: () => void;
@@ -38,12 +27,15 @@ interface DashboardTabProps {
 
 export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTabProps) {
   const { token, user: authUser } = useAuth();
-  const { xpByCategory, streaks, history, isLoading: isXpLoading, totalXp, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
+  const {
+    xpByCategory, streaks, activityStreaks, history, progression, isLoading: isXpLoading, totalXp,
+    fetchSummary, fetchHistory, fetchStreaks, fetchActivityStreaks, fetchProgression,
+  } = useXpStore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [teamDetails, setTeamDetails] = useState<any>(null);
   const [profile, setProfile] = useState<ProfileData>(() => {
-    const regNo = authUser?.username || authUser?.regNo || authUser?.sprNo || "";
+    const regNo = authUser?.username || authUser?.studentId || authUser?.regNo || authUser?.sprNo || "";
     return {
       studentName: authUser?.fullName || authUser?.name || "",
       studentId: regNo,
@@ -59,136 +51,115 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
     };
   });
 
-  const fetchTeamDetails = async (studentId?: string) => {
+  const fetchTeamDetails = async (_studentId?: string) => {
     try {
       const res = await apiClient.get('/api/v1/teams/my-team/details');
-      if (res.data.success && res.data.data) {
-        setTeamDetails(res.data.data);
-        return;
+      if (res.data?.success && res.data?.data) {
+        const t = res.data.data;
+        setTeamDetails({
+          teamName: t.teamName || 'My Team',
+          captainName: t.captainName || 'Not Assigned',
+          viceCaptainName: t.viceCaptainName || 'Not Assigned',
+          totalTeamXp: t.totalTeamXp ?? 0,
+          stage: t.stage || 'Stage 1',
+          department: t.department || '',
+          section: t.section || '',
+          currentMemberCount: t.currentMemberCount ?? (t.members?.length || 0),
+          members: t.members || [],
+        });
       }
-    } catch (err) {
-      try {
-        const fallback = await apiClient.get('/api/v1/teams/my-team');
-        if (fallback.data.success && fallback.data.data) {
-          const t = fallback.data.data;
-          setTeamDetails({
-            teamName: t.name || t.teamName || 'My Team',
-            captainName: t.captainName || t.captain?.fullName || 'Not Assigned',
-            viceCaptainName: t.viceCaptainName || t.viceCaptain?.fullName || 'Not Assigned',
-            totalTeamXp: t.totalTeamXp || t.teamXp || 0,
-            stage: t.stage || 'Stage 1',
-            department: t.departmentName || t.department?.name || profile.department || 'N/A',
-            section: t.sectionName || t.section?.sectionName || profile.section || 'N/A',
-            currentMemberCount: t.memberCount || (t.members?.length || 0),
-            members: t.members || [],
-          });
-          return;
-        }
-      } catch (err2) {
-        if (studentId) {
-          try {
-            const fallback2 = await apiClient.get(`/api/v1/teams/student/${studentId}`);
-            if (fallback2.data.success && fallback2.data.data) {
-              setTeamDetails(fallback2.data.data);
-            }
-          } catch (err3) {
-            console.error("Failed to load team details", err3);
-          }
-        }
-      }
+    } catch {
+      // Student has no team assigned yet — silently set to null
+      setTeamDetails(null);
     }
   };
 
+  const [activeStageExpectedXp, setActiveStageExpectedXp] = useState<number>(0);
+  const [hasActiveStage, setHasActiveStage] = useState<boolean>(false);
+
   useEffect(() => {
-    const loadProfile = async () => {
+    let isMounted = true;
+    const loadDashboardData = async () => {
+      setIsLoading(true);
       try {
-        if (token === 'debug_token') {
-          setIsLoading(false);
-          return; // Skip fetch for mock login
-        }
-        fetchTeamDetails();
         const res = await apiClient.get('/api/v1/auth/me');
-        if (res.data.success && res.data.data) {
+        if (res.data?.success && res.data?.data && isMounted) {
           const p = res.data.data;
-          const regNo = p.username || p.sprNo || "";
-          setProfile(prev => ({
-            ...prev,
-            studentName: p.fullName || prev.studentName,
+          const regNo = p.username || p.sprNo || p.regNo || "";
+          setProfile({
+            studentName: p.fullName || p.name || "",
             studentId: regNo,
-            section: p.section || prev.section,
-            year: p.year || prev.year,
-            department: p.department || prev.department,
-            score: p.totalXp ?? p.score ?? prev.score,
-            rank: p.rank || prev.rank,
-            currentStage: p.stage ?? prev.currentStage,
+            section: p.section || "",
+            year: p.year || "",
+            department: p.department || "",
+            score: p.totalXp ?? p.score ?? 0,
+            rank: p.rank || 1,
+            currentStage: p.stage ?? 1,
             isCaptain: p.isCaptain ?? (p.teamRole === 'CAPTAIN'),
             isViceCaptain: p.isViceCaptain ?? (p.teamRole === 'VICE_CAPTAIN'),
             teamRole: p.teamRole,
-          }));
+          });
 
           if (regNo) {
             fetchSummary(regNo);
             fetchHistory(regNo);
             fetchStreaks(regNo);
+            fetchActivityStreaks();
+            fetchProgression();
             fetchTeamDetails(regNo);
           }
         }
       } catch (error) {
-        console.error("Failed to load profile", error);
+        console.error("Failed to load profile data", error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
-    };
 
-    loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  useEffect(() => {
-    if (profile.studentId && !isLoading) {
-      fetchSummary(profile.studentId);
-      fetchHistory(profile.studentId);
-      fetchStreaks(profile.studentId);
-      fetchTeamDetails(profile.studentId);
-    }
-  }, [profile.studentId, isLoading, fetchSummary, fetchHistory, fetchStreaks]);
-
-  const getLevelInfo = (xp: number) => {
-    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-      if (xp <= LEVEL_THRESHOLDS[i].max) {
-        return LEVEL_THRESHOLDS[i];
-      }
-    }
-    return LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1];
-  };
-
-  const [activeStageExpectedXp, setActiveStageExpectedXp] = useState<number>(200);
-
-  useEffect(() => {
-    const fetchStageInfo = async () => {
       try {
         const fetchedStages = await apiClient.get('/api/v1/students/stages');
-        if (fetchedStages.data?.success && Array.isArray(fetchedStages.data?.data)) {
+        if (fetchedStages.data?.success && Array.isArray(fetchedStages.data?.data) && isMounted) {
           const list = fetchedStages.data.data;
           const active = list.find((s: any) => s.isActive === true || s.active === true || s.stageStatus === 'ACTIVE');
-          if (active && active.expectedXp) {
-            setActiveStageExpectedXp(Number(active.expectedXp));
+          if (active) {
+            setHasActiveStage(true);
+            setActiveStageExpectedXp(Number(active.expectedXp) || 0);
+          } else {
+            setHasActiveStage(false);
           }
         }
       } catch (_) {}
     };
-    fetchStageInfo();
-  }, []);
+
+    if (token) {
+      loadDashboardData();
+    }
+    return () => { isMounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const displayXp = profile.score !== undefined && profile.score !== null ? profile.score : (totalXp ?? 0);
-  const levelInfo = getLevelInfo(displayXp);
-  const progress = Math.min(1, Math.max(0, (displayXp - levelInfo.min) / (levelInfo.max - levelInfo.min)));
+  const levelNum = progression?.currentLevel ?? 1;
+  const levelTitle = progression?.currentLevelName ?? 'Explorer';
+  const levelMaxXp = progression?.currentLevelMaxXp ?? 100;
+  const progress = progression ? Math.min(1, Math.max(0, (progression.progressPercentage ?? 0) / 100)) : 0;
 
-  const maxStreak = (streaks || []).reduce((max, s) => {
-    const current = s?.currentStreak || s?.streakCount || 0;
-    const isBroken = s?.isBroken === true || s?.status === 'Broken' || s?.status === 'BROKEN';
-    return !isBroken && current > max ? current : max;
-  }, 0);
+  const maxStreak = (() => {
+    if (!streaks) return 0;
+    if (typeof streaks === 'number') return streaks;
+    if (Array.isArray(streaks)) {
+      if (streaks.length === 0) return 0;
+      return streaks.reduce((max, s) => {
+        if (typeof s === 'number') return s > max ? s : max;
+        const current = Number(s?.currentStreak ?? s?.streakCount ?? s?.streak ?? s?.count ?? 0);
+        const isBroken = s?.isBroken === true || s?.status === 'Broken' || s?.status === 'BROKEN';
+        return !isBroken && current > max ? current : max;
+      }, 0);
+    }
+    if (typeof streaks === 'object') {
+      return Number((streaks as any).activeStreakCount ?? (streaks as any).currentStreak ?? (streaks as any).totalStreak ?? 0);
+    }
+    return 0;
+  })();
   const displayStreak = maxStreak;
 
   if (isLoading || isXpLoading) {
@@ -270,7 +241,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Level Progress */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-slate-800">Level {levelInfo.level} — {levelInfo.title}</h3>
+            <h3 className="font-bold text-slate-800">Level {levelNum} — {levelTitle}</h3>
             <Stars className="w-6 h-6 text-indigo-500" />
           </div>
           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
@@ -280,14 +251,20 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
             />
           </div>
           <p className="text-xs text-slate-500 font-medium">
-            {displayXp} / {levelInfo.max} XP to next level
+            {displayXp} / {levelMaxXp} XP to next level
           </p>
         </div>
 
-        {/* Stage Progress Card (Matching Flutter activeStageDetails) */}
-        {(() => {
+        {/* Stage Progress Card (matches Flutter's _buildStageProgressBanner) */}
+        {!hasActiveStage ? (
+          <div className="bg-red-50 rounded-2xl p-5 border border-red-200 text-center space-y-2">
+            <LockKeyhole className="w-8 h-8 mx-auto text-red-500" />
+            <h3 className="font-bold text-red-600 text-base">No Active Stage</h3>
+            <p className="text-xs text-red-500">No active stage is currently available. Activities are locked.</p>
+          </div>
+        ) : (() => {
           const currentStage = Math.max(1, profile.currentStage || 1);
-          const stageMaxXp = activeStageExpectedXp || 200;
+          const stageMaxXp = activeStageExpectedXp || 1;
           const stagePct = Math.min(100, Math.round((displayXp / stageMaxXp) * 100));
 
           return (
@@ -308,7 +285,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
               </div>
 
               <div className="flex justify-between items-center text-sm font-bold">
-                <span className="text-slate-700">{displayXp} / {stageMaxXp} XP</span>
+                <span className="text-slate-700">{displayXp} / {activeStageExpectedXp} XP</span>
                 <span className={stagePct >= 100 ? 'text-emerald-600' : 'text-indigo-600'}>{stagePct}%</span>
               </div>
             </div>
@@ -368,6 +345,33 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Activity Streaks */}
+        <div>
+          <h3 className="text-lg font-bold text-slate-800 mb-3">Activity Streaks</h3>
+          {activityStreaks.length === 0 ? (
+            <p className="text-slate-500 text-sm">No active activity streaks recorded.</p>
+          ) : (
+            <div className="flex overflow-x-auto gap-3 pb-2 snap-x">
+              {activityStreaks.map((s, idx) => {
+                const count = Number(s?.currentStreak ?? 0);
+                const isBroken = count === 0;
+                const name = s?.activityName || 'Activity';
+                return (
+                  <div key={idx} className={`snap-start shrink-0 w-32 p-3 rounded-2xl border-2 bg-white ${isBroken ? 'border-red-200' : 'border-orange-200'}`}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] font-bold text-slate-800 truncate w-20">{name}</span>
+                      <span className="text-xs">{isBroken ? "💤" : "⚡"}</span>
+                    </div>
+                    <div className={`text-sm font-bold ${isBroken ? 'text-red-500' : 'text-orange-600'}`}>
+                      {isBroken ? "No Streak" : `${count} Times`}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

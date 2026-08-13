@@ -3,6 +3,7 @@ import { Medal, UserMinus, CheckCircle2, XCircle, Link, AlertTriangle } from 'lu
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
+import { getSafeHref } from '../../../core/utils/url';
 
 export default function RemovalRequestsTab() {
   const { token } = useAuth();
@@ -162,7 +163,7 @@ export default function RemovalRequestsTab() {
                 
                 <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-2 items-start">
                   <Link className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                  <a href={claim.evidenceUrl || "#"} target="_blank" rel="noreferrer" className="text-xs text-indigo-600 hover:underline break-all">
+                  <a href={getSafeHref(claim.evidenceUrl)} target="_blank" rel="noreferrer" className="text-xs text-indigo-600 hover:underline break-all">
                     {claim.evidenceUrl || "No evidence provided"}
                   </a>
                 </div>

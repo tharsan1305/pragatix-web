@@ -37,14 +37,17 @@ export const studentService = {
     const form = new FormData();
     form.append('file', file);
     return apiClient.post('/api/v1/students/bulk-parse', form, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000
     });
   },
 
   // Bulk import confirmed students
   // POST /api/v1/students/bulk-import
   bulkImport: (students: any[]) =>
-    apiClient.post('/api/v1/students/bulk-import', students),
+    apiClient.post('/api/v1/students/bulk-import', students, {
+      timeout: 120000
+    }),
 
   // Adjust student points (add or deduct)
   // POST /api/v1/students/{id}/adjust-points

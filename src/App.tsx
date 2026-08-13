@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './features/auth/LoginPage';
+import ContactUsPage from './pages/legal/ContactUsPage';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
+import SecurityPage from './pages/legal/SecurityPage';
+import CookiePolicyPage from './pages/legal/CookiePolicyPage';
+import DpdpCompliancePage from './pages/legal/DpdpCompliancePage';
+import AccountDataDeletionPolicyPage from './pages/legal/AccountDataDeletionPolicyPage';
+import DisclaimerPage from './pages/legal/DisclaimerPage';
+import DataSafetyPolicyPage from './pages/legal/DataSafetyPolicyPage';
 import AdminDashboard from './features/admin/AdminDashboard';
 import TeacherDashboard from './features/teacher/TeacherDashboard';
 import StudentDashboardPage from './features/student/StudentDashboardPage';
@@ -46,6 +55,16 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
+          
+          <Route path="/contact" element={<ContactUsPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/cookies" element={<CookiePolicyPage />} />
+          <Route path="/dpdp-compliance" element={<DpdpCompliancePage />} />
+          <Route path="/data-deletion" element={<AccountDataDeletionPolicyPage />} />
+          <Route path="/disclaimer" element={<DisclaimerPage />} />
+          <Route path="/data-safety" element={<DataSafetyPolicyPage />} />
           
           {/* Shared Routes */}
           <Route 

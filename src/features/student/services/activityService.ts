@@ -15,11 +15,7 @@ export class ActivityService {
         rawStages = Array.isArray(res.data) ? res.data : (res.data.data || []);
       }
     } catch (e) {
-      console.warn('Student stages endpoint fallback to admin stages:', e);
-      const adminRes = await apiClient.get('/api/v1/admin/stages');
-      if (adminRes.data && adminRes.data.success) {
-        rawStages = adminRes.data.data || [];
-      }
+      console.warn('Could not fetch student stages:', e);
     }
 
     const stages: Stage[] = [];
@@ -80,6 +76,7 @@ export class ActivityService {
             evidence: evidenceArr,
             statusPillText: act.statusPillText || act.status || (isCompleted ? 'COMPLETED' : 'NOT_STARTED'),
             allowStudentRequest: act.allowStudentRequest === true || act.allowRequest === true || act.canRequest === true,
+            category: act.category || 'OTHER',
           };
         });
 

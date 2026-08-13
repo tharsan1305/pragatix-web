@@ -5,18 +5,20 @@ import apiClient from '../../../services/apiClient';
 interface AttendanceRecord {
   date: string;
   period?: string | number;
-  status: 'PRESENT' | 'ABSENT' | 'ON_DUTY' | 'LATE';
+  status: 'PRESENT' | 'ABSENT';
   remarks?: string;
+}
+
+interface AttendanceStats {
+  percentage: number;
+  monthlyPercentage: number;
+  presentDays: number;
+  absentDays: number;
 }
 
 export default function StudentAttendanceTab() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [stats, setStats] = useState({
-    percentage: 100,
-    monthlyPercentage: 100,
-    presentDays: 0,
-    absentDays: 0,
-  });
+  const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +32,7 @@ export default function StudentAttendanceTab() {
     try {
       const [summaryRes, historyRes] = await Promise.allSettled([
         apiClient.get('/api/student/attendance/summary'),
-        apiClient.get('/api/student/attendance/history')
+        apiClient.get('/api/student/attendance/history'),
       ]);
 
       let summaryData: any = null;
@@ -45,17 +47,14 @@ export default function StudentAttendanceTab() {
       }
 
       if (summaryData) {
-        const present = summaryData.totalPresentDays ?? summaryData.presentDays ?? 0;
-        const absent = summaryData.totalAbsentDays ?? summaryData.absentDays ?? 0;
-        const overallPct = summaryData.attendancePercentage ?? summaryData.percentage ?? 100;
-        const monthlyPct = summaryData.monthlyAttendancePercentage ?? summaryData.monthlyPercentage ?? overallPct;
-
         setStats({
-          percentage: Math.round(overallPct),
-          monthlyPercentage: Math.round(monthlyPct),
-          presentDays: present,
-          absentDays: absent,
+          percentage: Math.round(summaryData.attendancePercentage ?? 0),
+          monthlyPercentage: Math.round(summaryData.monthlyAttendancePercentage ?? 0),
+          presentDays: summaryData.totalPresentDays ?? 0,
+          absentDays: summaryData.totalAbsentDays ?? 0,
         });
+      } else {
+        setStats(null);
       }
 
       setRecords(historyData);
@@ -83,6 +82,28 @@ export default function StudentAttendanceTab() {
       </div>
 
       <div className="p-4 max-w-3xl mx-auto space-y-6">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+          </div>
+        ) : error ? (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-center space-x-3 text-sm font-semibold">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        ) : !stats ? (
+          <div className="bg-white p-8 rounded-2xl text-center border border-slate-100 shadow-sm flex flex-col items-center gap-4">
+            <p className="text-sm font-medium text-slate-500">No attendance data available.</p>
+            <button
+              onClick={fetchAttendance}
+              className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </button>
+          </div>
+        ) : (
+          <>
         {/* 4 Summary Cards matching Flutter _buildSummaryCards */}
         <div className="grid grid-cols-2 gap-4">
           {/* Card 1: Overall */}
@@ -114,16 +135,7 @@ export default function StudentAttendanceTab() {
         <h2 className="text-lg font-bold text-slate-800 pt-2">Attendance History</h2>
 
         {/* Logs Listing matching Flutter _buildHistoryList */}
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
-          </div>
-        ) : error ? (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-center space-x-3 text-sm font-semibold">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        ) : records.length === 0 ? (
+        {records.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100 shadow-sm">
             <p className="text-sm font-medium">No history available.</p>
           </div>
@@ -169,6 +181,8 @@ export default function StudentAttendanceTab() {
               );
             })}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

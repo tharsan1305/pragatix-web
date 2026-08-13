@@ -196,9 +196,11 @@ export default function TeacherGroupManagementTab() {
       setDepts(["All", ...Array.from(deptSet).sort()]);
       setYears(["All", ...Array.from(yearSet).sort()]);
       setSections(["All", ...Array.from(sectionSet).sort()]);
+      return data;
     } catch (e: any) {
       console.error("Error fetching teams", e);
       setGroups([]);
+      return [];
     } finally {
       setIsLoading(false);
     }
@@ -253,14 +255,21 @@ export default function TeacherGroupManagementTab() {
     setIsSubmitting(true);
     const toastId = toast.loading("Updating group limit...");
     try {
-      const response = await apiClient.put(`/api/v1/teams/${activeLimitTeam.id}/limit?size=${newSize}`);
+      let response;
+      try {
+        response = await apiClient.put(`/api/v1/teams/${activeLimitTeam.id}/limit?size=${newSize}`);
+      } catch {
+        const teamName = (activeLimitTeam as any).name || "Team";
+        response = await apiClient.put(`/api/v1/teams/${activeLimitTeam.id}`, { name: teamName, size: newSize });
+      }
       toast.dismiss(toastId);
-      if (response.data.success) {
-        toast.success("Group limit updated successfully");
+      if (response.data.success || response.status === 200) {
+        toast.success("Group limit updated successfully!");
         setActiveLimitTeam(null);
-        fetchGroups();
+        const updatedGroups = await fetchGroups();
         if (selectedTeamDetails && (selectedTeamDetails.teamId === activeLimitTeam.id || selectedTeamDetails.id === activeLimitTeam.id)) {
-          setSelectedTeamDetails(prev => prev ? { ...prev, teamCapacity: newSize, size: newSize } : null);
+          const fresh = updatedGroups.find((g: any) => (g.teamId || g.id) === activeLimitTeam.id);
+          if (fresh) setSelectedTeamDetails(fresh);
         }
       } else {
         toast.error(response.data.message || "Failed to update group limit");
@@ -295,16 +304,29 @@ export default function TeacherGroupManagementTab() {
     setIsSubmitting(true);
     const toastId = toast.loading("Adding member to group...");
     try {
-      const response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/add-member?regNo=${encodeURIComponent(regNoToAdd)}&studentId=${encodeURIComponent(regNoToAdd)}`);
+      let response;
+      try {
+        response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/members?regNo=${encodeURIComponent(regNoToAdd)}`);
+      } catch {
+        try {
+          response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/members`, [regNoToAdd]);
+        } catch {
+          response = await apiClient.post(`/api/v1/teams/${activeAddTeamId}/add-member?regNo=${encodeURIComponent(regNoToAdd)}`);
+        }
+      }
       toast.dismiss(toastId);
-      if (response.data.success) {
-        toast.success("Member added successfully");
+      if (response.data.success || response.status === 200) {
+        toast.success("Member added successfully!");
         setActiveAddTeamId(null);
         setStudentIdInput('');
         setMemberSearchQuery('');
         setMemberSearchResults([]);
         setSelectedMemberToAssign(null);
-        fetchGroups();
+        const updatedGroups = await fetchGroups();
+        if (selectedTeamDetails && (selectedTeamDetails.teamId === activeAddTeamId || selectedTeamDetails.id === activeAddTeamId)) {
+          const fresh = updatedGroups.find((g: any) => (g.teamId || g.id) === activeAddTeamId);
+          if (fresh) setSelectedTeamDetails(fresh);
+        }
       } else {
         toast.error(response.data.message || "Failed to add member");
       }
@@ -319,11 +341,20 @@ export default function TeacherGroupManagementTab() {
   const removeMember = async (teamId: number, studentRegNoOrId: string, name: string) => {
     const toastId = toast.loading(`Removing ${name}...`);
     try {
-      const response = await apiClient.post(`/api/v1/teams/${teamId}/remove-member?regNo=${encodeURIComponent(studentRegNoOrId)}&studentId=${encodeURIComponent(studentRegNoOrId)}`);
+      let response;
+      try {
+        response = await apiClient.delete(`/api/v1/teams/${teamId}/members/${encodeURIComponent(studentRegNoOrId)}`);
+      } catch {
+        response = await apiClient.post(`/api/v1/teams/${teamId}/remove-member?regNo=${encodeURIComponent(studentRegNoOrId)}`);
+      }
       toast.dismiss(toastId);
-      if (response.data.success) {
+      if (response.data.success || response.status === 200) {
         toast.success(`Removed ${name} from group`);
-        fetchGroups();
+        const updatedGroups = await fetchGroups();
+        if (selectedTeamDetails && (selectedTeamDetails.teamId === teamId || selectedTeamDetails.id === teamId)) {
+          const fresh = updatedGroups.find((g: any) => (g.teamId || g.id) === teamId);
+          if (fresh) setSelectedTeamDetails(fresh);
+        }
       } else {
         toast.error(response.data.message || "Failed to remove member");
       }
@@ -352,12 +383,21 @@ export default function TeacherGroupManagementTab() {
     setIsSubmitting(true);
     const toastId = toast.loading("Updating team captain...");
     try {
-      const response = await apiClient.put(`/api/v1/teams/${tId}/captain?regNo=${encodeURIComponent(selectedNewCaptainRegNo)}`);
+      let response;
+      try {
+        response = await apiClient.put(`/api/v1/teams/${tId}/captain?regNo=${encodeURIComponent(selectedNewCaptainRegNo)}`);
+      } catch {
+        response = await apiClient.post(`/api/v1/teams/${tId}/captain?regNo=${encodeURIComponent(selectedNewCaptainRegNo)}`);
+      }
       toast.dismiss(toastId);
-      if (response.data.success) {
+      if (response.data.success || response.status === 200) {
         toast.success("Team Captain changed successfully!");
         setActiveChangeCaptainTeam(null);
-        fetchGroups();
+        const updatedGroups = await fetchGroups();
+        if (selectedTeamDetails && (selectedTeamDetails.teamId === tId || selectedTeamDetails.id === tId)) {
+          const fresh = updatedGroups.find((g: any) => (g.teamId || g.id) === tId);
+          if (fresh) setSelectedTeamDetails(fresh);
+        }
       } else {
         toast.error(response.data.message || "Failed to change captain");
       }
@@ -389,15 +429,21 @@ export default function TeacherGroupManagementTab() {
     setIsSubmitting(true);
     const toastId = toast.loading("Updating team vice captain...");
     try {
-      const response = await apiClient.put(`/api/v1/teams/${tId}/vice-captain?regNo=${encodeURIComponent(selectedNewViceCaptainRegNo)}`);
+      let response;
+      try {
+        response = await apiClient.put(`/api/v1/teams/${tId}/vice-captain?regNo=${encodeURIComponent(selectedNewViceCaptainRegNo)}`);
+      } catch {
+        response = await apiClient.post(`/api/v1/teams/${tId}/vice-captain?regNo=${encodeURIComponent(selectedNewViceCaptainRegNo)}`);
+      }
       toast.dismiss(toastId);
       if (response.data.success || response.status === 200) {
         toast.success("Team Vice Captain updated successfully!");
         setActiveChangeViceCaptainTeam(null);
+        const updatedGroups = await fetchGroups();
         if (selectedTeamDetails && (selectedTeamDetails.teamId === tId || selectedTeamDetails.id === tId)) {
-          setSelectedTeamDetails(null);
+          const fresh = updatedGroups.find((g: any) => (g.teamId || g.id) === tId);
+          if (fresh) setSelectedTeamDetails(fresh);
         }
-        fetchGroups();
       } else {
         toast.error(response.data.message || "Failed to change vice captain");
       }
@@ -422,12 +468,10 @@ export default function TeacherGroupManagementTab() {
     try {
       const response = await apiClient.delete(`/api/v1/teams/${tId}`);
       toast.dismiss(toastId);
-      if (response.data.success) {
+      if (response.data.success || response.status === 200) {
         toast.success("Group deleted successfully!");
         setActiveDeleteTeam(null);
-        if (selectedTeamDetails && (selectedTeamDetails.teamId === tId || selectedTeamDetails.id === tId)) {
-          setSelectedTeamDetails(null);
-        }
+        setSelectedTeamDetails(null);
         fetchGroups();
       } else {
         toast.error(response.data.message || "Failed to delete group");
@@ -437,6 +481,22 @@ export default function TeacherGroupManagementTab() {
       toast.error(e.response?.data?.message || e.message);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const openTeamDetails = async (g: GroupData) => {
+    setSelectedTeamDetails(g);
+    const tId = g.teamId || g.id;
+    if (tId) {
+      try {
+        const response = await apiClient.get(`/api/v1/teams/${tId}`);
+        const fresh = response.data?.data || response.data;
+        if (fresh && (fresh.teamId || fresh.id)) {
+          setSelectedTeamDetails(fresh);
+        }
+      } catch (e) {
+        console.warn("Could not fetch detailed team view:", e);
+      }
     }
   };
 
@@ -530,7 +590,7 @@ export default function TeacherGroupManagementTab() {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        onClick={() => setSelectedTeamDetails(g)}
+                        onClick={() => openTeamDetails(g)}
                         className="flex items-center gap-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors"
                         title="View Full Team Details"
                       >
@@ -637,13 +697,26 @@ export default function TeacherGroupManagementTab() {
         )}
       </div>
 
-      {/* FULL TEAM DETAILS MODAL (Matching Flutter's Team Details Screen) */}
+      {/* FULL TEAM DETAILS MODAL (Matching Flutter's Team Details Screen 1:1) */}
       {selectedTeamDetails && (() => {
         const g = selectedTeamDetails;
         const tId = g.teamId || g.id || 0;
-        const captainName = g.captainName || g.captain?.fullName || g.captain?.username || "No Captain";
-        const viceCaptainName = g.viceCaptainName || g.viceCaptain?.fullName || g.viceCaptain?.username || "Balaji";
         const members = g.teamMembers || g.members || g.students || [];
+        
+        const captainRegNo = (g.captainId || g.captainRegNo || g.captain?.regNo || g.captain?.id || '').toString().toLowerCase().trim();
+        const viceCaptainRegNo = (g.viceCaptainId || g.viceCaptainRegNo || g.viceCaptain?.regNo || g.viceCaptain?.id || '').toString().toLowerCase().trim();
+
+        const captainMember = members.find((m: any) => {
+          const mReg = (m.regNo || m.studentId || m.id || '').toString().toLowerCase().trim();
+          return (mReg && mReg === captainRegNo) || m.isCaptain || m.teamRole === 'CAPTAIN';
+        });
+        const viceCaptainMember = members.find((m: any) => {
+          const mReg = (m.regNo || m.studentId || m.id || '').toString().toLowerCase().trim();
+          return (mReg && mReg === viceCaptainRegNo) || m.isViceCaptain || m.teamRole === 'VICE_CAPTAIN';
+        });
+
+        const captainName = g.captainName || captainMember?.fullName || captainMember?.name || g.captain?.fullName || g.captain?.name || "Unassigned";
+        const viceCaptainName = g.viceCaptainName || viceCaptainMember?.fullName || viceCaptainMember?.name || g.viceCaptain?.fullName || g.viceCaptain?.name || "Unassigned";
         const size = g.teamCapacity || g.size || g.maxTeamSize || 10;
         const groupName = g.teamName || g.name || g.groupName || `Group #${tId}`;
         const dept = g.departmentName || (typeof g.department === 'string' ? g.department : g.department?.name) || 'Cyber Security';
@@ -761,7 +834,27 @@ export default function TeacherGroupManagementTab() {
                   </div>
 
                   <div className="space-y-2">
-                    {members.map((m: any, idx: number) => {
+                    {[...members]
+                      .sort((a: any, b: any) => {
+                        const aReg = (a.regNo || a.studentId || a.id || '').toString();
+                        const bReg = (b.regNo || b.studentId || b.id || '').toString();
+                        const captainRegNo = (g.captainRegNo || g.captainId || g.captain?.regNo || g.captain?.id || '').toString();
+                        const viceCaptainRegNo = (g.viceCaptainRegNo || g.viceCaptainId || g.viceCaptain?.regNo || g.viceCaptain?.id || '').toString();
+                        const viceCaptainName = g.viceCaptainName || g.viceCaptain?.fullName || g.viceCaptain?.name || '';
+
+                        const aIsCaptain = (aReg && aReg === captainRegNo) || a.isCaptain || a.teamRole === 'CAPTAIN';
+                        const bIsCaptain = (bReg && bReg === captainRegNo) || b.isCaptain || b.teamRole === 'CAPTAIN';
+                        if (aIsCaptain && !bIsCaptain) return -1;
+                        if (!aIsCaptain && bIsCaptain) return 1;
+
+                        const aIsVice = (aReg && aReg === viceCaptainRegNo) || a.isViceCaptain || a.teamRole === 'VICE_CAPTAIN' || (viceCaptainName && (a.fullName === viceCaptainName || a.name === viceCaptainName));
+                        const bIsVice = (bReg && bReg === viceCaptainRegNo) || b.isViceCaptain || b.teamRole === 'VICE_CAPTAIN' || (viceCaptainName && (b.fullName === viceCaptainName || b.name === viceCaptainName));
+                        if (aIsVice && !bIsVice) return -1;
+                        if (!aIsVice && bIsVice) return 1;
+
+                        return 0;
+                      })
+                      .map((m: any, idx: number) => {
                       const mRegNo = (m.regNo || m.studentId || m.id || '').toString();
                       const captainRegNo = (g.captainRegNo || g.captainId || g.captain?.regNo || g.captain?.id || '').toString();
                       const viceCaptainRegNo = (g.viceCaptainRegNo || g.viceCaptainId || g.viceCaptain?.regNo || g.viceCaptain?.id || '').toString();
@@ -1036,7 +1129,7 @@ export default function TeacherGroupManagementTab() {
                       className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm font-semibold bg-white"
                     >
                       {members.map((m: any) => {
-                        const mRegNo = (m.regNo || m.studentId || '').toString();
+                        const mRegNo = (m.regNo || m.studentId || m.registerNumber || m.studentRegNo || m.id || '').toString();
                         return (
                           <option key={mRegNo} value={mRegNo}>
                             {m.fullName || m.name || mRegNo} ({mRegNo})
@@ -1093,7 +1186,7 @@ export default function TeacherGroupManagementTab() {
                       className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm font-semibold bg-white"
                     >
                       {members.map((m: any) => {
-                        const mRegNo = (m.regNo || m.studentId || '').toString();
+                        const mRegNo = (m.regNo || m.studentId || m.registerNumber || m.studentRegNo || m.id || '').toString();
                         return (
                           <option key={mRegNo} value={mRegNo}>
                             {m.fullName || m.name || mRegNo} ({mRegNo})

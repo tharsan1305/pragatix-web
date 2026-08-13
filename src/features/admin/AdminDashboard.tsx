@@ -19,22 +19,24 @@ import ActivityListPage from './activity/pages/ActivityListPage';
 import CreateActivityPage from './activity/pages/CreateActivityPage';
 import EditActivityPage from './activity/pages/EditActivityPage';
 import AssignFacultyPage from './activity/pages/AssignFacultyPage';
+import TeacherActivityWorkflowPage from '../teacher/pages/TeacherActivityWorkflowPage';
 import CaptainRewardYearSelectionPage from './pages/CaptainRewardYearSelectionPage';
 import CaptainRewardSettingsPage from './pages/CaptainRewardSettingsPage';
 import AttendanceSettingsYearSelectionPage from './pages/AttendanceSettingsYearSelectionPage';
 import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
 import AcademicCalendarPage from './pages/AcademicCalendarPage';
 import AnalyticsTab from './tabs/AnalyticsTab';
+import YearSelectionPage from './pages/YearSelectionPage';
 import PageLoader from '../../components/common/PageLoader';
 import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, isSuperAdmin: authIsSuperAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isTabLoading, setIsTabLoading] = useState(false);
 
-  const isSuperAdmin = user?.roles?.some((r: any) => {
+  const isSuperAdmin = authIsSuperAdmin || user?.roles?.some((r: any) => {
     const name = typeof r === 'string' ? r : (r?.name || '');
     return name === 'ROLE_SUPER_ADMIN' || name === 'ROLE_SUPERADMIN' || name === 'SUPER_ADMIN';
   }) || user?.isSuperAdmin || false;
@@ -70,8 +72,17 @@ export default function AdminDashboard() {
     const newParams: Record<string, string> = { tab: currentTabSlug, view: name };
     if (props) {
       Object.entries(props).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && typeof v !== 'object') {
-          newParams[k] = String(v);
+        if (v !== undefined && v !== null) {
+          if (typeof v !== 'object') {
+            newParams[k] = String(v);
+          } else {
+            if (k === 'activity' && (v as any).id) {
+              newParams.activityId = String((v as any).id);
+            }
+            if (k === 'stage' && (v as any).id) {
+              newParams.stageId = String((v as any).id);
+            }
+          }
         }
       });
     }
@@ -99,7 +110,7 @@ export default function AdminDashboard() {
 
   const tabs: { name: string; icon: any; Component: React.ComponentType<any> }[] = [
     { name: 'Overview', icon: LayoutDashboard, Component: OverviewTab },
-    { name: 'Activity', icon: Activity, Component: ActivityTab },
+    { name: 'Activity', icon: Activity, Component: isSuperAdmin ? YearSelectionPage : ActivityTab },
     { name: 'Attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
     { name: 'Groups', icon: Users, Component: TeacherGroupManagementTab },
     { name: 'Requests', icon: Award, Component: AdminBadgeRequestsTab },
@@ -140,13 +151,15 @@ export default function AdminDashboard() {
         return <StageDetailsPage onBack={popView} stageId={Number(currentViewProps.stageId) || currentViewProps.stageId} stageName={currentViewProps.stageName || ''} stageDescription={currentViewProps.stageDescription || ''} teachersList={currentViewProps.teachersList} onPushView={pushView} />;
       case 'activity_list':
       case 'all_activities':
-        return <ActivityListPage onBack={popView} subgroup={currentViewProps.subgroup} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName || (currentViewName === 'all_activities' ? 'All Activities' : undefined)} onPushView={pushView} />;
+        return <ActivityListPage onBack={popView} subgroup={currentViewProps.subgroup} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName || (currentViewName === 'all_activities' ? 'All Activities' : undefined)} academicYear={currentViewProps.academicYear} onPushView={pushView} />;
       case 'create_activity':
         return <CreateActivityPage onBack={popView} subgroupId={currentViewProps.subgroupId} stageId={currentViewProps.stageId} subgroupName={currentViewProps.subgroupName} />;
       case 'edit_activity':
         return <EditActivityPage onBack={popView} activity={currentViewProps.activity} activityId={currentViewProps.activityId ? Number(currentViewProps.activityId) : undefined} />;
       case 'assign_faculty':
-        return <AssignFacultyPage activity={currentViewProps.activity} activityId={currentViewProps.activityId ? Number(currentViewProps.activityId) : undefined} onBack={popView} />;
+        return <AssignFacultyPage activity={currentViewProps.activity} activityId={currentViewProps.activityId ? Number(currentViewProps.activityId) : undefined} stageId={currentViewProps.stageId ? Number(currentViewProps.stageId) : undefined} onBack={popView} />;
+      case 'teacher_workflow':
+        return <TeacherActivityWorkflowPage activity={currentViewProps.activity} stageId={currentViewProps.stageId} academicYear={currentViewProps.academicYear} subgroupName={currentViewProps.subgroupName} onBack={popView} />;
       case 'captain_reward_year_selection':
         return <CaptainRewardYearSelectionPage onBack={popView} onSelectYear={(yr) => pushView('captain_reward_settings', { academicYear: yr })} />;
       case 'captain_reward_settings':

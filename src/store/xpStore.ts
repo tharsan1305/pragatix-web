@@ -1,15 +1,33 @@
 import { create } from 'zustand';
 import apiClient from '../services/apiClient';
 
+interface StudentProgression {
+  totalXp: number;
+  currentLevel: number;
+  currentLevelName: string;
+  currentLevelMinXp: number;
+  currentLevelMaxXp: number;
+  nextLevel: number | null;
+  remainingXp: number;
+  progressPercentage: number;
+  unlockedLevels: any[];
+  lockedLevels: any[];
+  isMaxLevel: boolean;
+}
+
 interface XpState {
   xpByCategory: Record<string, number>;
   history: any[];
   streaks: any[];
+  activityStreaks: any[];
+  progression: StudentProgression | null;
   isLoading: boolean;
   totalXp: number;
   fetchSummary: (studentId: string) => Promise<void>;
   fetchHistory: (studentId: string) => Promise<void>;
   fetchStreaks: (studentId: string) => Promise<void>;
+  fetchActivityStreaks: () => Promise<void>;
+  fetchProgression: () => Promise<void>;
   submitXpClaim: (category: string, activityName: string, xpPoints: number, evidenceUrl: string) => Promise<boolean>;
 }
 
@@ -17,6 +35,8 @@ export const useXpStore = create<XpState>((set) => ({
   xpByCategory: {},
   history: [],
   streaks: [],
+  activityStreaks: [],
+  progression: null,
   isLoading: false,
   totalXp: 0,
 
@@ -44,6 +64,7 @@ export const useXpStore = create<XpState>((set) => ({
   },
 
   fetchHistory: async (studentId) => {
+    if (!studentId) return;
     set({ isLoading: true });
     try {
       const response = await apiClient.get(`/api/v1/xp/${studentId}/history?page=0&size=50`);
@@ -60,6 +81,7 @@ export const useXpStore = create<XpState>((set) => ({
   },
 
   fetchStreaks: async (studentId) => {
+    if (!studentId) return;
     set({ isLoading: true });
     try {
       let response;
@@ -78,6 +100,32 @@ export const useXpStore = create<XpState>((set) => ({
       set({ streaks: [] });
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  fetchActivityStreaks: async () => {
+    try {
+      const response = await apiClient.get('/api/v1/students/me/activity-streaks');
+      if (response.data?.success && response.data?.data) {
+        set({ activityStreaks: response.data.data });
+      } else {
+        set({ activityStreaks: [] });
+      }
+    } catch (_error) {
+      set({ activityStreaks: [] });
+    }
+  },
+
+  fetchProgression: async () => {
+    try {
+      const response = await apiClient.get('/api/v1/student-level/progression');
+      if (response.data?.success && response.data?.data) {
+        set({ progression: response.data.data });
+      } else {
+        set({ progression: null });
+      }
+    } catch (_error) {
+      set({ progression: null });
     }
   },
 
