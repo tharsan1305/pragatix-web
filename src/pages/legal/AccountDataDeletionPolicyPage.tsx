@@ -27,9 +27,9 @@ export default function AccountDataDeletionPolicyPage() {
         <p className="text-slate-600 leading-relaxed text-sm">Any registered user of PragatiX - student, parent/guardian, teacher, or staff member - may request deletion of their account and personal data. For students under 18, a parent or guardian may submit the request on the student's behalf.</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">3. How to Request Account &amp; Data Deletion</h2>
-        <p className="text-slate-600 leading-relaxed text-sm">To request deletion of your PragatiX account and associated personal data, please send an email to <strong>jagadeesanrv@jjcet.ac.in</strong> with the subject line <strong>"Account Deletion Request"</strong>, using the template below. Including all requested details helps us verify your account and process your request faster.</p>
+        <p className="text-slate-600 leading-relaxed text-sm">To request deletion of your PragatiX account and associated personal data, please send an email to <strong>jjcetpm@jjcet.ac.in</strong> with the subject line <strong>"Account Deletion Request"</strong>, using the template below. Including all requested details helps us verify your account and process your request faster.</p>
 
-        <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-indigo-500 rounded-lg p-4 mt-4 text-sm font-mono whitespace-pre-wrap text-slate-700">To: jagadeesanrv@jjcet.ac.in
+        <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-indigo-500 rounded-lg p-4 mt-4 text-sm font-mono whitespace-pre-wrap text-slate-700">To: jjcetpm@jjcet.ac.in
 Subject: Account Deletion Request
 
 Full Name: [Your full name as registered on PragatiX]
@@ -77,7 +77,7 @@ legal retention requirements.</div>
         <p className="text-slate-600 leading-relaxed text-sm">For any questions regarding account or data deletion, mail us directly using the details below.</p>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
           <p className="text-slate-600 text-sm mb-1"><strong>J.J. College of Engineering and Technology</strong></p>
-          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jagadeesanrv@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jagadeesanrv@jjcet.ac.in</a></p>
+          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
         </div>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">8. Changes to This Policy</h2>

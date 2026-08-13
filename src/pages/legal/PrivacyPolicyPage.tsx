@@ -123,7 +123,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-slate-600 text-sm mb-1"><strong>Jagadeesan R V</strong></p>
           <p className="text-slate-600 text-sm mb-1">Placement Head / Admin Officer</p>
           <p className="text-slate-600 text-sm mb-1">J.J. College of Engineering and Technology</p>
-          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:principal@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">principal@jjcet.ac.in</a></p>
+          <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jagadeesanrv@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jagadeesanrv@jjcet.ac.in</a></p>
           <p className="text-slate-600 text-sm"><strong>Phone:</strong> 73058 11776</p>
         </div>
 

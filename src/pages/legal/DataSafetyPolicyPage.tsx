@@ -12,13 +12,13 @@ export default function DataSafetyPolicyPage() {
       </header>
 
       <main className="max-w-3xl mx-auto w-full p-6 my-8 bg-white rounded-3xl border border-slate-100 shadow-sm flex-1">
-        <span className="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">App Store &amp; Compliance</span>
+        <span className="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">Google Play Console – Data Safety</span>
         <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Data Safety Policy</h1>
         <div className="text-sm text-slate-500 mb-4 pb-4 border-b border-slate-100">
           <span><strong>Version:</strong> 1.1</span>
           <span className="ml-4"><strong>Effective Date:</strong> August 11, 2026</span>
         </div>
-        <p className="text-slate-600 leading-relaxed text-sm mb-6"><strong>Prepared for:</strong> Google Play Console "Data Safety" section and Apple App Store "App Privacy" disclosure</p>
+        <p className="text-slate-600 leading-relaxed text-sm mb-6"><strong>Prepared for:</strong> Google Play Console – Data Safety</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">1. Does This App Collect or Share User Data?</h2>
         <p className="text-slate-600 leading-relaxed text-sm">Yes. PragatiX collects personal data that is necessary to provide academic administration, attendance tracking, discipline management, and notification services for JJCET students, teachers, and staff.</p>
@@ -75,7 +75,7 @@ export default function DataSafetyPolicyPage() {
         <p className="text-slate-600 leading-relaxed text-sm">Yes. All data transmitted between the app and our servers is encrypted using industry-standard TLS.</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">5. Can Users Request Data Deletion?</h2>
-        <p className="text-slate-600 leading-relaxed text-sm">Yes. Users may request deletion of their account and personal data by emailing principal@jjcet.ac.in - see our <Link to="/data-deletion" className="text-indigo-600 hover:text-indigo-800 underline">Account &amp; Data Deletion Policy</Link> for the full process. Requests are handled in accordance with the Digital Personal Data Protection Act, 2023, and are subject to applicable academic and legal retention requirements.</p>
+        <p className="text-slate-600 leading-relaxed text-sm">Yes. Users may request deletion of their account and personal data by emailing jjcetpm@jjcet.ac.in - see our <Link to="/data-deletion" className="text-indigo-600 hover:text-indigo-800 underline">Account &amp; Data Deletion Policy</Link> for the full process. Requests are handled in accordance with the Digital Personal Data Protection Act, 2023, and are subject to applicable academic and legal retention requirements.</p>
 
         <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">6. Security Practices</h2>
         <ul className="list-disc list-inside space-y-2 mb-4 text-slate-600 text-sm">

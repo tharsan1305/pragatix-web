@@ -370,30 +370,71 @@ export default function LoginPage() {
         )}
 
         {/* ── Footer ── */}
-        <div className="mt-8 text-center pt-4 border-t border-slate-100 space-y-3">
-          <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[11px] font-bold text-slate-500">
-            <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Contact Us</a>
-            <span className="text-slate-300">•</span>
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
-            <span className="text-slate-300">•</span>
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Privacy Policy</a>
-            <span className="text-slate-300">•</span>
-            <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Security</a>
-            <span className="text-slate-300">•</span>
-            <a href="/cookies" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Cookie &amp; Tracking Policy</a>
-            <span className="text-slate-300">•</span>
-            <a href="/dpdp-compliance" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">DPDP Compliance</a>
-            <span className="text-slate-300">•</span>
-            <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Account &amp; Data Deletion</a>
-            <span className="text-slate-300">•</span>
-            <a href="/disclaimer" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Disclaimer</a>
-            <span className="text-slate-300">•</span>
-            <a href="/data-safety" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">Data Safety Policy</a>
-          </div>
-          <div className="text-center text-xs font-medium text-slate-400">
+        <footer className="mt-8 pt-5 border-t border-slate-100" role="contentinfo">
+          {/* Navigation Links */}
+          <nav aria-label="Legal and compliance" className="mb-4">
+            <ul className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[11px] font-semibold text-slate-600">
+              <li>
+                <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Contact Us
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Terms of Service
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Privacy Policy
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Security
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/cookies" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Cookie &amp; Tracking Policy
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/dpdp-compliance" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  DPDP Compliance
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Account &amp; Data Deletion
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/disclaimer" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Disclaimer
+                </a>
+              </li>
+              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
+              <li>
+                <a href="/data-safety" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
+                  Data Safety Policy
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Copyright */}
+          <p className="text-center text-[11px] font-medium text-slate-400">
             JJCET © 2026 · All rights reserved
-          </div>
-        </div>
+          </p>
+        </footer>
       </div>
     </div>
   );
