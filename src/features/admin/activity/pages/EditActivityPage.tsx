@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -26,7 +27,7 @@ export default function EditActivityPage({ onBack, onSuccess, activity: initialA
           const found = acts.find((a: any) => String(a.id) === String(activityId));
           if (found) setActivity(found);
         })
-        .catch(console.error)
+        .catch(logger.error)
         .finally(() => setIsLoading(false));
     }
   }, [initialActivity, activityId]);
@@ -50,7 +51,7 @@ export default function EditActivityPage({ onBack, onSuccess, activity: initialA
       }
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || 'Failed to update event');
     } finally {
       setIsSubmitting(false);

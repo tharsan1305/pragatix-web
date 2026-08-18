@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Zap, Moon, Trophy, RefreshCw, AlertCircle } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
@@ -37,7 +38,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
         setStreaks([]);
       }
     } catch (e: any) {
-      console.error('Failed to fetch streaks:', e);
+      logger.error('Failed to fetch streaks:', e);
       setError(e.response?.data?.message || 'Failed to load activity streaks');
     } finally {
       setIsLoading(false);

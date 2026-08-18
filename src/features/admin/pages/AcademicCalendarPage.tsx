@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, RefreshCw, Star, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -120,7 +121,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
       setAllHolidays(combinedHolidays);
       setAllAlternateWorkingDays(combinedAWD);
     } catch (e: any) {
-      console.error(e);
+      logger.error(e);
       toast.error('Failed to load academic calendar data');
     } finally {
       setIsLoading(false);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import LandingPage from './landing-page/LandingPage';
 import LoginPage from './features/auth/LoginPage';
 import ContactUsPage from './pages/legal/ContactUsPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
@@ -53,9 +54,9 @@ function App() {
     <BrowserRouter>
       <NavigationTransition>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          
+
           <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -65,121 +66,121 @@ function App() {
           <Route path="/data-deletion" element={<AccountDataDeletionPolicyPage />} />
           <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/data-safety" element={<DataSafetyPolicyPage />} />
-          
+
           {/* Shared Routes */}
-          <Route 
-            path="/students" 
+          <Route
+            path="/students"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER']}>
                 <StudentListPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/students/:id" 
+          <Route
+            path="/students/:id"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER']}>
                 <StudentDetailsPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/*" 
+          <Route
+            path="/admin/*"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/teacher/*" 
+
+          <Route
+            path="/teacher/*"
             element={
               <ProtectedRoute allowedRoles={['TEACHER']}>
                 <TeacherDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* CC Students Directory */}
-          <Route 
-            path="/teacher/students-directory" 
+          <Route
+            path="/teacher/students-directory"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <StudentsDirectoryPage />
               </ProtectedRoute>
-            } 
+            }
           />
 
           {/* --- Execution & Drill-down Pages --- */}
-          <Route 
-            path="/teacher/group-activity/:activityId/year" 
+          <Route
+            path="/teacher/group-activity/:activityId/year"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <GroupActivityYearPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher/group-activity/:activityId/dept" 
+          <Route
+            path="/teacher/group-activity/:activityId/dept"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <GroupActivityDeptPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher/group-activity/:activityId/sec" 
+          <Route
+            path="/teacher/group-activity/:activityId/sec"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <GroupActivitySecPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher/group-activity/:activityId/execution" 
+          <Route
+            path="/teacher/group-activity/:activityId/execution"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <GroupActivityExecutionPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher/group-activity/:activityId/create-group" 
+          <Route
+            path="/teacher/group-activity/:activityId/create-group"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <CreateGroupPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/teacher/activity/:activityId/execution" 
+          <Route
+            path="/teacher/activity/:activityId/execution"
             element={
               <ProtectedRoute allowedRoles={['TEACHER', 'ADMIN']}>
                 <ActivityExecutionPageV2 />
               </ProtectedRoute>
-            } 
+            }
           />
           {/* ---------------------------------- */}
-          
-          <Route 
-            path="/student/*" 
+
+          <Route
+            path="/student/*"
             element={
               <ProtectedRoute allowedRoles={['STUDENT', 'CAPTAIN']}>
                 <StudentDashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
-          <Route 
-            path="/captain/*" 
+
+          <Route
+            path="/captain/*"
             element={
-              <ProtectedRoute allowedRoles={['CAPTAIN', 'STUDENT']}>
+              <ProtectedRoute allowedRoles={['CAPTAIN']}>
                 <CaptainDashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Default route redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

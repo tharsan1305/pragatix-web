@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { apiClient } from '../api/client';
 
@@ -42,11 +43,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem('spdms_token') || localStorage.getItem('token')
+    () => localStorage.getItem('spdms_token')
   );
-  
+
   const [user, setUser] = useState<UserData | null>(() => {
-    const stored = localStorage.getItem('spdms_user') || localStorage.getItem('user');
+    const stored = localStorage.getItem('spdms_user');
     if (!stored) return null;
     try {
       return JSON.parse(stored);
@@ -64,20 +65,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (token) {
       localStorage.setItem('spdms_token', token);
-      localStorage.setItem('token', token);
     } else {
       localStorage.removeItem('spdms_token');
-      localStorage.removeItem('token');
     }
   }, [token]);
 
   useEffect(() => {
     if (user) {
       localStorage.setItem('spdms_user', JSON.stringify(user));
-      localStorage.setItem('user', JSON.stringify(user));
     } else {
       localStorage.removeItem('spdms_user');
-      localStorage.removeItem('user');
     }
   }, [user]);
 
@@ -108,10 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
-          console.warn("Token expired or unauthorized, logging out.");
+          logger.warn("Token expired or unauthorized, logging out.");
           logout();
         } else {
-          console.warn("Could not reach auth check endpoint; preserving stored session.");
+          logger.warn("Could not reach auth check endpoint; preserving stored session.");
         }
       }
     };
@@ -178,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const resetInactivityTimer = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        console.warn('Session expired due to 30 minutes of inactivity.');
+        logger.warn('Session expired due to 30 minutes of inactivity.');
         logout();
       }, INACTIVITY_LIMIT);
     };

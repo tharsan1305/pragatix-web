@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { Trophy, Shield, Stars, Users, Activity, TrendingUp, Award, LockKeyhole } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -110,7 +111,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
           }
         }
       } catch (error) {
-        console.error("Failed to load profile data", error);
+        logger.error("Failed to load profile data", error);
       } finally {
         if (isMounted) setIsLoading(false);
       }

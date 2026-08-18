@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ShieldAlert, CheckCircle, ArrowLeft, Loader2, Timer } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
 import { authService, type AuthResponse } from './services/auth.service';
-import logoImg from '../../assets/logo.jpg';
+import logoImg from '../../assets/logo.png';
+import { Link } from 'react-router-dom';
 
 type Step = 'email' | 'otp';
 
@@ -197,14 +198,25 @@ export default function LoginPage() {
   // Render
   // ─────────────────────────────────────────
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 px-4 py-8 relative">
+      {/* Top Left Navigation Back to Landing */}
+      <div className="absolute top-6 left-6 z-10">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Landing Page</span>
+        </Link>
+      </div>
+
       {/* Ambient glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100">
+      <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 my-auto">
         {/* ── Logo & Title ── */}
         <div className="flex flex-col items-center mb-8 text-center">
           <div className="w-24 h-24 rounded-2xl bg-white shadow-lg p-2 flex items-center justify-center overflow-hidden border border-slate-200 mb-4">

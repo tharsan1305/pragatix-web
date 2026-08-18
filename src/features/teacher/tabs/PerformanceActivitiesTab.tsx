@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -77,7 +78,7 @@ export default function PerformanceActivitiesTab() {
         setPendingBadges(res.data.data?.pendingBadgeRequests ?? res.data.data?.pendingCount ?? 0);
       }
     } catch (e) {
-      console.error("Failed to fetch CC stats", e);
+      logger.error("Failed to fetch CC stats", e);
     }
   };
 
@@ -94,7 +95,7 @@ export default function PerformanceActivitiesTab() {
         setMyActivities(response.data.data || []);
       }
     } catch (e) {
-      console.error("Failed to fetch activities", e);
+      logger.error("Failed to fetch activities", e);
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +150,7 @@ export default function PerformanceActivitiesTab() {
         setAvailableYears(FIXED_YEARS);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setAvailableYears(FIXED_YEARS);
     } finally {
       setIsLoading(false);
@@ -170,7 +171,7 @@ export default function PerformanceActivitiesTab() {
         setAvailableDepts(res.data.data || []);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -199,7 +200,7 @@ export default function PerformanceActivitiesTab() {
         }
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -234,7 +235,7 @@ export default function PerformanceActivitiesTab() {
         setAssignmentId(res.data.data.assignment?.id || null);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Type, Tag, AlignLeft, Hash, CheckCircle2, Award, ShieldAlert, BookOpen, FileText } from 'lucide-react';
 import { activityService } from '../api/activityService';
@@ -62,7 +63,7 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
   }, [initialData]);
 
   useEffect(() => {
-    activityService.fetchCustomFrequencies().then(setCustomFrequencies).catch(console.error);
+    activityService.fetchCustomFrequencies().then(setCustomFrequencies).catch(logger.error);
   }, []);
 
   const handleChange = (field: keyof ActivityModel, value: any) => {

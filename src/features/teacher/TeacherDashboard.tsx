@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
@@ -33,7 +34,7 @@ export default function TeacherDashboard() {
           setSubRoles(combined);
         }
       } catch (err) {
-        console.error('Failed to fetch profile', err);
+        logger.error('Failed to fetch profile', err);
       } finally {
         setLoading(false);
       }

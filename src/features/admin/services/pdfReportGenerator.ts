@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -57,7 +58,7 @@ async function loadLogoAsBase64(url: string, fallbackType: 'COLLEGE' | 'PRAGATIX
           return;
         }
       } catch (e) {
-        console.warn('Logo conversion notice:', e);
+        logger.warn('Logo conversion notice:', e);
       }
       resolve(createFallbackLogoBase64(fallbackType));
     };
@@ -163,79 +164,138 @@ function createFallbackLogoBase64(type: 'COLLEGE' | 'PRAGATIX' | 'SOWDAMBIKA'): 
 }
 
 /**
- * Renders HTML canvas elements for Bar, Donut, Stage Pie, and Dept Leaderboard charts into Data URLs
+ * Renders HTML canvas elements for Line, Donut, Stage Pie, and Dept Leaderboard charts into Data URLs
  */
 function createAllChartDataUrls(
   categoryData: { label: string; value: number; color: string }[],
-  monthlyData: { label: string; value: number }[],
+  lineChartData: { month: string; awardedXp: number; penaltyXp: number }[],
   stageData: { label: string; value: number; color: string }[],
   deptData: { label: string; value: number; color: string }[]
 ): { barChartUrl: string; donutChartUrl: string; stagePieUrl: string; deptBarUrl: string } {
-  // 1. Monthly XP Bar Chart Canvas
-  const barCanvas = document.createElement('canvas');
-  barCanvas.width = 600;
-  barCanvas.height = 250;
-  const bCtx = barCanvas.getContext('2d');
-  if (bCtx) {
-    bCtx.fillStyle = '#FAFAFA';
-    bCtx.fillRect(0, 0, 600, 250);
+  // 1. Line Chart Canvas: Department Awarded vs Penalty XP
+  const lineCanvas = document.createElement('canvas');
+  lineCanvas.width = 600;
+  lineCanvas.height = 250;
+  const lCtx = lineCanvas.getContext('2d');
+  if (lCtx) {
+    lCtx.fillStyle = '#FAFAFA';
+    lCtx.fillRect(0, 0, 600, 250);
 
-    bCtx.fillStyle = '#0F172A';
-    bCtx.font = 'bold 14px sans-serif';
-    bCtx.fillText('Monthly XP Awarded Trend', 20, 25);
+    lCtx.fillStyle = '#0F172A';
+    lCtx.font = 'bold 14px sans-serif';
+    lCtx.fillText('Department: Awarded vs Penalty XP', 20, 25);
 
-    const safeMonthly = monthlyData.length > 0 ? monthlyData : [
-      { label: 'Jun', value: 18400 },
-      { label: 'Jul', value: 24200 },
-      { label: 'Aug', value: 31000 },
-      { label: 'Sep', value: 28900 },
-      { label: 'Oct', value: 36500 },
-      { label: 'Nov', value: 45500 },
-    ];
+    // Draw Legend
+    lCtx.fillStyle = '#3B82F6';
+    lCtx.fillRect(350, 15, 12, 12);
+    lCtx.fillStyle = '#1E293B';
+    lCtx.font = 'bold 10px sans-serif';
+    lCtx.fillText('Awarded XP', 368, 24);
 
-    const maxVal = Math.max(...safeMonthly.map((d) => d.value), 100);
-    const chartHeight = 150;
-    const startY = 205;
-    const startX = 50;
-    const barWidth = 45;
-    const gap = 35;
+    lCtx.fillStyle = '#EF4444';
+    lCtx.fillRect(460, 15, 12, 12);
+    lCtx.fillStyle = '#1E293B';
+    lCtx.fillText('Penalty Deductions', 478, 24);
 
-    bCtx.strokeStyle = '#E2E8F0';
-    bCtx.lineWidth = 1;
+    const safeLineData = (lineChartData && lineChartData.length > 0)
+      ? lineChartData
+      : [
+          { month: 'Cyber Security', awardedXp: 8830, penaltyXp: 230 },
+          { month: 'Information Technology', awardedXp: 550, penaltyXp: 0 },
+        ];
+
+    const maxVal = Math.max(
+      ...safeLineData.map((d) => Math.max(d.awardedXp || 0, d.penaltyXp || 0)),
+      100
+    );
+
+    const chartHeight = 140;
+    const startY = 200;
+    const startX = 65;
+    const usableWidth = 480;
+    const stepX = safeLineData.length > 1 ? usableWidth / (safeLineData.length - 1) : usableWidth / 2;
+
+    // Grid lines
+    lCtx.strokeStyle = '#E2E8F0';
+    lCtx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
       const y = startY - (chartHeight / 4) * i;
-      bCtx.beginPath();
-      bCtx.moveTo(startX, y);
-      bCtx.lineTo(560, y);
-      bCtx.stroke();
+      lCtx.beginPath();
+      lCtx.moveTo(startX - 10, y);
+      lCtx.lineTo(startX + usableWidth, y);
+      lCtx.stroke();
 
-      bCtx.fillStyle = '#94A3B8';
-      bCtx.font = '10px sans-serif';
-      bCtx.fillText(`${Math.round((maxVal / 4) * i)}`, 10, y + 3);
+      lCtx.fillStyle = '#94A3B8';
+      lCtx.font = '10px sans-serif';
+      lCtx.textAlign = 'right';
+      lCtx.fillText(`${Math.round((maxVal / 4) * i)}`, startX - 15, y + 3);
     }
 
-    safeMonthly.forEach((d, idx) => {
-      const x = startX + idx * (barWidth + gap);
-      const h = (d.value / maxVal) * chartHeight;
-      const y = startY - h;
+    // Draw Awarded XP Line (Blue)
+    lCtx.strokeStyle = '#3B82F6';
+    lCtx.lineWidth = 3;
+    lCtx.beginPath();
+    safeLineData.forEach((d, idx) => {
+      const x = safeLineData.length === 1 ? startX + usableWidth / 2 : startX + idx * stepX;
+      const y = startY - ((d.awardedXp || 0) / maxVal) * chartHeight;
+      if (idx === 0) lCtx.moveTo(x, y);
+      else lCtx.lineTo(x, y);
+    });
+    lCtx.stroke();
 
-      const grad = bCtx.createLinearGradient(x, y, x, startY);
-      grad.addColorStop(0, '#3B82F6');
-      grad.addColorStop(1, '#1D4ED8');
+    // Draw Awarded XP Points & Labels
+    safeLineData.forEach((d, idx) => {
+      const x = safeLineData.length === 1 ? startX + usableWidth / 2 : startX + idx * stepX;
+      const y = startY - ((d.awardedXp || 0) / maxVal) * chartHeight;
 
-      bCtx.fillStyle = grad;
-      bCtx.beginPath();
-      bCtx.roundRect(x, y, barWidth, h, [4, 4, 0, 0]);
-      bCtx.fill();
+      lCtx.beginPath();
+      lCtx.arc(x, y, 5, 0, Math.PI * 2);
+      lCtx.fillStyle = '#3B82F6';
+      lCtx.fill();
+      lCtx.strokeStyle = '#FFFFFF';
+      lCtx.lineWidth = 2;
+      lCtx.stroke();
 
-      bCtx.fillStyle = '#1E293B';
-      bCtx.font = 'bold 11px sans-serif';
-      bCtx.textAlign = 'center';
-      bCtx.fillText(`${d.value}`, x + barWidth / 2, y - 6);
+      lCtx.fillStyle = '#1E3A8A';
+      lCtx.font = 'bold 10px sans-serif';
+      lCtx.textAlign = 'center';
+      lCtx.fillText(`${d.awardedXp || 0}`, x, y - 8);
 
-      bCtx.fillStyle = '#64748B';
-      bCtx.font = '11px sans-serif';
-      bCtx.fillText(d.label, x + barWidth / 2, startY + 18);
+      // X-axis Dept Label
+      lCtx.fillStyle = '#64748B';
+      lCtx.font = '10px sans-serif';
+      lCtx.fillText(d.month || 'Dept', x, startY + 18);
+    });
+
+    // Draw Penalty XP Line (Red)
+    lCtx.strokeStyle = '#EF4444';
+    lCtx.lineWidth = 3;
+    lCtx.beginPath();
+    safeLineData.forEach((d, idx) => {
+      const x = safeLineData.length === 1 ? startX + usableWidth / 2 : startX + idx * stepX;
+      const y = startY - ((d.penaltyXp || 0) / maxVal) * chartHeight;
+      if (idx === 0) lCtx.moveTo(x, y);
+      else lCtx.lineTo(x, y);
+    });
+    lCtx.stroke();
+
+    // Draw Penalty XP Points & Labels
+    safeLineData.forEach((d, idx) => {
+      const x = safeLineData.length === 1 ? startX + usableWidth / 2 : startX + idx * stepX;
+      const y = startY - ((d.penaltyXp || 0) / maxVal) * chartHeight;
+
+      lCtx.beginPath();
+      lCtx.arc(x, y, 5, 0, Math.PI * 2);
+      lCtx.fillStyle = '#EF4444';
+      lCtx.fill();
+      lCtx.strokeStyle = '#FFFFFF';
+      lCtx.lineWidth = 2;
+      lCtx.stroke();
+
+      lCtx.fillStyle = '#991B1B';
+      lCtx.font = 'bold 10px sans-serif';
+      lCtx.textAlign = 'center';
+      lCtx.fillText(`${d.penaltyXp || 0}`, x, y + 15);
     });
   }
 
@@ -437,7 +497,7 @@ function toShortDeptCode(deptName: string): string {
   }
 
   return {
-    barChartUrl: barCanvas.toDataURL('image/png'),
+    barChartUrl: lineCanvas.toDataURL('image/png'),
     donutChartUrl: donutCanvas.toDataURL('image/png'),
     stagePieUrl: stageCanvas.toDataURL('image/png'),
     deptBarUrl: deptCanvas.toDataURL('image/png'),
@@ -451,9 +511,10 @@ export async function generateEngagementPdfReport(
   userName: string,
   userRole: string,
   categoryChartData: { label: string; value: number; color: string }[],
-  monthlyChartData: { label: string; value: number }[],
+  monthlyLineChartData: { month: string; awardedXp: number; penaltyXp: number }[] | any[],
   passedStageData?: any[],
-  passedDeptData?: any[]
+  passedDeptData?: any[],
+  activeTableMode?: 'DEPARTMENT_SUMMARY' | 'STUDENT_ROSTER'
 ) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -503,7 +564,7 @@ export async function generateEngagementPdfReport(
   // Generate All Chart Data URLs
   const { barChartUrl, donutChartUrl, stagePieUrl, deptBarUrl } = createAllChartDataUrls(
     categoryChartData,
-    monthlyChartData,
+    monthlyLineChartData,
     stageChartData,
     deptChartData
   );
@@ -528,12 +589,17 @@ export async function generateEngagementPdfReport(
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
 
+    const stageDisplay = filters.stage && filters.stage !== 'stage 0' && filters.stage !== '0' ? filters.stage : 'All Stages';
+    const dateDisplay = (filters.fromDate && filters.fromDate.trim() !== '') || (filters.toDate && filters.toDate.trim() !== '')
+      ? `${filters.fromDate || 'Start'} to ${filters.toDate || 'Present'}`
+      : 'All Time';
+
     const filterText = [
       `Department: ${filters.departmentName || 'All Departments'}`,
       `Academic Year: ${filters.academicYear || 'All Years'}`,
       `Section: ${filters.sectionName || 'All Sections'}`,
-      `Stage: ${filters.stage || 'All Stages'}`,
-      `Date Range: ${filters.fromDate} to ${filters.toDate}`,
+      `Stage: ${stageDisplay}`,
+      `Date Range: ${dateDisplay}`,
     ].join('  |  ');
 
     doc.text(filterText, 14, 33);
@@ -596,7 +662,7 @@ export async function generateEngagementPdfReport(
 
   currentY += 4;
 
-  // Row 1: Monthly XP Awarded (Bar) | XP Distribution by Category (Donut)
+  // Row 1: Monthly XP Awarded (Line Graph) | XP Distribution by Category (Donut)
   doc.addImage(barChartUrl, 'PNG', 14, currentY, 88, 36);
   doc.addImage(donutChartUrl, 'PNG', 108, currentY, 88, 36);
 
@@ -614,52 +680,105 @@ export async function generateEngagementPdfReport(
 
   currentY += 41;
 
-  // Section 3: Paginated Detail Data Table
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10.5);
-  doc.setTextColor(15, 23, 42);
-  doc.text('3. Detailed Breakdown Roster', 14, currentY);
+  // Section 3: Paginated Detail Data Table (Department Summary OR Student Roster)
+  const isDeptSummaryMode = activeTableMode === 'DEPARTMENT_SUMMARY' || filters.totalsOnly;
 
-  currentY += 3;
+  if (isDeptSummaryMode && passedDeptData && passedDeptData.length > 0) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text('3. Department Performance Summary', 14, currentY);
 
-  const tableHead = [['#', 'Reg No', 'Student Name', 'Department', 'Sec', 'Stage', 'Total XP', 'Attendance']];
+    currentY += 3;
 
-  const tableBody = rows.map((r, idx) => [
-    `${idx + 1}`,
-    r.regNo || `-`,
-    r.studentName || `Student`,
-    r.department || `CSE`,
-    r.section || `A`,
-    r.stage || `Foundation`,
-    `${r.totalXp} XP`,
-    `${r.attendancePct}%`,
-  ]);
+    const tableHead = [['# Rank', 'Department Name', 'Code', 'Student Roster', 'Total XP Accumulated', 'Avg XP / Student', 'Performance Rating']];
 
-  autoTable(doc, {
-    startY: currentY,
-    head: tableHead,
-    body: tableBody,
-    theme: 'striped',
-    headStyles: {
-      fillColor: [15, 23, 42],
-      textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      fontSize: 8,
-    },
-    bodyStyles: {
-      fontSize: 7.5,
-      textColor: [51, 65, 85],
-    },
-    alternateRowStyles: {
-      fillColor: [248, 250, 252],
-    },
-    margin: { top: 38, bottom: 18, left: 14, right: 14 },
-    didDrawPage: (data) => {
-      if (data.pageNumber > 1) {
-        drawHeader(data);
-      }
-    },
-  });
+    const tableBody = passedDeptData.map((dept: any, idx: number) => {
+      const avg = dept.averageXp || (dept.studentCount ? Math.round(dept.totalXp / dept.studentCount) : 0);
+      const rating = idx === 0 ? 'Tier 1 Elite' : idx === 1 ? 'Tier 2 Excellence' : 'Active Performing';
+      return [
+        `#${idx + 1}`,
+        dept.name || 'Department',
+        dept.code || 'DEPT',
+        `${dept.studentCount || 0} Students`,
+        `${(dept.totalXp || 0).toLocaleString()} XP`,
+        `${avg.toLocaleString()} XP`,
+        rating,
+      ];
+    });
+
+    autoTable(doc, {
+      startY: currentY,
+      head: tableHead,
+      body: tableBody,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8,
+      },
+      bodyStyles: {
+        fontSize: 7.5,
+        textColor: [51, 65, 85],
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      margin: { top: 38, bottom: 18, left: 14, right: 14 },
+      didDrawPage: (data) => {
+        if (data.pageNumber > 1) {
+          drawHeader(data);
+        }
+      },
+    });
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(15, 23, 42);
+    doc.text('3. Detailed Breakdown Roster', 14, currentY);
+
+    currentY += 3;
+
+    const tableHead = [['#', 'Reg No', 'Student Name', 'Department', 'Sec', 'Stage', 'Total XP', 'Attendance']];
+
+    const tableBody = rows.map((r, idx) => [
+      `${idx + 1}`,
+      r.regNo || `-`,
+      r.studentName || `Student`,
+      r.department || `CSE`,
+      r.section || `A`,
+      r.stage || `Foundation`,
+      `${r.totalXp} XP`,
+      `${r.attendancePct}%`,
+    ]);
+
+    autoTable(doc, {
+      startY: currentY,
+      head: tableHead,
+      body: tableBody,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 8,
+      },
+      bodyStyles: {
+        fontSize: 7.5,
+        textColor: [51, 65, 85],
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      margin: { top: 38, bottom: 18, left: 14, right: 14 },
+      didDrawPage: (data) => {
+        if (data.pageNumber > 1) {
+          drawHeader(data);
+        }
+      },
+    });
+  }
 
   // Add Page Footer to every page
   const totalPages = doc.getNumberOfPages();

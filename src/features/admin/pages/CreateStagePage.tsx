@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -16,10 +17,7 @@ export default function CreateStagePage({ onBack }: Props) {
     mustThreshold: '0',
     individualThreshold: '0',
     groupThreshold: '0',
-    academicYear: 'FIRST_YEAR',
-    startDate: '',
-    endDate: '',
-    isActive: true
+    academicYear: 'FIRST_YEAR'
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -40,13 +38,9 @@ export default function CreateStagePage({ onBack }: Props) {
         mustThreshold: parseInt(formData.mustThreshold) || 0,
         individualThreshold: parseInt(formData.individualThreshold) || 0,
         groupThreshold: parseInt(formData.groupThreshold) || 0,
-        academicYear: formData.academicYear,
-        active: formData.isActive
+        academicYear: formData.academicYear
       };
 
-      if (formData.startDate) payload.startDate = formData.startDate;
-      if (formData.endDate) payload.endDate = formData.endDate;
-      
       const response = await apiClient.post('/api/v1/admin/stages', payload);
       toast.dismiss(toastId);
       if (response.data?.success || response.status === 200 || response.status === 201) {
@@ -57,7 +51,7 @@ export default function CreateStagePage({ onBack }: Props) {
       }
     } catch (error: any) {
       toast.dismiss(toastId);
-      console.error(error);
+      logger.error(error);
       toast.error(error.response?.data?.message || 'Error creating stage');
     } finally {
       setIsSaving(false);
@@ -70,11 +64,16 @@ export default function CreateStagePage({ onBack }: Props) {
         <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-white flex-1">Create New Stage</h1>
+        <h1 className="text-2xl font-bold text-white flex-1">Create Stage</h1>
       </div>
 
       <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
         <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">Stage Configuration</h2>
+            <p className="text-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
+          </div>
+
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Stage Name *</label>
@@ -87,39 +86,41 @@ export default function CreateStagePage({ onBack }: Props) {
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
               />
             </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Academic Year *</label>
+              <select
+                value={formData.academicYear}
+                onChange={e => setFormData({...formData, academicYear: e.target.value})}
+                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow bg-white"
+              >
+                <option value="FIRST_YEAR">First Year</option>
+                <option value="SECOND_YEAR">Second Year</option>
+                <option value="THIRD_YEAR">Third Year</option>
+                <option value="FINAL_YEAR">Fourth Year</option>
+              </select>
+            </div>
             
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Description</label>
               <textarea 
                 value={formData.description} 
                 onChange={e => setFormData({...formData, description: e.target.value})} 
-                placeholder="Brief description of this stage's purpose..."
+                placeholder="Describe targets or rules for this stage..."
                 rows={3}
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow resize-none"
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Academic Year *</label>
-                <select
-                  value={formData.academicYear}
-                  onChange={e => setFormData({...formData, academicYear: e.target.value})}
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow bg-white"
-                >
-                  <option value="FIRST_YEAR">1st Year (FIRST_YEAR)</option>
-                  <option value="SECOND_YEAR">2nd Year (SECOND_YEAR)</option>
-                  <option value="THIRD_YEAR">3rd Year (THIRD_YEAR)</option>
-                  <option value="FINAL_YEAR">4th Year (FINAL_YEAR)</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Expected XP Points</label>
+                <label className="text-sm font-medium text-slate-700">Expected XP *</label>
                 <input 
+                  required
                   type="number" 
                   value={formData.expectedXp} 
                   onChange={e => setFormData({...formData, expectedXp: e.target.value})} 
-                  placeholder="e.g. 100"
+                  placeholder="e.g. 500"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
                 />
               </div>
@@ -129,77 +130,50 @@ export default function CreateStagePage({ onBack }: Props) {
                   type="number" 
                   value={formData.displayOrder} 
                   onChange={e => setFormData({...formData, displayOrder: e.target.value})} 
+                  placeholder="e.g. 1"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Must-Do Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.mustThreshold} 
-                  onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
-                  placeholder="e.g. 20"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
-                />
+            <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Subgroup Thresholds</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
               </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Individual Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.individualThreshold} 
-                  onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
-                  placeholder="e.g. 30"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Group Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.groupThreshold} 
-                  onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
-                  placeholder="e.g. 50"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Start Date (Optional)</label>
-                <input 
-                  type="date" 
-                  value={formData.startDate} 
-                  onChange={e => setFormData({...formData, startDate: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Must Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.mustThreshold} 
+                    onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
+                    placeholder="e.g. 50"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Individual Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.individualThreshold} 
+                    onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
+                    placeholder="e.g. 100"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Group Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.groupThreshold} 
+                    onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
+                    placeholder="e.g. 150"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">End Date (Optional)</label>
-                <input 
-                  type="date" 
-                  value={formData.endDate} 
-                  min={formData.startDate}
-                  onChange={e => setFormData({...formData, endDate: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition-shadow"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center pt-2 space-x-3">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={formData.isActive} 
-                  onChange={e => setFormData({...formData, isActive: e.target.checked})} 
-                  className="sr-only peer" 
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
-                <span className="ml-3 text-sm font-medium text-slate-700">Active Status</span>
-              </label>
             </div>
           </div>
           

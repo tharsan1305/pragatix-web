@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
@@ -20,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Unhandled React Error Boundary Catch:', error, errorInfo);
+    logger.error('Unhandled React Error Boundary Catch:', error, errorInfo);
   }
 
   private handleReload = () => {

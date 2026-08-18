@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -49,7 +50,7 @@ export default function TeachersTab({ onBack }: Props) {
         subjects: subjRes.data?.data || []
       });
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       // Fallback roles if API fails
       setLookups(prev => ({ ...prev, roles: [{name: 'ROLE_ADMIN'}, {name: 'ROLE_TEACHER'}, {name: 'ROLE_STUDENT'}] }));
     }
@@ -67,7 +68,7 @@ export default function TeachersTab({ onBack }: Props) {
         setFilteredUsers(staff);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +145,7 @@ export default function TeachersTab({ onBack }: Props) {
       fetchUsers();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to save user.');
     }
   };
@@ -176,7 +177,7 @@ export default function TeachersTab({ onBack }: Props) {
       fetchUsers();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to delete user.');
     }
   };

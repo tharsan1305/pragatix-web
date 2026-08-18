@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import apiClient from '../../../services/apiClient';
 import type { Stage, StageStatus, ActivityStatus, Subgroup, Activity } from '../types/activity';
 
@@ -15,7 +16,7 @@ export class ActivityService {
         rawStages = Array.isArray(res.data) ? res.data : (res.data.data || []);
       }
     } catch (e) {
-      console.warn('Could not fetch student stages:', e);
+      logger.warn('Could not fetch student stages:', e);
     }
 
     const stages: Stage[] = [];
@@ -35,7 +36,7 @@ export class ActivityService {
               activitiesList = actRes.data.data || [];
             }
           } catch (err) {
-            console.error(`Failed to fetch activities for subgroup ${subId}`, err);
+            logger.error(`Failed to fetch activities for subgroup ${subId}`, err);
           }
         }
 
@@ -149,7 +150,7 @@ export class ActivityService {
       });
       return res.data?.success === true || res.status === 200 || res.status === 201;
     } catch (e) {
-      console.error(`Failed to submit completion for activity ${activityId}:`, e);
+      logger.error(`Failed to submit completion for activity ${activityId}:`, e);
       return false;
     }
   }

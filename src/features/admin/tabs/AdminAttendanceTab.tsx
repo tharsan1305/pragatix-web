@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Download, Settings, Calendar, ArrowLeft, RefreshCw, AlertCircle, X, Search, CalendarOff } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,13 +12,10 @@ interface Props {
 }
 
 export default function AdminAttendanceTab({ onBack }: Props) {
-  const { user } = useAuth();
+  const { isSuperAdmin, isAdmin } = useAuth();
   
   // Role Detection matching Flutter: isYearAdmin
-  const roles: string[] = user?.roles || [];
-  const hasAdmin = roles.includes('ROLE_ADMIN') || roles.includes('ADMIN');
-  const hasSuperAdmin = roles.includes('ROLE_SUPER_ADMIN') || roles.includes('ROLE_SUPERADMIN') || roles.includes('SUPER_ADMIN');
-  const isYearAdmin = hasAdmin && !hasSuperAdmin;
+  const isYearAdmin = isAdmin && !isSuperAdmin;
 
   // Filter States
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -72,7 +70,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         }
       }
     } catch (e) {
-      console.error("Error loading filters:", e);
+      logger.error("Error loading filters:", e);
       setYears([]);
       setDepartments([]);
     } finally {
@@ -146,7 +144,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         setIsHoliday(true);
         setSummary(null);
       } else {
-        console.warn('Backend server response warning:', e);
+        logger.warn('Backend server response warning:', e);
         setSummary({
           totalStudents: 0,
           totalPresent: 0,

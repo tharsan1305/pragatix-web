@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { RefreshCw, Plus, Edit2, Trash2, ChevronRight, ListFilter, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -35,7 +36,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
         setTeachers(allUsers.filter((u: any) => u.roles?.includes('ROLE_TEACHER')));
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     }
   };
 
@@ -50,7 +51,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
         setStages(response.data.data || []);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       toast.error("Failed to fetch stages");
     } finally {
       setIsLoading(false);
@@ -82,7 +83,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to delete stage');
     }
   };

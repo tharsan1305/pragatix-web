@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, AlertTriangle, ChevronRight } from 'lucide-react';
@@ -57,7 +58,7 @@ export default function GroupActivityYearPage({ onBack, onPushView, activityId: 
         setAvailableYears(FIXED_YEARS);
       }
     } catch (e: any) {
-      console.error("Failed to load years:", e);
+      logger.error("Failed to load years:", e);
       setAvailableYears(FIXED_YEARS);
     } finally {
       setLoading(false);

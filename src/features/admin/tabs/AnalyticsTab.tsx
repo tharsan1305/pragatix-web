@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { logger } from '../../../utils/logger';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  TrendingUp,
   TrendingDown,
   Award,
   RefreshCw,
@@ -59,17 +59,16 @@ export default function AnalyticsTab() {
 
   // Stages list (loaded from API for filter dropdown)
   const [stages, setStages] = useState<{ id: string; name: string }[]>([]);
+  const stagesRef = useRef(stages);
+  stagesRef.current = stages;
 
-  const [sections] = useState<{ id: string; name: string }[]>([
+  const [sections, setSections] = useState<{ id: string; name: string }[]>([
     { id: 'all', name: 'All Sections' },
-    { id: 'sec-a', name: 'Section A' },
-    { id: 'sec-b', name: 'Section B' },
-    { id: 'sec-c', name: 'Section C' },
   ]);
 
   // HOD Role Enforcement: Resolve HOD department name & ID
   const hodUserDept = useMemo(() => {
-    return user?.department || user?.departmentName || 'Computer Science & Engineering';
+    return user?.department || user?.departmentName || '';
   }, [user]);
 
   // Filter Form State
@@ -85,8 +84,8 @@ export default function AnalyticsTab() {
     xpMin: 0,
     xpMax: 5000,
     totalsOnly: false,
-    fromDate: '2025-06-01',
-    toDate: new Date().toISOString().slice(0, 10),
+    fromDate: '',   // Empty = no date restriction on initial load (fetch all-time data)
+    toDate: '',     // Empty = no upper date bound
   });
 
   // Force HOD department locking
@@ -152,11 +151,31 @@ export default function AnalyticsTab() {
   const [activeTableMode, setActiveTableMode] = useState<'STUDENT_ROSTER' | 'DEPARTMENT_SUMMARY'>('DEPARTMENT_SUMMARY');
   const [tableSearchText, setTableSearchText] = useState('');
 
+  const isFetchingRef = useRef(false);
+
   // Fetch Live Analytics Data from Backend APIs
   const fetchAnalyticsData = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setIsLoading(true);
     setHasError(false);
+
+    // Helper: fetch with error logging instead of silently returning null
+    const safeFetch = async (label: string, fn: () => Promise<any>) => {
+      try {
+        const res = await fn();
+        logger.debug(`[Analytics ✅] ${label}`, res?.data);
+        return res;
+      } catch (err: any) {
+        const status = err?.response?.status;
+        const msg = err?.response?.data?.message || err?.message || 'Unknown error';
+        logger.error(`[Analytics ❌] ${label} → HTTP ${status ?? 'ERR'}: ${msg}`);
+        return null;
+      }
+    };
+
     try {
+      // ── Build shared query params ──
       const queryParams: Record<string, any> = {};
 
       if (filterState.academicYear !== 'All Years') {
@@ -164,40 +183,88 @@ export default function AnalyticsTab() {
       }
       if (filterState.departmentId !== 'all' && filterState.departmentId !== 'hod-dept') {
         queryParams.departmentId = filterState.departmentId;
+      } else if (isHOD && user?.departmentId) {
+        queryParams.departmentId = user.departmentId;
       }
+      if (filterState.sectionId && filterState.sectionId !== 'all') {
+        queryParams.sectionId = filterState.sectionId;
+      }
+      // stageId: only add if stages are loaded and a stage is selected
       if (filterState.stage !== 'All Stages') {
-        queryParams.stage = filterState.stage;
+        const matchedStage = stagesRef.current.find((s) => s.name === filterState.stage);
+        if (matchedStage) queryParams.stageId = Number(matchedStage.id);
       }
-      if (filterState.fromDate) queryParams.startDate = filterState.fromDate;
-      if (filterState.toDate) queryParams.endDate = filterState.toDate;
+      // Only add date filters when explicitly set by user (don't restrict initial load)
+      if (filterState.fromDate && filterState.fromDate !== '') {
+        queryParams.startDate = filterState.fromDate;
+      }
+      if (filterState.toDate && filterState.toDate !== '') {
+        queryParams.endDate = filterState.toDate;
+      }
 
-      // HOD Dashboard API endpoint fallback
+      logger.debug('[Analytics] Query params:', queryParams);
+
+      // HOD-specific summary
       let hodDataRes = null;
       if (isHOD) {
-        hodDataRes = await apiClient.get('/api/v1/hod/analytics/dashboard', { params: queryParams }).catch(() => null);
+        hodDataRes = await safeFetch('HOD Dashboard', () =>
+          apiClient.get('/api/v1/hod/analytics/dashboard', {
+            params: filterState.academicYear !== 'All Years' ? { year: filterState.academicYear } : {},
+          })
+        );
       }
 
-      // Parallel API Fetching
-      const [statsRes, leaderboardRes, attendanceRes, studentsRes, deptsRes, monthlyRes, categoryRes, deptRankRes, stagesRes] =
+      // Leaderboard only accepts yearId, departmentId, sectionId
+      const leaderboardParams: Record<string, any> = {};
+      if (queryParams.departmentId) leaderboardParams.departmentId = queryParams.departmentId;
+      if (queryParams.sectionId) leaderboardParams.sectionId = queryParams.sectionId;
+
+      // Students API: page, size, year, departmentId, sectionId
+      const studentParams: Record<string, any> = { page: 0, size: 100 };
+      if (filterState.academicYear !== 'All Years') studentParams.year = filterState.academicYear;
+      if (queryParams.departmentId) studentParams.departmentId = queryParams.departmentId;
+      if (queryParams.sectionId) studentParams.sectionId = queryParams.sectionId;
+
+      const secUrl = queryParams.departmentId
+        ? `/api/v1/admin/departments/${queryParams.departmentId}/sections`
+        : '/api/v1/admin/sections';
+
+      const [statsRes, leaderboardRes, attendanceRes, studentsRes, deptsRes, monthlyRes, categoryRes, deptRankRes, stagesRes, sectionsRes, topPerformersRes] =
         await Promise.all([
-          apiClient.get('/api/v1/admin/stats', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/leaderboard', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/analytics/attendance/overview', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/students?page=0&size=1000', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/admin/departments').catch(() => null),
-          apiClient.get('/api/v1/analytics/xp/award-penalty', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/analytics/xp/activities', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/analytics/xp/departments', { params: queryParams }).catch(() => null),
-          apiClient.get('/api/v1/admin/stages').catch(() => null),
+          safeFetch('Admin Stats', () => apiClient.get('/api/v1/admin/stats')),
+          safeFetch('Leaderboard', () => apiClient.get('/api/v1/leaderboard', { params: leaderboardParams })),
+          safeFetch('Attendance Overview', () => apiClient.get('/api/v1/analytics/attendance/overview', { params: queryParams })),
+          safeFetch('Students', () => apiClient.get('/api/v1/students', { params: studentParams })),
+          safeFetch('Departments', () => apiClient.get('/api/v1/admin/departments')),
+          safeFetch('XP Award-Penalty', () => apiClient.get('/api/v1/analytics/xp/award-penalty', { params: queryParams })),
+          safeFetch('XP Activities', () => apiClient.get('/api/v1/analytics/xp/activities', { params: queryParams })),
+          safeFetch('XP Departments', () => apiClient.get('/api/v1/analytics/xp/departments', { params: queryParams })),
+          safeFetch('Stages', () => apiClient.get('/api/v1/admin/stages')),
+          safeFetch('Sections', () => apiClient.get(secUrl)),
+          safeFetch('XP Top Performers', () => apiClient.get('/api/v1/analytics/xp/top-performers', { params: queryParams })),
         ]);
+
+      // 0. Process Sections list
+      if (sectionsRes?.data) {
+        const rawSecList = Array.isArray(sectionsRes.data.data)
+          ? sectionsRes.data.data
+          : Array.isArray(sectionsRes.data)
+            ? sectionsRes.data
+            : [];
+        const mappedSecs = rawSecList.map((s: any) => ({
+          id: `${s.id || s.sectionId}`,
+          name: s.sectionName || s.name || `Section ${s.id}`,
+        }));
+        setSections([{ id: 'all', name: 'All Sections' }, ...mappedSecs]);
+      }
 
       // 1. Process Departments list
       if (deptsRes?.data) {
         const dList = Array.isArray(deptsRes.data.data)
           ? deptsRes.data.data
           : Array.isArray(deptsRes.data)
-          ? deptsRes.data
-          : [];
+            ? deptsRes.data
+            : [];
         if (dList.length > 0) {
           setDepartments(
             dList.map((d: any) => ({
@@ -212,39 +279,63 @@ export default function AnalyticsTab() {
       let totalStudentsCount = 0;
       let totalAwarded = 0;
 
-      // 2. Process Students list
-      if (studentsRes?.data) {
-        const studentList = Array.isArray(studentsRes.data.data?.content)
-          ? studentsRes.data.data.content
-          : Array.isArray(studentsRes.data.data)
-          ? studentsRes.data.data
-          : Array.isArray(studentsRes.data)
-          ? studentsRes.data
-          : [];
+      // Stage number → name lookup (defaults + API override if stages loaded)
+      const stageNumberToName: Record<number, string> = {
+        1: 'Foundation', 2: 'Achievement', 3: 'Excellence', 4: 'Elite', 5: 'Legacy',
+      };
+      // Also apply from stagesRes fetched in this cycle (avoids stale closure)
+      if (stagesRes?.data) {
+        const sList = Array.isArray(stagesRes.data.data)
+          ? stagesRes.data.data
+          : Array.isArray(stagesRes.data)
+            ? stagesRes.data
+            : [];
+        sList.forEach((s: any) => {
+          const num = parseInt(`${s.id || s.stageId}`, 10);
+          if (!isNaN(num)) stageNumberToName[num] = s.name || s.stageName || `Stage ${num}`;
+        });
+        if (sList.length > 0) {
+          setStages(sList.map((s: any) => ({
+            id: `${s.id || s.stageId}`,
+            name: s.name || s.stageName || 'Stage',
+          })));
+        }
+      }
 
-        totalStudentsCount = studentList.length;
+      // 2. Process Students list — ApiResponse<Page<StudentResponse>>
+      if (studentsRes?.data) {
+        const pageData = studentsRes.data.data;
+        const studentList = Array.isArray(pageData?.content)
+          ? pageData.content
+          : Array.isArray(pageData)
+            ? pageData
+            : Array.isArray(studentsRes.data)
+              ? studentsRes.data
+              : [];
+
+        totalStudentsCount = pageData?.totalElements ?? studentList.length;
         studentList.forEach((s: any) => {
-          const score = s.score ?? s.totalXp ?? s.xp ?? 0;
-          if (score > 0) totalAwarded += score;
+          const xp = s.score ?? s.totalXp ?? s.xp ?? 0;
+          if (xp > 0) totalAwarded += xp;
         });
 
         if (studentList.length > 0) {
-          const mappedRows: ReportRowData[] = studentList.slice(0, 25).map((s: any, idx: number) => ({
+          const mappedRows: ReportRowData[] = studentList.map((s: any, idx: number) => ({
             rank: idx + 1,
-            regNo: s.regNo || s.registerNo || s.sprNo || `REG-${100 + idx}`,
-            studentName: s.fullName || s.name || s.studentName || 'Student',
-            department: s.department?.deptCode || s.departmentName || s.department || 'CSE',
-            section: s.section?.sectionName || s.sectionName || s.section || 'A',
-            stage: s.stage || (s.totalXp > 1200 ? 'Elite' : s.totalXp > 800 ? 'Excellence' : 'Foundation'),
-            totalXp: s.totalXp ?? s.score ?? s.xp ?? 0,
-            attendancePct: s.attendancePct ?? 92.5,
-            badgesCount: s.badgesCount ?? Math.floor(Math.random() * 10) + 1,
+            regNo: s.regNo || s.sprNo || s.registerNo || '',
+            studentName: s.fullName || s.studentName || s.name || 'Student',
+            department: s.departmentName || s.department?.deptCode || s.department || '',
+            section: s.sectionName || s.section?.sectionName || s.section || '',
+            stage: s.stageName || s.stage || stageNumberToName[s.currentStage ?? 0] || '',
+            totalXp: s.score ?? s.totalXp ?? s.xp ?? 0,
+            attendancePct: s.attendancePercentage ?? s.attendancePct ?? 0,
+            badgesCount: s.badgesCount ?? 0,
           }));
           setTopPerformers(mappedRows);
         }
       }
 
-      // 3. Process HOD API data or General Admin Stats
+      // 3. Admin Stats — returns: {totalStudents, teachersCount, totalDepartments, totalAlerts, pendingBadgeRequests}
       if (hodDataRes?.data) {
         const hData = hodDataRes.data.data || hodDataRes.data;
         if (hData) {
@@ -252,99 +343,101 @@ export default function AnalyticsTab() {
             ...prev,
             totalStudents: hData.totalStudents ?? prev.totalStudents,
             totalXp: hData.totalXp ?? prev.totalXp,
-            avgXpPerStudent: Math.round(hData.averageXp ?? prev.avgXpPerStudent),
+            avgXpPerStudent: Math.round(hData.averageXp ?? hData.avgXp ?? prev.avgXpPerStudent),
             attendancePercentage: hData.attendancePercentage ?? prev.attendancePercentage,
           }));
         }
       } else if (statsRes?.data) {
         const d = statsRes.data.data || statsRes.data;
+        const statStudents = Number(d.totalStudents ?? d.students ?? totalStudentsCount) || 0;
         setMetrics((prev) => ({
           ...prev,
-          totalStudents: d.totalStudents ?? d.students ?? (totalStudentsCount || prev.totalStudents),
-          totalXp: d.totalXp ?? (totalAwarded || prev.totalXp),
-          avgXpPerStudent: Math.round(
-            d.avgXp ?? (totalAwarded && totalStudentsCount ? totalAwarded / totalStudentsCount : prev.avgXpPerStudent)
-          ),
-          badgesAwarded: d.badgesAwarded ?? d.totalBadges ?? prev.badgesAwarded,
-          missionsCompleted: d.missionsCompleted ?? prev.missionsCompleted,
+          totalStudents: statStudents > 0 ? statStudents : prev.totalStudents,
+          avgXpPerStudent: statStudents > 0 && totalAwarded > 0
+            ? Math.round(totalAwarded / statStudents)
+            : prev.avgXpPerStudent,
         }));
-        if (d.totalAlerts !== undefined) setAtRiskStudentsCount(d.totalAlerts);
+        if (d.totalAlerts !== undefined) setAtRiskStudentsCount(Number(d.totalAlerts) || 0);
       }
 
-      // 4. Process Attendance Overview
+      // 4. Attendance Overview — AnalyticsOverviewDTO
+      //    Fields: overallAttendancePercentage, presentStudents, partialAbsentees, fullDayAbsentees, totalStudents
       if (attendanceRes?.data) {
         const attData = attendanceRes.data.data || attendanceRes.data;
         setMetrics((prev) => ({
           ...prev,
-          attendancePercentage: attData.averageAttendancePercentage ?? attData.overallPercentage ?? prev.attendancePercentage,
+          attendancePercentage: Math.round(
+            attData.overallAttendancePercentage ??
+            attData.averageAttendancePercentage ??
+            attData.overallPercentage ??
+            prev.attendancePercentage
+          ),
+          totalStudents: prev.totalStudents > 0 ? prev.totalStudents : (attData.totalStudents ?? prev.totalStudents),
         }));
       }
 
-/**
- * Normalizes raw/composite category strings (e.g. "MUST MUST (INDIVIDUAL) COMMUNICATION", "GROUP GROUPS ACADEMIC")
- * into clean top-level category display names.
- */
-function normalizeCategoryName(rawCategory: string): string {
-  if (!rawCategory) return 'General';
-  const s = String(rawCategory).toUpperCase().replace(/\(.*?\)/g, '').replace(/[^A-Z0-9\s_]/g, ' ').trim();
+      /**
+       * Normalizes raw/composite category strings (e.g. "MUST MUST (INDIVIDUAL) COMMUNICATION", "GROUP GROUPS ACADEMIC")
+       * into clean top-level category display names.
+       */
+      function normalizeCategoryName(rawCategory: string): string {
+        if (!rawCategory) return 'General';
+        const s = String(rawCategory).toUpperCase().replace(/\(.*?\)/g, '').replace(/[^A-Z0-9\s_]/g, ' ').trim();
 
-  if (s.includes('ACADEMIC')) return 'Academic';
-  if (s.includes('SKILL')) return 'Skill';
-  if (s.includes('COMMUNICATION')) return 'Communication';
-  if (s.includes('DISCIPLINE')) return 'Discipline';
-  if (s.includes('LEADERSHIP')) return 'Leadership';
-  if (s.includes('CAREER')) return 'Career';
-  if (s.includes('INNOVATION')) return 'Innovation';
-  if (s.includes('SPORTS') || s.includes('FITNESS')) return 'Sports & Fitness';
-  if (s.includes('COMMUNITY') || s.includes('SOCIAL')) return 'Community Service';
+        if (s.includes('ACADEMIC')) return 'Academic';
+        if (s.includes('SKILL')) return 'Skill';
+        if (s.includes('COMMUNICATION')) return 'Communication';
+        if (s.includes('DISCIPLINE')) return 'Discipline';
+        if (s.includes('LEADERSHIP')) return 'Leadership';
+        if (s.includes('CAREER')) return 'Career';
+        if (s.includes('INNOVATION')) return 'Innovation';
+        if (s.includes('SPORTS') || s.includes('FITNESS')) return 'Sports & Fitness';
+        if (s.includes('COMMUNITY') || s.includes('SOCIAL')) return 'Community Service';
 
-  const words = s.split(/\s+/).filter(Boolean);
-  const uniqueWords = Array.from(new Set(words));
-  return uniqueWords
-    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-    .join(' ');
-}
-
-/**
- * Formats month identifiers into clean month labels (e.g. "Jun 2025", "Jul 2025")
- */
-function formatMonthLabel(m: any, index: number): string {
-  const raw = m?.monthName || m?.monthNameShort || m?.month || m?.monthKey || m?.date || m?.submittedAt || m?.label;
-  if (raw && typeof raw === 'string' && raw !== 'Month' && raw !== 'Group') {
-    if (raw.match(/^\d{4}-\d{2}/)) {
-      const parts = raw.split('-');
-      const monthNum = parseInt(parts[1], 10);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      if (monthNum >= 1 && monthNum <= 12) {
-        return `${months[monthNum - 1]} ${parts[0]}`;
+        const words = s.split(/\s+/).filter(Boolean);
+        const uniqueWords = Array.from(new Set(words));
+        return uniqueWords
+          .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+          .join(' ');
       }
-    }
-    return raw;
-  }
 
-  const fallbackMonths = ['Jun 2025', 'Jul 2025', 'Aug 2025', 'Sep 2025', 'Oct 2025', 'Nov 2025'];
-  return fallbackMonths[index % fallbackMonths.length];
-}
 
-      // 5. Process Monthly Award vs Penalty API for Line & Bar Chart
+      // 5. Process Award vs Penalty API — returns List<XpAwardVsPenaltyDTO>
+      //    DTO fields: departmentName (String), awardXp (Long), penaltyXp (Long)
+      //    This is grouped PER DEPARTMENT, not per month — use departmentName as the x-axis label
       if (monthlyRes?.data && Array.isArray(monthlyRes.data) && monthlyRes.data.length > 0) {
         setMonthlyLineChartData(
-          monthlyRes.data.map((m: any, idx: number) => ({
-            month: formatMonthLabel(m, idx),
-            awardedXp: m.totalAwardedXp ?? m.awardXp ?? m.awardedXp ?? m.award ?? m.xp ?? 0,
-            penaltyXp: m.totalPenaltyXp ?? m.penaltyXp ?? m.penalty ?? 0,
+          monthlyRes.data.map((m: any) => ({
+            month: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
+            awardedXp: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
+            penaltyXp: m.penaltyXp ?? m.totalPenaltyXp ?? 0,
           }))
         );
 
         setMonthlyChartData(
-          monthlyRes.data.map((m: any, idx: number) => ({
-            label: formatMonthLabel(m, idx),
-            value: m.totalAwardedXp ?? m.awardXp ?? m.awardedXp ?? m.award ?? m.xp ?? 0,
+          monthlyRes.data.map((m: any) => ({
+            label: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
+            value: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
           }))
         );
+
+        // Derive totalXp by summing awardXp across all departments
+        if (!isHOD) {
+          const derivedTotalXp = (monthlyRes.data as any[]).reduce((sum: number, m: any) => {
+            return sum + (m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0);
+          }, 0);
+          if (derivedTotalXp > 0) {
+            setMetrics((prev) => ({
+              ...prev,
+              totalXp: derivedTotalXp,
+              avgXpPerStudent: prev.totalStudents > 0 ? Math.round(derivedTotalXp / prev.totalStudents) : prev.avgXpPerStudent,
+            }));
+          }
+        }
       }
 
-      // 6. Process Category Donut Chart API (Normalize & Aggregate Raw Categories)
+      // 6. Process Category Donut Chart API — returns List<ActivityXpContributionDTO>
+      //    DTO fields: activityName (String), category (String), totalAwardXp (Long), totalPenaltyXp (Long), netXp (Long)
       if (categoryRes?.data && Array.isArray(categoryRes.data) && categoryRes.data.length > 0) {
         const colorPalette = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#6366F1', '#EF4444', '#14B8A6'];
         const aggregated: Record<string, number> = {};
@@ -352,7 +445,8 @@ function formatMonthLabel(m: any, index: number): string {
         categoryRes.data.forEach((c: any) => {
           const raw = c.category || c.activityName || c.name || '';
           const norm = normalizeCategoryName(raw);
-          const val = c.totalAwardedXp ?? c.totalXp ?? c.xpPoints ?? c.xp ?? c.value ?? 0;
+          // DTO field is totalAwardXp (NOT totalAwardedXp)
+          const val = c.totalAwardXp ?? c.totalAwardedXp ?? c.totalXp ?? c.netXp ?? c.xpPoints ?? c.xp ?? c.value ?? 0;
           aggregated[norm] = (aggregated[norm] || 0) + val;
         });
 
@@ -366,89 +460,120 @@ function formatMonthLabel(m: any, index: number): string {
         setCategoryChartData(chartItems);
       }
 
-function toShortDeptCode(deptName: string): string {
-  if (!deptName) return 'DEPT';
-  const upper = deptName.toUpperCase();
-  if (upper.includes('CYBER')) return 'CYBER';
-  if (upper.includes('INFORMATION') || upper.includes('IT')) return 'IT';
-  if (upper.includes('COMPUTER') || upper.includes('CSE')) return 'CSE';
-  if (upper.includes('ELECTRONICS') && upper.includes('COMM')) return 'ECE';
-  if (upper.includes('ELECTRICAL')) return 'EEE';
-  if (upper.includes('MECHANICAL') || upper.includes('MECH')) return 'MECH';
-  if (upper.includes('CIVIL')) return 'CIVIL';
-  if (upper.includes('ARTIFICIAL') || upper.includes('AI')) return 'AI&DS';
-  return upper.length > 6 ? upper.substring(0, 5) : upper;
-}
-
-      // 7. Process Department Rankings for Admin / Super Admin
-      if (deptRankRes?.data && Array.isArray(deptRankRes.data) && deptRankRes.data.length > 0) {
-        setDeptRankings(
-          deptRankRes.data.map((d: any) => ({
-            name: d.groupName || d.name || d.departmentName || 'Department',
-            code: toShortDeptCode(d.code || d.departmentCode || d.groupName || d.name || d.departmentName),
-            totalXp: d.totalXp ?? d.xp ?? 0,
-            studentCount: d.studentCount ?? d.totalStudents ?? 0,
-            averageXp: Math.round(d.averageXp ?? d.avgXp ?? 0),
-          }))
-        );
+      function toShortDeptCode(deptName: string): string {
+        if (!deptName) return 'DEPT';
+        const upper = deptName.toUpperCase();
+        if (upper.includes('CYBER')) return 'CYBER';
+        if (upper.includes('INFORMATION') || upper.includes('IT')) return 'IT';
+        if (upper.includes('COMPUTER') || upper.includes('CSE')) return 'CSE';
+        if (upper.includes('ELECTRONICS') && upper.includes('COMM')) return 'ECE';
+        if (upper.includes('ELECTRICAL')) return 'EEE';
+        if (upper.includes('MECHANICAL') || upper.includes('MECH')) return 'MECH';
+        if (upper.includes('CIVIL')) return 'CIVIL';
+        if (upper.includes('ARTIFICIAL') || upper.includes('AI')) return 'AI&DS';
+        return upper.length > 6 ? upper.substring(0, 5) : upper;
       }
 
-      // 8. Process Leaderboard
-      if (leaderboardRes?.data) {
+      // 7. Process Department Rankings — returns List<GroupedXpDTO>
+      //    DTO fields: groupName (String), averageXp (Double), totalXp (Long), studentCount (Long)
+      if (deptRankRes?.data && Array.isArray(deptRankRes.data) && deptRankRes.data.length > 0) {
+        const deptList = deptRankRes.data.map((d: any) => ({
+          name: d.groupName || d.name || d.departmentName || 'Department',
+          code: toShortDeptCode(d.groupName || d.code || d.departmentCode || d.name || d.departmentName),
+          totalXp: d.totalXp ?? d.xp ?? 0,
+          studentCount: d.studentCount ?? d.totalStudents ?? 0,
+          averageXp: Math.round(d.averageXp ?? d.avgXp ?? 0),
+        }));
+        setDeptRankings(deptList);
+
+        // Also update totalXp from dept rankings sum if award-penalty didn't return it
+        if (!isHOD) {
+          const deptTotalXp = deptList.reduce((sum: number, d: any) => sum + (d.totalXp || 0), 0);
+          if (deptTotalXp > 0) {
+            setMetrics((prev) => ({
+              ...prev,
+              totalXp: prev.totalXp > 0 ? prev.totalXp : deptTotalXp,
+              avgXpPerStudent: prev.totalXp > 0 ? prev.avgXpPerStudent
+                : (prev.totalStudents > 0 ? Math.round(deptTotalXp / prev.totalStudents) : 0),
+            }));
+          }
+        }
+      }
+
+      // 8. Process Top Performers / Leaderboard
+      // Primary source: /api/v1/analytics/xp/top-performers (List<XpTopPerformerDTO>)
+      // Secondary source: /api/v1/leaderboard
+      // Fallback: /api/v1/students
+      if (topPerformersRes?.data && Array.isArray(topPerformersRes.data) && topPerformersRes.data.length > 0) {
+        const mappedTop: ReportRowData[] = topPerformersRes.data.map((item: any, index: number) => ({
+          rank: item.rank || index + 1,
+          regNo: item.registerNumber || item.regNo || item.sprNo || '',
+          studentName: item.studentName || item.fullName || item.name || 'Student',
+          department: item.department || item.departmentName || '',
+          section: item.section || item.sectionName || '',
+          stage: item.stageName || item.stage || (item.currentStage ? stageNumberToName[item.currentStage] : 'Active'),
+          totalXp: item.currentXp ?? item.awardedXp ?? item.score ?? item.totalXp ?? 0,
+          attendancePct: item.attendancePct ?? 0,
+          badgesCount: 0,
+        }));
+        setTopPerformers(mappedTop);
+      } else if (leaderboardRes?.data) {
         const list = Array.isArray(leaderboardRes.data.data)
           ? leaderboardRes.data.data
           : Array.isArray(leaderboardRes.data)
-          ? leaderboardRes.data
-          : [];
+            ? leaderboardRes.data
+            : [];
         if (list.length > 0) {
-          const mappedTop = list.slice(0, 25).map((item: any, index: number) => ({
+          const mappedTop = list.map((item: any, index: number) => ({
             rank: index + 1,
-            regNo: item.regNo || item.studentId || item.registerNumber || '',
+            regNo: item.regNo || item.sprNo || item.registerNumber || '',
             studentName: item.fullName || item.studentName || item.name || 'Student',
             department: item.departmentName || item.department || '',
             section: item.sectionName || item.section || '',
-            stage: item.stage || item.stageName || '',
+            stage: item.stageName || item.stage || stageNumberToName[item.currentStage ?? 0] || '',
             totalXp: item.score ?? item.totalXp ?? item.xp ?? 0,
-            attendancePct: item.attendancePct ?? 0,
+            attendancePct: item.attendancePercentage ?? item.attendancePct ?? 0,
             badgesCount: item.badgesCount ?? 0,
           }));
           setTopPerformers(mappedTop);
         }
       }
 
-      // 9. Process Stages list for filter dropdown
-      if (stagesRes?.data) {
-        const sList = Array.isArray(stagesRes.data.data)
-          ? stagesRes.data.data
-          : Array.isArray(stagesRes.data)
-          ? stagesRes.data
-          : [];
-        if (sList.length > 0) {
-          setStages(
-            sList.map((s: any) => ({
-              id: `${s.id || s.stageId}`,
-              name: s.name || s.stageName || 'Stage',
-            }))
-          );
-        }
-      }
+      // Stages were already processed above alongside stageNumberToName setup
+
     } catch (e: any) {
-      console.warn('Live Analytics fetch notice:', e);
+      const errMsg = e?.message || 'Failed to reach Spring Boot analytics server.';
+      logger.error('[Analytics] Fatal fetch error:', e);
       setHasError(true);
-      setErrorMessage(e?.message || 'Failed to reach Spring Boot analytics server.');
+      setErrorMessage(errMsg);
     } finally {
       setIsLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [filterState, isHOD]);
+  }, [filterState, isHOD, user?.departmentId]);
 
-  // Initial Load + Auto Refresh Polling (Every 30 Seconds)
+
+  // Initial Load + Auto Refresh Polling (Visibility-aware, 60 Seconds)
   useEffect(() => {
     fetchAnalyticsData();
-    const intervalId = setInterval(() => {
-      fetchAnalyticsData();
-    }, 30000); // 30-second polling
 
-    return () => clearInterval(intervalId);
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchAnalyticsData();
+      }
+    }, 60000); // 60-second background polling
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAnalyticsData();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [fetchAnalyticsData]);
 
   // Filter Handlers
@@ -526,8 +651,12 @@ function toShortDeptCode(deptName: string): string {
     });
   }, [topPerformers, filterState, tableSearchText, departments]);
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   // PDF Export Trigger
   const handleDownloadPDF = async () => {
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
     toast.loading('Generating server-styled PDF Report...', { id: 'pdf-toast' });
     try {
       const userName = user?.fullName || user?.username || 'System Administrator';
@@ -540,31 +669,51 @@ function toShortDeptCode(deptName: string): string {
         userName,
         userRoleDisplay,
         categoryChartData,
-        monthlyChartData,
+        monthlyLineChartData,
         stagePieChartData,
-        deptRankings
+        deptRankings,
+        activeTableMode
       );
 
       toast.success('Engagement PDF Report downloaded successfully!', { id: 'pdf-toast' });
     } catch (err) {
-      console.error('PDF Generation error:', err);
+      logger.error('PDF Generation error:', err);
       toast.error('Failed to generate PDF report.', { id: 'pdf-toast' });
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
   // CSV Export Trigger
   const handleExportCSV = () => {
     toast.success('Exporting Analytics CSV Data...');
-    const header = 'Rank,Register No,Student Name,Department,Section,Stage,Total XP,Attendance %\n';
-    const csvRows = filteredRows
-      .map((r, i) => `${i + 1},${r.regNo},"${r.studentName}",${r.department},${r.section},${r.stage},${r.totalXp},${r.attendancePct}%`)
-      .join('\n');
+    let header = '';
+    let csvRows = '';
+
+    if (activeTableMode === 'DEPARTMENT_SUMMARY' || filterState.totalsOnly) {
+      header = 'Rank,Department Name,Department Code,Student Roster Count,Total XP Accumulated,Average XP Per Student,Performance Rating\n';
+      csvRows = deptRankings
+        .map((d, i) => {
+          const rating = i === 0 ? 'Tier 1 Elite' : i === 1 ? 'Tier 2 Excellence' : 'Active Performing';
+          const avgXp = d.averageXp || (d.studentCount ? Math.round(d.totalXp / d.studentCount) : 0);
+          return `${i + 1},"${d.name}","${d.code}",${d.studentCount},${d.totalXp},${avgXp},"${rating}"`;
+        })
+        .join('\n');
+    } else {
+      header = 'Rank,Register No,Student Name,Department,Section,Stage,Total XP,Attendance %\n';
+      csvRows = filteredRows
+        .map((r, i) => `${i + 1},"${r.regNo}","${r.studentName}","${r.department}","${r.section}","${r.stage}",${r.totalXp},${r.attendancePct}%`)
+        .join('\n');
+    }
 
     const blob = new Blob([header + csvRows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `engagement_report_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.href = url;
+    const modeName = (activeTableMode === 'DEPARTMENT_SUMMARY' || filterState.totalsOnly) ? 'dept_summary' : 'student_roster';
+    link.download = `analytics_${modeName}_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (
@@ -581,7 +730,7 @@ function toShortDeptCode(deptName: string): string {
                 </span>
               ) : isHOD ? (
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center">
-                  <Lock className="w-3 h-3 mr-1" /> HOD Scoped ({hodUserDept})
+                  <Lock className="w-3 h-3 mr-1" /> HOD Scoped ({hodUserDept || 'your department'})
                 </span>
               ) : (
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
@@ -591,7 +740,7 @@ function toShortDeptCode(deptName: string): string {
             </div>
             <p className="text-xs text-slate-400 mt-1">
               {isHOD
-                ? `Department metrics scoped to ${hodUserDept}`
+                ? `Department metrics scoped to ${hodUserDept || 'your department'}`
                 : 'Institution-wide live student engagement, attendance compliance & XP leaderboard'}
             </p>
           </div>
@@ -600,9 +749,8 @@ function toShortDeptCode(deptName: string): string {
           <div className="flex items-center space-x-2 flex-wrap gap-y-2">
             <button
               onClick={() => setShowFilterPanel(!showFilterPanel)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors flex items-center space-x-1.5 ${
-                showFilterPanel ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-              }`}
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors flex items-center space-x-1.5 ${showFilterPanel ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                }`}
             >
               <Filter className="w-4 h-4" />
               <span>{showFilterPanel ? 'Hide Filters' : 'Show Filters'}</span>
@@ -689,7 +837,7 @@ function toShortDeptCode(deptName: string): string {
                 </label>
                 {isHOD ? (
                   <div className="w-full bg-slate-900/80 border border-amber-500/40 text-amber-300 text-xs font-semibold rounded-xl px-3 py-2 flex items-center justify-between">
-                    <span className="truncate">{hodUserDept}</span>
+                    <span className="truncate">{hodUserDept || 'Department not set'}</span>
                     <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0 ml-1" />
                   </div>
                 ) : (
@@ -774,11 +922,10 @@ function toShortDeptCode(deptName: string): string {
                 <span className="text-xs text-slate-300 font-medium">Report Mode:</span>
                 <button
                   onClick={() => setFilterState((prev) => ({ ...prev, totalsOnly: !prev.totalsOnly }))}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 border ${
-                    filterState.totalsOnly
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 border ${filterState.totalsOnly
                       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                       : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
-                  }`}
+                    }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
                   <span>{filterState.totalsOnly ? 'Department Totals Only' : 'Per-Student Detailed Roster'}</span>
@@ -851,9 +998,7 @@ function toShortDeptCode(deptName: string): string {
                 <div>
                   <span className="text-[11px] font-semibold text-blue-700">Total XP Issued</span>
                   <div className="text-xl font-bold text-blue-900">{metrics.totalXp.toLocaleString()} XP</div>
-                  <div className="text-[10px] text-emerald-600 font-medium flex items-center">
-                    <TrendingUp className="w-3 h-3 mr-0.5" /> +14.2% month
-                  </div>
+                  <div className="text-[10px] text-blue-600 font-medium">Institution total</div>
                 </div>
               </div>
 
@@ -904,25 +1049,25 @@ function toShortDeptCode(deptName: string): string {
               </div>
             </div>
 
-            {/* FEATURED: DUAL-LINE COMPARISON CHART (AWARDED VS PENALTY XP) */}
+            {/* FEATURED: DEPT AWARD VS PENALTY XP COMPARISON CHART */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center space-x-2">
                   <Activity className="w-5 h-5 text-blue-600" />
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">Monthly Awarded vs Penalty XP Trend</h3>
-                    <p className="text-[11px] text-slate-400">Live API comparison of issued discipline points vs penalty deductions</p>
+                    <h3 className="font-bold text-slate-900 text-sm">Department: Awarded vs Penalty XP</h3>
+                    <p className="text-[11px] text-slate-400">Per-department comparison of issued XP vs penalty deductions</p>
                   </div>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                  Dual Line Trend API
+                  Line Graph API
                 </span>
               </div>
 
               <div className="h-72 w-full">
                 {monthlyLineChartData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-xs text-slate-400">
-                    No XP activity recorded for active date range & filters.
+                    No XP data available. Try removing filters or expanding the date range.
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -944,8 +1089,8 @@ function toShortDeptCode(deptName: string): string {
                         name="Awarded XP"
                         stroke="#3B82F6"
                         strokeWidth={3}
-                        dot={{ fill: '#3B82F6', r: 4 }}
-                        activeDot={{ stroke: '#1D4ED8', strokeWidth: 2, r: 6 }}
+                        dot={{ fill: '#3B82F6', r: 5, strokeWidth: 2, stroke: '#FFFFFF' }}
+                        activeDot={{ r: 7, stroke: '#1E40AF', strokeWidth: 3, fill: '#3B82F6' }}
                       />
                       <Line
                         type="monotone"
@@ -953,8 +1098,8 @@ function toShortDeptCode(deptName: string): string {
                         name="Penalty Deductions"
                         stroke="#EF4444"
                         strokeWidth={3}
-                        dot={{ fill: '#EF4444', r: 4 }}
-                        activeDot={{ stroke: '#B91C1C', strokeWidth: 2, r: 6 }}
+                        dot={{ fill: '#EF4444', r: 5, strokeWidth: 2, stroke: '#FFFFFF' }}
+                        activeDot={{ r: 7, stroke: '#991B1B', strokeWidth: 3, fill: '#EF4444' }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -1114,11 +1259,10 @@ function toShortDeptCode(deptName: string): string {
                   <div className="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
                     <button
                       onClick={() => setActiveTableMode('DEPARTMENT_SUMMARY')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                        activeTableMode === 'DEPARTMENT_SUMMARY'
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${activeTableMode === 'DEPARTMENT_SUMMARY'
                           ? 'bg-indigo-600 text-white shadow-sm'
                           : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                        }`}
                     >
                       <Building className="w-3.5 h-3.5" />
                       <span>Department Performance Summary</span>
@@ -1126,11 +1270,10 @@ function toShortDeptCode(deptName: string): string {
 
                     <button
                       onClick={() => setActiveTableMode('STUDENT_ROSTER')}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                        activeTableMode === 'STUDENT_ROSTER'
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${activeTableMode === 'STUDENT_ROSTER'
                           ? 'bg-indigo-600 text-white shadow-sm'
                           : 'text-slate-600 hover:text-slate-900'
-                      }`}
+                        }`}
                     >
                       <Users className="w-3.5 h-3.5" />
                       <span>Per-Student Detailed Roster</span>
@@ -1190,23 +1333,22 @@ function toShortDeptCode(deptName: string): string {
                               </span>
                             </td>
                             <td className="py-3.5 px-4 text-center font-semibold text-slate-700">
-                              {dept.studentCount || 350} Students
+                              {dept.studentCount} Students
                             </td>
                             <td className="py-3.5 px-4 text-right font-black text-indigo-600 text-sm">
                               {dept.totalXp.toLocaleString()} XP
                             </td>
                             <td className="py-3.5 px-4 text-right font-bold text-emerald-600">
-                              {(dept.averageXp || Math.round(dept.totalXp / (dept.studentCount || 350))).toLocaleString()} XP
+                              {(dept.averageXp || (dept.studentCount ? Math.round(dept.totalXp / dept.studentCount) : 0)).toLocaleString()} XP
                             </td>
                             <td className="py-3.5 px-4 text-center">
                               <span
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                                  idx === 0
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${idx === 0
                                     ? 'bg-amber-50 text-amber-700 border-amber-300'
                                     : idx === 1
-                                    ? 'bg-indigo-50 text-indigo-700 border-indigo-300'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                                }`}
+                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-300'
+                                      : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                  }`}
                               >
                                 {idx === 0 ? '🏆 Tier 1 Elite' : idx === 1 ? '⭐ Tier 2 Excellence' : '✅ Active Performing'}
                               </span>
@@ -1248,15 +1390,14 @@ function toShortDeptCode(deptName: string): string {
                             <td className="py-3.5 px-4 font-medium text-slate-600">{row.section}</td>
                             <td className="py-3.5 px-4">
                               <span
-                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                                  row.stage === 'Elite'
+                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${row.stage === 'Elite'
                                     ? 'bg-purple-50 text-purple-700 border-purple-200'
                                     : row.stage === 'Excellence'
-                                    ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                                    : row.stage === 'Achievement'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                }`}
+                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                      : row.stage === 'Achievement'
+                                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  }`}
                               >
                                 {row.stage}
                               </span>

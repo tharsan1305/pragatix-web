@@ -5,10 +5,11 @@ import PointReviewTab from '../student/tabs/PointReviewTab';
 import LeaderboardTab from '../student/tabs/LeaderboardTab';
 import CaptainGroupTab from './tabs/CaptainGroupTab';
 import ActivitiesTab from '../student/tabs/ActivitiesTab';
+import StudentAttendanceTab from '../student/tabs/StudentAttendanceTab';
 import LevelsBadgesTab from '../student/tabs/LevelsBadgesTab';
 import ProfileTab from '../student/tabs/ProfileTab';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, History, Trophy, Users, Ticket, Medal, User } from 'lucide-react';
+import { LayoutDashboard, History, Trophy, Users, Ticket, CalendarCheck, Medal, User } from 'lucide-react';
 
 export default function CaptainDashboardPage() {
   const [activeTab, setActiveTab] = useState(0);
@@ -29,6 +30,7 @@ export default function CaptainDashboardPage() {
     { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
     { name: 'My Group', icon: Users, component: <CaptainGroupTab /> },
     { name: 'Activities', icon: Ticket, component: <ActivitiesTab /> },
+    { name: 'Attendance', icon: CalendarCheck, component: <StudentAttendanceTab /> },
     { name: 'Levels & Badges', icon: Medal, component: <LevelsBadgesTab /> },
     { name: 'Profile', icon: User, component: <ProfileTab /> }
   ];

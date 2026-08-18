@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { User as UserIcon, LogOut, RefreshCw, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -24,16 +25,26 @@ export default function ProfileTab() {
     setIsLoading(true);
     setError(null);
     try {
-      // Call GET /api/v1/profile/me matching Flutter ProfileRepository.getMyProfile
-      let response;
-      try {
-        response = await apiClient.get('/api/v1/profile/me');
-      } catch (_) {
-        response = await apiClient.get('/api/v1/auth/me');
+      // Call GET /api/v1/profile/me and attendance summary in parallel
+      const [profileRes, attSummaryRes] = await Promise.allSettled([
+        apiClient.get('/api/v1/profile/me').catch(() => apiClient.get('/api/v1/auth/me')),
+        apiClient.get('/api/student/attendance/summary').catch(() => null),
+      ]);
+
+      let d: any = null;
+      if (profileRes.status === 'fulfilled' && profileRes.value?.data?.data) {
+        d = profileRes.value.data.data;
       }
 
-      if (response.data?.success && response.data?.data) {
-        const d = response.data.data;
+      let realAttendancePct: number | null = null;
+      if (attSummaryRes.status === 'fulfilled' && attSummaryRes.value?.data) {
+        const attData = attSummaryRes.value.data.data || attSummaryRes.value.data;
+        if (attData && attData.attendancePercentage !== undefined) {
+          realAttendancePct = Math.round(attData.attendancePercentage);
+        }
+      }
+
+      if (d) {
         const stDetails = d.studentDetails || {};
 
         setProfile({
@@ -51,7 +62,7 @@ export default function ProfileTab() {
             isCaptain: stDetails.isCaptain ?? d.isCaptain ?? false,
             isViceCaptain: stDetails.isViceCaptain ?? d.isViceCaptain ?? false,
             currentXp: stDetails.currentXp ?? d.totalXp ?? d.score ?? 0,
-            attendancePercentage: stDetails.attendancePercentage ?? d.attendancePercentage ?? 0,
+            attendancePercentage: realAttendancePct !== null ? realAttendancePct : (stDetails.attendancePercentage ?? d.attendancePercentage ?? 0),
             rank: stDetails.rank ?? d.rank ?? 0,
           }
         });
@@ -59,7 +70,7 @@ export default function ProfileTab() {
         setProfile(null);
       }
     } catch (e: any) {
-      console.warn("Failed to load profile details:", e);
+      logger.warn("Failed to load profile details:", e);
       setError(e.response?.data?.message || "Error loading profile");
       setProfile(null);
     } finally {

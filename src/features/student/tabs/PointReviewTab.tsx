@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect, useRef } from 'react';
 import { Plus, X, Upload, CheckCircle2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -47,7 +48,7 @@ export default function PointReviewTab() {
           setCurrentStage(res.data.data.stage ?? 1);
         }
       } catch (e) {
-        console.error("Failed to load user info in PointReviewTab", e);
+        logger.error("Failed to load user info in PointReviewTab", e);
       }
       if (regNo) {
         fetchSummary(regNo);
@@ -74,7 +75,7 @@ export default function PointReviewTab() {
         }
         setAllActivities(flattened);
       } catch (e) {
-        console.error("Failed to load activities for claim wizard", e);
+        logger.error("Failed to load activities for claim wizard", e);
       }
     };
 

@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { RefreshCw, ChevronRight, Star, User, Users, AlertCircle, Bell, UsersRound, Gavel, Calendar, UserCheck, ArrowLeft, GraduationCap, UserPlus, X, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +16,7 @@ import GroupActivityYearPage from '../../admin/activity/pages/GroupActivityYearP
 
 export default function ActivityTab() {
   const navigate = useNavigate();
-  const { subRoles } = useAuth();
-  const isCC = subRoles.some(r => r.toUpperCase() === 'CC' || r.toUpperCase() === 'CLASS_COORDINATOR');
+  const { isSuperAdmin, isAdmin, isCC } = useAuth();
 
   const [academicYear, setAcademicYear] = useState<string>('FIRST_YEAR');
   const [stagesList, setStagesList] = useState<any[]>([]);
@@ -124,7 +124,7 @@ export default function ActivityTab() {
       const list = response.data?.success ? (response.data.data || []) : (Array.isArray(response.data) ? response.data : []);
       setStagesList(list);
     } catch (e) {
-      console.warn("Failed to fetch activity stages:", e);
+      logger.warn("Failed to fetch activity stages:", e);
     } finally {
       setIsLoading(false);
     }
@@ -222,6 +222,7 @@ export default function ActivityTab() {
           activity={subView.props?.activity}
           stageId={subView.props?.stageId}
           subgroupName={subView.props?.subgroupName}
+          academicYear={subView.props?.academicYear || academicYear}
           onBack={handleGoBack}
         />
       );
@@ -568,14 +569,17 @@ export default function ActivityTab() {
           </div>
           <select
             value={academicYear}
+            disabled={isCC && !isAdmin && !isSuperAdmin}
             onChange={(e) => setAcademicYear(e.target.value)}
-            className="w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl px-5 py-3 focus:ring-2 focus:ring-slate-800 outline-none cursor-pointer"
+            className={`w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl px-5 py-3 focus:ring-2 focus:ring-slate-800 outline-none ${
+              isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700' : 'cursor-pointer'
+            }`}
           >
             <option value="FIRST_YEAR">FIRST YEAR</option>
             <option value="SECOND_YEAR">SECOND YEAR</option>
             <option value="THIRD_YEAR">THIRD YEAR</option>
             <option value="FOURTH_YEAR">FOURTH YEAR</option>
-            <option value="ALL">All Academic Years</option>
+            {(!isCC || isAdmin || isSuperAdmin) && <option value="ALL">All Academic Years</option>}
           </select>
         </div>
 
@@ -823,7 +827,7 @@ function CCActivityListPageView({
       const list = res.data?.success ? (res.data.data || []) : (Array.isArray(res.data) ? res.data : []);
       setActivities(list);
     } catch (err) {
-      console.error('Failed to fetch CC activities:', err);
+      logger.error('Failed to fetch CC activities:', err);
       setActivities([]);
     } finally {
       setIsLoading(false);

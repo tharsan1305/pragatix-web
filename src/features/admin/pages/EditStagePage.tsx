@@ -1,33 +1,70 @@
-import { useState } from 'react';
+import { logger } from '../../../utils/logger';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
 interface Props {
   onBack: () => void;
-  stage: any;
+  stage?: any;
+  stageId?: number | string;
 }
 
-export default function EditStagePage({ onBack, stage }: Props) {
+export default function EditStagePage({ onBack, stage, stageId }: Props) {
+  const [isLoading, setIsLoading] = useState(!stage && Boolean(stageId));
   const [formData, setFormData] = useState({
-    name: stage.name || '',
-    description: stage.description || '',
-    displayOrder: stage.displayOrder?.toString() || '0',
-    expectedXp: (stage.expectedXp ?? 0).toString(),
-    mustThreshold: (stage.mustThreshold ?? 0).toString(),
-    individualThreshold: (stage.individualThreshold ?? 0).toString(),
-    groupThreshold: (stage.groupThreshold ?? 0).toString(),
-    academicYear: stage.academicYear || 'FIRST_YEAR',
-    startDate: stage.startDate ? stage.startDate.split('T')[0] : (stage.startDateTime ? stage.startDateTime.split('T')[0] : ''),
-    endDate: stage.endDate ? stage.endDate.split('T')[0] : (stage.endDateTime ? stage.endDateTime.split('T')[0] : ''),
-    isActive: stage.isActive ?? stage.active ?? true
+    name: stage?.name || '',
+    description: stage?.description || '',
+    displayOrder: stage?.displayOrder?.toString() || '0',
+    expectedXp: (stage?.expectedXp ?? 0).toString(),
+    mustThreshold: (stage?.mustThreshold ?? 0).toString(),
+    individualThreshold: (stage?.individualThreshold ?? 0).toString(),
+    groupThreshold: (stage?.groupThreshold ?? 0).toString(),
+    academicYear: stage?.academicYear || 'FIRST_YEAR'
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  const targetStageId = stage?.id || stageId;
+
+  useEffect(() => {
+    if (!stage && stageId) {
+      fetchStageDetails(stageId);
+    }
+  }, [stage, stageId]);
+
+  const fetchStageDetails = async (id: number | string) => {
+    setIsLoading(true);
+    try {
+      const response = await apiClient.get(`/api/v1/admin/stages/${id}`);
+      const data = response.data?.data || response.data;
+      if (data) {
+        setFormData({
+          name: data.name || '',
+          description: data.description || '',
+          displayOrder: (data.displayOrder ?? 0).toString(),
+          expectedXp: (data.expectedXp ?? 0).toString(),
+          mustThreshold: (data.mustThreshold ?? 0).toString(),
+          individualThreshold: (data.individualThreshold ?? 0).toString(),
+          groupThreshold: (data.groupThreshold ?? 0).toString(),
+          academicYear: data.academicYear || 'FIRST_YEAR'
+        });
+      }
+    } catch (e) {
+      logger.warn("Error loading stage details for edit:", e);
+      toast.error("Failed to load stage details");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       toast.error("Stage name is required");
+      return;
+    }
+    if (!targetStageId) {
+      toast.error("Invalid stage ID");
       return;
     }
     setIsSaving(true);
@@ -41,14 +78,10 @@ export default function EditStagePage({ onBack, stage }: Props) {
         mustThreshold: parseInt(formData.mustThreshold) || 0,
         individualThreshold: parseInt(formData.individualThreshold) || 0,
         groupThreshold: parseInt(formData.groupThreshold) || 0,
-        academicYear: formData.academicYear,
-        active: formData.isActive
+        academicYear: formData.academicYear
       };
 
-      if (formData.startDate) payload.startDate = formData.startDate;
-      if (formData.endDate) payload.endDate = formData.endDate;
-      
-      const response = await apiClient.put(`/api/v1/admin/stages/${stage.id}`, payload);
+      const response = await apiClient.put(`/api/v1/admin/stages/${targetStageId}`, payload);
       toast.dismiss(toastId);
       if (response.data?.success || response.status === 200 || response.status === 201) {
         toast.success("Stage updated successfully!");
@@ -58,7 +91,7 @@ export default function EditStagePage({ onBack, stage }: Props) {
       }
     } catch (error: any) {
       toast.dismiss(toastId);
-      console.error(error);
+      logger.error(error);
       toast.error(error.response?.data?.message || 'Error updating stage');
     } finally {
       setIsSaving(false);
@@ -75,7 +108,18 @@ export default function EditStagePage({ onBack, stage }: Props) {
       </div>
 
       <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
-        <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        {isLoading ? (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 flex flex-col items-center justify-center space-y-4">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm font-medium text-slate-600">Loading Stage details...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">Stage Configuration</h2>
+              <p className="text-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
+            </div>
+
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Stage Name *</label>
@@ -88,39 +132,41 @@ export default function EditStagePage({ onBack, stage }: Props) {
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
               />
             </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Academic Year *</label>
+              <select
+                value={formData.academicYear}
+                onChange={e => setFormData({...formData, academicYear: e.target.value})}
+                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
+              >
+                <option value="FIRST_YEAR">First Year</option>
+                <option value="SECOND_YEAR">Second Year</option>
+                <option value="THIRD_YEAR">Third Year</option>
+                <option value="FINAL_YEAR">Fourth Year</option>
+              </select>
+            </div>
             
             <div className="space-y-1">
               <label className="text-sm font-medium text-slate-700">Description</label>
               <textarea 
                 value={formData.description} 
                 onChange={e => setFormData({...formData, description: e.target.value})} 
-                placeholder="Brief description of this stage's purpose..."
+                placeholder="Describe targets or rules for this stage..."
                 rows={3}
                 className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow resize-none"
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Academic Year *</label>
-                <select
-                  value={formData.academicYear}
-                  onChange={e => setFormData({...formData, academicYear: e.target.value})}
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
-                >
-                  <option value="FIRST_YEAR">1st Year (FIRST_YEAR)</option>
-                  <option value="SECOND_YEAR">2nd Year (SECOND_YEAR)</option>
-                  <option value="THIRD_YEAR">3rd Year (THIRD_YEAR)</option>
-                  <option value="FINAL_YEAR">4th Year (FINAL_YEAR)</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Expected XP Points</label>
+                <label className="text-sm font-medium text-slate-700">Expected XP *</label>
                 <input 
+                  required
                   type="number" 
                   value={formData.expectedXp} 
                   onChange={e => setFormData({...formData, expectedXp: e.target.value})} 
-                  placeholder="e.g. 100"
+                  placeholder="e.g. 500"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
                 />
               </div>
@@ -130,77 +176,50 @@ export default function EditStagePage({ onBack, stage }: Props) {
                   type="number" 
                   value={formData.displayOrder} 
                   onChange={e => setFormData({...formData, displayOrder: e.target.value})} 
+                  placeholder="e.g. 1"
                   className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Must-Do Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.mustThreshold} 
-                  onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
-                  placeholder="e.g. 20"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
+            <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-800">Subgroup Thresholds</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
               </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Individual Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.individualThreshold} 
-                  onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
-                  placeholder="e.g. 30"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Group Threshold</label>
-                <input 
-                  type="number" 
-                  value={formData.groupThreshold} 
-                  onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
-                  placeholder="e.g. 50"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Start Date (Optional)</label>
-                <input 
-                  type="date" 
-                  value={formData.startDate} 
-                  onChange={e => setFormData({...formData, startDate: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Must Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.mustThreshold} 
+                    onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
+                    placeholder="e.g. 50"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Individual Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.individualThreshold} 
+                    onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
+                    placeholder="e.g. 100"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Group Threshold</label>
+                  <input 
+                    type="number" 
+                    value={formData.groupThreshold} 
+                    onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
+                    placeholder="e.g. 150"
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
+                  />
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">End Date (Optional)</label>
-                <input 
-                  type="date" 
-                  value={formData.endDate} 
-                  min={formData.startDate}
-                  onChange={e => setFormData({...formData, endDate: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
-              </div>
-            </div>
-            
-            <div className="flex items-center pt-2 space-x-3">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={formData.isActive} 
-                  onChange={e => setFormData({...formData, isActive: e.target.checked})} 
-                  className="sr-only peer" 
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-sm font-medium text-slate-700">Active Status</span>
-              </label>
             </div>
           </div>
           
@@ -222,6 +241,7 @@ export default function EditStagePage({ onBack, stage }: Props) {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

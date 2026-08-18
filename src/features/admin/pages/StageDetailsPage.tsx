@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, RefreshCw, X, Star, User, Users, ChevronRight, ChevronDown, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -66,7 +67,7 @@ export default function StageDetailsPage({
         const acts = await activityService.fetchActivities(subId, stageId, sub.name);
         setSubgroupActivities(prev => ({ ...prev, [subId]: acts || [] }));
       } catch (err) {
-        console.error("Failed to load subgroup activities:", err);
+        logger.error("Failed to load subgroup activities:", err);
       } finally {
         setSubgroupLoading(prev => ({ ...prev, [subId]: false }));
       }
@@ -84,7 +85,7 @@ export default function StageDetailsPage({
       fetchSubgroups();
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || 'Failed to remove activity from stage');
     }
   };
@@ -100,7 +101,7 @@ export default function StageDetailsPage({
       fetchSubgroups();
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || 'Failed to delete activity from system');
     }
   };
@@ -203,7 +204,7 @@ export default function StageDetailsPage({
         }
       }
     } catch (e: any) {
-      console.error('Failed to fetch stage details:', e);
+      logger.error('Failed to fetch stage details:', e);
       setSubgroups([
         { id: 1, name: 'Must', threshold: 150, category: 'must' },
         { id: 2, name: 'Individual', threshold: 150, category: 'individual' },
@@ -241,7 +242,7 @@ export default function StageDetailsPage({
       fetchSubgroups();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to save subgroup');
     }
   };
@@ -261,7 +262,7 @@ export default function StageDetailsPage({
       fetchSubgroups();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to delete subgroup');
     }
   };

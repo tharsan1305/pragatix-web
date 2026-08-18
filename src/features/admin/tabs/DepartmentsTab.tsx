@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Building2, Plus, Search, RefreshCw, Edit2, Trash2, ArrowLeft, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -31,7 +32,7 @@ export default function DepartmentsTab({ onBack }: Props) {
         setFilteredDepartments(response.data.data || []);
       }
     } catch (e) {
-      console.error(e);
+      logger.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +65,7 @@ export default function DepartmentsTab({ onBack }: Props) {
         setDeptSections([]);
       }
     } catch (e) {
-      console.error("Failed to load sections", e);
+      logger.error("Failed to load sections", e);
       setDeptSections([]);
     } finally {
       setIsLoadingSections(false);
@@ -111,7 +112,7 @@ export default function DepartmentsTab({ onBack }: Props) {
       fetchDeptSections(editingDept.id);
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to add section');
     }
   };
@@ -126,7 +127,7 @@ export default function DepartmentsTab({ onBack }: Props) {
       fetchDeptSections(editingDept.id);
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to delete section');
     }
   };
@@ -157,7 +158,7 @@ export default function DepartmentsTab({ onBack }: Props) {
       fetchDepartments();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to save department.');
     }
   };
@@ -172,7 +173,7 @@ export default function DepartmentsTab({ onBack }: Props) {
       fetchDepartments();
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to delete department.');
     }
   };

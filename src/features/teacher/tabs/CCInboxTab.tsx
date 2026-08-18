@@ -1,7 +1,9 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Check, RefreshCw, Clock, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
+import { teamService } from '../../../services/teamService';
 import { getSafeHref } from '../../../core/utils/url';
 
 interface Props {
@@ -53,7 +55,7 @@ export default function CCInboxTab({ onBack }: Props) {
           combined.push(...badgeItems);
         }
       } catch (e) {
-        console.error("Failed to fetch CC badge requests:", e);
+        logger.error("Failed to fetch CC badge requests:", e);
       }
 
       // 2. Fetch Activity Completion Requests submitted by students
@@ -73,7 +75,7 @@ export default function CCInboxTab({ onBack }: Props) {
           combined.push(...actItems);
         }
       } catch (e) {
-        console.error("Failed to fetch activity requests inbox:", e);
+        logger.error("Failed to fetch activity requests inbox:", e);
       }
 
       // 3. Fetch Penalty requests
@@ -91,12 +93,33 @@ export default function CCInboxTab({ onBack }: Props) {
           combined.push(...penItems.map((item: any) => ({ ...item, isBadgeRequest: false, isActivityRequest: false })));
         }
       } catch (e) {
-        console.error("Failed to fetch penalty CC inbox:", e);
+        logger.error("Failed to fetch penalty CC inbox:", e);
+      }
+
+      // 4. Fetch pending team member removal requests (GET /api/v1/teams/removal-requests/pending)
+      try {
+        const removalRes = await teamService.getPendingRemovalRequests();
+        if (removalRes.data?.success && Array.isArray(removalRes.data.data)) {
+          const removalItems = removalRes.data.data.map((item: any) => ({
+            ...item,
+            isRemovalRequest: true,
+            isBadgeRequest: false,
+            isActivityRequest: false,
+            title: 'Team Removal Request',
+            studentName: item.studentName || item.memberName || item.regNo || 'Student',
+            studentRegNo: item.regNo || item.studentRegNo || item.memberRegNo || '',
+            description: item.reason || item.note || `Captain requested removal of this member from team "${item.teamName || ''}".`,
+            date: item.requestedAt || item.createdAt || item.date,
+          }));
+          combined.push(...removalItems);
+        }
+      } catch (e) {
+        logger.error("Failed to fetch team removal requests:", e);
       }
 
       setInbox(combined);
     } catch (e) {
-      console.error("Failed to load CC inbox:", e);
+      logger.error("Failed to load CC inbox:", e);
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +140,7 @@ export default function CCInboxTab({ onBack }: Props) {
         setMyRequests(Array.isArray(raw) ? raw : (raw?.content || []));
       }
     } catch (e) {
-      console.error("Failed to fetch my penalty requests:", e);
+      logger.error("Failed to fetch my penalty requests:", e);
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +149,8 @@ export default function CCInboxTab({ onBack }: Props) {
   const handleApprove = async (item: any) => {
     const isBadge = item.isBadgeRequest || item.badgeName;
     const isAct = item.isActivityRequest || item.activityName;
-    const label = isBadge ? "badge request" : isAct ? "activity request" : "penalty request";
+    const isRemoval = item.isRemovalRequest;
+    const label = isBadge ? "badge request" : isAct ? "activity request" : isRemoval ? "removal request" : "penalty request";
     const toastId = toast.loading(`Approving ${label}...`);
     try {
       let response;
@@ -134,6 +158,8 @@ export default function CCInboxTab({ onBack }: Props) {
         response = await apiClient.put(`/api/cc/badge-requests/${item.id}/approve`);
       } else if (isAct) {
         response = await apiClient.put(`/api/activity-requests/${item.id}/approve`);
+      } else if (isRemoval) {
+        response = await teamService.approveRemovalRequest(item.id);
       } else {
         try {
           response = await apiClient.put(`/api/penalties/${item.id}/approve`);
@@ -149,7 +175,7 @@ export default function CCInboxTab({ onBack }: Props) {
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Failed to approve request:", e);
+      logger.error("Failed to approve request:", e);
       toast.error(e.response?.data?.message || 'Failed to approve request');
     }
   };
@@ -159,7 +185,8 @@ export default function CCInboxTab({ onBack }: Props) {
     if (!rejectingItem) return;
     const isBadge = rejectingItem.isBadgeRequest || rejectingItem.badgeName;
     const isAct = rejectingItem.isActivityRequest || rejectingItem.activityName;
-    const label = isBadge ? "badge request" : isAct ? "activity request" : "penalty request";
+    const isRemoval = rejectingItem.isRemovalRequest;
+    const label = isBadge ? "badge request" : isAct ? "activity request" : isRemoval ? "removal request" : "penalty request";
     const toastId = toast.loading(`Rejecting ${label}...`);
     try {
       let response;
@@ -171,6 +198,8 @@ export default function CCInboxTab({ onBack }: Props) {
         response = await apiClient.put(`/api/activity-requests/${rejectingItem.id}/reject`, {
           reason: rejectReason
         });
+      } else if (isRemoval) {
+        response = await teamService.rejectRemovalRequest(rejectingItem.id);
       } else {
         try {
           response = await apiClient.put(`/api/penalties/${rejectingItem.id}/reject`, {
@@ -192,7 +221,7 @@ export default function CCInboxTab({ onBack }: Props) {
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Failed to reject request:", e);
+      logger.error("Failed to reject request:", e);
       toast.error(e.response?.data?.message || 'Failed to reject request');
     }
   };
@@ -298,7 +327,7 @@ export default function CCInboxTab({ onBack }: Props) {
             {currentList.map(req => {
               const studentName = req.studentName || req.studentRegNo || req.student?.fullName || req.fullName || 'Student';
               const regNo = req.studentRegNo || req.registerNumber || req.regNo || req.student?.registerNumber || 'N/A';
-              const activity = req.activityName || req.penaltyActivity || 'Activity Request';
+              const activity = req.activityName || req.penaltyActivity || (req.isRemovalRequest ? `Team removal — ${req.teamName || 'team'}` : 'Activity Request');
               const penaltyXP = req.penaltyXP ?? req.pointsDeducted ?? req.points ?? 0;
               const reason = req.reason || req.description || req.note || '';
               const proofUrl = req.proofUrl || req.evidenceUrl || '';
@@ -316,8 +345,9 @@ export default function CCInboxTab({ onBack }: Props) {
 
               const isBadge = req.isBadgeRequest || req.badgeName;
               const isAct = req.isActivityRequest || req.activityName;
-              const badgeLabel = isBadge ? 'Badge Request' : isAct ? 'Activity Request' : 'Penalty Request';
-              const badgeClass = isBadge ? 'bg-purple-100 text-purple-800' : isAct ? 'bg-indigo-100 text-indigo-800' : 'bg-rose-100 text-rose-800';
+              const isRemoval = req.isRemovalRequest;
+              const badgeLabel = isBadge ? 'Badge Request' : isAct ? 'Activity Request' : isRemoval ? 'Removal Request' : 'Penalty Request';
+              const badgeClass = isBadge ? 'bg-purple-100 text-purple-800' : isAct ? 'bg-indigo-100 text-indigo-800' : isRemoval ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800';
 
               return (
                 <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-3">
@@ -410,7 +440,7 @@ export default function CCInboxTab({ onBack }: Props) {
                         className="px-5 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold text-xs transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
-                        <span>Approve {isAct ? 'Activity' : 'Penalty'}</span>
+                        <span>Approve {isAct ? 'Activity' : isRemoval ? 'Removal' : 'Penalty'}</span>
                       </button>
                     </div>
                   )}

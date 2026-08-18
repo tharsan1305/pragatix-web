@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Edit2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -51,7 +52,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
       const fetchedAdmins = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
       setAdmins(fetchedAdmins);
     } catch (error) {
-      console.error('Error loading Year Admins:', error);
+      logger.error('Error loading Year Admins:', error);
       toast.error('Failed to load Year Admins');
     } finally {
       setIsLoading(false);

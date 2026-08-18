@@ -1,3 +1,4 @@
+import { logger } from '../utils/logger';
 import { create } from 'zustand';
 import apiClient from '../services/apiClient';
 
@@ -57,7 +58,7 @@ export const useXpStore = create<XpState>((set) => ({
         set({ xpByCategory: xpData, totalXp });
       }
     } catch (error) {
-      console.error('Failed to fetch summary for student:', studentId, error);
+      logger.error('Failed to fetch summary for student:', studentId, error);
     } finally {
       set({ isLoading: false });
     }
@@ -74,7 +75,7 @@ export const useXpStore = create<XpState>((set) => ({
         set({ history: list });
       }
     } catch (error) {
-      console.error('Failed to fetch XP history for student:', studentId, error);
+      logger.error('Failed to fetch XP history for student:', studentId, error);
     } finally {
       set({ isLoading: false });
     }
@@ -139,7 +140,7 @@ export const useXpStore = create<XpState>((set) => ({
       });
       return response.data.success === true;
     } catch (error) {
-      console.error('Failed to submit XP claim:', error);
+      logger.error('Failed to submit XP claim:', error);
       return false;
     }
   }

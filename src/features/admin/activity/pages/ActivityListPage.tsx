@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, RefreshCw, AlertCircle, X, PlusCircle, ListPlus, Star, User, Users, Folder, Repeat, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -41,17 +42,7 @@ export default function ActivityListPage({
   academicYear: directAcademicYear,
   onPushView = () => {} 
 }: ActivityListPageProps) {
-  const { user, subRoles, isAdmin: isAuthAdmin } = useAuth();
-  const isAdmin = isAuthAdmin || (user?.roles?.some((r: any) => {
-    const clean = String(r).trim().toUpperCase();
-    return clean === 'ADMIN' || clean === 'ROLE_ADMIN' || clean === 'SUPER_ADMIN' || clean === 'ROLE_SUPER_ADMIN';
-  }) ?? false);
-
-  const isCc = subRoles.some((r: any) => {
-    const clean = String(r).trim().toUpperCase();
-    return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
-  });
-
+  const { isCC: isCc, isAdmin } = useAuth();
   const canAssign = isAdmin || isCc;
 
   const [activities, setActivities] = useState<ActivityModel[]>([]);
@@ -83,7 +74,7 @@ export default function ActivityListPage({
       );
       setActivities(data || []);
     } catch (err: any) {
-      console.error('Failed to fetch activities:', err);
+      logger.error('Failed to fetch activities:', err);
       setError(err.response?.data?.message || err.message || 'Failed to load activities for this category.');
     } finally {
       setIsLoading(false);
@@ -106,7 +97,7 @@ export default function ActivityListPage({
       fetchActivities();
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || 'Failed to remove activity from stage');
     }
   };
@@ -122,7 +113,7 @@ export default function ActivityListPage({
       fetchActivities();
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || 'Failed to delete activity from system');
     }
   };
@@ -139,7 +130,7 @@ export default function ActivityListPage({
       );
       setGroupedActivities(data || []);
     } catch (err: any) {
-      console.error('Error loading grouped activities:', err);
+      logger.error('Error loading grouped activities:', err);
       setGroupedActivities([]);
     } finally {
       setIsFetchingGrouped(false);
@@ -164,7 +155,7 @@ export default function ActivityListPage({
       fetchActivities();
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error(err);
+      logger.error(err);
       toast.error(err.response?.data?.message || err.message || "Failed to map activity to stage");
     }
   };

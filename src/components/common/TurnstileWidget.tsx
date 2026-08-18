@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import { useEffect, useRef } from 'react';
 
 declare global {
@@ -27,7 +28,10 @@ interface TurnstileWidgetProps {
   resetTrigger?: number | string | boolean;
 }
 
-const SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string) || '1x00000000000000000000AA';
+const isProd = import.meta.env.PROD;
+const configuredSiteKey = (import.meta.env.VITE_TURNSTILE_SITE_KEY as string)?.trim();
+// In production, require VITE_TURNSTILE_SITE_KEY; use test key only in dev/staging environments
+const SITE_KEY = configuredSiteKey || (isProd ? '' : '1x00000000000000000000AA');
 
 export default function TurnstileWidget({
   onVerify,
@@ -41,6 +45,13 @@ export default function TurnstileWidget({
   useEffect(() => {
     let isMounted = true;
 
+    if (!SITE_KEY) {
+      if (isProd) {
+        logger.warn('Turnstile widget: VITE_TURNSTILE_SITE_KEY is not configured in production.');
+      }
+      return;
+    }
+
     const renderWidget = () => {
       if (!containerRef.current || !window.turnstile) return;
 
@@ -48,7 +59,7 @@ export default function TurnstileWidget({
         try {
           window.turnstile.remove(widgetIdRef.current);
         } catch (e) {
-          console.warn('Turnstile remove warning:', e);
+          logger.warn('Turnstile remove warning:', e);
         }
         widgetIdRef.current = null;
       }
@@ -75,7 +86,7 @@ export default function TurnstileWidget({
         });
         widgetIdRef.current = id;
       } catch (err) {
-        console.error('Failed to render Turnstile widget:', err);
+        logger.error('Failed to render Turnstile widget:', err);
       }
     };
 
@@ -101,17 +112,21 @@ export default function TurnstileWidget({
         }
       }
     };
-  }, []);
+  }, [onVerify, onExpire, onError]);
 
   useEffect(() => {
     if (resetTrigger !== undefined && widgetIdRef.current && window.turnstile) {
       try {
         window.turnstile.reset(widgetIdRef.current);
       } catch (e) {
-        console.warn('Turnstile reset warning:', e);
+        logger.warn('Turnstile reset warning:', e);
       }
     }
   }, [resetTrigger]);
+
+  if (!SITE_KEY && isProd) {
+    return null;
+  }
 
   return (
     <div className="flex justify-center my-3">

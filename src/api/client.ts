@@ -3,7 +3,7 @@ import { ApiConfig } from '../config/apiConfig';
 
 const baseURL = (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim() !== '')
   ? import.meta.env.VITE_API_BASE_URL
-  : (ApiConfig.baseUrl || 'http://localhost:8080');
+  : (ApiConfig.baseUrl ?? '');
 
 export const apiClient = axios.create({
   baseURL,
@@ -16,8 +16,8 @@ export const apiClient = axios.create({
 // Request interceptor to attach JWT token (reads fresh every time)
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('spdms_token') || localStorage.getItem('auth_token') || localStorage.getItem('token');
-    const isAuthRoute = config.url?.includes('/api/v1/auth/login') 
+    const token = localStorage.getItem('spdms_token') || localStorage.getItem('auth_token');
+    const isAuthRoute = config.url?.includes('/api/v1/auth/login')
       || config.url?.includes('/api/v1/auth/student-login') 
       || config.url?.includes('/api/v1/auth/parent-login')
       || config.url?.includes('/api/v1/auth/request-otp')
@@ -44,16 +44,14 @@ apiClient.interceptors.response.use(
 
     // Only redirect if genuinely unauthorized on non-auth route
     if (isUnauth && !isLoginRoute && !isAuthEndpoint) {
-      const token = localStorage.getItem('spdms_token') || localStorage.getItem('auth_token') || localStorage.getItem('token');
+      const token = localStorage.getItem('spdms_token') || localStorage.getItem('auth_token');
       const msg = error.response?.data?.message || '';
-      
+
       // If token is expired or missing, clear and redirect
       if (!token || msg.toLowerCase().includes('expired') || msg.toLowerCase().includes('invalid token')) {
         localStorage.removeItem('spdms_token');
         localStorage.removeItem('spdms_user');
         localStorage.removeItem('auth_token');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         localStorage.removeItem('userRole');
         delete apiClient.defaults.headers.common['Authorization'];
         window.location.href = '/login';

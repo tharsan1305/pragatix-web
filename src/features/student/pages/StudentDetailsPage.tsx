@@ -1,20 +1,25 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStudentStore } from '../../../store/studentStore';
+import { useAuth } from '../../../store/authContext';
 import { studentService } from '../services/student.service';
 import apiClient from '../../../services/apiClient';
 import { 
   ArrowLeft, Trash2, Award, FileWarning, Medal, Mail, Building, Hash, 
-  ShieldCheck, ShieldAlert, PlusCircle, MinusCircle, RefreshCw, X 
+  ShieldCheck, ShieldAlert, PlusCircle, MinusCircle, RefreshCw, X, Lock
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function StudentDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, isAdmin, isSuperAdmin, isHOD } = useAuth();
   const { selectedStudent, setSelectedStudent } = useStudentStore();
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAccessRestricted, setIsAccessRestricted] = useState(false);
   
   // Real data state
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
@@ -32,15 +37,35 @@ export default function StudentDetailsPage() {
     const fetchDetails = async () => {
       setIsLoading(true);
       setError(null);
+      setIsAccessRestricted(false);
       try {
         if (id) {
           const student = await studentService.getStudentById(Number(id));
+
+          // Defense-in-depth: If logged in as restricted Teacher / CC / HOD (not Admin)
+          if (!isAdmin && !isSuperAdmin) {
+            const userDept = (user?.departmentName || user?.department || '').toString().toLowerCase().trim();
+            const studentDept = (student?.departmentName || (student as any)?.department || '').toString().toLowerCase().trim();
+
+            if (isHOD && userDept && studentDept && !studentDept.includes(userDept) && !userDept.includes(studentDept)) {
+              setIsAccessRestricted(true);
+              setError('Access Restricted: This student belongs to another department. (Backend authorization verification required)');
+              setIsLoading(false);
+              return;
+            }
+          }
+
           setSelectedStudent(student);
           setIsCurrentlyCaptain(student.isCaptain || false);
           fetchHistoryLogs(id);
         }
       } catch (err: any) {
-        setError(err.message || 'Failed to load student details');
+        if (err?.response?.status === 403) {
+          setIsAccessRestricted(true);
+          setError('Access Restricted (HTTP 403): You do not have permission to view this student profile. (Backend authorization verification required)');
+        } else {
+          setError(err.response?.data?.message || err.message || 'Failed to load student details');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -48,17 +73,21 @@ export default function StudentDetailsPage() {
     fetchDetails();
     
     return () => setSelectedStudent(null);
-  }, [id, setSelectedStudent]);
+  }, [id, setSelectedStudent, isAdmin, isSuperAdmin, isHOD, user]);
 
   const fetchHistoryLogs = async (studentId: string) => {
     setIsLoadingHistory(true);
     try {
       const res = await apiClient.get(`/api/v1/students/${studentId}/discipline-logs`);
-      if (res.data.success) {
+      if (res.data?.success) {
         setHistoryLogs(res.data.data || []);
       }
-    } catch (e) {
-      console.error('Failed to load history logs', e);
+    } catch (e: any) {
+      if (e?.response?.status === 403) {
+        logger.warn('Access restricted for student discipline logs');
+      } else {
+        logger.error('Failed to load history logs', e);
+      }
     } finally {
       setIsLoadingHistory(false);
     }
@@ -73,12 +102,13 @@ export default function StudentDetailsPage() {
         : `/api/v1/students/${id}/make-captain`;
       
       const res = await apiClient.post(endpoint);
-      if (res.data.success || res.status === 200) {
+      if (res.data?.success || res.status === 200) {
         setIsCurrentlyCaptain(!isCurrentlyCaptain);
         setSelectedStudent({ ...selectedStudent, isCaptain: !isCurrentlyCaptain });
+        toast.success(isCurrentlyCaptain ? 'Removed captain status' : 'Appointed as captain');
       }
     } catch (e: any) {
-      alert(e.response?.data?.message || 'Failed to update captain status');
+      toast.error(e.response?.data?.message || 'Failed to update captain status');
     } finally {
       setIsCaptainLoading(false);
     }
@@ -94,8 +124,8 @@ export default function StudentDetailsPage() {
         reason: reason.trim(),
       });
 
-      if (res.data.success || res.status === 200) {
-        alert('Points adjusted successfully!');
+      if (res.data?.success || res.status === 200) {
+        toast.success('Points adjusted successfully!');
         setIsAdjustModalOpen(false);
         setReason('');
         // Refresh score and logs
@@ -104,7 +134,7 @@ export default function StudentDetailsPage() {
         fetchHistoryLogs(id);
       }
     } catch (e: any) {
-      alert(e.response?.data?.message || 'Failed to adjust points');
+      toast.error(e.response?.data?.message || 'Failed to adjust points');
     } finally {
       setIsSubmittingPoints(false);
     }
@@ -114,10 +144,10 @@ export default function StudentDetailsPage() {
     if (!id || !window.confirm('Are you sure you want to delete this student profile?')) return;
     try {
       await studentService.deleteStudent(Number(id));
-      alert('Student deleted successfully');
+      toast.success('Student deleted successfully');
       navigate(-1);
     } catch (e: any) {
-      alert(e.message || 'Failed to delete student');
+      toast.error(e.message || 'Failed to delete student');
     }
   };
 
@@ -131,17 +161,20 @@ export default function StudentDetailsPage() {
 
   if (error || !selectedStudent) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-center gap-3">
-          <FileWarning className="w-5 h-5" />
-          <p>{error || 'Student not found'}</p>
+      <div className="p-6 max-w-4xl mx-auto my-12">
+        <div className={`p-6 rounded-2xl flex flex-col items-start gap-4 border shadow-sm ${isAccessRestricted ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-700'}`}>
+          <div className="flex items-center gap-3">
+            {isAccessRestricted ? <Lock className="w-6 h-6 text-amber-600 shrink-0" /> : <FileWarning className="w-6 h-6 text-red-600 shrink-0" />}
+            <h2 className="text-lg font-bold">{isAccessRestricted ? 'Access Restricted' : 'Error'}</h2>
+          </div>
+          <p className="text-sm leading-relaxed">{error || 'Student not found'}</p>
+          <button 
+            onClick={() => navigate(-1)}
+            className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 font-semibold text-xs transition-colors shadow-xs"
+          >
+            <ArrowLeft className="w-4 h-4" /> Go Back
+          </button>
         </div>
-        <button 
-          onClick={() => navigate(-1)}
-          className="mt-4 flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" /> Go Back
-        </button>
       </div>
     );
   }

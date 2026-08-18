@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import apiClient from '../../../../services/apiClient';
 import type {
   ActivityModel,
@@ -13,7 +14,7 @@ export const activityService = {
   },
 
   createTeam: async (body: any): Promise<any> => {
-    const response = await apiClient.post('/api/v1/group-activities/teams', body);
+    const response = await apiClient.post('/api/v1/teams', body);
     return response.data;
   },
 
@@ -48,14 +49,14 @@ export const activityService = {
         return [{ subgroup: key, activities: options }];
       }
     } catch (fallbackErr) {
-      console.error("Fallback activity fetch failed:", fallbackErr);
+      logger.error("Fallback activity fetch failed:", fallbackErr);
     }
 
     return [];
   },
 
   fetchActivities: async (subgroupId?: number, stageId?: number, subgroupName?: string, isCcOverride?: boolean): Promise<ActivityModel[]> => {
-    const userString = localStorage.getItem('spdms_user') || localStorage.getItem('user');
+    const userString = localStorage.getItem('spdms_user');
     let isCc = !!isCcOverride;
     if (!isCc && userString) {
       try {
@@ -85,7 +86,7 @@ export const activityService = {
           return data;
         }
       } catch (e) {
-        console.warn("Failed to fetch CC activities:", e);
+        logger.warn("Failed to fetch CC activities:", e);
       }
     }
 
@@ -167,7 +168,7 @@ export const activityService = {
           }
         }
       } catch (e) {
-        console.warn('Failed to resolve subgroup from stages', e);
+        logger.warn('Failed to resolve subgroup from stages', e);
       }
     }
 
@@ -250,6 +251,41 @@ export const activityService = {
     return response.data.data;
   },
 
+  getAssignments: async (activityId: number, stageId?: number): Promise<any[]> => {
+    const stageParam = stageId ? `?stageId=${stageId}` : '';
+    const response = await apiClient.get(`/api/v1/admin/activities/${activityId}/assignments${stageParam}`);
+    return response.data?.data || (Array.isArray(response.data) ? response.data : []);
+  },
+
+  addAssignment: async (
+    activityId: number,
+    departmentId: number,
+    year: string,
+    sectionId: number | null,
+    teacherId: number,
+    scope: 'SECTION' | 'DEPARTMENT' = 'SECTION',
+    stageId?: number
+  ): Promise<any> => {
+    const stageParam = stageId ? `?stageId=${stageId}` : '';
+    const response = await apiClient.post(`/api/v1/admin/activities/${activityId}/assignments${stageParam}`, {
+      departmentId,
+      year: year || '1',
+      sectionId,
+      teacherId,
+      scope,
+    });
+    return response.data;
+  },
+
+  removeAssignment: async (assignmentId: number): Promise<void> => {
+    await apiClient.delete(`/api/v1/admin/assignments/${assignmentId}`);
+  },
+
+  clearAllAssignments: async (activityId: number, stageId?: number): Promise<void> => {
+    const stageParam = stageId ? `?stageId=${stageId}` : '';
+    await apiClient.delete(`/api/v1/admin/activities/${activityId}/assignments${stageParam}`);
+  },
+
   assignActivity: async (activityId: number, sectionId: number | null, teacherId: number): Promise<any> => {
     const response = await apiClient.post(`/api/v1/admin/activities/${activityId}/assign`, {
       sectionId,
@@ -262,11 +298,17 @@ export const activityService = {
     activityId: number,
     globalEnabled: boolean,
     assignments: any[],
-    ccEnabled: boolean = false
+    ccEnabled: boolean = false,
+    stageId?: number,
+    attendanceEngineEnabled?: boolean,
+    attendanceRule?: string
   ): Promise<void> => {
     await apiClient.post(`/api/v1/admin/activities/${activityId}/assign`, {
       globalEnabled,
       ccEnabled,
+      stageId,
+      attendanceEngineEnabled,
+      attendanceRule,
       assignments,
     });
   },

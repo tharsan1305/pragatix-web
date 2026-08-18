@@ -1,10 +1,20 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../../api/client';
-import { Users, Star, RefreshCw, UserX, Shield, Award, Calendar, BookOpen, Trophy } from 'lucide-react';
+import { teamService } from '../../../services/teamService';
+import { useAuth } from '../../../store/authContext';
+import toast from 'react-hot-toast';
+import { Users, Star, RefreshCw, UserX, UserPlus, UserMinus, Shield, Award, Calendar, BookOpen, Trophy, X } from 'lucide-react';
 
 export default function CaptainGroupTab() {
+  const { isCaptain: viewerIsCaptain } = useAuth();
   const [loading, setLoading] = useState(true);
   const [teamData, setTeamData] = useState<any>(null);
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [classmates, setClassmates] = useState<any[]>([]);
+  const [isClassmatesLoading, setIsClassmatesLoading] = useState(false);
+  const [pendingRegNo, setPendingRegNo] = useState<string | null>(null);
 
   const fetchMyGroup = async () => {
     setLoading(true);
@@ -23,7 +33,7 @@ export default function CaptainGroupTab() {
         setTeamData(null);
       }
     } catch (err: any) {
-      console.error('Error fetching team:', err);
+      logger.error('Error fetching team:', err);
       setTeamData(null);
     } finally {
       setLoading(false);
@@ -33,6 +43,72 @@ export default function CaptainGroupTab() {
   useEffect(() => {
     fetchMyGroup();
   }, []);
+
+  const openAddMemberModal = async () => {
+    setIsAddModalOpen(true);
+    setIsClassmatesLoading(true);
+    try {
+      const response = await teamService.getMyClassmates();
+      const list = response.data?.data ?? response.data ?? [];
+      setClassmates(Array.isArray(list) ? list : []);
+    } catch (err) {
+      logger.error('Failed to fetch classmates:', err);
+      toast.error('Failed to load classmates');
+      setClassmates([]);
+    } finally {
+      setIsClassmatesLoading(false);
+    }
+  };
+
+  const handleAddMember = async (regNo: string, name: string) => {
+    setPendingRegNo(regNo);
+    const toastId = toast.loading(`Adding ${name}...`);
+    try {
+      const response = await teamService.addMemberByCaptain(regNo);
+      toast.dismiss(toastId);
+      if (response.data?.success !== false) {
+        toast.success(`${name} added to the team`);
+        setIsAddModalOpen(false);
+        fetchMyGroup();
+      } else {
+        toast.error(response.data?.message || 'Failed to add member');
+      }
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error(err.response?.data?.message || 'Failed to add member');
+    } finally {
+      setPendingRegNo(null);
+    }
+  };
+
+  const handleRequestRemoval = async (regNo: string, name: string) => {
+    if (!window.confirm(`Request removal of ${name} from the team?`)) return;
+    setPendingRegNo(regNo);
+    const toastId = toast.loading(`Requesting removal of ${name}...`);
+    try {
+      const response = await teamService.requestMemberRemoval(regNo);
+      toast.dismiss(toastId);
+      if (response.data?.success !== false) {
+        toast.success('Removal request sent to your Class Coordinator');
+      } else {
+        toast.error(response.data?.message || 'Failed to submit removal request');
+      }
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error(err.response?.data?.message || 'Failed to submit removal request');
+    } finally {
+      setPendingRegNo(null);
+    }
+  };
+
+  const existingRegNos = new Set(
+    (teamData?.members || teamData?.teamMembers || []).map((m: any) =>
+      String(m.regNo || m.studentRegNo || m.registerNumber || m.studentId || '')
+    )
+  );
+  const availableClassmates = classmates.filter(
+    (c) => !existingRegNos.has(String(c.regNo || c.studentRegNo || c.registerNumber || c.studentId || ''))
+  );
 
   if (loading) {
     return (
@@ -84,13 +160,24 @@ export default function CaptainGroupTab() {
       {/* Header Bar matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-md flex justify-between items-center">
         <h1 className="text-xl font-bold">My Team Leaderboard</h1>
-        <button
-          onClick={fetchMyGroup}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
-          title="Refresh Team"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {viewerIsCaptain && (
+            <button
+              onClick={openAddMemberModal}
+              className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+              title="Add Member"
+            >
+              <UserPlus className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={fetchMyGroup}
+            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+            title="Refresh Team"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Header Card matching Flutter _buildHeaderCard */}
@@ -168,6 +255,7 @@ export default function CaptainGroupTab() {
               const name = member.studentName || 'Student';
               const memberXp = member.totalXp ?? 0;
               const memberStage = `${member.currentStage ?? 'Stage 1'} - ${member.currentLevel ?? 'Explorer'}`;
+              const memberRegNo = member.regNo || member.studentRegNo || member.registerNumber || member.studentId || '';
 
               return (
                 <div
@@ -214,9 +302,21 @@ export default function CaptainGroupTab() {
                   </div>
 
                   {/* Score on Right matching Flutter */}
-                  <div className="flex items-center gap-1 text-sm font-extrabold text-amber-600 shrink-0 ml-3">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span>{memberXp}</span>
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <div className="flex items-center gap-1 text-sm font-extrabold text-amber-600">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <span>{memberXp}</span>
+                    </div>
+                    {viewerIsCaptain && !isCaptain && memberRegNo && (
+                      <button
+                        onClick={() => handleRequestRemoval(memberRegNo, name)}
+                        disabled={pendingRegNo === memberRegNo}
+                        className="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-40 cursor-pointer"
+                        title={`Request removal of ${name}`}
+                      >
+                        <UserMinus className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -224,6 +324,57 @@ export default function CaptainGroupTab() {
           </div>
         )}
       </div>
+
+      {/* Add Member Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <h3 className="text-lg font-bold text-slate-900">Add Classmate to Team</h3>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {isClassmatesLoading ? (
+                <div className="flex justify-center py-10">
+                  <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
+                </div>
+              ) : availableClassmates.length === 0 ? (
+                <p className="text-center text-sm text-slate-400 py-10">
+                  No available classmates to add.
+                </p>
+              ) : (
+                availableClassmates.map((c: any) => {
+                  const cRegNo = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
+                  const cName = c.fullName || c.studentName || c.name || 'Student';
+                  return (
+                    <div
+                      key={cRegNo || cName}
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50"
+                    >
+                      <div className="min-w-0">
+                        <div className="font-semibold text-sm text-slate-800 truncate">{cName}</div>
+                        <div className="text-xs text-slate-400">{cRegNo}</div>
+                      </div>
+                      <button
+                        onClick={() => handleAddMember(cRegNo, cName)}
+                        disabled={pendingRegNo === cRegNo}
+                        className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 disabled:opacity-40 cursor-pointer"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

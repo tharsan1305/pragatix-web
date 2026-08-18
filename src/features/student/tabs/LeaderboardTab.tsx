@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { Trophy, ChevronDown, FilterX, Star } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
@@ -23,13 +24,12 @@ export default function LeaderboardTab() {
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+  const [studentYearId, setStudentYearId] = useState<string | null>(null);
 
-  // Filter state – null means "All" (no filter applied), matching Flutter's null = no filter
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  // Filter state – Department & Section only (showYearFilter is FALSE for students in Flutter)
   const [selectedDept, setSelectedDept] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
-  const [yearOptions, setYearOptions] = useState<FilterOption[]>([]);
   const [deptOptions, setDeptOptions] = useState<FilterOption[]>([]);
   const [sectionOptions, setSectionOptions] = useState<FilterOption[]>([]);
 
@@ -37,18 +37,17 @@ export default function LeaderboardTab() {
   const fetchFilters = useCallback(async (yearId: string | null, departmentId: string | null) => {
     try {
       const params: Record<string, string> = {};
-      if (yearId) params.yearId = yearId;
-      if (departmentId) params.departmentId = departmentId;
+      if (yearId && yearId !== 'All') params.yearId = yearId;
+      if (departmentId && departmentId !== 'All') params.departmentId = departmentId;
 
       const res = await apiClient.get('/api/v1/leaderboard/filters', { params });
       if (res.data?.success && res.data.data) {
         const d = res.data.data;
-        setYearOptions(d.years ?? []);
         setDeptOptions(d.departments ?? []);
         setSectionOptions(d.sections ?? []);
       }
     } catch (e) {
-      console.error('Failed to fetch leaderboard filters', e);
+      logger.error('Failed to fetch leaderboard filters', e);
     }
   }, []);
 
@@ -57,9 +56,9 @@ export default function LeaderboardTab() {
     setIsLoading(true);
     try {
       const params: Record<string, string> = {};
-      if (yearId) params.yearId = yearId;
-      if (departmentId) params.departmentId = departmentId;
-      if (sectionId) params.sectionId = sectionId;
+      if (yearId && yearId !== 'All') params.yearId = yearId;
+      if (departmentId && departmentId !== 'All') params.departmentId = departmentId;
+      if (sectionId && sectionId !== 'All') params.sectionId = sectionId;
 
       const res = await apiClient.get('/api/v1/leaderboard', { params });
       if (res.data?.success && res.data.data) {
@@ -75,56 +74,63 @@ export default function LeaderboardTab() {
         setFilteredList(students);
       }
     } catch (e) {
-      console.error('Failed to fetch leaderboard', e);
+      logger.error('Failed to fetch leaderboard', e);
       setFilteredList([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // ── Initial load: get current user, filters, and leaderboard ──
+  // ── Initial load: get current user, their year, filters, and leaderboard ──
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
+      let userYear: string | null = null;
       try {
-        // Get current user (match Flutter: uses /api/v1/auth/me → username = regNo)
-        const profileRes = await apiClient.get('/api/v1/auth/me');
+        let profileRes;
+        try {
+          profileRes = await apiClient.get('/api/v1/profile/me');
+        } catch {
+          profileRes = await apiClient.get('/api/v1/auth/me');
+        }
+
         if (profileRes.data?.success && profileRes.data.data) {
-          setCurrentUserId(profileRes.data.data.username ?? null);
-          setCurrentUserName(profileRes.data.data.fullName ?? null);
+          const d = profileRes.data.data;
+          const reg = d.username || d.regNo || d.registerNumber || null;
+          setCurrentUserId(reg);
+          setCurrentUserName(d.fullName || d.name || null);
+
+          // Get student's academic year ID if available
+          const st = d.studentDetails || {};
+          const yr = st.yearId?.toString() || d.yearId?.toString() || d.year?.toString() || null;
+          if (yr) {
+            userYear = yr;
+            setStudentYearId(yr);
+          }
         }
       } catch (e) {
-        console.error('Failed to get current user profile', e);
+        logger.error('Failed to get current user profile', e);
       }
 
-      await fetchFilters(null, null);
-      await fetchLeaderboard(null, null, null);
+      await fetchFilters(userYear, null);
+      await fetchLeaderboard(userYear, null, null);
     };
     init();
   }, [fetchFilters, fetchLeaderboard]);
 
   // ── Cascading filter handlers (match Flutter behavior) ──
-  const handleYearChange = async (val: string | null) => {
-    if (val === selectedYear) return;
-    setSelectedYear(val);
-    setSelectedDept(null);
-    setSelectedSection(null);
-    await fetchFilters(val, null);
-    await fetchLeaderboard(val, null, null);
-  };
-
   const handleDeptChange = async (val: string | null) => {
     if (val === selectedDept) return;
     setSelectedDept(val);
     setSelectedSection(null);
-    await fetchFilters(selectedYear, val);
-    await fetchLeaderboard(selectedYear, val, null);
+    await fetchFilters(studentYearId, val);
+    await fetchLeaderboard(studentYearId, val, null);
   };
 
   const handleSectionChange = async (val: string | null) => {
     if (val === selectedSection) return;
     setSelectedSection(val);
-    await fetchLeaderboard(selectedYear, selectedDept, val);
+    await fetchLeaderboard(studentYearId, selectedDept, val);
   };
 
   // ── Current user rank (match Flutter: uses regNo) ──
@@ -172,31 +178,16 @@ export default function LeaderboardTab() {
         <h1 className="text-xl font-bold">Leaderboard</h1>
       </div>
 
-      {/* Dynamic Cascading Filters (parity with Flutter) */}
+      {/* Filter Row (Matching Flutter: Only Department and Section for Student) */}
       <div className="bg-slate-800 px-4 py-3 flex gap-2 shadow-inner">
-        {/* Year Filter */}
-        <div className="flex-1 relative">
-          <select
-            value={selectedYear ?? ''}
-            onChange={(e) => handleYearChange(e.target.value || null)}
-            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-lg pl-3 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30"
-          >
-            <option value="" className="text-slate-800">All Year</option>
-            {yearOptions.map(opt => (
-              <option key={opt.id} value={String(opt.id)} className="text-slate-800">{opt.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="w-4 h-4 text-white/70 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-
         {/* Department Filter */}
         <div className="flex-1 relative">
           <select
             value={selectedDept ?? ''}
             onChange={(e) => handleDeptChange(e.target.value || null)}
-            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-lg pl-3 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-lg pl-3 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
           >
-            <option value="" className="text-slate-800">All Dept</option>
+            <option value="" className="text-slate-800">All Departments</option>
             {deptOptions.map(opt => (
               <option key={opt.id} value={String(opt.id)} className="text-slate-800">{opt.name}</option>
             ))}
@@ -209,9 +200,9 @@ export default function LeaderboardTab() {
           <select
             value={selectedSection ?? ''}
             onChange={(e) => handleSectionChange(e.target.value || null)}
-            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-lg pl-3 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="w-full bg-white/10 border border-white/20 text-white text-sm font-bold rounded-lg pl-3 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
           >
-            <option value="" className="text-slate-800">All Sec</option>
+            <option value="" className="text-slate-800">Section</option>
             {sectionOptions.map(opt => (
               <option key={opt.id} value={String(opt.id)} className="text-slate-800">{opt.name}</option>
             ))}
@@ -244,7 +235,7 @@ export default function LeaderboardTab() {
                 return (
                   <div 
                     key={s.regNo}
-                    className={`mb-2 rounded-2xl border flex items-center p-3 shadow-sm ${
+                    className={`mb-2 rounded-2xl border flex items-center p-3 shadow-xs ${
                       isCurrentUser ? 'bg-indigo-50 border-indigo-200 shadow-indigo-100' : 'bg-white border-slate-100 shadow-slate-100/50'
                     }`}
                   >

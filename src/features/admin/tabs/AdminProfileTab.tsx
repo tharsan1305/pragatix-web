@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { LogOut, Shield, KeyRound, X } from 'lucide-react';
+import { logger } from '../../../utils/logger';
+import React, { useState, useEffect } from 'react';
+import { LogOut, RefreshCw, KeyRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -9,61 +10,68 @@ export default function AdminProfileTab() {
   const { logout, isSuperAdmin } = useAuth();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [profileData, setProfileData] = useState({
-    name: isSuperAdmin ? "Super Admin" : "Admin",
-    username: "admin",
-    email: "admin@jjcet.ac.in",
-    phone: "+91 98765 43210",
-    department: "Academic Administration",
-    role: isSuperAdmin ? "SUPER_ADMIN" : "ADMIN",
-    assignedYear: "1",
-    totalStudents: 0,
-    totalGroups: 0
-  });
+  const [profile, setProfile] = useState<any>(null);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isRefreshingCache, setIsRefreshingCache] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [isChangingPass, setIsChangingPass] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await apiClient.get('/api/v1/auth/me');
-        if (response.data?.success && response.data?.data) {
-          const d = response.data.data;
-          setProfileData({
-            name: d.fullName || d.username || (isSuperAdmin ? 'Super Admin' : 'Admin'),
-            username: d.username || 'admin',
-            email: d.email || 'admin@jjcet.ac.in',
-            phone: d.phone || d.phoneNumber || '+91 98765 43210',
-            department: d.department || 'Academic Administration',
-            role: (d.roles && d.roles.length > 0) ? d.roles.join(', ') : (isSuperAdmin ? 'SUPER_ADMIN' : 'ADMIN'),
-            assignedYear: d.academicYear || 'All Years',
-            totalStudents: d.totalStudentsInYear ?? 0,
-            totalGroups: d.totalGroups ?? 0
-          });
-        }
-      } catch (e) {
-        console.error("Failed to fetch admin profile:", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchProfile();
-  }, [isSuperAdmin]);
+  }, []);
+
+  const fetchProfile = async () => {
+    setIsLoading(true);
+    try {
+      let response;
+      try {
+        response = await apiClient.get('/api/v1/profile/me');
+      } catch {
+        response = await apiClient.get('/api/v1/auth/me');
+      }
+
+      if (response.data?.success && response.data?.data) {
+        setProfile(response.data.data);
+      } else if (response.data?.data) {
+        setProfile(response.data.data);
+      }
+    } catch (e) {
+      logger.error("Failed to fetch admin profile:", e);
+      toast.error("Failed to load profile data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefreshCache = async () => {
+    setIsRefreshingCache(true);
+    const toastId = toast.loading("Refreshing database cache...");
+    try {
+      const response = await apiClient.post('/api/v1/superadmin/cache/refresh');
+      toast.dismiss(toastId);
+      if (response.data?.success || response.status === 200) {
+        toast.success(response.data?.message || "Database cache refreshed successfully");
+        fetchProfile();
+      } else {
+        toast.error(response.data?.message || "Failed to refresh database cache");
+      }
+    } catch (e: any) {
+      toast.dismiss(toastId);
+      toast.error(e.response?.data?.message || "Error refreshing database cache");
+    } finally {
+      setIsRefreshingCache(false);
+    }
+  };
 
   const handleConfirmLogout = () => {
     setIsLogoutModalOpen(false);
     logout();
   };
 
-  const handleChangePasswordSubmit = (e: React.FormEvent) => {
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handlePasswordReset();
-  };
-
-  const handlePasswordReset = async () => {
     if (!newPassword.trim()) {
       toast.error("Password cannot be empty");
       return;
@@ -89,84 +97,147 @@ export default function AdminProfileTab() {
     );
   }
 
+  const superAdminStats = profile?.superAdminDetails;
+  const adminStats = profile?.adminDetails;
+  const isAdmin = !!adminStats;
+  const isSuper = !!superAdminStats || isSuperAdmin || profile?.role === 'SUPER_ADMIN';
+
   return (
-    <div className="flex flex-col h-full bg-[#F1F5F9]">
-      <div className="bg-slate-900 text-white px-4 py-4 shadow-sm z-10 flex items-center">
-        <h1 className="text-xl font-bold">{isSuperAdmin ? 'Super Admin Profile' : 'Admin Profile'}</h1>
-      </div>
-
-      <div className="flex-1 overflow-y-auto flex flex-col items-center pt-10 pb-6 px-6">
-        <div className="w-[120px] h-[120px] rounded-full bg-[#EA4335]/10 shadow-md flex items-center justify-center mb-5">
-          <Shield className="w-16 h-16 text-[#EA4335] fill-current" />
+    <div className="flex flex-col min-h-full bg-[#F8FAFC]">
+      <div className="flex-1 overflow-y-auto flex flex-col items-center pt-8 pb-12 px-4 sm:px-6">
+        
+        {/* Profile Header matching Flutter SharedProfileHeader */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">
+            {profile?.fullName || (isSuper ? 'System Administrator' : 'Administrator')}
+          </h1>
+          <p className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
+            {profile?.role || (isSuper ? 'SUPER_ADMIN' : 'ADMIN')}
+          </p>
         </div>
-
-        <h2 className="text-[22px] font-bold text-[#1E293B]">{profileData.name}</h2>
-        <p className="text-[15px] text-gray-500 mt-1 mb-8">{profileData.email}</p>
 
         <div className="w-full max-w-md space-y-4">
-          {/* Personal Information */}
-          <div className="bg-white rounded-2xl shadow-sm px-5 py-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider text-center border-b border-slate-100 pb-2">Personal Information</h3>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Username</span>
-              <span className="font-bold text-[#1E293B]">{profileData.username}</span>
+          {/* 1. Personal Information Card */}
+          <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
+            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              Personal Information
+            </h3>
+            
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">Username</span>
+              <span className="font-bold text-[#1E293B]">{profile?.username || 'Not Available'}</span>
             </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Email</span>
-              <span className="font-bold text-[#1E293B]">{profileData.email}</span>
+
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">Email</span>
+              <span className="font-bold text-[#1E293B] truncate max-w-[220px]">{profile?.email || 'Not Available'}</span>
             </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Phone</span>
-              <span className="font-bold text-[#1E293B]">{profileData.phone}</span>
+
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">Phone</span>
+              <span className="font-bold text-[#1E293B]">{profile?.phone || 'Not Available'}</span>
             </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Department</span>
-              <span className="font-bold text-[#1E293B]">{profileData.department}</span>
-            </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Status</span>
-              <span className="font-bold text-emerald-600">Active</span>
+
+            {isAdmin ? (
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Assigned Year</span>
+                <span className="font-bold text-[#1E293B]">{adminStats?.academicYear || 'Not Available'}</span>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Department</span>
+                <span className="font-bold text-[#1E293B]">{profile?.department || 'N/A'}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-slate-500 font-medium">Status</span>
+              <span className="font-bold text-emerald-600">
+                {profile?.accountStatus || 'Active'}
+              </span>
             </div>
           </div>
 
-          {/* Academic Statistics */}
-          <div className="bg-white rounded-2xl shadow-sm px-5 py-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider text-center border-b border-slate-100 pb-2">Academic Statistics</h3>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Assigned Year</span>
-              <span className="font-bold text-[#1E293B]">{profileData.assignedYear}</span>
+          {/* 2. System Statistics Card (Super Admin) matching Flutter */}
+          {isSuper && superAdminStats && (
+            <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
+              <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+                System Statistics
+              </h3>
+              
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Total Departments</span>
+                <span className="font-bold text-[#1E293B]">{superAdminStats.totalDepartments}</span>
+              </div>
+
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Total Students</span>
+                <span className="font-bold text-[#1E293B]">{superAdminStats.totalStudents}</span>
+              </div>
+
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Total Teachers</span>
+                <span className="font-bold text-[#1E293B]">{superAdminStats.totalTeachers}</span>
+              </div>
             </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Total Students</span>
-              <span className="font-bold text-[#1E293B]">{profileData.totalStudents}</span>
+          )}
+
+          {/* 3. Academic Statistics Card (Year Admin) matching Flutter */}
+          {isAdmin && !isSuper && adminStats && (
+            <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
+              <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+                Academic Statistics
+              </h3>
+              
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Assigned Year</span>
+                <span className="font-bold text-[#1E293B]">{adminStats.academicYear || 'All Years'}</span>
+              </div>
+
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Total Students</span>
+                <span className="font-bold text-[#1E293B]">{adminStats.totalStudentsInYear ?? 0}</span>
+              </div>
+
+              <div className="flex justify-between items-center text-xs sm:text-sm">
+                <span className="text-slate-500 font-medium">Total Groups</span>
+                <span className="font-bold text-[#1E293B]">{adminStats.totalGroups ?? 0}</span>
+              </div>
             </div>
-            <div className="h-px bg-slate-100" />
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Total Groups</span>
-              <span className="font-bold text-[#1E293B]">{profileData.totalGroups}</span>
-            </div>
+          )}
+
+          {/* Action Buttons matching Flutter */}
+          <div className="pt-2 space-y-3">
+            {/* Refresh DB Cache button for Super Admin */}
+            {isSuper && (
+              <button
+                onClick={handleRefreshCache}
+                disabled={isRefreshingCache}
+                className="w-full py-3.5 px-4 bg-[#3B5998] hover:bg-[#2d4373] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshingCache ? 'animate-spin' : ''}`} />
+                <span>Refresh DB Cache</span>
+              </button>
+            )}
+
+            {/* Change Password Button */}
+            <button
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <KeyRound className="w-4 h-4" />
+              <span>Change Password</span>
+            </button>
+
+            {/* Logout Button matching Flutter Red Logout */}
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              className="w-full py-3.5 px-4 bg-[#E53E3E] hover:bg-[#C53030] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
           </div>
-        </div>
-
-        <div className="mt-8 w-full max-w-md space-y-3 pb-6">
-          <button 
-            onClick={() => setIsPasswordModalOpen(true)}
-            className="w-full py-3.5 px-4 bg-slate-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors shadow-sm"
-          >
-            <KeyRound className="w-5 h-5" /> Change Password
-          </button>
-
-          <button 
-            onClick={() => setIsLogoutModalOpen(true)}
-            className="w-full py-3.5 px-4 bg-rose-50 text-rose-600 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors border border-rose-100"
-          >
-            <LogOut className="w-5 h-5" /> Sign Out
-          </button>
         </div>
       </div>
 
@@ -179,12 +250,12 @@ export default function AdminProfileTab() {
 
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-slate-900">Change Admin Password</h3>
-              <button onClick={() => setIsPasswordModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="text-base font-bold text-slate-900">Change Admin Password</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer">
+                ✕
               </button>
             </div>
             <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
@@ -196,14 +267,14 @@ export default function AdminProfileTab() {
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                   placeholder="Enter new password..."
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold"
                 />
               </div>
               <div className="flex justify-end space-x-2 pt-2">
-                <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 text-sm text-slate-500 font-semibold hover:bg-slate-100 rounded-xl">
+                <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 text-xs text-slate-600 font-bold hover:bg-slate-100 rounded-xl cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" disabled={isChangingPass} className="px-5 py-2 text-sm bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors">
+                <button type="submit" disabled={isChangingPass} className="px-5 py-2 text-xs bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-xs cursor-pointer">
                   {isChangingPass ? 'Saving...' : 'Update Password'}
                 </button>
               </div>

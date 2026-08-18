@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, AlertTriangle, ChevronRight, Building2 } from 'lucide-react';
@@ -30,7 +31,7 @@ export default function GroupActivityDeptPage() {
         setError("Failed to load departments");
       }
     } catch (e: any) {
-      console.error("Failed to fetch departments:", e);
+      logger.error("Failed to fetch departments:", e);
       setError("Error loading departments");
     } finally {
       setLoading(false);
@@ -55,7 +56,7 @@ export default function GroupActivityDeptPage() {
         });
       }
     } catch (e) {
-      console.error("Failed to check sections:", e);
+      logger.error("Failed to check sections:", e);
       navigate(`/teacher/group-activity/${activityId}/execution`, {
         state: { year, dept, section: null }
       });

@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, X, Award, Link2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -67,7 +68,7 @@ export default function LevelsBadgesTab() {
         setBadgesByTier(grouped);
       }
     } catch (e) {
-      console.warn("Could not fetch badges from server", e);
+      logger.warn("Could not fetch badges from server", e);
     }
 
     try {
@@ -126,7 +127,7 @@ export default function LevelsBadgesTab() {
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Badge request submission error:", e);
+      logger.error("Badge request submission error:", e);
       toast.error(e.response?.data?.message || e.message || "Failed to submit badge request.");
     } finally {
       setIsSubmitting(false);

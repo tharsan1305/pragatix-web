@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { logger } from '../../../utils/logger';
+import React, { useState, useEffect } from 'react';
 import { LogOut, Lock, RefreshCw, X, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
@@ -6,15 +7,36 @@ import apiClient from '../../../services/apiClient';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../../../components/common/LogoutModal';
 
+interface ProfileState {
+  fullName: string;
+  username: string;
+  email: string;
+  phone: string;
+  department: string;
+  status: string;
+  role: string;
+  ccDetails?: {
+    section?: string;
+    academicYear?: string;
+  } | null;
+  hodDetails?: {
+    totalFaculty?: number;
+    totalStudents?: number;
+  } | null;
+  teacherDetails?: {
+    employeeId?: string;
+    totalStudents?: number;
+    attendanceTakenCount?: number;
+  } | null;
+  adminDetails?: {
+    academicYear?: string;
+  } | null;
+}
+
 export default function ProfileTab() {
-  const { logout, subRoles } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const isCC = subRoles.some((r: any) => {
-    const clean = String(r).trim().toUpperCase();
-    return clean === 'CC' || clean === 'CLASS_COORDINATOR' || clean === 'ROLE_CC' || clean === 'ROLE_CLASS_COORDINATOR';
-  });
-  
   const [isLoading, setIsLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -22,17 +44,18 @@ export default function ProfileTab() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isChangingPass, setIsChangingPass] = useState(false);
 
-  const [profileData, setProfileData] = useState({
-    username: "jaga",
-    fullName: "jaga",
-    email: "jaga@gmail.com",
+  const [profile, setProfile] = useState<ProfileState>({
+    fullName: "Teacher",
+    username: "teacher",
+    email: "Not Available",
     phone: "Not Available",
-    department: "Cyber Security",
+    department: "Not Available",
     status: "Active",
-    employeeId: "jaga",
-    totalStudents: 0,
-    attendanceTaken: 0,
-    role: "TEACHER"
+    role: "TEACHER",
+    ccDetails: null,
+    hodDetails: null,
+    teacherDetails: null,
+    adminDetails: null
   });
 
   useEffect(() => {
@@ -42,26 +65,32 @@ export default function ProfileTab() {
   const fetchProfile = async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get('/api/v1/auth/me');
+      let response;
+      try {
+        response = await apiClient.get('/api/v1/profile/me');
+      } catch {
+        response = await apiClient.get('/api/v1/auth/me');
+      }
+
       if (response.data?.success && response.data?.data) {
         const d = response.data.data;
-        const stats = d.teacherDetails || {};
 
-        setProfileData({
-          username: d.username || d.employeeId || "jaga",
-          fullName: d.fullName || d.name || "jaga",
-          email: d.email || "jaga@gmail.com",
+        setProfile({
+          fullName: d.fullName || d.name || "User",
+          username: d.username || d.employeeId || "user",
+          email: d.email || "Not Available",
           phone: d.phone || d.mobileNumber || "Not Available",
-          department: d.department || d.departmentName || "Cyber Security",
+          department: d.department || d.departmentName || "Not Available",
           status: d.accountStatus || d.status || "Active",
-          employeeId: d.employeeId || d.username || "jaga",
-          totalStudents: stats.totalStudents ?? d.totalStudents ?? 0,
-          attendanceTaken: stats.attendanceTakenCount ?? d.attendanceTaken ?? 0,
-          role: (d.role || "TEACHER").replace("ROLE_", "")
+          role: d.role ? String(d.role).replace("ROLE_", "") : "TEACHER",
+          ccDetails: d.ccDetails || null,
+          hodDetails: d.hodDetails || null,
+          teacherDetails: d.teacherDetails || null,
+          adminDetails: d.adminDetails || null,
         });
       }
     } catch (e) {
-      console.error("Failed to fetch profile:", e);
+      logger.error("Failed to fetch profile:", e);
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +125,7 @@ export default function ProfileTab() {
       setConfirmPassword('');
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || "Failed to update password");
     } finally {
       setIsChangingPass(false);
@@ -128,12 +157,12 @@ export default function ProfileTab() {
         <div className="flex flex-col items-center justify-center">
           <div className="w-24 h-24 rounded-full bg-rose-100/70 border-4 border-white shadow-md flex items-center justify-center mb-3">
             <span className="text-3xl font-black text-rose-500">
-              {getInitials(profileData.fullName)}
+              {getInitials(profile.fullName)}
             </span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">{profileData.fullName}</h2>
+          <h2 className="text-2xl font-extrabold text-slate-900">{profile.fullName}</h2>
           <p className="text-xs font-bold text-slate-400 tracking-wider uppercase mt-0.5">
-            {profileData.role} {isCC ? '• CLASS COORDINATOR' : ''}
+            {profile.role}
           </p>
         </div>
 
@@ -146,54 +175,98 @@ export default function ProfileTab() {
           <div className="space-y-2.5 text-xs md:text-sm">
             <div className="flex justify-between items-center">
               <span className="font-semibold text-slate-400">Username</span>
-              <span className="font-bold text-slate-900">{profileData.username}</span>
+              <span className="font-bold text-slate-900">{profile.username}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-semibold text-slate-400">Email</span>
-              <span className="font-bold text-slate-900 truncate max-w-[200px]">{profileData.email}</span>
+              <span className="font-bold text-slate-900 truncate max-w-[220px]">{profile.email}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-semibold text-slate-400">Phone</span>
-              <span className="font-bold text-slate-900">{profileData.phone}</span>
+              <span className="font-bold text-slate-900">{profile.phone}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-slate-400">Department</span>
-              <span className="font-bold text-slate-900">{profileData.department}</span>
-            </div>
+            {profile.adminDetails ? (
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Assigned Year</span>
+                <span className="font-bold text-slate-900">{profile.adminDetails.academicYear || 'Not Available'}</span>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Department</span>
+                <span className="font-bold text-slate-900">{profile.department}</span>
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <span className="font-semibold text-slate-400">Status</span>
               <span className="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                {profileData.status}
+                {profile.status}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Teacher Information (Flutter Aligned 1:1) */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-          <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
-            Teacher Information
-          </h3>
-
-          <div className="space-y-2.5 text-xs md:text-sm">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-slate-400">Employee ID</span>
-              <span className="font-bold text-slate-900">{profileData.employeeId}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-slate-400">Total Students</span>
-              <span className="font-bold text-slate-900">{profileData.totalStudents}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-slate-400">Attendance Taken</span>
-              <span className="font-bold text-slate-900">{profileData.attendanceTaken}</span>
+        {/* Card 2: Role-Specific Details (Flutter Aligned 1:1) */}
+        {profile.ccDetails && (
+          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+              Class Coordinator Info
+            </h3>
+            <div className="space-y-2.5 text-xs md:text-sm">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Section</span>
+                <span className="font-bold text-slate-900">{profile.ccDetails.section || 'Not Available'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Assigned Year</span>
+                <span className="font-bold text-slate-900">{profile.ccDetails.academicYear || 'Not Available'}</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {profile.hodDetails && (
+          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+              HOD Statistics
+            </h3>
+            <div className="space-y-2.5 text-xs md:text-sm">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Total Faculty</span>
+                <span className="font-bold text-slate-900">{profile.hodDetails.totalFaculty ?? 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Total Students</span>
+                <span className="font-bold text-slate-900">{profile.hodDetails.totalStudents ?? 0}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {profile.teacherDetails && !profile.ccDetails && !profile.hodDetails && (
+          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
+            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+              Teacher Information
+            </h3>
+            <div className="space-y-2.5 text-xs md:text-sm">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Employee ID</span>
+                <span className="font-bold text-slate-900">{profile.teacherDetails.employeeId || 'Not Available'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Total Students</span>
+                <span className="font-bold text-slate-900">{profile.teacherDetails.totalStudents ?? 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-slate-400">Attendance Taken</span>
+                <span className="font-bold text-slate-900">{profile.teacherDetails.attendanceTakenCount ?? 0}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Action Buttons (Flutter Aligned 1:1) */}
         <div className="space-y-3 pt-2">
-          {/* Change Password Button (Blue #4F46E5) */}
+          {/* Change Password Button */}
           <button
             onClick={() => setIsPasswordModalOpen(true)}
             className="w-full bg-[#4338CA] hover:bg-[#3730A3] text-white font-bold py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
@@ -202,7 +275,7 @@ export default function ProfileTab() {
             <span>Change Password</span>
           </button>
 
-          {/* Logout Button (Red #EF4444) */}
+          {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
             className="w-full bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
@@ -222,7 +295,7 @@ export default function ProfileTab() {
               <h3 className="text-lg font-bold text-slate-900">Change Password</h3>
               <button 
                 onClick={() => setIsPasswordModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -247,7 +320,7 @@ export default function ProfileTab() {
                   type="password"
                   required
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Confirm new password..."
                   className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
                 />

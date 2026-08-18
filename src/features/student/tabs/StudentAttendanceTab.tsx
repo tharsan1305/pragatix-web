@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
@@ -59,7 +60,7 @@ export default function StudentAttendanceTab() {
 
       setRecords(historyData);
     } catch (e: any) {
-      console.warn('Failed to load student attendance:', e);
+      logger.warn('Failed to load student attendance:', e);
       setError(e.response?.data?.message || 'Failed to load attendance record');
     } finally {
       setIsLoading(false);

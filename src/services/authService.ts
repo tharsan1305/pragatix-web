@@ -11,11 +11,6 @@ export const authService = {
   studentLogin: (identity: string, password: string) =>
     apiClient.post('/api/v1/auth/student-login', { identity, password }),
 
-  // Parent login
-  // POST /api/v1/auth/parent-login
-  parentLogin: (sprNo: string, dateOfBirth: string) =>
-    apiClient.post('/api/v1/auth/parent-login', { sprNo, dateOfBirth }),
-
   // Get current logged-in user profile
   // GET /api/v1/auth/me
   getMe: () => apiClient.get('/api/v1/auth/me'),

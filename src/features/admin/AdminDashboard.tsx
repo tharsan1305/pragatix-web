@@ -32,14 +32,9 @@ import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3
 import { useAuth } from '../../store/authContext';
 
 export default function AdminDashboard() {
-  const { user, isSuperAdmin: authIsSuperAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isTabLoading, setIsTabLoading] = useState(false);
-
-  const isSuperAdmin = authIsSuperAdmin || user?.roles?.some((r: any) => {
-    const name = typeof r === 'string' ? r : (r?.name || '');
-    return name === 'ROLE_SUPER_ADMIN' || name === 'ROLE_SUPERADMIN' || name === 'SUPER_ADMIN';
-  }) || user?.isSuperAdmin || false;
 
   const tabSlugs = [
     'overview',
@@ -146,7 +141,7 @@ export default function AdminDashboard() {
       case 'create_stage':
         return <CreateStagePage onBack={popView} />;
       case 'edit_stage':
-        return <EditStagePage onBack={popView} stage={currentViewProps.stage} />;
+        return <EditStagePage onBack={popView} stage={currentViewProps.stage} stageId={currentViewProps.stageId} />;
       case 'stage_details':
         return <StageDetailsPage onBack={popView} stageId={Number(currentViewProps.stageId) || currentViewProps.stageId} stageName={currentViewProps.stageName || ''} stageDescription={currentViewProps.stageDescription || ''} teachersList={currentViewProps.teachersList} onPushView={pushView} />;
       case 'activity_list':

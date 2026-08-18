@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Save, RotateCcw, Clock, Star, ShieldCheck, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -26,17 +27,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
   const fetchSettings = async () => {
     setIsLoading(true);
     try {
-      let res;
-      try {
-        res = await apiClient.get('/api/v1/admin/captain-rewards/settings', {
-          params: { academicYear },
-        });
-      } catch (_e) {
-        res = await apiClient.get('/api/admin/captain-rewards/settings', {
-          params: { academicYear },
-        });
-      }
-
+      const res = await apiClient.get(`/api/v1/admin/captain-reward/settings/${academicYear}`);
       if (res.data?.success && res.data?.data) {
         const d = res.data.data;
         setSettings({
@@ -47,7 +38,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
         });
       }
     } catch (e) {
-      console.warn('Failed to load captain reward settings from API, using defaults:', e);
+      logger.warn('Failed to load captain reward settings from API, using defaults:', e);
     } finally {
       setIsLoading(false);
     }
@@ -63,12 +54,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
         ...settings,
       };
 
-      let res;
-      try {
-        res = await apiClient.put('/api/v1/admin/captain-rewards/settings', payload);
-      } catch (_e) {
-        res = await apiClient.post('/api/v1/admin/captain-rewards/settings', payload);
-      }
+      const res = await apiClient.put(`/api/v1/admin/captain-reward/settings/${academicYear}`, payload);
 
       toast.dismiss(toastId);
       if (res.status === 200 || res.data?.success) {
@@ -78,7 +64,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to save captain reward settings');
     } finally {
       setIsSaving(false);

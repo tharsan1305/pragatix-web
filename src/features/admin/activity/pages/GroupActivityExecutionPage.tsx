@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users, Award, RefreshCw } from 'lucide-react';
@@ -53,7 +54,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
         setIsLoading(false);
       }
     } catch (e) {
-      console.error("Failed to fetch assignment:", e);
+      logger.error("Failed to fetch assignment:", e);
       setIsLoading(false);
     }
   };
@@ -66,7 +67,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
         setTeams(res.data.data || []);
       }
     } catch (e) {
-      console.error("Failed to fetch teams:", e);
+      logger.error("Failed to fetch teams:", e);
     } finally {
       setIsLoading(false);
     }
@@ -95,7 +96,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Failed to award XP:", e);
+      logger.error("Failed to award XP:", e);
       toast.error(e.response?.data?.message || 'Failed to award XP to team');
     } finally {
       setIsSubmitting(false);

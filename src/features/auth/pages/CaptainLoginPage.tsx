@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/client';
+import { useAuth } from '../../../store/authContext';
 
 export const CaptainLoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ export const CaptainLoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,13 +23,15 @@ export const CaptainLoginPage: React.FC = () => {
       });
 
       const { token, user } = response.data;
-      localStorage.setItem('spdms_token', token);
-      localStorage.setItem('token', token);
-      localStorage.setItem('spdms_user', JSON.stringify(user));
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('userRole', 'CAPTAIN');
+      const captainUser = {
+        ...user,
+        role: 'CAPTAIN',
+        roles: Array.from(new Set([...(user?.roles || []), 'CAPTAIN', 'ROLE_CAPTAIN'])),
+        isCaptain: true,
+      };
 
-      navigate('/captain/dashboard');
+      login(token, captainUser);
+      navigate('/captain', { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check credentials.');
     } finally {

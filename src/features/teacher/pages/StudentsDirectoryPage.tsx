@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Plus, UserPlus, RefreshCw, Sparkles, X, Trash2, ShieldAlert, FileText, CheckCircle2, Pencil } from 'lucide-react';
@@ -20,9 +21,19 @@ export default function StudentsDirectoryPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any | null>(null);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [years, setYears] = useState<any[]>([]);
-  const [_sections, setSections] = useState<any[]>([]);
+  const [semesters, setSemesters] = useState<any[]>([]);
+  const [genders, setGenders] = useState<any[]>([]);
+  const [sections, setSections] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [ccInfo, setCcInfo] = useState<any>(null);
+
+  // Dynamic sections per selected department
+  const [createDeptSections, setCreateDeptSections] = useState<any[]>([]);
+  const [selectedCreateDeptId, setSelectedCreateDeptId] = useState<string>('');
+
+  const [editDeptSections, setEditDeptSections] = useState<any[]>([]);
 
   // Excel Bulk Upload State
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
@@ -49,12 +60,12 @@ export default function StudentsDirectoryPage() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/api/v1/students?page=0&size=1000&sortBy=fullName');
+      const res = await apiClient.get('/api/v1/students?page=0&size=100&sortBy=fullName');
       if (res.data.success) {
         setStudents(res.data.data?.content || []);
       }
     } catch (e) {
-      console.error('Failed to load students', e);
+      logger.error('Failed to load students', e);
     } finally {
       setLoading(false);
     }
@@ -62,49 +73,59 @@ export default function StudentsDirectoryPage() {
 
   const fetchLookups = async () => {
     try {
-      const [deptRes, yearsRes, sectionsRes, ccRes] = await Promise.allSettled([
-        apiClient.get('/api/v1/admin/departments'),
+      // CC users already have their department/section fixed via ccInfo below
+      // (locked in the form UI); skip the unscoped institution-wide lookups for them.
+      const [deptRes, ayRes, yearsRes, semRes, genRes, sectionsRes, teamRes, ccRes] = await Promise.allSettled([
+        isCc ? Promise.resolve(null) : apiClient.get('/api/v1/admin/departments'),
+        apiClient.get('/api/v1/admin/academic-years'),
         apiClient.get('/api/v1/admin/years'),
-        apiClient.get('/api/v1/admin/sections'),
+        apiClient.get('/api/v1/admin/semesters'),
+        apiClient.get('/api/v1/admin/genders'),
+        isCc ? Promise.resolve(null) : apiClient.get('/api/v1/admin/sections'),
+        apiClient.get('/api/v1/teams'),
         apiClient.get('/api/v1/cc/class-details')
       ]);
 
-      if (deptRes.status === 'fulfilled' && deptRes.value.data?.success) {
-        setDepartments(deptRes.value.data.data || []);
-      } else {
-        try {
-          const fallbackDept = await apiClient.get('/api/v1/students/filters/departments');
-          setDepartments(fallbackDept.data?.data || fallbackDept.data || []);
-        } catch (_) {}
-      }
+      const deduplicate = (list: any[]) => {
+        if (!Array.isArray(list)) return [];
+        const seen = new Set();
+        return list.filter(item => {
+          if (!item || item.id === undefined) return false;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
+      };
 
-      if (yearsRes.status === 'fulfilled' && yearsRes.value.data?.success) {
-        setYears(yearsRes.value.data.data || []);
-      } else {
-        setYears([
-          { id: 1, yearName: 'First Year', yearNo: 1 },
-          { id: 2, yearName: 'Second Year', yearNo: 2 },
-          { id: 3, yearName: 'Third Year', yearNo: 3 },
-          { id: 4, yearName: 'Fourth Year', yearNo: 4 },
-        ]);
-      }
-
-      if (sectionsRes.status === 'fulfilled' && sectionsRes.value.data?.success) {
-        setSections(sectionsRes.value.data.data || []);
-      } else {
-        try {
-          const fallbackSec = await apiClient.get('/api/v1/students/filters/sections');
-          setSections(fallbackSec.data?.data || fallbackSec.data || []);
-        } catch (_) {
-          setSections([
-            { id: 1, sectionName: 'A' },
-            { id: 2, sectionName: 'B' },
-            { id: 3, sectionName: 'C' }
-          ]);
+      if (deptRes.status === 'fulfilled' && deptRes.value?.data?.data) {
+        const dList = deduplicate(deptRes.value.data.data);
+        setDepartments(dList);
+        if (dList.length > 0) {
+          setSelectedCreateDeptId(String(dList[0].id));
+          fetchSectionsForDept(dList[0].id, false);
         }
       }
 
-      if (ccRes.status === 'fulfilled' && ccRes.value.data?.success) {
+      if (ayRes.status === 'fulfilled' && ayRes.value.data?.data) {
+        setAcademicYears(deduplicate(ayRes.value.data.data));
+      }
+      if (yearsRes.status === 'fulfilled' && yearsRes.value.data?.data) {
+        setYears(deduplicate(yearsRes.value.data.data));
+      }
+      if (semRes.status === 'fulfilled' && semRes.value.data?.data) {
+        setSemesters(deduplicate(semRes.value.data.data));
+      }
+      if (genRes.status === 'fulfilled' && genRes.value.data?.data) {
+        setGenders(deduplicate(genRes.value.data.data));
+      }
+      if (sectionsRes.status === 'fulfilled' && sectionsRes.value?.data?.data) {
+        setSections(deduplicate(sectionsRes.value.data.data));
+      }
+      if (teamRes.status === 'fulfilled' && teamRes.value.data?.data) {
+        setGroups(deduplicate(teamRes.value.data.data));
+      }
+
+      if (ccRes.status === 'fulfilled' && ccRes.value.data?.data) {
         setCcInfo(ccRes.value.data.data);
       } else {
         try {
@@ -124,7 +145,24 @@ export default function StudentsDirectoryPage() {
         } catch (_) {}
       }
     } catch (e) {
-      console.error('Failed to load lookups', e);
+      logger.error('Failed to load lookups', e);
+    }
+  };
+
+  const fetchSectionsForDept = async (deptId: string | number, isEdit = false) => {
+    if (!deptId) {
+      if (isEdit) setEditDeptSections([]);
+      else setCreateDeptSections([]);
+      return;
+    }
+    try {
+      const res = await apiClient.get(`/api/v1/admin/departments/${deptId}/sections`);
+      const list = Array.isArray(res.data?.data) ? res.data.data : [];
+      if (isEdit) setEditDeptSections(list.length > 0 ? list : sections);
+      else setCreateDeptSections(list.length > 0 ? list : sections);
+    } catch (e) {
+      if (isEdit) setEditDeptSections(sections);
+      else setCreateDeptSections(sections);
     }
   };
 
@@ -400,28 +438,53 @@ export default function StudentsDirectoryPage() {
               e.preventDefault(); 
               const form = e.currentTarget;
               const formData = new FormData(form);
-              const data = {
-                fullName: formData.get("fullName"),
-                registerNumber: formData.get("registerNumber"),
-                email: formData.get("email"),
-                phone: formData.get("phone"),
-                address: formData.get("address"),
-                dateOfBirth: formData.get("dob"),
-                gender: formData.get("gender"),
-                semester: formData.get("semester"),
-                academicYear: formData.get("academicYear"),
-                sprNo: formData.get("sprNo"),
-                departmentId: isCc ? ccInfo?.departmentId : formData.get("departmentId"),
-                section: isCc ? ccInfo?.sectionName : formData.get("section"),
-                year: isCc ? ccInfo?.year : formData.get("year"),
+
+              const dobVal = (formData.get("dob") as string) || "";
+              let password = "";
+              if (dobVal) {
+                const parts = dobVal.split("-");
+                if (parts.length === 3) {
+                  password = `${parts[2]}${parts[1]}${parts[0]}`;
+                }
+              }
+
+              const data: any = {
+                fullName: (formData.get("fullName") as string)?.trim(),
+                regNo: (formData.get("registerNumber") as string)?.trim(),
+                email: (formData.get("email") as string)?.trim(),
+                phone: (formData.get("phone") as string)?.trim() || "",
+                address: (formData.get("address") as string)?.trim() || "",
+                dateOfBirth: dobVal || null,
+                dob: dobVal || null,
+                password: password || undefined,
+                sprNo: (formData.get("sprNo") as string)?.trim() || "",
+                departmentId: isCc ? ccInfo?.departmentId : (formData.get("departmentId") ? Number(formData.get("departmentId")) : null),
+                academicYearId: formData.get("academicYearId") ? Number(formData.get("academicYearId")) : null,
+                yearId: isCc ? (years.find(y => String(y.yearNo) === String(ccInfo?.year) || y.yearName === ccInfo?.year)?.id || null) : (formData.get("yearId") ? Number(formData.get("yearId")) : null),
+                semesterId: formData.get("semesterId") ? Number(formData.get("semesterId")) : null,
+                genderId: formData.get("genderId") ? Number(formData.get("genderId")) : null,
+                sectionId: isCc ? ccInfo?.sectionId : (formData.get("sectionId") ? Number(formData.get("sectionId")) : null),
+                groupId: formData.get("groupId") ? Number(formData.get("groupId")) : null,
+                active: true,
               };
+
+              const guardianName = (formData.get("guardianName") as string)?.trim();
+              if (guardianName) {
+                data.guardian = {
+                  guardianName,
+                  relationship: (formData.get("guardianRel") as string) || "Guardian",
+                  phoneNo: (formData.get("guardianPhone") as string)?.trim() || "",
+                  email: (formData.get("guardianEmail") as string)?.trim() || ""
+                };
+              }
+
               try {
-                await studentService.createStudent(data);
+                await apiClient.post('/api/v1/students', data);
                 toast.success("Student registered successfully");
                 setIsModalOpen(false);
                 fetchStudents();
               } catch (err: any) {
-                toast.error(err.response?.data?.message || "Failed to register student");
+                toast.error(err.response?.data?.message || err.message || "Failed to register student");
               }
             }} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -432,7 +495,8 @@ export default function StudentsDirectoryPage() {
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Register Number * (reg_no)</label>
                   <input name="registerNumber" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="e.g. 24IT001" />
-                </div>                 <div>
+                </div>
+                <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">SPR Number (spr_no)</label>
                   <input name="sprNo" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="Optional" />
                 </div>
@@ -460,11 +524,31 @@ export default function StudentsDirectoryPage() {
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
                   ) : (
-                    <select name="departmentId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
-                      <option value="" disabled selected>Select Dept</option>
+                    <select 
+                      name="departmentId" 
+                      required 
+                      value={selectedCreateDeptId}
+                      onChange={e => {
+                        setSelectedCreateDeptId(e.target.value);
+                        fetchSectionsForDept(e.target.value, false);
+                      }}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none"
+                    >
+                      <option value="" disabled>Select Dept</option>
                       {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
                   )}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year *</label>
+                  <select name="academicYearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <option value="" disabled selected>Select Academic Year</option>
+                    {academicYears.map(ay => (
+                      <option key={ay.id} value={ay.id}>
+                        {ay.academicYear || ay.yearName || ay.name || ay.code || `AY-${ay.id}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Year *</label>
@@ -474,14 +558,26 @@ export default function StudentsDirectoryPage() {
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
                   ) : (
-                    <select name="year" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <select name="yearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
                       <option value="" disabled selected>Select Year</option>
-                      <option value="1">Year 1</option>
-                      <option value="2">Year 2</option>
-                      <option value="3">Year 3</option>
-                      <option value="4">Year 4</option>
+                      {years.map(y => (
+                        <option key={y.id} value={y.id}>
+                          {y.yearName || (y.yearNo ? `Year ${y.yearNo}` : y.name || `Year ${y.id}`)}
+                        </option>
+                      ))}
                     </select>
                   )}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Semester *</label>
+                  <select name="semesterId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <option value="" disabled selected>Select Semester</option>
+                    {semesters.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.semesterNo !== undefined ? `Semester ${s.semesterNo}` : (s.semesterName || s.name || `Semester ${s.id}`)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Section (Optional)</label>
@@ -491,49 +587,69 @@ export default function StudentsDirectoryPage() {
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
                   ) : (
-                    <select name="section" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <select name="sectionId" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
                       <option value="">No Section Selected (Optional)</option>
-                      <option value="A">Section A</option>
-                      <option value="B">Section B</option>
-                      <option value="C">Section C</option>
+                      {(createDeptSections.length > 0 ? createDeptSections : sections).map(sec => (
+                        <option key={sec.id} value={sec.id}>
+                          {sec.sectionName || sec.name}
+                        </option>
+                      ))}
                     </select>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year *</label>
-                  <select name="academicYear" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
-                    <option value="" disabled selected>Select Academic Year</option>
-                    <option value="2023-2024">2023-2024</option>
-                    <option value="2024-2025">2024-2025</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Semester *</label>
-                  <select name="semester" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
-                    <option value="" disabled selected>Select Semester</option>
-                    {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
-                  </select>
-                </div>
-                <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Gender *</label>
-                  <select name="gender" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                  <select name="genderId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
                     <option value="" disabled selected>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+                    {genders.map(g => (
+                      <option key={g.id} value={g.id}>
+                        {g.genderName || g.name || g.gender}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Group (Optional)</label>
-                  <select name="group" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                  <select name="groupId" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
                     <option value="">No Group Selected (Optional)</option>
-                    <option value="G1">Group Alpha</option>
-                    <option value="G2">Group Beta</option>
+                    {groups.map(grp => (
+                      <option key={grp.id} value={grp.id}>
+                        {grp.groupName || grp.name || grp.title || grp.teamName}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              <div className="pt-6 flex justify-end gap-3 mt-4">
+              {/* Guardian Information (matching Flutter 1:1) */}
+              <div className="border-t border-slate-100 pt-4 mt-2">
+                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Guardian Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
+                    <input name="guardianName" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="Parent / Guardian Name" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Relationship</label>
+                    <select name="guardianRel" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white">
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Guardian">Guardian</option>
+                      <option value="Parent">Parent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Parent Mobile Number</label>
+                    <input name="guardianPhone" type="tel" maxLength={10} className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="10 digits" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Email</label>
+                    <input name="guardianEmail" type="email" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="guardian@example.com" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 flex justify-end gap-3 mt-4 border-t border-slate-100">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
                   Cancel
                 </button>
@@ -569,21 +685,40 @@ export default function StudentsDirectoryPage() {
               e.preventDefault(); 
               const form = e.currentTarget;
               const formData = new FormData(form);
-              const payload = {
-                fullName: formData.get("fullName"),
-                registerNumber: formData.get("registerNumber"),
-                email: formData.get("email"),
-                phone: formData.get("phone"),
-                address: formData.get("address"),
-                dob: formData.get("dob"),
-                gender: formData.get("gender"),
-                semester: formData.get("semester"),
-                academicYear: formData.get("academicYear"),
-                sprNo: formData.get("sprNo"),
-                departmentId: formData.get("departmentId") ? Number(formData.get("departmentId")) : editingStudent.departmentId,
-                section: formData.get("section"),
-                year: formData.get("year"),
+
+              const payload: any = {
+                fullName: (formData.get("fullName") as string)?.trim(),
+                email: (formData.get("email") as string)?.trim(),
+                phone: (formData.get("phone") as string)?.trim() || "",
+                address: (formData.get("address") as string)?.trim() || "",
+                dateOfBirth: (formData.get("dob") as string) || null,
+                dob: (formData.get("dob") as string) || null,
+                sprNo: (formData.get("sprNo") as string)?.trim() || "",
+                departmentId: formData.get("departmentId") ? Number(formData.get("departmentId")) : (editingStudent.departmentId || null),
+                academicYearId: formData.get("academicYearId") ? Number(formData.get("academicYearId")) : (editingStudent.academicYearId || null),
+                yearId: formData.get("yearId") ? Number(formData.get("yearId")) : (editingStudent.yearId || null),
+                semesterId: formData.get("semesterId") ? Number(formData.get("semesterId")) : (editingStudent.semesterId || null),
+                genderId: formData.get("genderId") ? Number(formData.get("genderId")) : (editingStudent.genderId || null),
+                sectionId: formData.get("sectionId") ? Number(formData.get("sectionId")) : (editingStudent.sectionId || null),
+                groupId: formData.get("groupId") ? Number(formData.get("groupId")) : (editingStudent.groupId || editingStudent.teamId || null),
+                active: editingStudent.active ?? true,
               };
+
+              const newPassword = (formData.get("password") as string)?.trim();
+              if (newPassword) {
+                payload.password = newPassword;
+              }
+
+              const guardianName = (formData.get("guardianName") as string)?.trim();
+              if (guardianName) {
+                payload.guardian = {
+                  guardianName,
+                  relationship: (formData.get("guardianRel") as string) || "Guardian",
+                  phoneNo: (formData.get("guardianPhone") as string)?.trim() || "",
+                  email: (formData.get("guardianEmail") as string)?.trim() || ""
+                };
+              }
+
               const toastId = toast.loading("Updating student details...");
               try {
                 const res = await apiClient.put(`/api/v1/students/${editingStudent.id}`, payload);
@@ -612,12 +747,12 @@ export default function StudentsDirectoryPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Register Number * (reg_no)</label>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Register Number (reg_no)</label>
                   <input 
                     name="registerNumber" 
-                    required 
+                    disabled
                     defaultValue={editingStudent.studentId || editingStudent.regNo || editingStudent.registerNumber || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-xl outline-none text-sm font-medium cursor-not-allowed" 
                   />
                 </div>
                 <div>
@@ -670,6 +805,9 @@ export default function StudentsDirectoryPage() {
                   <select 
                     name="departmentId" 
                     defaultValue={editingStudent.departmentId || ''} 
+                    onChange={e => {
+                      fetchSectionsForDept(e.target.value, true);
+                    }}
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
                   >
                     <option value="" disabled>Select Dept</option>
@@ -677,68 +815,153 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year</label>
+                  <select 
+                    name="academicYearId" 
+                    defaultValue={editingStudent.academicYearId || ''} 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                  >
+                    <option value="">Select Academic Year</option>
+                    {academicYears.map(ay => (
+                      <option key={ay.id} value={ay.id}>
+                        {ay.academicYear || ay.yearName || ay.name || ay.code || `AY-${ay.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Year *</label>
                   <select 
-                    name="year" 
-                    defaultValue={editingStudent.year || editingStudent.yearId || ''} 
+                    name="yearId" 
+                    defaultValue={editingStudent.yearId || editingStudent.year || ''} 
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
                   >
                     <option value="" disabled>Select Year</option>
-                    <option value="1">Year 1</option>
-                    <option value="2">Year 2</option>
-                    <option value="3">Year 3</option>
-                    <option value="4">Year 4</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Section</label>
-                  <select 
-                    name="section" 
-                    defaultValue={editingStudent.section || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
-                  >
-                    <option value="">No Section Selected</option>
-                    <option value="A">Section A</option>
-                    <option value="B">Section B</option>
-                    <option value="C">Section C</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year</label>
-                  <select 
-                    name="academicYear" 
-                    defaultValue={editingStudent.academicYear || '2024-2025'} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
-                  >
-                    <option value="2023-2024">2023-2024</option>
-                    <option value="2024-2025">2024-2025</option>
+                    {years.map(y => (
+                      <option key={y.id} value={y.id}>
+                        {y.yearName || (y.yearNo ? `Year ${y.yearNo}` : y.name || `Year ${y.id}`)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Semester</label>
                   <select 
-                    name="semester" 
-                    defaultValue={editingStudent.semester || 1} 
+                    name="semesterId" 
+                    defaultValue={editingStudent.semesterId || ''} 
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
                   >
-                    {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Semester {s}</option>)}
+                    <option value="">Select Semester</option>
+                    {semesters.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.semesterNo !== undefined ? `Semester ${s.semesterNo}` : (s.semesterName || s.name || `Semester ${s.id}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Section</label>
+                  <select 
+                    name="sectionId" 
+                    defaultValue={editingStudent.sectionId || ''} 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                  >
+                    <option value="">No Section Selected</option>
+                    {(editDeptSections.length > 0 ? editDeptSections : sections).map(sec => (
+                      <option key={sec.id} value={sec.id}>
+                        {sec.sectionName || sec.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1">Gender</label>
                   <select 
-                    name="gender" 
-                    defaultValue={
-                      editingStudent.gender === 'M' || editingStudent.gender === 'Male' ? 'Male' :
-                      editingStudent.gender === 'F' || editingStudent.gender === 'Female' ? 'Female' :
-                      editingStudent.gender === 'O' || editingStudent.gender === 'Other' ? 'Other' : 'Male'
-                    } 
+                    name="genderId" 
+                    defaultValue={editingStudent.genderId || ''} 
                     className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
                   >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+                    <option value="">Select Gender</option>
+                    {genders.map(g => (
+                      <option key={g.id} value={g.id}>
+                        {g.genderName || g.name || g.gender}
+                      </option>
+                    ))}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Group (Optional)</label>
+                  <select 
+                    name="groupId" 
+                    defaultValue={editingStudent.groupId || editingStudent.teamId || ''} 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                  >
+                    <option value="">No Group Selected</option>
+                    {groups.map(grp => (
+                      <option key={grp.id} value={grp.id}>
+                        {grp.groupName || grp.name || grp.title || grp.teamName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Reset Password (Optional)</label>
+                  <input 
+                    name="password" 
+                    type="password"
+                    placeholder="Leave blank to keep unchanged" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                  />
+                </div>
+              </div>
+
+              {/* Guardian Details */}
+              <div className="border-t border-slate-100 pt-4 mt-2">
+                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Guardian Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
+                    <input 
+                      name="guardianName" 
+                      defaultValue={editingStudent.guardian?.guardianName || editingStudent.guardianName || ''} 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      placeholder="Parent / Guardian Name" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Relationship</label>
+                    <select 
+                      name="guardianRel" 
+                      defaultValue={editingStudent.guardian?.relationship || editingStudent.guardianRel || 'Father'} 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white"
+                    >
+                      <option value="Father">Father</option>
+                      <option value="Mother">Mother</option>
+                      <option value="Guardian">Guardian</option>
+                      <option value="Parent">Parent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Parent Mobile Number</label>
+                    <input 
+                      name="guardianPhone" 
+                      type="tel" 
+                      maxLength={10} 
+                      defaultValue={editingStudent.guardian?.phoneNo || editingStudent.guardianPhone || ''} 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      placeholder="10 digits" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Email</label>
+                    <input 
+                      name="guardianEmail" 
+                      type="email" 
+                      defaultValue={editingStudent.guardian?.email || editingStudent.guardianEmail || ''} 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      placeholder="guardian@example.com" 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1224,7 +1447,7 @@ export default function StudentsDirectoryPage() {
         setReportLogs([]);
       }
     } catch (e: any) {
-      console.error('Report monitor search error:', e);
+      logger.error('Report monitor search error:', e);
       setReportError(e.response?.data?.message || 'Failed to search student discipline report');
     } finally {
       setIsSearchingReport(false);

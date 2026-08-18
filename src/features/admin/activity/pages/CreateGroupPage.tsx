@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, UserPlus, X, AlertCircle } from 'lucide-react';
@@ -41,7 +42,7 @@ export default function CreateGroupPage() {
       });
       setSearchResults(filtered);
     } catch (err) {
-      console.error('Search failed', err);
+      logger.error('Search failed', err);
     } finally {
       setIsSearching(false);
     }

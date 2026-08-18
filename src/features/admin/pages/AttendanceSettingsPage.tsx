@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Save, Calendar, Clock, ChevronRight, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -62,7 +63,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
         });
       }
     } catch (e) {
-      console.warn('Failed to load attendance settings, using defaults:', e);
+      logger.warn('Failed to load attendance settings, using defaults:', e);
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +94,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error(e);
+      logger.error(e);
       toast.error(e.response?.data?.message || 'Failed to save settings');
     } finally {
       setIsSaving(false);

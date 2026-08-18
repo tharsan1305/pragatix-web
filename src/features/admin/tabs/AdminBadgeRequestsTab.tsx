@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Award, Check, RefreshCw, ExternalLink, ArrowLeft, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -47,7 +48,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
         filterList(list, selectedStatus);
       }
     } catch (e) {
-      console.error("Failed to fetch badge requests:", e);
+      logger.error("Failed to fetch badge requests:", e);
       toast.error("Failed to fetch badge requests");
     } finally {
       setIsLoading(false);
@@ -99,7 +100,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Failed to approve badge request:", e);
+      logger.error("Failed to approve badge request:", e);
       toast.error(e.response?.data?.message || 'Failed to approve request');
     }
   };
@@ -134,7 +135,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
       }
     } catch (e: any) {
       toast.dismiss(toastId);
-      console.error("Failed to reject badge request:", e);
+      logger.error("Failed to reject badge request:", e);
       toast.error(e.response?.data?.message || 'Failed to reject request');
     }
   };

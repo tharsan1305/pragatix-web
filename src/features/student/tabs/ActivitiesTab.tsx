@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import type { Stage, Activity } from '../types/activity';
@@ -29,7 +30,7 @@ export const ActivitiesTab: React.FC = () => {
         if (updated) setSelectedStage(updated);
       }
     } catch (error) {
-      console.error('Failed to load student stages:', error);
+      logger.error('Failed to load student stages:', error);
     } finally {
       setIsLoading(false);
     }

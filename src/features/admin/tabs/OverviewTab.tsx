@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { Users, School, Building2, Trophy, RefreshCw } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
@@ -42,7 +43,7 @@ export default function OverviewTab({ onPushView = () => {} }: Props) {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch admin stats', error);
+      logger.error('Failed to fetch admin stats', error);
     } finally {
       setIsLoading(false);
     }

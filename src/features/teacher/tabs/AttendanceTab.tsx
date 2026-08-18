@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle, Check, CalendarX } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -62,7 +63,7 @@ export default function AttendanceTab() {
         setPeriod(res.data.data);
       }
     } catch (err) {
-      console.warn('Could not fetch next available period', err);
+      logger.warn('Could not fetch next available period', err);
     }
   }, []);
 
@@ -226,7 +227,7 @@ export default function AttendanceTab() {
           fetchStudentRoster(Number(resolvedYearId), Number(resolvedDeptId), Number(resolvedSecId), todayDate, period);
         }
       } catch (err) {
-        console.warn('Could not load dynamic lookups', err);
+        logger.warn('Could not load dynamic lookups', err);
       }
     };
 
@@ -330,7 +331,7 @@ export default function AttendanceTab() {
         setErrorMsg('No students found matching the selected Year, Department, and Section.');
       }
     } catch (err: any) {
-      console.error('Failed to load students for attendance', err);
+      logger.error('Failed to load students for attendance', err);
       const msg = err?.response?.data?.message || err?.message || '';
       if (msg.includes('Holiday')) {
         setIsHoliday(true);
@@ -433,7 +434,7 @@ export default function AttendanceTab() {
       }
     } catch (err: any) {
       toast.dismiss(toastId);
-      console.error('Failed to save attendance', err);
+      logger.error('Failed to save attendance', err);
       const errDetail = err?.response?.data?.message || 'Error saving attendance';
       toast.error(errDetail);
     } finally {

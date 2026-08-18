@@ -1,3 +1,4 @@
+import { logger } from '../../../../utils/logger';
 import { useState } from 'react';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { activityService } from '../api/activityService';
@@ -35,7 +36,7 @@ export default function CreateActivityPage({
         }
       }, 1000);
     } catch (err: any) {
-      console.error('Failed to create activity:', err);
+      logger.error('Failed to create activity:', err);
       const msg = err.response?.data?.message || err.message || 'Failed to create activity';
       setToast({ message: msg, type: 'error' });
     } finally {

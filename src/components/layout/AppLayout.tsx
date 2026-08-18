@@ -1,3 +1,4 @@
+import { logger } from '../../utils/logger';
 import type { ReactNode } from 'react';
 import Sidebar from './Sidebar';
 
@@ -7,14 +8,14 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   // In a real app, this role would come from your auth store
-  const storedUser = localStorage.getItem('user');
+  const storedUser = localStorage.getItem('spdms_user');
   let role = null;
   if (storedUser) {
     try {
       const user = JSON.parse(storedUser);
       role = user.role;
     } catch (e) {
-      console.error('Failed to parse user role');
+      logger.error('Failed to parse user role');
     }
   }
 

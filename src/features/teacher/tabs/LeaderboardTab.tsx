@@ -1,3 +1,4 @@
+import { logger } from '../../../utils/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, ChevronDown, Trophy, FilterX } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
@@ -35,7 +36,7 @@ export default function TeacherLeaderboardTab() {
         if (Array.isArray(d.sections)) setSectionOptions(d.sections);
       }
     } catch (e) {
-      console.error('Failed to fetch leaderboard filters', e);
+      logger.error('Failed to fetch leaderboard filters', e);
     }
   }, []);
 
@@ -61,7 +62,7 @@ export default function TeacherLeaderboardTab() {
       }
       setLeaderboardList(rawList);
     } catch (e) {
-      console.error('Failed to fetch leaderboard', e);
+      logger.error('Failed to fetch leaderboard', e);
       setLeaderboardList([]);
     } finally {
       setIsLoading(false);
