@@ -1,6 +1,11 @@
 import { logger } from '../../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { Type, Tag, AlignLeft, Hash, CheckCircle2, Award, ShieldAlert, BookOpen, FileText } from 'lucide-react';
+
+import { 
+  Type, Tag, AlignLeft, Hash, CheckCircle2, 
+  PlusCircle, MinusCircle, Star, Repeat, BarChart2, 
+  User, Users, Menu, AlertCircle
+} from 'lucide-react';
 import { activityService } from '../api/activityService';
 import type { ActivityModel } from '../types/ActivityTypes';
 
@@ -18,7 +23,7 @@ const XP_CATEGORIES = [
 
 const EVIDENCE_OPTIONS = [
   'Handwritten', 'Soft Copy', 'Diary / Notebook', 'Weekly Log',
-  'Direct Observation', 'Attendance Register', 'ERP Attendance'
+  'Direct Observation', 'Attendance Register', 'ERP Attendance', 'Manual'
 ];
 
 export default function ActivityForm({ initialData, onSubmit, onCancel = () => {}, isSubmitting }: ActivityFormProps) {
@@ -27,18 +32,20 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
     description: '',
     justification: '',
     type: 'Individual',
-    xpCategory: 'Academic',
+    xpCategory: 'Skill',
     xpType: 'Reward',
     awardEnabled: true,
     awardXp: 50,
     penaltyEnabled: false,
     penaltyXp: 0,
     cap: 1,
-    awardFrequency: 'Daily',
-    evidence: [],
+    awardType: 'Fixed XP',
+    awardFrequency: 'Per Assignment',
+    evidence: ['Direct Observation'],
     status: 'ACTIVE',
     displayOrder: 1,
     allowStudentRequest: false,
+    streakEnabled: false,
     ...initialData
   });
 
@@ -52,12 +59,24 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
         name: initialData.name || prev.name || '',
         description: initialData.description || prev.description || '',
         justification: initialData.justification || prev.justification || '',
+        awardEnabled: initialData.awardEnabled ?? (initialData.awardXp ? initialData.awardXp > 0 : true),
         awardXp: initialData.awardXp ?? (initialData.xp ? parseInt(String(initialData.xp)) || 50 : 50),
-        awardFrequency: initialData.awardFrequency || initialData.frequency || prev.awardFrequency || 'Daily',
+        penaltyEnabled: initialData.penaltyEnabled ?? (initialData.penaltyXp ? initialData.penaltyXp > 0 : false),
+        penaltyXp: initialData.penaltyXp ?? 0,
+        cap: initialData.cap ?? 1,
+        awardType: initialData.awardType || 'Fixed XP',
+        awardFrequency: initialData.awardFrequency || initialData.frequency || prev.awardFrequency || 'Per Assignment',
         type: initialData.type || prev.type || 'Individual',
-        xpCategory: initialData.xpCategory || prev.xpCategory || 'Academic',
+        xpCategory: initialData.xpCategory || prev.xpCategory || 'Skill',
         status: initialData.status || prev.status || 'ACTIVE',
         displayOrder: initialData.displayOrder ?? prev.displayOrder ?? 1,
+        allowStudentRequest: initialData.allowStudentRequest ?? prev.allowStudentRequest ?? false,
+        streakEnabled: initialData.streakEnabled ?? prev.streakEnabled ?? false,
+        evidence: Array.isArray(initialData.evidence)
+          ? initialData.evidence
+          : (typeof initialData.evidence === 'string' && (initialData.evidence as string).trim()
+              ? (initialData.evidence as string).split(',').map(s => s.trim())
+              : prev.evidence || ['Direct Observation']),
       }));
     }
   }, [initialData]);
@@ -104,11 +123,11 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
       description: formData.description?.trim() || '',
       evidence: currentEvidence,
       justification: formData.justification?.trim() || '',
-      xpCategory: formData.xpCategory || 'Academic',
+      xpCategory: formData.xpCategory || 'Skill',
       type: formData.type || 'Individual',
       cap: Number(formData.cap) || 1,
-      awardFrequency: formData.awardFrequency || 'Daily',
-      frequency: formData.awardFrequency || 'Daily',
+      awardFrequency: formData.awardFrequency || 'Per Assignment',
+      frequency: formData.awardFrequency || 'Per Assignment',
       displayOrder: Number(formData.displayOrder) || 1,
       status: formData.status || 'ACTIVE',
       awardXp: formData.awardEnabled ? (Number(formData.awardXp) || 0) : 0,
@@ -119,20 +138,25 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
       awardDays: Array.isArray(formData.awardDays) ? formData.awardDays.filter(d => typeof d === 'string' && d.trim().length > 0) : [],
       xp: String(formData.awardEnabled ? (Number(formData.awardXp) || 50) : 0),
       xpType: computedXpType,
+      allowStudentRequest: formData.allowStudentRequest ?? false,
+      streakEnabled: formData.streakEnabled ?? false,
     };
 
     onSubmit(payload);
   };
 
+  const isPerAssignment = formData.awardFrequency === 'Per Assignment';
+
   return (
-    <form id="activity-form" onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
-      {/* Section 1: Activity Details */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-sm">
+    <form id="activity-form" onSubmit={handleSubmit} className="space-y-5 max-w-2xl mx-auto pb-8">
+      
+      {/* ── Section 1: Basic Information / Activity Details ───────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 space-y-4">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-xs shadow-xs">
             1
           </div>
-          <h3 className="text-lg font-bold text-slate-900">Activity Details</h3>
+          <h3 className="text-base font-bold text-slate-900">Activity Details</h3>
         </div>
 
         <div className="space-y-4">
@@ -147,12 +171,12 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
               type="text" 
               value={formData.name || ''} 
               onChange={e => handleChange('name', e.target.value)} 
-              className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-medium" 
-              placeholder="e.g. Monday Remember / Regret Journal" 
+              className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-semibold text-slate-900" 
+              placeholder="e.g. Newspaper Reading" 
             />
           </div>
 
-          {/* XP Category & Type */}
+          {/* XP Category & Description */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
@@ -162,7 +186,7 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
               <select 
                 value={formData.xpCategory} 
                 onChange={e => handleChange('xpCategory', e.target.value)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#EA4335]"
+                className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335] cursor-pointer"
               >
                 {XP_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -170,16 +194,16 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
 
             <div>
               <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <FileText className="w-4 h-4 text-[#EA4335]" />
-                <span>Activity Type *</span>
+                <CheckCircle2 className="w-4 h-4 text-[#EA4335]" />
+                <span>Status</span>
               </label>
               <select 
-                value={formData.type} 
-                onChange={e => handleChange('type', e.target.value)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#EA4335]"
+                value={formData.status || 'ACTIVE'} 
+                onChange={e => handleChange('status', e.target.value)} 
+                className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335] cursor-pointer"
               >
-                <option value="Individual">Individual</option>
-                <option value="Group">Group</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
               </select>
             </div>
           </div>
@@ -193,108 +217,150 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
             <textarea 
               value={formData.description || ''} 
               onChange={e => handleChange('description', e.target.value)} 
-              className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-medium" 
-              rows={3} 
-              placeholder="Provide event details..." 
+              className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-medium text-slate-800" 
+              rows={2} 
+              placeholder="1 Minute Reading in front of class" 
             />
           </div>
 
-          {/* Display Order & Status */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <Hash className="w-4 h-4 text-[#EA4335]" />
-                <span>Display Order</span>
-              </label>
-              <input 
-                type="number" 
-                value={formData.displayOrder ?? 1} 
-                onChange={e => handleChange('displayOrder', parseInt(e.target.value) || 1)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#EA4335]" 
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#EA4335]" />
-                <span>Status</span>
-              </label>
-              <select 
-                value={formData.status || 'ACTIVE'} 
-                onChange={e => handleChange('status', e.target.value)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium focus:ring-2 focus:ring-[#EA4335]"
-              >
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
+          {/* Display Order */}
+          <div>
+            <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <Hash className="w-4 h-4 text-[#EA4335]" />
+              <span>Display Order</span>
+            </label>
+            <input 
+              type="number" 
+              value={formData.displayOrder ?? 1} 
+              onChange={e => handleChange('displayOrder', parseInt(e.target.value) || 1)} 
+              className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335]" 
+            />
           </div>
         </div>
       </div>
 
-      {/* Section 2: XP Rules */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-sm">
+      {/* ── Section 2: Award Rules (XP Configuration) ────────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 space-y-5">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-xs shadow-xs">
             2
           </div>
-          <h3 className="text-lg font-bold text-slate-900">XP Rules & Frequency</h3>
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Award Rules</h3>
+            <p className="text-xs font-semibold text-slate-400">XP Configuration</p>
+          </div>
         </div>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <Award className="w-4 h-4 text-emerald-600" />
-                <span>Award XP</span>
+          
+          {/* Award XP Switch & Input */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Award XP</p>
+                <p className="text-xs text-slate-500">Award points when student satisfies the activity condition</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={formData.awardEnabled ?? true} 
+                  onChange={e => handleChange('awardEnabled', e.target.checked)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#EA4335]"></div>
               </label>
-              <input 
-                type="number" 
-                value={formData.awardXp ?? 50} 
-                onChange={e => handleChange('awardXp', parseInt(e.target.value) || 0)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium" 
-              />
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <ShieldAlert className="w-4 h-4 text-rose-500" />
-                <span>Penalty XP</span>
-              </label>
-              <input 
-                type="number" 
-                value={formData.penaltyXp ?? 0} 
-                onChange={e => handleChange('penaltyXp', parseInt(e.target.value) || 0)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium" 
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
-                <Hash className="w-4 h-4 text-teal-600" />
-                <span>Max Cap</span>
-              </label>
-              <input 
-                type="number" 
-                value={formData.cap ?? 1} 
-                onChange={e => handleChange('cap', parseInt(e.target.value) || 1)} 
-                className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium" 
-              />
-            </div>
+            {formData.awardEnabled && (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#EA4335]">
+                  <PlusCircle className="w-5 h-5" />
+                </div>
+                <input 
+                  type="number" 
+                  value={formData.awardXp ?? 50} 
+                  onChange={e => handleChange('awardXp', parseInt(e.target.value) || 0)} 
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#EA4335]" 
+                  placeholder="Award XP Value" 
+                />
+              </div>
+            )}
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-slate-700 mb-1.5 block">Frequency</label>
+          {/* Penalty XP Switch & Input */}
+          <div className="space-y-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Penalty XP</p>
+                <p className="text-xs text-slate-500">Deduct points when student violates/fails the activity condition</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={formData.penaltyEnabled ?? false} 
+                  onChange={e => handleChange('penaltyEnabled', e.target.checked)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#EA4335]"></div>
+              </label>
+            </div>
+
+            {formData.penaltyEnabled && (
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#EA4335]">
+                  <MinusCircle className="w-5 h-5" />
+                </div>
+                <input 
+                  type="number" 
+                  value={formData.penaltyXp ?? 100} 
+                  onChange={e => handleChange('penaltyXp', parseInt(e.target.value) || 0)} 
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-bold text-slate-900 focus:ring-2 focus:ring-[#EA4335]" 
+                  placeholder="Penalty XP Value" 
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Warning if neither enabled */}
+          {!formData.awardEnabled && !formData.penaltyEnabled && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-2.5 text-xs text-red-700 font-bold">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>At least one toggle (Award XP or Penalty XP) must be enabled.</span>
+            </div>
+          )}
+
+          {/* Award Type */}
+          <div className="pt-2">
+            <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <Star className="w-4 h-4 text-[#EA4335]" />
+              <span>Award Type</span>
+            </label>
             <select 
-              value={formData.awardFrequency || 'Daily'} 
-              onChange={e => handleChange('awardFrequency', e.target.value)} 
-              className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-sm font-medium bg-white"
+              value={formData.awardType || 'Fixed XP'} 
+              onChange={e => handleChange('awardType', e.target.value)} 
+              className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335] cursor-pointer"
             >
-              <option value="One Time">One Time</option>
+              <option value="Fixed XP">Fixed XP</option>
+              <option value="Variable XP (future use)">Variable XP (future use)</option>
+            </select>
+          </div>
+
+          {/* Award Frequency */}
+          <div>
+            <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <Repeat className="w-4 h-4 text-[#EA4335]" />
+              <span>Award Frequency</span>
+            </label>
+            <select 
+              value={formData.awardFrequency || 'Per Assignment'} 
+              onChange={e => handleChange('awardFrequency', e.target.value)} 
+              className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335] cursor-pointer"
+            >
+              <option value="Per Assignment">Per Assignment</option>
               <option value="Daily">Daily</option>
               <option value="Weekly">Weekly</option>
               <option value="Monthly">Monthly</option>
-              <option value="Per Assignment">Per Assignment</option>
+              <option value="One Time">One Time</option>
               {Array.from(new Set(
                 customFrequencies
                   .map(cf => (typeof cf === 'string' ? cf : cf.name || '').trim())
@@ -310,80 +376,198 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
                 <option key={name} value={name}>{name}</option>
               ))}
             </select>
+            {isPerAssignment && (
+              <p className="text-xs text-slate-500 italic mt-1.5">
+                XP is awarded for every assignment submission. No cap limit.
+              </p>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* Section 3: Requirements */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-sm">
-            3
-          </div>
-          <h3 className="text-lg font-bold text-slate-900">Requirements & Evidence</h3>
-        </div>
-
-        <div className="space-y-4">
+          {/* Cap */}
           <div>
-            <label className="text-xs font-bold text-slate-700 mb-2 flex items-center space-x-1.5">
-              <BookOpen className="w-4 h-4 text-indigo-600" />
-              <span>Evidence Required</span>
+            <label className="text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <BarChart2 className="w-4 h-4 text-[#EA4335]" />
+              <span>Cap {isPerAssignment ? '(Unlimited)' : ''}</span>
             </label>
-            <div className="flex flex-wrap gap-2">
-              {EVIDENCE_OPTIONS.map(ev => {
-                const current = Array.isArray(formData.evidence) 
-                  ? formData.evidence 
-                  : (typeof formData.evidence === 'string' && (formData.evidence as string).trim() ? [formData.evidence] : []);
-                const selected = current.includes(ev);
-
-                return (
-                  <button 
-                    type="button" 
-                    key={ev} 
-                    onClick={() => toggleEvidence(ev)} 
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                      selected 
-                        ? 'bg-indigo-50 text-indigo-700 border-indigo-200 shadow-sm' 
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {ev}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-slate-700 mb-1.5 block">Justification / Rationale</label>
-            <textarea 
-              value={formData.justification || ''} 
-              onChange={e => handleChange('justification', e.target.value)} 
-              className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-medium" 
-              rows={2} 
-              placeholder="Why is this activity important?" 
+            <input 
+              type="number" 
+              value={formData.cap ?? 1} 
+              disabled={isPerAssignment}
+              onChange={e => handleChange('cap', parseInt(e.target.value) || 1)} 
+              className={`w-full p-3.5 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 ${
+                isPerAssignment ? 'bg-slate-100/80 text-slate-400 cursor-not-allowed' : 'bg-slate-50/70 focus:ring-2 focus:ring-[#EA4335]'
+              }`} 
             />
           </div>
+
         </div>
       </div>
 
-      {/* Sticky Bottom Action Bar matching Flutter */}
-      <div className="flex justify-end items-center gap-3 pt-4 pb-12">
+      {/* ── Section 3: Evidence ─────────────────────────────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 space-y-4">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            3
+          </div>
+          <h3 className="text-base font-bold text-slate-900">Evidence</h3>
+        </div>
+
+        <div className="space-y-1">
+          {EVIDENCE_OPTIONS.map(opt => {
+            const current = Array.isArray(formData.evidence) 
+              ? formData.evidence 
+              : (typeof formData.evidence === 'string' && (formData.evidence as string).trim() ? [formData.evidence] : []);
+            const isChecked = current.includes(opt);
+
+            return (
+              <label 
+                key={opt}
+                onClick={() => toggleEvidence(opt)}
+                className={`flex items-center justify-between p-3 rounded-2xl transition-all cursor-pointer select-none ${
+                  isChecked 
+                    ? 'bg-rose-50/70 border border-rose-100' 
+                    : 'hover:bg-slate-50 border border-transparent'
+                }`}
+              >
+                <span className={`text-sm font-semibold ${isChecked ? 'text-slate-900' : 'text-slate-700'}`}>
+                  {opt}
+                </span>
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                  isChecked 
+                    ? 'bg-[#EA4335] border-[#EA4335] text-white' 
+                    : 'border-slate-400 bg-white'
+                }`}>
+                  {isChecked && (
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Section 4: Activity Type (Segmented Cards) ─────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 space-y-4">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            4
+          </div>
+          <h3 className="text-base font-bold text-slate-900">Activity Type</h3>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {/* Individual Card */}
+          <button
+            type="button"
+            onClick={() => handleChange('type', 'Individual')}
+            className={`py-5 px-4 rounded-2xl flex flex-col items-center justify-center space-y-2 border transition-all cursor-pointer ${
+              formData.type === 'Individual'
+                ? 'bg-[#EA4335] border-[#EA4335] text-white shadow-lg shadow-red-500/25 scale-[1.02]'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <User className={`w-7 h-7 ${formData.type === 'Individual' ? 'text-white' : 'text-slate-500'}`} />
+            <span className="font-bold text-sm">Individual</span>
+          </button>
+
+          {/* Group Card */}
+          <button
+            type="button"
+            onClick={() => handleChange('type', 'Group')}
+            className={`py-5 px-4 rounded-2xl flex flex-col items-center justify-center space-y-2 border transition-all cursor-pointer ${
+              formData.type === 'Group'
+                ? 'bg-[#EA4335] border-[#EA4335] text-white shadow-lg shadow-red-500/25 scale-[1.02]'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <Users className={`w-7 h-7 ${formData.type === 'Group' ? 'text-white' : 'text-slate-500'}`} />
+            <span className="font-bold text-sm">Group</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Standalone Card: Allow Student Request ─────────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80">
+        <div className="flex items-center justify-between">
+          <div className="pr-4">
+            <h4 className="text-sm font-bold text-slate-900">Allow Student Request</h4>
+            <p className="text-xs text-slate-500 mt-0.5">Students can submit a completion request for this activity.</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input 
+              type="checkbox" 
+              checked={formData.allowStudentRequest ?? false} 
+              onChange={e => handleChange('allowStudentRequest', e.target.checked)} 
+              className="sr-only peer" 
+            />
+            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#EA4335]"></div>
+          </label>
+        </div>
+      </div>
+
+      {/* ── Standalone Card: Enable Streak ─────────────────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80">
+        <div className="flex items-center justify-between">
+          <div className="pr-4">
+            <h4 className="text-sm font-bold text-slate-900">Enable Streak</h4>
+            <p className="text-xs text-slate-500 mt-0.5">Track consecutive streaks for this activity automatically.</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input 
+              type="checkbox" 
+              checked={formData.streakEnabled ?? false} 
+              onChange={e => handleChange('streakEnabled', e.target.checked)} 
+              className="sr-only peer" 
+            />
+            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#EA4335]"></div>
+          </label>
+        </div>
+      </div>
+
+      {/* ── Section 5: Justification (Optional) ─────────────────────────────────── */}
+      <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-200/80 space-y-4">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-7 h-7 rounded-full bg-[#EA4335] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            5
+          </div>
+          <h3 className="text-base font-bold text-slate-900">Justification (Optional)</h3>
+        </div>
+
+        <div className="relative">
+          <div className="absolute top-3.5 left-3.5 text-[#EA4335] pointer-events-none">
+            <Menu className="w-5 h-5" />
+          </div>
+          <textarea 
+            value={formData.justification || ''} 
+            onChange={e => handleChange('justification', e.target.value)} 
+            className="w-full pl-11 pr-4 py-3 bg-slate-50/70 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-[#EA4335] outline-none text-sm font-medium text-slate-800" 
+            rows={2} 
+            placeholder="One Minute Reading in front of class" 
+          />
+        </div>
+      </div>
+
+      {/* ── Sticky Bottom Action Bar (Flutter Parity) ──────────────────────────── */}
+      <div className="sticky bottom-0 bg-white/95 backdrop-blur-md -mx-4 sm:-mx-6 px-6 py-3.5 border-t border-slate-200/80 flex justify-between items-center gap-4 z-20 shadow-lg rounded-t-2xl">
         <button 
           type="button" 
           onClick={onCancel}
-          className="px-6 py-3 border border-slate-300 text-slate-700 text-sm font-bold rounded-2xl hover:bg-slate-100 transition-colors"
+          className="flex-1 py-3 px-5 border border-slate-300 text-slate-700 text-sm font-bold rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer text-center"
         >
           Cancel
         </button>
         <button 
           type="submit" 
           disabled={isSubmitting} 
-          className="px-8 py-3 bg-[#EA4335] hover:bg-red-600 text-white text-sm font-bold rounded-2xl shadow-lg disabled:opacity-50 transition-all active:scale-95"
+          className="flex-1 py-3 px-5 bg-[#EA4335] hover:bg-red-600 text-white text-sm font-bold rounded-2xl shadow-md disabled:opacity-50 transition-all active:scale-95 cursor-pointer text-center"
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
+
     </form>
   );
 }

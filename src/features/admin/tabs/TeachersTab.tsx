@@ -1,5 +1,5 @@
 import { logger } from '../../../utils/logger';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
@@ -51,7 +51,6 @@ export default function TeachersTab({ onBack }: Props) {
       });
     } catch (e) {
       logger.error(e);
-      // Fallback roles if API fails
       setLookups(prev => ({ ...prev, roles: [{name: 'ROLE_ADMIN'}, {name: 'ROLE_TEACHER'}, {name: 'ROLE_STUDENT'}] }));
     }
   };
@@ -62,10 +61,15 @@ export default function TeachersTab({ onBack }: Props) {
       const response = await apiClient.get('/api/v1/admin/users');
       if (response.data?.success) {
         const allUsers = response.data.data || [];
-        // Filter out students to show only staff/teachers in this tab
-        const staff = allUsers.filter((u: any) => !u.roles?.includes('ROLE_STUDENT'));
-        setUsers(staff);
-        setFilteredUsers(staff);
+        // Match Flutter teachers_tab.dart: show genuine teachers (excludes pure admin and student accounts)
+        const teachers = allUsers.filter((u: any) => {
+          const roles: string[] = u.roles || [];
+          const hasTeacherRole = roles.includes('ROLE_TEACHER') || roles.includes('ROLE_TRANSPORT');
+          const isPureAdmin = roles.some((r: string) => r === 'ROLE_ADMIN' || r === 'ROLE_SUPER_ADMIN') && !roles.includes('ROLE_TEACHER');
+          return hasTeacherRole && !isPureAdmin && !roles.includes('ROLE_STUDENT');
+        });
+        setUsers(teachers);
+        setFilteredUsers(teachers);
       }
     } catch (e) {
       logger.error(e);

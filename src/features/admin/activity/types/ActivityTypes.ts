@@ -31,10 +31,12 @@ export interface ActivityModel {
   activityType?: string;
   assignmentMode: string;
   allowStudentRequest?: boolean;
+  streakEnabled?: boolean;
   subgroup?: string | Record<string, any>;
   subgroupId?: number;
   stageId?: number;
 }
+
 
 export interface ExecutionStudentModel {
   id: number;

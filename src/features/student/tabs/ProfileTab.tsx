@@ -135,7 +135,7 @@ export default function ProfileTab() {
         <h1 className="text-xl font-bold">Profile</h1>
         <button
           onClick={fetchProfile}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
           title="Refresh Profile"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -191,13 +191,21 @@ export default function ProfileTab() {
 
         {/* Quick Actions matching Flutter _buildQuickActions */}
         <div className="space-y-3 pt-2">
+          {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm"
+            className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
           </button>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center pt-4 pb-2">
+          <p className="text-xs font-semibold text-slate-400 tracking-wide">
+            JJCET © 2026 All rights reserved
+          </p>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { logger } from '../../../utils/logger';
-import React, { useState, useEffect } from 'react';
-import { LogOut, Lock, RefreshCw, X, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+import { LogOut, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -39,10 +40,6 @@ export default function ProfileTab() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isChangingPass, setIsChangingPass] = useState(false);
 
   const [profile, setProfile] = useState<ProfileState>({
     fullName: "Teacher",
@@ -101,35 +98,6 @@ export default function ProfileTab() {
     logout();
     toast.success("Signed out successfully");
     navigate('/login');
-  };
-
-  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPassword || newPassword.trim().length < 4) {
-      toast.error("Password must be at least 4 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-
-    setIsChangingPass(true);
-    const toastId = toast.loading("Updating password...");
-    try {
-      await apiClient.post('/api/v1/auth/change-password', { newPassword: newPassword.trim() });
-      toast.dismiss(toastId);
-      toast.success("Password updated successfully!");
-      setIsPasswordModalOpen(false);
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      logger.error(e);
-      toast.error(e.response?.data?.message || "Failed to update password");
-    } finally {
-      setIsChangingPass(false);
-    }
   };
 
   if (isLoading) {
@@ -266,15 +234,6 @@ export default function ProfileTab() {
 
         {/* Bottom Action Buttons (Flutter Aligned 1:1) */}
         <div className="space-y-3 pt-2">
-          {/* Change Password Button */}
-          <button
-            onClick={() => setIsPasswordModalOpen(true)}
-            className="w-full bg-[#4338CA] hover:bg-[#3730A3] text-white font-bold py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
-          >
-            <Lock className="w-4 h-4" />
-            <span>Change Password</span>
-          </button>
-
           {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
@@ -285,68 +244,14 @@ export default function ProfileTab() {
           </button>
         </div>
 
-      </div>
-
-      {/* Change Password Modal */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-slate-900">Change Password</h3>
-              <button 
-                onClick={() => setIsPasswordModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password..."
-                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Confirm new password..."
-                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2.5 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-xl cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isChangingPass}
-                  className="px-5 py-2.5 bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 rounded-xl shadow-xs flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>Update Password</span>
-                </button>
-              </div>
-            </form>
-          </div>
+        {/* Footer */}
+        <div className="text-center pt-4 pb-2">
+          <p className="text-xs font-semibold text-slate-400 tracking-wide">
+            JJCET © 2026 All rights reserved
+          </p>
         </div>
-      )}
+
+      </div>
 
       {/* Logout Modal */}
       <LogoutModal
