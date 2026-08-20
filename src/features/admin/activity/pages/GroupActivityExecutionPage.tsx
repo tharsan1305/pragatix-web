@@ -93,6 +93,9 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
         toast.success('XP awarded to team successfully!');
         setScoringTeam(null);
         setRemarks('');
+        if (activeAssignmentId) {
+          fetchTeamsForAssignment(activeAssignmentId);
+        }
       }
     } catch (e: any) {
       toast.dismiss(toastId);
@@ -151,13 +154,19 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
                   </div>
 
                   <div className="flex items-center space-x-2 self-end md:self-center">
-                    <button
-                      onClick={() => setScoringTeam(t)}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1.5 shadow-xs"
-                    >
-                      <Award className="w-4 h-4" />
-                      <span>Award XP</span>
-                    </button>
+                    {t.isAwarded ? (
+                      <span className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-semibold text-xs border border-slate-200 cursor-not-allowed">
+                        XP Already Awarded
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setScoringTeam(t)}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer"
+                      >
+                        <Award className="w-4 h-4" />
+                        <span>Award XP</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -229,14 +238,14 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
                 <button
                   type="button"
                   onClick={() => setScoringTeam(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 rounded-lg shadow-xs flex items-center space-x-1"
+                  className="px-5 py-2 bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 rounded-lg shadow-xs flex items-center space-x-1 cursor-pointer"
                 >
                   {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1" />}
                   <span>Confirm Award</span>

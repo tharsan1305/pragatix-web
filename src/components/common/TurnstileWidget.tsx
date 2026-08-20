@@ -42,6 +42,14 @@ export default function TurnstileWidget({
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => { onVerifyRef.current = onVerify; }, [onVerify]);
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
+  useEffect(() => { onErrorRef.current = onError; }, [onError]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -69,18 +77,18 @@ export default function TurnstileWidget({
           sitekey: SITE_KEY,
           action: 'turnstile-spin-v2',
           callback: (token: string) => {
-            if (isMounted) onVerify(token);
+            if (isMounted) onVerifyRef.current(token);
           },
           'expired-callback': () => {
             if (isMounted) {
-              onVerify('');
-              if (onExpire) onExpire();
+              onVerifyRef.current('');
+              onExpireRef.current?.();
             }
           },
           'error-callback': () => {
             if (isMounted) {
-              onVerify('');
-              if (onError) onError();
+              onVerifyRef.current('');
+              onErrorRef.current?.();
             }
           },
         });
@@ -112,7 +120,7 @@ export default function TurnstileWidget({
         }
       }
     };
-  }, [onVerify, onExpire, onError]);
+  }, []); // Mount once — no longer re-inits on every parent re-render
 
   useEffect(() => {
     if (resetTrigger !== undefined && widgetIdRef.current && window.turnstile) {

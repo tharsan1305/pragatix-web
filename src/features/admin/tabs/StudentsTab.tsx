@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X, UserCheck, School, Shield, User, Bell, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X, UserCheck, School, Shield, User, Bell, RotateCcw, AlertTriangle, Upload, Download, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import AdminBadgeRequestsTab from './AdminBadgeRequestsTab';
@@ -29,6 +29,16 @@ export default function StudentsTab({ onBack }: Props) {
   // Notification Bell & Badge Requests State
   const [pendingBadgeRequests, setPendingBadgeRequests] = useState<number>(0);
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState<boolean>(false);
+
+  // Bulk Upload States
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState<boolean>(false);
+  const [isBulkParsing, setIsBulkParsing] = useState<boolean>(false);
+  const [isBulkImporting, setIsBulkImporting] = useState<boolean>(false);
+  const [bulkParseResult, setBulkParseResult] = useState<{
+    allRows: any[];
+    rejectedRows: any[];
+    validRows: any[];
+  } | null>(null);
 
   // In-App Delete Confirmation State
   const [deleteConfirmStudent, setDeleteConfirmStudent] = useState<{ id: number; name: string } | null>(null);
@@ -216,6 +226,101 @@ export default function StudentsTab({ onBack }: Props) {
       logger.error("Failed to fetch students:", e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    const toastId = toast.loading('Downloading template...');
+    try {
+      const res = await apiClient.get('/api/v1/students/bulk-upload/template', {
+        responseType: 'blob'
+      });
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'SPDMS_Student_Bulk_Upload_Template.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      toast.dismiss(toastId);
+      toast.success('Template downloaded to your downloads folder!');
+    } catch (e: any) {
+      toast.dismiss(toastId);
+      toast.error('Failed to download student upload template');
+    }
+  };
+
+  const handleBulkFileParse = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsBulkParsing(true);
+    const toastId = toast.loading('Parsing student Excel file...');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await apiClient.post('/api/v1/students/bulk-parse', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      toast.dismiss(toastId);
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        const allRows: any[] = res.data.data;
+        const rejectedRows = allRows.filter(
+          (s: any) => s.errorReason && s.errorReason.toString().trim() !== ''
+        );
+        const validRows = allRows.filter(
+          (s: any) => !s.errorReason || s.errorReason.toString().trim() === ''
+        );
+
+        setBulkParseResult({ allRows, rejectedRows, validRows });
+
+        if (validRows.length > 0) {
+          toast.success(`Parsed ${validRows.length} valid student rows.`);
+        } else {
+          toast.error('No valid student records found in the Excel file.');
+        }
+      } else {
+        toast.error(res.data?.message || 'Failed to parse Excel file');
+      }
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error(err.response?.data?.message || 'Failed to parse Excel file');
+    } finally {
+      setIsBulkParsing(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleBulkImport = async () => {
+    if (!bulkParseResult || bulkParseResult.validRows.length === 0) {
+      toast.error('No valid students to import');
+      return;
+    }
+
+    setIsBulkImporting(true);
+    const toastId = toast.loading(`Importing ${bulkParseResult.validRows.length} students...`);
+    try {
+      const res = await apiClient.post('/api/v1/students/bulk-import', bulkParseResult.validRows);
+      toast.dismiss(toastId);
+      if (res.data?.success || res.status === 200) {
+        toast.success(`Successfully imported ${bulkParseResult.validRows.length} students!`);
+        setIsBulkUploadModalOpen(false);
+        setBulkParseResult(null);
+        fetchStudents();
+      } else {
+        toast.error(res.data?.message || 'Failed to import students');
+      }
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      toast.error(err.response?.data?.message || 'Failed to import students');
+    } finally {
+      setIsBulkImporting(false);
     }
   };
 
@@ -501,6 +606,19 @@ export default function StudentsTab({ onBack }: Props) {
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Bulk Upload Button */}
+          <button
+            onClick={() => {
+              setBulkParseResult(null);
+              setIsBulkUploadModalOpen(true);
+            }}
+            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer"
+            title="Bulk Upload Students from Excel"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Bulk Upload</span>
+          </button>
+
           {/* Notification Bell with Badge */}
           <button
             onClick={() => setIsBadgeModalOpen(true)}
@@ -1108,6 +1226,174 @@ export default function StudentsTab({ onBack }: Props) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Upload Modal matching Flutter students_tab_dialogs.dart 1:1 */}
+      {isBulkUploadModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-[#1E293B] text-white px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-base sm:text-lg">Bulk Student Upload</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setIsBulkUploadModalOpen(false);
+                  setBulkParseResult(null);
+                }}
+                className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50">
+              {/* Step 1: Download Template */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 font-extrabold text-xs flex items-center justify-center">
+                    1
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-800">Download Excel Template</h4>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Download the formatted student import template containing all required academic and guardian columns.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Excel Template (.xlsx)</span>
+                </button>
+              </div>
+
+              {/* Step 2: Upload Excel File */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 font-extrabold text-xs flex items-center justify-center">
+                    2
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-800">Choose Excel File &amp; Parse</h4>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Fill in the student details and select the completed Excel file to validate and parse.
+                </p>
+                <label className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer">
+                  {isBulkParsing ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Validating Excel File...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      <span>Choose Excel File (.xlsx, .xls)</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept=".xlsx, .xls"
+                    disabled={isBulkParsing || isBulkImporting}
+                    onChange={handleBulkFileParse}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Step 3: Parse Result Summary */}
+              {bulkParseResult && (
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 animate-in fade-in duration-200">
+                  <h4 className="font-bold text-sm text-slate-800 flex items-center justify-between">
+                    <span>Validation Summary</span>
+                    <span className="text-xs font-normal text-slate-500">
+                      Total: {bulkParseResult.allRows.length} rows
+                    </span>
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+                      <span className="block text-2xl font-black text-emerald-700">
+                        {bulkParseResult.validRows.length}
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
+                        Valid Rows
+                      </span>
+                    </div>
+
+                    <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center">
+                      <span className="block text-2xl font-black text-rose-700">
+                        {bulkParseResult.rejectedRows.length}
+                      </span>
+                      <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider">
+                        Rejected Rows
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Rejected Rows Details */}
+                  {bulkParseResult.rejectedRows.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-bold text-rose-600 flex items-center space-x-1">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>Rejected Rows &amp; Reasons:</span>
+                      </p>
+                      <div className="max-h-36 overflow-y-auto space-y-1.5 p-2 bg-rose-50/50 rounded-xl border border-rose-100 text-xs">
+                        {bulkParseResult.rejectedRows.map((r, idx) => (
+                          <div key={idx} className="p-2 bg-white rounded-lg border border-rose-200 text-slate-700">
+                            <span className="font-bold text-slate-900">{r.fullName || 'Unnamed'}</span>{' '}
+                            <span className="font-mono text-slate-500">({r.regNo || 'No Reg'})</span>:
+                            <span className="text-rose-600 font-semibold block mt-0.5">{r.errorReason}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Import Button */}
+                  {bulkParseResult.validRows.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleBulkImport}
+                      disabled={isBulkImporting}
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isBulkImporting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Importing {bulkParseResult.validRows.length} Students...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Confirm &amp; Import {bulkParseResult.validRows.length} Valid Students</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-white border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsBulkUploadModalOpen(false);
+                  setBulkParseResult(null);
+                }}
+                className="px-5 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors text-xs cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

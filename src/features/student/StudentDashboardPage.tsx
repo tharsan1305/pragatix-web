@@ -45,8 +45,21 @@ export default function StudentDashboardPage() {
     }, 350);
   };
 
+  const openSubView = (name: string) => {
+    window.history.pushState({ tabIdx: activeTab, subView: name }, '');
+    setActiveSubView(name);
+  };
+
+  const closeSubView = () => {
+    if (window.history.state?.subView) {
+      window.history.back();
+    } else {
+      setActiveSubView(null);
+    }
+  };
+
   const tabs = [
-    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} onOpenStreaks={() => setActiveSubView('streaks')} /> },
+    { name: 'Dashboard', icon: LayoutDashboard, component: <DashboardTab onSelectTab={handleTabChange} onOpenStreaks={() => openSubView('streaks')} /> },
     { name: 'Point Review', icon: History, component: <PointReviewTab /> },
     { name: 'Leaderboard', icon: Trophy, component: <LeaderboardTab /> },
     { name: 'My Group', icon: Users, component: <CaptainGroupTab /> },
@@ -89,7 +102,7 @@ export default function StudentDashboardPage() {
         <div className="flex-1 overflow-y-auto md:pb-0 pb-32 flex flex-col justify-between">
           <div>
             {activeSubView === 'streaks' ? (
-              <ActivityStreaksPage onBack={() => setActiveSubView(null)} />
+              <ActivityStreaksPage onBack={closeSubView} />
             ) : (
               tabs[activeTab].component
             )}

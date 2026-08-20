@@ -9,15 +9,15 @@ interface PolicyLink {
 }
 
 const POLICY_LINKS: PolicyLink[] = [
-  { label: 'Contact Us', path: '/contact', externalUrl: 'https://pragatix.in/contact' },
-  { label: 'Terms of Service', path: '/terms', externalUrl: 'https://pragatix.in/terms' },
-  { label: 'Privacy Policy', path: '/privacy', externalUrl: 'https://pragatix.in/privacy' },
-  { label: 'Security', path: '/security', externalUrl: 'https://pragatix.in/security' },
-  { label: 'Cookie & Tracking Policy', path: '/cookies', externalUrl: 'https://pragatix.in/cookies' },
-  { label: 'DPDP Compliance', path: '/dpdp-compliance', externalUrl: 'https://pragatix.in/dpdp-compliance' },
-  { label: 'Account & Data Deletion', path: '/data-deletion', externalUrl: 'https://pragatix.in/data-deletion' },
-  { label: 'Disclaimer', path: '/disclaimer', externalUrl: 'https://pragatix.in/disclaimer' },
-  { label: 'Data Safety Policy', path: '/data-safety', externalUrl: 'https://pragatix.in/data-safety' },
+  { label: 'Contact Us', path: '/contact', externalUrl: 'https://www.pragatix.in/contact' },
+  { label: 'Terms of Service', path: '/terms', externalUrl: 'https://www.pragatix.in/terms' },
+  { label: 'Privacy Policy', path: '/privacy', externalUrl: 'https://www.pragatix.in/privacy' },
+  { label: 'Security', path: '/security', externalUrl: 'https://www.pragatix.in/security' },
+  { label: 'Cookie & Tracking Policy', path: '/cookies', externalUrl: 'https://www.pragatix.in/cookies' },
+  { label: 'DPDP Compliance', path: '/dpdp-compliance', externalUrl: 'https://www.pragatix.in/dpdp-compliance' },
+  { label: 'Account & Data Deletion', path: '/data-deletion', externalUrl: 'https://www.pragatix.in/data-deletion' },
+  { label: 'Disclaimer', path: '/disclaimer', externalUrl: 'https://www.pragatix.in/disclaimer' },
+  { label: 'Data Safety Policy', path: '/data-safety', externalUrl: 'https://www.pragatix.in/data-safety' },
 ];
 
 export const LandingFooter: React.FC = () => {

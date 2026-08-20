@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { Award, Check, RefreshCw, ExternalLink, ArrowLeft, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Award, Check, RefreshCw, ExternalLink, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { getSafeHref } from '../../../core/utils/url';
@@ -82,26 +82,35 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
 
   const handleApprove = async (id: number) => {
     const toastId = toast.loading("Approving badge request...");
-    try {
-      let response;
+    const approveEndpoints = [
+      `/api/admin/badge-requests/${id}/approve`,
+      `/api/cc/badge-requests/${id}/approve`,
+      `/api/v1/admin/badge-requests/${id}/approve`,
+      `/api/v1/badges/${id}/approve`
+    ];
+
+    let success = false;
+    let lastError: any = null;
+
+    for (const endpoint of approveEndpoints) {
       try {
-        response = await apiClient.put(`/api/admin/badge-requests/${id}/approve`);
-      } catch (_e1) {
-        try {
-          response = await apiClient.put(`/api/cc/badge-requests/${id}/approve`);
-        } catch (_e2) {
-          response = await apiClient.put(`/api/v1/admin/badge-requests/${id}/approve`);
+        const response = await apiClient.put(endpoint);
+        if (response.status === 200 || response.data?.success) {
+          success = true;
+          break;
         }
+      } catch (e: any) {
+        lastError = e;
       }
-      toast.dismiss(toastId);
-      if (response.status === 200 || response.data?.success) {
-        toast.success("Badge request approved successfully");
-        fetchRequests();
-      }
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      logger.error("Failed to approve badge request:", e);
-      toast.error(e.response?.data?.message || 'Failed to approve request');
+    }
+
+    toast.dismiss(toastId);
+    if (success) {
+      toast.success("Badge request approved successfully");
+      fetchRequests();
+    } else {
+      logger.error("Failed to approve badge request:", lastError);
+      toast.error(lastError?.response?.data?.message || 'Failed to approve request');
     }
   };
 
@@ -109,34 +118,38 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
     e.preventDefault();
     if (!rejectingReq) return;
     const toastId = toast.loading("Rejecting badge request...");
-    try {
-      let response;
+
+    const rejectEndpoints = [
+      `/api/admin/badge-requests/${rejectingReq.id}/reject`,
+      `/api/cc/badge-requests/${rejectingReq.id}/reject`,
+      `/api/v1/admin/badge-requests/${rejectingReq.id}/reject`,
+      `/api/v1/badges/${rejectingReq.id}/reject`
+    ];
+
+    let success = false;
+    let lastError: any = null;
+
+    for (const endpoint of rejectEndpoints) {
       try {
-        response = await apiClient.put(`/api/admin/badge-requests/${rejectingReq.id}/reject`, {
-          reason: rejectReason
-        });
-      } catch (_e1) {
-        try {
-          response = await apiClient.put(`/api/cc/badge-requests/${rejectingReq.id}/reject`, {
-            reason: rejectReason
-          });
-        } catch (_e2) {
-          response = await apiClient.put(`/api/v1/admin/badge-requests/${rejectingReq.id}/reject`, {
-            reason: rejectReason
-          });
+        const response = await apiClient.put(endpoint, { reason: rejectReason });
+        if (response.status === 200 || response.data?.success) {
+          success = true;
+          break;
         }
+      } catch (e: any) {
+        lastError = e;
       }
-      toast.dismiss(toastId);
-      if (response.status === 200 || response.data?.success) {
-        toast.success("Badge request rejected");
-        setRejectingReq(null);
-        setRejectReason('');
-        fetchRequests();
-      }
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      logger.error("Failed to reject badge request:", e);
-      toast.error(e.response?.data?.message || 'Failed to reject request');
+    }
+
+    toast.dismiss(toastId);
+    if (success) {
+      toast.success("Badge request rejected");
+      setRejectingReq(null);
+      setRejectReason('');
+      fetchRequests();
+    } else {
+      logger.error("Failed to reject badge request:", lastError);
+      toast.error(lastError?.response?.data?.message || 'Failed to reject request');
     }
   };
 
@@ -239,64 +252,61 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                         <h3 className="font-bold text-slate-900 text-base">{badgeName}</h3>
                         <p className="text-xs text-slate-600 font-medium">{studentName} <span className="text-slate-400">({regNo})</span></p>
                         {req.departmentName && (
-                          <p className="text-[11px] text-slate-400 mt-0.5">{req.departmentName} • {req.sectionName || 'Section'}</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Dept: {req.departmentName}</p>
+                        )}
+                        {req.reason && (
+                          <p className="text-xs text-slate-500 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                            "{req.reason}"
+                          </p>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2 self-end md:self-center">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1.5 ${
-                        status === 'APPROVED' 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                          : status === 'REJECTED'
-                          ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                          : 'bg-amber-50 text-amber-700 border border-amber-200'
-                      }`}>
-                        {status === 'APPROVED' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        {status === 'REJECTED' && <XCircle className="w-3.5 h-3.5" />}
-                        {status === 'PENDING' && <Clock className="w-3.5 h-3.5" />}
-                        <span>{status}</span>
-                      </span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 self-end md:self-center">
+                      {proofLink && (
+                        <a
+                          href={getSafeHref(proofLink)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 py-1.5 px-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>View Proof</span>
+                        </a>
+                      )}
+
+                      {status === 'PENDING' ? (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleApprove(req.id)}
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Approve</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setRejectingReq(req);
+                              setRejectReason('');
+                            }}
+                            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            <span>Reject</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 ${
+                          status === 'APPROVED' 
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                        }`}>
+                          {status === 'APPROVED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                          <span>{status}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
-
-                  {proofLink && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center space-x-2">
-                      <ExternalLink className="w-4 h-4 text-blue-600" />
-                      <a
-                        href={getSafeHref(proofLink)}
-                        target="_blank"
-                        rel="noopener noreferrer" 
-                        className="text-xs font-medium text-blue-600 hover:underline"
-                      >
-                        View Verification Proof Document
-                      </a>
-                    </div>
-                  )}
-
-                  {req.reviewedBy && (
-                    <div className="mt-3 text-[11px] text-slate-400">
-                      Reviewed by {req.reviewedBy} {req.reviewedAt ? `on ${new Date(req.reviewedAt).toLocaleDateString()}` : ''}
-                    </div>
-                  )}
-
-                  {status === 'PENDING' && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end space-x-3">
-                      <button
-                        onClick={() => setRejectingReq(req)}
-                        className="px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl font-semibold text-xs transition-colors"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        onClick={() => handleApprove(req.id)}
-                        className="px-5 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold text-xs transition-colors shadow-xs flex items-center space-x-1.5"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span>Approve Request</span>
-                      </button>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -307,33 +317,46 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
       {/* Reject Modal */}
       {rejectingReq && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Reject Badge Request</h3>
-            <p className="text-xs text-slate-500">
-              Please state the reason for rejecting <span className="font-semibold text-slate-700">{rejectingReq.badgeName || 'this badge request'}</span> for {rejectingReq.studentName}.
-            </p>
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                <XCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Reject Badge Request</h3>
+                <p className="text-xs text-slate-500">{rejectingReq.badgeName || 'Badge'} for {rejectingReq.studentName || 'Student'}</p>
+              </div>
+            </div>
+
             <form onSubmit={handleRejectSubmit} className="space-y-4">
-              <textarea
-                required
-                rows={3}
-                value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
-                placeholder="Enter rejection reason..."
-                className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm"
-              />
-              <div className="flex justify-end space-x-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 mb-1 block">Reason for Rejection *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Explain why this badge claim is being rejected..."
+                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 text-xs bg-white resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setRejectingReq(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg"
+                  onClick={() => {
+                    setRejectingReq(null);
+                    setRejectReason('');
+                  }}
+                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 rounded-lg shadow-xs"
+                  className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
-                  Confirm Reject
+                  Confirm Rejection
                 </button>
               </div>
             </form>

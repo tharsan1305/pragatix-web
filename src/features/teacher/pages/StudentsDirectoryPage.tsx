@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
 import studentService from '../../../services/studentService';
+import ConfirmationModal from '../../../components/common/ConfirmationModal';
 
 export default function StudentsDirectoryPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function StudentsDirectoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any | null>(null);
+  const [deleteConfirmStudent, setDeleteConfirmStudent] = useState<{ id: number; name: string } | null>(null);
   const [departments, setDepartments] = useState<any[]>([]);
   const [academicYears, setAcademicYears] = useState<any[]>([]);
   const [years, setYears] = useState<any[]>([]);
@@ -225,16 +227,18 @@ export default function StudentsDirectoryPage() {
 
 
 
-  const deleteStudent = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) return;
+  const confirmDeleteStudent = async () => {
+    if (!deleteConfirmStudent) return;
+    const { id, name } = deleteConfirmStudent;
+    setDeleteConfirmStudent(null);
     try {
       const res = await apiClient.delete(`/api/v1/students/${id}`);
-      if (res.data.success) {
-        alert("Deleted successfully");
+      if (res.data?.success || res.status === 200) {
+        toast.success(`Deleted ${name || 'student'} successfully`);
         fetchStudents();
       }
     } catch (e: any) {
-      alert(e.response?.data?.message || "Delete failed");
+      toast.error(e.response?.data?.message || 'Delete failed');
     }
   };
 
@@ -332,7 +336,10 @@ export default function StudentsDirectoryPage() {
                       <Pencil className="w-4 h-4 text-indigo-600" />
                     </button>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); deleteStudent(student.id); }} 
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setDeleteConfirmStudent({ id: student.id, name: student.fullName }); 
+                      }} 
                       className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       title="Delete Student"
                     >
@@ -1411,6 +1418,18 @@ export default function StudentsDirectoryPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteConfirmStudent !== null}
+        title="Confirm Student Deletion"
+        description={`Are you sure you want to delete "${deleteConfirmStudent?.name || 'this student'}"? This action cannot be undone.`}
+        confirmText="Delete Student"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={confirmDeleteStudent}
+        onCancel={() => setDeleteConfirmStudent(null)}
+      />
 
     </div>
   );

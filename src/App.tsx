@@ -39,7 +39,7 @@ function NavigationTransition({ children }: { children: React.ReactNode }) {
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 
   return (
     <>

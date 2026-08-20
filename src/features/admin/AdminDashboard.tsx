@@ -26,9 +26,11 @@ import AttendanceSettingsYearSelectionPage from './pages/AttendanceSettingsYearS
 import AttendanceSettingsPage from './pages/AttendanceSettingsPage';
 import AcademicCalendarPage from './pages/AcademicCalendarPage';
 import AnalyticsTab from './tabs/AnalyticsTab';
+import AdminLeaderboardTab from './tabs/AdminLeaderboardTab';
 import YearSelectionPage from './pages/YearSelectionPage';
+import RecycleBinPage from './recycle_bin/pages/RecycleBinPage';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, BarChart3, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, Trophy, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
 
 export default function AdminDashboard() {
@@ -43,15 +45,14 @@ export default function AdminDashboard() {
     'groups',
     'requests',
     ...(isSuperAdmin ? ['admins'] : []),
-    'analytics',
+    'leaderboard',
     'profile'
   ];
 
-  const currentTabSlug = searchParams.get('tab') || 'overview';
+  const currentViewName = searchParams.get('view');
+  const currentTabSlug = currentViewName === 'leaderboard' ? 'leaderboard' : (searchParams.get('tab') || 'overview');
   const foundIdx = tabSlugs.indexOf(currentTabSlug);
   const activeTab = foundIdx !== -1 ? foundIdx : 0;
-
-  const currentViewName = searchParams.get('view');
   
   const currentViewProps = useMemo(() => {
     const p: Record<string, any> = {};
@@ -64,6 +65,10 @@ export default function AdminDashboard() {
   }, [searchParams]);
 
   const pushView = (name: string, props?: Record<string, any>) => {
+    if (name === 'leaderboard') {
+      setSearchParams({ tab: 'leaderboard' });
+      return;
+    }
     const newParams: Record<string, string> = { tab: currentTabSlug, view: name };
     if (props) {
       Object.entries(props).forEach(([k, v]) => {
@@ -94,13 +99,11 @@ export default function AdminDashboard() {
 
   const handleTabClick = (idx: number) => {
     const slug = tabSlugs[idx] || 'overview';
-    if (slug !== currentTabSlug || currentViewName) {
-      setIsTabLoading(true);
-      setSearchParams({ tab: slug });
-      setTimeout(() => {
-        setIsTabLoading(false);
-      }, 350);
-    }
+    setIsTabLoading(true);
+    setSearchParams({ tab: slug });
+    setTimeout(() => {
+      setIsTabLoading(false);
+    }, 250);
   };
 
   const tabs: { name: string; icon: any; Component: React.ComponentType<any> }[] = [
@@ -110,13 +113,13 @@ export default function AdminDashboard() {
     { name: 'Groups', icon: Users, Component: TeacherGroupManagementTab },
     { name: 'Requests', icon: Award, Component: AdminBadgeRequestsTab },
     ...(isSuperAdmin ? [{ name: 'Admins', icon: ShieldCheck, Component: SuperAdminManagementTab }] : []),
-    { name: 'Analytics', icon: BarChart3, Component: AnalyticsTab },
+    { name: 'Leaderboard', icon: Trophy, Component: AdminLeaderboardTab },
     { name: 'Profile', icon: User, Component: AdminProfileTab }
   ];
 
   const renderActiveTabComponent = () => {
     const ActiveComp = tabs[activeTab]?.Component || OverviewTab;
-    return <ActiveComp onPushView={pushView} />;
+    return <ActiveComp onPushView={pushView} onNavigateTab={(slug: string) => setSearchParams({ tab: slug })} />;
   };
 
   const renderCurrentView = () => {
@@ -165,8 +168,12 @@ export default function AdminDashboard() {
         return <AttendanceSettingsPage academicYear={currentViewProps.academicYear} onBack={popView} onNavigateAcademicCalendar={() => pushView('academic_calendar', { academicYear: currentViewProps.academicYear })} />;
       case 'academic_calendar':
         return <AcademicCalendarPage academicYear={currentViewProps.academicYear} onBack={popView} />;
+      case 'recycle_bin':
+        return <RecycleBinPage onBack={popView} />;
       case 'analytics':
-        return <AnalyticsTab />;
+        return <AnalyticsTab onBack={popView} />;
+      case 'leaderboard':
+        return <AdminLeaderboardTab />;
       default:
         return renderActiveTabComponent();
     }

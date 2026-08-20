@@ -10,6 +10,7 @@ import {
   ShieldCheck, ShieldAlert, PlusCircle, MinusCircle, RefreshCw, X, Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmationModal from '../../../components/common/ConfirmationModal';
 
 export default function StudentDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ export default function StudentDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAccessRestricted, setIsAccessRestricted] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   // Real data state
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
@@ -140,8 +142,9 @@ export default function StudentDetailsPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!id || !window.confirm('Are you sure you want to delete this student profile?')) return;
+  const handleDeleteConfirm = async () => {
+    if (!id) return;
+    setIsDeleteModalOpen(false);
     try {
       await studentService.deleteStudent(Number(id));
       toast.success('Student deleted successfully');
@@ -209,8 +212,8 @@ export default function StudentDetailsPage() {
           </button>
 
           <button 
-            onClick={handleDelete}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-medium text-xs shadow-sm"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-medium text-xs shadow-sm cursor-pointer"
           >
             <Trash2 className="w-4 h-4" /> Delete
           </button>
@@ -280,6 +283,13 @@ export default function StudentDetailsPage() {
                   className="w-full py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2"
                 >
                   <PlusCircle className="w-4 h-4" /> Adjust Points
+                </button>
+                <button 
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Profile</span>
                 </button>
               </div>
             </div>
@@ -418,6 +428,17 @@ export default function StudentDetailsPage() {
           </div>
         </div>
       )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        title="Confirm Delete Student"
+        description={`Are you sure you want to delete "${selectedStudent?.fullName || 'this student'}"? This action cannot be undone.`}
+        confirmText="Delete Student"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setIsDeleteModalOpen(false)}
+      />
     </div>
   );
 }

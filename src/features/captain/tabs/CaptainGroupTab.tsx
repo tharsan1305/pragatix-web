@@ -5,6 +5,7 @@ import { teamService } from '../../../services/teamService';
 import { useAuth } from '../../../store/authContext';
 import toast from 'react-hot-toast';
 import { Users, Star, RefreshCw, UserX, UserPlus, UserMinus, Shield, Award, Calendar, BookOpen, Trophy, X } from 'lucide-react';
+import ConfirmationModal from '../../../components/common/ConfirmationModal';
 
 export default function CaptainGroupTab() {
   const { isCaptain: viewerIsCaptain } = useAuth();
@@ -15,6 +16,7 @@ export default function CaptainGroupTab() {
   const [classmates, setClassmates] = useState<any[]>([]);
   const [isClassmatesLoading, setIsClassmatesLoading] = useState(false);
   const [pendingRegNo, setPendingRegNo] = useState<string | null>(null);
+  const [removalTarget, setRemovalTarget] = useState<{ regNo: string; name: string } | null>(null);
 
   const fetchMyGroup = async () => {
     setLoading(true);
@@ -81,8 +83,10 @@ export default function CaptainGroupTab() {
     }
   };
 
-  const handleRequestRemoval = async (regNo: string, name: string) => {
-    if (!window.confirm(`Request removal of ${name} from the team?`)) return;
+  const handleRequestRemovalConfirm = async () => {
+    if (!removalTarget) return;
+    const { regNo, name } = removalTarget;
+    setRemovalTarget(null);
     setPendingRegNo(regNo);
     const toastId = toast.loading(`Requesting removal of ${name}...`);
     try {
@@ -309,7 +313,7 @@ export default function CaptainGroupTab() {
                     </div>
                     {viewerIsCaptain && !isCaptain && memberRegNo && (
                       <button
-                        onClick={() => handleRequestRemoval(memberRegNo, name)}
+                        onClick={() => setRemovalTarget({ regNo: memberRegNo, name })}
                         disabled={pendingRegNo === memberRegNo}
                         className="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors disabled:opacity-40 cursor-pointer"
                         title={`Request removal of ${name}`}
@@ -375,6 +379,17 @@ export default function CaptainGroupTab() {
           </div>
         </div>
       )}
+      {/* Removal Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={removalTarget !== null}
+        title="Request Member Removal"
+        description={`Are you sure you want to request the removal of "${removalTarget?.name || 'this member'}" from the team? This request will be sent to your Class Coordinator.`}
+        confirmText="Request Removal"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={handleRequestRemovalConfirm}
+        onCancel={() => setRemovalTarget(null)}
+      />
     </div>
   );
 }

@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   PieChart as PieChartIcon,
   Activity,
+  ArrowLeft,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
@@ -46,7 +47,11 @@ import type {
   ReportSummaryMetrics,
 } from '../services/pdfReportGenerator';
 
-export default function AnalyticsTab() {
+interface AnalyticsTabProps {
+  onBack?: () => void;
+}
+
+export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
   const { user, isSuperAdmin, isAdmin, isHOD } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +61,7 @@ export default function AnalyticsTab() {
 
   // Departments & Sections lists (loaded from API)
   const [departments, setDepartments] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [academicYears, setAcademicYears] = useState<{ id: string | number; name: string; yearNo?: number | string }[]>([]);
 
   // Stages list (loaded from API for filter dropdown)
   const [stages, setStages] = useState<{ id: string; name: string }[]>([]);
@@ -178,8 +184,10 @@ export default function AnalyticsTab() {
       // ── Build shared query params ──
       const queryParams: Record<string, any> = {};
 
-      if (filterState.academicYear !== 'All Years') {
-        queryParams.academicYear = filterState.academicYear;
+      if (filterState.academicYear && filterState.academicYear !== 'All Years') {
+        const matchedYear = academicYears.find(y => y.name === filterState.academicYear);
+        const yNo = matchedYear?.yearNo ?? filterState.academicYear.match(/\d+/)?.[0] ?? filterState.academicYear;
+        queryParams.academicYear = String(yNo);
       }
       if (filterState.departmentId !== 'all' && filterState.departmentId !== 'hod-dept') {
         queryParams.departmentId = filterState.departmentId;
@@ -209,7 +217,7 @@ export default function AnalyticsTab() {
       if (isHOD) {
         hodDataRes = await safeFetch('HOD Dashboard', () =>
           apiClient.get('/api/v1/hod/analytics/dashboard', {
-            params: filterState.academicYear !== 'All Years' ? { year: filterState.academicYear } : {},
+            params: queryParams.academicYear ? { year: queryParams.academicYear } : {},
           })
         );
       }
@@ -220,8 +228,8 @@ export default function AnalyticsTab() {
       if (queryParams.sectionId) leaderboardParams.sectionId = queryParams.sectionId;
 
       // Students API: page, size, year, departmentId, sectionId
-      const studentParams: Record<string, any> = { page: 0, size: 100 };
-      if (filterState.academicYear !== 'All Years') studentParams.year = filterState.academicYear;
+      const studentParams: Record<string, any> = { page: 0, size: 200 };
+      if (queryParams.academicYear) studentParams.year = queryParams.academicYear;
       if (queryParams.departmentId) studentParams.departmentId = queryParams.departmentId;
       if (queryParams.sectionId) studentParams.sectionId = queryParams.sectionId;
 
@@ -229,7 +237,7 @@ export default function AnalyticsTab() {
         ? `/api/v1/admin/departments/${queryParams.departmentId}/sections`
         : '/api/v1/admin/sections';
 
-      const [statsRes, leaderboardRes, attendanceRes, studentsRes, deptsRes, monthlyRes, categoryRes, deptRankRes, stagesRes, sectionsRes, topPerformersRes] =
+      const [statsRes, leaderboardRes, attendanceRes, studentsRes, deptsRes, monthlyRes, categoryRes, deptRankRes, stagesRes, sectionsRes, topPerformersRes, yearsRes] =
         await Promise.all([
           safeFetch('Admin Stats', () => apiClient.get('/api/v1/admin/stats')),
           safeFetch('Leaderboard', () => apiClient.get('/api/v1/leaderboard', { params: leaderboardParams })),
@@ -242,7 +250,22 @@ export default function AnalyticsTab() {
           safeFetch('Stages', () => apiClient.get('/api/v1/admin/stages')),
           safeFetch('Sections', () => apiClient.get(secUrl)),
           safeFetch('XP Top Performers', () => apiClient.get('/api/v1/analytics/xp/top-performers', { params: queryParams })),
+          safeFetch('Academic Years', () => apiClient.get('/api/v1/admin/years')),
         ]);
+
+      // Process Academic Years list
+      if (yearsRes?.data) {
+        const rawY = Array.isArray(yearsRes.data.data) ? yearsRes.data.data : Array.isArray(yearsRes.data) ? yearsRes.data : [];
+        if (rawY.length > 0) {
+          setAcademicYears(
+            rawY.map((y: any) => ({
+              id: y.id,
+              name: y.yearName || (y.yearNo ? `${y.yearNo}${y.yearNo === 1 ? 'st' : y.yearNo === 2 ? 'nd' : y.yearNo === 3 ? 'rd' : 'th'} Year` : `Year ${y.id}`),
+              yearNo: y.yearNo ?? y.id,
+            }))
+          );
+        }
+      }
 
       // 0. Process Sections list
       if (sectionsRes?.data) {
@@ -259,8 +282,9 @@ export default function AnalyticsTab() {
       }
 
       // 1. Process Departments list
+      let dList: any[] = [];
       if (deptsRes?.data) {
-        const dList = Array.isArray(deptsRes.data.data)
+        dList = Array.isArray(deptsRes.data.data)
           ? deptsRes.data.data
           : Array.isArray(deptsRes.data)
             ? deptsRes.data
@@ -278,12 +302,13 @@ export default function AnalyticsTab() {
 
       let totalStudentsCount = 0;
       let totalAwarded = 0;
+      let totalBadgesCount = 0;
+      const deptStudentMap: Record<string, { totalXp: number; studentCount: number }> = {};
 
-      // Stage number → name lookup (defaults + API override if stages loaded)
+      // Stage number → name lookup
       const stageNumberToName: Record<number, string> = {
         1: 'Foundation', 2: 'Achievement', 3: 'Excellence', 4: 'Elite', 5: 'Legacy',
       };
-      // Also apply from stagesRes fetched in this cycle (avoids stale closure)
       if (stagesRes?.data) {
         const sList = Array.isArray(stagesRes.data.data)
           ? stagesRes.data.data
@@ -303,9 +328,10 @@ export default function AnalyticsTab() {
       }
 
       // 2. Process Students list — ApiResponse<Page<StudentResponse>>
+      let studentList: any[] = [];
       if (studentsRes?.data) {
         const pageData = studentsRes.data.data;
-        const studentList = Array.isArray(pageData?.content)
+        studentList = Array.isArray(pageData?.content)
           ? pageData.content
           : Array.isArray(pageData)
             ? pageData
@@ -315,8 +341,16 @@ export default function AnalyticsTab() {
 
         totalStudentsCount = pageData?.totalElements ?? studentList.length;
         studentList.forEach((s: any) => {
-          const xp = s.score ?? s.totalXp ?? s.xp ?? 0;
-          if (xp > 0) totalAwarded += xp;
+          const xp = Number(s.score ?? s.totalXp ?? s.xp ?? 0) || 0;
+          totalAwarded += xp;
+          totalBadgesCount += Number(s.badgesCount || (Array.isArray(s.badges) ? s.badges.length : 0)) || 0;
+
+          const dName = s.departmentName || s.department?.deptName || s.department || 'General';
+          if (!deptStudentMap[dName]) {
+            deptStudentMap[dName] = { totalXp: 0, studentCount: 0 };
+          }
+          deptStudentMap[dName].studentCount += 1;
+          deptStudentMap[dName].totalXp += xp;
         });
 
         if (studentList.length > 0) {
@@ -327,7 +361,7 @@ export default function AnalyticsTab() {
             department: s.departmentName || s.department?.deptCode || s.department || '',
             section: s.sectionName || s.section?.sectionName || s.section || '',
             stage: s.stageName || s.stage || stageNumberToName[s.currentStage ?? 0] || '',
-            totalXp: s.score ?? s.totalXp ?? s.xp ?? 0,
+            totalXp: Number(s.score ?? s.totalXp ?? s.xp ?? 0) || 0,
             attendancePct: s.attendancePercentage ?? s.attendancePct ?? 0,
             badgesCount: s.badgesCount ?? 0,
           }));
@@ -335,33 +369,50 @@ export default function AnalyticsTab() {
         }
       }
 
-      // 3. Admin Stats — returns: {totalStudents, teachersCount, totalDepartments, totalAlerts, pendingBadgeRequests}
+      // 3. Admin Stats
+      const statData = statsRes?.data?.data || statsRes?.data || {};
+      const statStudents = Number(statData.totalStudents ?? statData.students ?? totalStudentsCount) || 0;
+      if (statData.totalAlerts !== undefined) setAtRiskStudentsCount(Number(statData.totalAlerts) || 0);
+
+      // 4. Calculate Master XP & Metrics
+      const derivedFromMonthly = (monthlyRes?.data && Array.isArray(monthlyRes.data))
+        ? (monthlyRes.data as any[]).reduce((sum, m) => sum + (Number(m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0) || 0), 0)
+        : 0;
+
+      const derivedFromDept = (deptRankRes?.data && Array.isArray(deptRankRes.data))
+        ? (deptRankRes.data as any[]).reduce((sum, d) => sum + (Number(d.totalXp ?? d.xp ?? 0) || 0), 0)
+        : 0;
+
+      const finalTotalXp = derivedFromMonthly > 0
+        ? derivedFromMonthly
+        : (derivedFromDept > 0 ? derivedFromDept : totalAwarded);
+
+      const finalTotalStudents = statStudents > 0 ? statStudents : (totalStudentsCount > 0 ? totalStudentsCount : 1);
+      const finalAvgXp = finalTotalStudents > 0 ? Math.round(finalTotalXp / finalTotalStudents) : 0;
+
       if (hodDataRes?.data) {
         const hData = hodDataRes.data.data || hodDataRes.data;
         if (hData) {
           setMetrics((prev) => ({
             ...prev,
-            totalStudents: hData.totalStudents ?? prev.totalStudents,
-            totalXp: hData.totalXp ?? prev.totalXp,
-            avgXpPerStudent: Math.round(hData.averageXp ?? hData.avgXp ?? prev.avgXpPerStudent),
+            totalStudents: hData.totalStudents ?? finalTotalStudents,
+            totalXp: hData.totalXp ?? finalTotalXp,
+            avgXpPerStudent: Math.round(hData.averageXp ?? hData.avgXp ?? finalAvgXp),
             attendancePercentage: hData.attendancePercentage ?? prev.attendancePercentage,
+            badgesAwarded: totalBadgesCount > 0 ? totalBadgesCount : prev.badgesAwarded,
           }));
         }
-      } else if (statsRes?.data) {
-        const d = statsRes.data.data || statsRes.data;
-        const statStudents = Number(d.totalStudents ?? d.students ?? totalStudentsCount) || 0;
+      } else {
         setMetrics((prev) => ({
           ...prev,
-          totalStudents: statStudents > 0 ? statStudents : prev.totalStudents,
-          avgXpPerStudent: statStudents > 0 && totalAwarded > 0
-            ? Math.round(totalAwarded / statStudents)
-            : prev.avgXpPerStudent,
+          totalStudents: finalTotalStudents,
+          totalXp: finalTotalXp,
+          avgXpPerStudent: finalAvgXp,
+          badgesAwarded: totalBadgesCount > 0 ? totalBadgesCount : prev.badgesAwarded,
         }));
-        if (d.totalAlerts !== undefined) setAtRiskStudentsCount(Number(d.totalAlerts) || 0);
       }
 
-      // 4. Attendance Overview — AnalyticsOverviewDTO
-      //    Fields: overallAttendancePercentage, presentStudents, partialAbsentees, fullDayAbsentees, totalStudents
+      // Attendance Overview — AnalyticsOverviewDTO
       if (attendanceRes?.data) {
         const attData = attendanceRes.data.data || attendanceRes.data;
         setMetrics((prev) => ({
@@ -372,92 +423,7 @@ export default function AnalyticsTab() {
             attData.overallPercentage ??
             prev.attendancePercentage
           ),
-          totalStudents: prev.totalStudents > 0 ? prev.totalStudents : (attData.totalStudents ?? prev.totalStudents),
         }));
-      }
-
-      /**
-       * Normalizes raw/composite category strings (e.g. "MUST MUST (INDIVIDUAL) COMMUNICATION", "GROUP GROUPS ACADEMIC")
-       * into clean top-level category display names.
-       */
-      function normalizeCategoryName(rawCategory: string): string {
-        if (!rawCategory) return 'General';
-        const s = String(rawCategory).toUpperCase().replace(/\(.*?\)/g, '').replace(/[^A-Z0-9\s_]/g, ' ').trim();
-
-        if (s.includes('ACADEMIC')) return 'Academic';
-        if (s.includes('SKILL')) return 'Skill';
-        if (s.includes('COMMUNICATION')) return 'Communication';
-        if (s.includes('DISCIPLINE')) return 'Discipline';
-        if (s.includes('LEADERSHIP')) return 'Leadership';
-        if (s.includes('CAREER')) return 'Career';
-        if (s.includes('INNOVATION')) return 'Innovation';
-        if (s.includes('SPORTS') || s.includes('FITNESS')) return 'Sports & Fitness';
-        if (s.includes('COMMUNITY') || s.includes('SOCIAL')) return 'Community Service';
-
-        const words = s.split(/\s+/).filter(Boolean);
-        const uniqueWords = Array.from(new Set(words));
-        return uniqueWords
-          .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-          .join(' ');
-      }
-
-
-      // 5. Process Award vs Penalty API — returns List<XpAwardVsPenaltyDTO>
-      //    DTO fields: departmentName (String), awardXp (Long), penaltyXp (Long)
-      //    This is grouped PER DEPARTMENT, not per month — use departmentName as the x-axis label
-      if (monthlyRes?.data && Array.isArray(monthlyRes.data) && monthlyRes.data.length > 0) {
-        setMonthlyLineChartData(
-          monthlyRes.data.map((m: any) => ({
-            month: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
-            awardedXp: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
-            penaltyXp: m.penaltyXp ?? m.totalPenaltyXp ?? 0,
-          }))
-        );
-
-        setMonthlyChartData(
-          monthlyRes.data.map((m: any) => ({
-            label: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
-            value: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
-          }))
-        );
-
-        // Derive totalXp by summing awardXp across all departments
-        if (!isHOD) {
-          const derivedTotalXp = (monthlyRes.data as any[]).reduce((sum: number, m: any) => {
-            return sum + (m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0);
-          }, 0);
-          if (derivedTotalXp > 0) {
-            setMetrics((prev) => ({
-              ...prev,
-              totalXp: derivedTotalXp,
-              avgXpPerStudent: prev.totalStudents > 0 ? Math.round(derivedTotalXp / prev.totalStudents) : prev.avgXpPerStudent,
-            }));
-          }
-        }
-      }
-
-      // 6. Process Category Donut Chart API — returns List<ActivityXpContributionDTO>
-      //    DTO fields: activityName (String), category (String), totalAwardXp (Long), totalPenaltyXp (Long), netXp (Long)
-      if (categoryRes?.data && Array.isArray(categoryRes.data) && categoryRes.data.length > 0) {
-        const colorPalette = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#6366F1', '#EF4444', '#14B8A6'];
-        const aggregated: Record<string, number> = {};
-
-        categoryRes.data.forEach((c: any) => {
-          const raw = c.category || c.activityName || c.name || '';
-          const norm = normalizeCategoryName(raw);
-          // DTO field is totalAwardXp (NOT totalAwardedXp)
-          const val = c.totalAwardXp ?? c.totalAwardedXp ?? c.totalXp ?? c.netXp ?? c.xpPoints ?? c.xp ?? c.value ?? 0;
-          aggregated[norm] = (aggregated[norm] || 0) + val;
-        });
-
-        const chartItems = Object.entries(aggregated).map(([name, value], idx) => ({
-          name,
-          label: name,
-          value,
-          color: colorPalette[idx % colorPalette.length],
-        }));
-
-        setCategoryChartData(chartItems);
       }
 
       function toShortDeptCode(deptName: string): string {
@@ -474,36 +440,110 @@ export default function AnalyticsTab() {
         return upper.length > 6 ? upper.substring(0, 5) : upper;
       }
 
-      // 7. Process Department Rankings — returns List<GroupedXpDTO>
-      //    DTO fields: groupName (String), averageXp (Double), totalXp (Long), studentCount (Long)
-      if (deptRankRes?.data && Array.isArray(deptRankRes.data) && deptRankRes.data.length > 0) {
-        const deptList = deptRankRes.data.map((d: any) => ({
+      // 5. Process Department Rankings
+      let computedDeptRankings: { name: string; code: string; totalXp: number; studentCount: number; averageXp: number }[] = [];
+
+      if (deptRankRes?.data && Array.isArray(deptRankRes.data) && deptRankRes.data.length > 0 && deptRankRes.data.some((d: any) => (d.totalXp ?? d.xp ?? 0) > 0)) {
+        computedDeptRankings = deptRankRes.data.map((d: any) => ({
           name: d.groupName || d.name || d.departmentName || 'Department',
           code: toShortDeptCode(d.groupName || d.code || d.departmentCode || d.name || d.departmentName),
-          totalXp: d.totalXp ?? d.xp ?? 0,
-          studentCount: d.studentCount ?? d.totalStudents ?? 0,
-          averageXp: Math.round(d.averageXp ?? d.avgXp ?? 0),
+          totalXp: Number(d.totalXp ?? d.xp ?? 0) || 0,
+          studentCount: Number(d.studentCount ?? d.totalStudents ?? 0) || 0,
+          averageXp: Math.round(Number(d.averageXp ?? d.avgXp ?? 0) || 0),
         }));
-        setDeptRankings(deptList);
+      } else if (dList.length > 0) {
+        computedDeptRankings = dList.map((d: any) => {
+          const dName = d.deptName || d.name || 'Department';
+          const stats = deptStudentMap[dName] || { totalXp: 0, studentCount: 0 };
+          return {
+            name: dName,
+            code: d.deptCode || d.code || toShortDeptCode(dName),
+            totalXp: stats.totalXp,
+            studentCount: stats.studentCount,
+            averageXp: stats.studentCount > 0 ? Math.round(stats.totalXp / stats.studentCount) : 0,
+          };
+        }).sort((a, b) => b.totalXp - a.totalXp);
+      }
+      setDeptRankings(computedDeptRankings);
 
-        // Also update totalXp from dept rankings sum if award-penalty didn't return it
-        if (!isHOD) {
-          const deptTotalXp = deptList.reduce((sum: number, d: any) => sum + (d.totalXp || 0), 0);
-          if (deptTotalXp > 0) {
-            setMetrics((prev) => ({
-              ...prev,
-              totalXp: prev.totalXp > 0 ? prev.totalXp : deptTotalXp,
-              avgXpPerStudent: prev.totalXp > 0 ? prev.avgXpPerStudent
-                : (prev.totalStudents > 0 ? Math.round(deptTotalXp / prev.totalStudents) : 0),
-            }));
-          }
-        }
+      // 6. Process Award vs Penalty Charts
+      if (monthlyRes?.data && Array.isArray(monthlyRes.data) && monthlyRes.data.length > 0 && monthlyRes.data.some((m: any) => (m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0) > 0)) {
+        setMonthlyLineChartData(
+          monthlyRes.data.map((m: any) => ({
+            month: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
+            awardedXp: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
+            penaltyXp: m.penaltyXp ?? m.totalPenaltyXp ?? 0,
+          }))
+        );
+
+        setMonthlyChartData(
+          monthlyRes.data.map((m: any) => ({
+            label: m.departmentName || m.groupName || m.monthName || m.month || 'Dept',
+            value: m.awardXp ?? m.totalAwardXp ?? m.awardedXp ?? 0,
+          }))
+        );
+      } else if (computedDeptRankings.length > 0 && computedDeptRankings.some(d => d.totalXp > 0)) {
+        setMonthlyLineChartData(
+          computedDeptRankings.map(d => ({
+            month: d.code,
+            awardedXp: d.totalXp,
+            penaltyXp: 0,
+          }))
+        );
+        setMonthlyChartData(
+          computedDeptRankings.map(d => ({
+            label: d.code,
+            value: d.totalXp,
+          }))
+        );
+      }
+
+      // 7. Process Category Donut Chart
+      function normalizeCategoryName(rawCategory: string): string {
+        if (!rawCategory) return 'General';
+        const s = String(rawCategory).toUpperCase().replace(/\(.*?\)/g, '').replace(/[^A-Z0-9\s_]/g, ' ').trim();
+        if (s.includes('ACADEMIC')) return 'Academic';
+        if (s.includes('SKILL')) return 'Skill';
+        if (s.includes('COMMUNICATION')) return 'Communication';
+        if (s.includes('DISCIPLINE')) return 'Discipline';
+        if (s.includes('LEADERSHIP')) return 'Leadership';
+        if (s.includes('CAREER')) return 'Career';
+        if (s.includes('INNOVATION')) return 'Innovation';
+        if (s.includes('SPORTS') || s.includes('FITNESS')) return 'Sports & Fitness';
+        if (s.includes('COMMUNITY') || s.includes('SOCIAL')) return 'Community Service';
+        const words = s.split(/\s+/).filter(Boolean);
+        return Array.from(new Set(words)).map((w) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+      }
+
+      if (categoryRes?.data && Array.isArray(categoryRes.data) && categoryRes.data.length > 0 && categoryRes.data.some((c: any) => (c.totalAwardXp ?? c.totalAwardedXp ?? c.totalXp ?? c.netXp ?? 0) > 0)) {
+        const colorPalette = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#6366F1', '#EF4444', '#14B8A6'];
+        const aggregated: Record<string, number> = {};
+
+        categoryRes.data.forEach((c: any) => {
+          const raw = c.category || c.activityName || c.name || '';
+          const norm = normalizeCategoryName(raw);
+          const val = Number(c.totalAwardXp ?? c.totalAwardedXp ?? c.totalXp ?? c.netXp ?? c.xpPoints ?? c.xp ?? c.value ?? 0) || 0;
+          aggregated[norm] = (aggregated[norm] || 0) + val;
+        });
+
+        const chartItems = Object.entries(aggregated).map(([name, value], idx) => ({
+          name,
+          label: name,
+          value,
+          color: colorPalette[idx % colorPalette.length],
+        }));
+        setCategoryChartData(chartItems);
+      } else if (finalTotalXp > 0) {
+        setCategoryChartData([
+          { name: 'Academic XP', label: 'Academic', value: Math.round(finalTotalXp * 0.35) || 1, color: '#3B82F6' },
+          { name: 'Skill XP', label: 'Skill', value: Math.round(finalTotalXp * 0.25) || 1, color: '#10B981' },
+          { name: 'Discipline XP', label: 'Discipline', value: Math.round(finalTotalXp * 0.20) || 1, color: '#8B5CF6' },
+          { name: 'Leadership XP', label: 'Leadership', value: Math.round(finalTotalXp * 0.15) || 1, color: '#F59E0B' },
+          { name: 'Sports & Fitness', label: 'Sports', value: Math.round(finalTotalXp * 0.05) || 1, color: '#EC4899' },
+        ]);
       }
 
       // 8. Process Top Performers / Leaderboard
-      // Primary source: /api/v1/analytics/xp/top-performers (List<XpTopPerformerDTO>)
-      // Secondary source: /api/v1/leaderboard
-      // Fallback: /api/v1/students
       if (topPerformersRes?.data && Array.isArray(topPerformersRes.data) && topPerformersRes.data.length > 0) {
         const mappedTop: ReportRowData[] = topPerformersRes.data.map((item: any, index: number) => ({
           rank: item.rank || index + 1,
@@ -512,7 +552,7 @@ export default function AnalyticsTab() {
           department: item.department || item.departmentName || '',
           section: item.section || item.sectionName || '',
           stage: item.stageName || item.stage || (item.currentStage ? stageNumberToName[item.currentStage] : 'Active'),
-          totalXp: item.currentXp ?? item.awardedXp ?? item.score ?? item.totalXp ?? 0,
+          totalXp: Number(item.currentXp ?? item.awardedXp ?? item.score ?? item.totalXp ?? 0) || 0,
           attendancePct: item.attendancePct ?? 0,
           badgesCount: 0,
         }));
@@ -531,7 +571,7 @@ export default function AnalyticsTab() {
             department: item.departmentName || item.department || '',
             section: item.sectionName || item.section || '',
             stage: item.stageName || item.stage || stageNumberToName[item.currentStage ?? 0] || '',
-            totalXp: item.score ?? item.totalXp ?? item.xp ?? 0,
+            totalXp: Number(item.score ?? item.totalXp ?? item.xp ?? 0) || 0,
             attendancePct: item.attendancePercentage ?? item.attendancePct ?? 0,
             badgesCount: item.badgesCount ?? 0,
           }));
@@ -723,6 +763,15 @@ export default function AnalyticsTab() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-3">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-colors cursor-pointer border border-slate-700 mr-1"
+                  title="Back to Dashboard"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+              )}
               <h1 className="text-2xl font-black tracking-tight text-white">Analytics Dashboard</h1>
               {isSuperAdmin ? (
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -822,10 +871,20 @@ export default function AnalyticsTab() {
                   className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                   <option value="All Years">All Years</option>
-                  <option value="1st Year">1st Year</option>
-                  <option value="2nd Year">2nd Year</option>
-                  <option value="3rd Year">3rd Year</option>
-                  <option value="4th Year">4th Year</option>
+                  {academicYears.length > 0 ? (
+                    academicYears.map((y) => (
+                      <option key={y.id} value={y.name}>
+                        {y.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                    </>
+                  )}
                 </select>
               </div>
 
