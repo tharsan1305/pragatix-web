@@ -99,7 +99,7 @@ export default function TeacherLeaderboardTab() {
       {/* Top Header Bar */}
       <div className="bg-slate-900 text-white px-6 pt-10 pb-6 shadow-md flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Student Leaderboard</h1>
+          <h1 className="font-heading text-2xl font-bold">Student Leaderboard</h1>
           <p className="text-xs text-slate-400 mt-0.5">Real-time student rankings across departments and sections</p>
         </div>
 
@@ -188,9 +188,9 @@ export default function TeacherLeaderboardTab() {
             {/* Top 3 Visual Podium Section */}
             {leaderboardList.length >= 3 && (
               <div className="bg-slate-900 rounded-3xl p-6 shadow-xl text-white">
-                <h2 className="text-center text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-4">
+                <div className="text-center text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-4">
                   Top Performers
-                </h2>
+                </div>
                 <div className="flex items-end justify-center gap-2 sm:gap-6 pt-4 pb-2">
                   {/* 2nd Place (Silver) */}
                   {leaderboardList[1] && (

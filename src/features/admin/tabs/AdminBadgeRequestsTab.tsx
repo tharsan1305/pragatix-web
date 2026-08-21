@@ -165,7 +165,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
               </button>
             )}
             <div>
-              <h1 className="text-2xl font-bold">Badge Requests Approval</h1>
+              <h1 className="font-heading text-2xl font-bold">Badge Requests Approval</h1>
               <p className="text-xs text-slate-400 mt-0.5">Review student badge applications, proof files, and status decisions</p>
             </div>
           </div>
@@ -249,7 +249,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                       </div>
 
                       <div>
-                        <h3 className="font-bold text-slate-900 text-base">{badgeName}</h3>
+                        <h3 className="font-heading font-bold text-slate-900 text-base">{badgeName}</h3>
                         <p className="text-xs text-slate-600 font-medium">{studentName} <span className="text-slate-400">({regNo})</span></p>
                         {req.departmentName && (
                           <p className="text-[11px] text-slate-400 mt-0.5">Dept: {req.departmentName}</p>
@@ -323,7 +323,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                 <XCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Reject Badge Request</h3>
+                <h3 className="font-heading text-lg font-bold text-slate-900">Reject Badge Request</h3>
                 <p className="text-xs text-slate-500">{rejectingReq.badgeName || 'Badge'} for {rejectingReq.studentName || 'Student'}</p>
               </div>
             </div>

@@ -1,12 +1,14 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Plus, UserPlus, RefreshCw, Sparkles, X, Trash2, ShieldAlert, FileText, CheckCircle2, Pencil } from 'lucide-react';
+import { ArrowLeft, Search, Plus, UserPlus, RefreshCw, Sparkles, X, Trash2, ShieldAlert, FileText, CheckCircle2, Pencil, Download, Upload, FileSpreadsheet } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
 import studentService from '../../../services/studentService';
 import ConfirmationModal from '../../../components/common/ConfirmationModal';
+import { sanitizeAcademicYears } from '../../../utils/academicYearUtils';
+import { downloadStudentTemplate } from '../../../utils/studentTemplateUtils';
 
 export default function StudentsDirectoryPage() {
   const navigate = useNavigate();
@@ -28,7 +30,6 @@ export default function StudentsDirectoryPage() {
   const [semesters, setSemesters] = useState<any[]>([]);
   const [genders, setGenders] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
-  const [groups, setGroups] = useState<any[]>([]);
   const [ccInfo, setCcInfo] = useState<any>(null);
 
   // Dynamic sections per selected department
@@ -62,7 +63,7 @@ export default function StudentsDirectoryPage() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/api/v1/students?page=0&size=100&sortBy=fullName');
+      const res = await apiClient.get('/api/v1/students?page=0&size=1000&sortBy=fullName');
       if (res.data.success) {
         setStudents(res.data.data?.content || []);
       }
@@ -77,14 +78,13 @@ export default function StudentsDirectoryPage() {
     try {
       // CC users already have their department/section fixed via ccInfo below
       // (locked in the form UI); skip the unscoped institution-wide lookups for them.
-      const [deptRes, ayRes, yearsRes, semRes, genRes, sectionsRes, teamRes, ccRes] = await Promise.allSettled([
+      const [deptRes, ayRes, yearsRes, semRes, genRes, sectionsRes, ccRes] = await Promise.allSettled([
         isCc ? Promise.resolve(null) : apiClient.get('/api/v1/admin/departments'),
         apiClient.get('/api/v1/admin/academic-years'),
         apiClient.get('/api/v1/admin/years'),
         apiClient.get('/api/v1/admin/semesters'),
         apiClient.get('/api/v1/admin/genders'),
         isCc ? Promise.resolve(null) : apiClient.get('/api/v1/admin/sections'),
-        apiClient.get('/api/v1/teams'),
         apiClient.get('/api/v1/cc/class-details')
       ]);
 
@@ -108,8 +108,11 @@ export default function StudentsDirectoryPage() {
         }
       }
 
-      if (ayRes.status === 'fulfilled' && ayRes.value.data?.data) {
-        setAcademicYears(deduplicate(ayRes.value.data.data));
+      if (ayRes.status === 'fulfilled') {
+        const rawAy = ayRes.value?.data?.data || ayRes.value?.data || [];
+        setAcademicYears(sanitizeAcademicYears(rawAy));
+      } else {
+        setAcademicYears(sanitizeAcademicYears([]));
       }
       if (yearsRes.status === 'fulfilled' && yearsRes.value.data?.data) {
         setYears(deduplicate(yearsRes.value.data.data));
@@ -122,9 +125,6 @@ export default function StudentsDirectoryPage() {
       }
       if (sectionsRes.status === 'fulfilled' && sectionsRes.value?.data?.data) {
         setSections(deduplicate(sectionsRes.value.data.data));
-      }
-      if (teamRes.status === 'fulfilled' && teamRes.value.data?.data) {
-        setGroups(deduplicate(teamRes.value.data.data));
       }
 
       if (ccRes.status === 'fulfilled' && ccRes.value.data?.data) {
@@ -165,6 +165,18 @@ export default function StudentsDirectoryPage() {
     } catch (e) {
       if (isEdit) setEditDeptSections(sections);
       else setCreateDeptSections(sections);
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    const toastId = toast.loading('Downloading template...');
+    try {
+      downloadStudentTemplate();
+      toast.dismiss(toastId);
+      toast.success('Template downloaded to your downloads folder!');
+    } catch (e: any) {
+      toast.dismiss(toastId);
+      toast.error('Failed to download student upload template');
     }
   };
 
@@ -255,7 +267,7 @@ export default function StudentsDirectoryPage() {
         <button onClick={() => navigate(-1)} className="mr-4 p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-bold text-white flex-1 truncate">Students Directory</h1>
+        <h1 className="font-heading text-xl font-bold text-white flex-1 truncate">Students Directory</h1>
         
         {/* Header Icons to match Flutter 1:1 */}
         <div className="flex items-center space-x-2 text-white">
@@ -347,7 +359,7 @@ export default function StudentsDirectoryPage() {
                     </button>
                   </div>
                 </div>
-                <h3 className="font-bold text-slate-800 text-lg truncate">{student.fullName}</h3>
+                <h3 className="font-heading font-bold text-slate-800 text-lg truncate">{student.fullName}</h3>
                 <div className="text-xs text-slate-500 space-y-0.5 mt-1">
                   <p><span className="font-medium text-slate-700">Reg No:</span> {student.studentId || student.regNo || student.registerNumber || 'N/A'}</p>
                   {(student.sprNo || student.spr_no) && (
@@ -373,53 +385,72 @@ export default function StudentsDirectoryPage() {
         </button>
       </div>
 
-      {/* Options Modal (matches Flutter) */}
+      {/* Options Modal (matches Flutter + Template Reference) */}
       {isOptionsModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-slate-800 mb-4">Add Students</h2>
-              
-              <div 
-                className="flex items-start gap-4 p-4 hover:bg-slate-50 cursor-pointer rounded-xl transition-colors mb-2"
-                onClick={() => {
-                  setIsOptionsModalOpen(false);
-                  setIsModalOpen(true);
-                }}
-              >
-                <div className="text-teal-600 mt-1">
-                  <UserPlus className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800">Register Single Student</h3>
-                  <p className="text-xs text-slate-500 mt-1">Enter Name, Reg No, DOB, and details manually</p>
-                </div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <h2 className="font-heading text-xl font-bold text-slate-800">Add Students</h2>
+                <button 
+                  onClick={() => setIsOptionsModalOpen(false)}
+                  className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-
-              <div className="w-full h-px bg-slate-100 my-2"></div>
-
-              <div 
-                className="flex items-start gap-4 p-4 hover:bg-slate-50 cursor-pointer rounded-xl transition-colors"
-                onClick={() => {
-                  setIsOptionsModalOpen(false);
-                  setIsBulkUploadModalOpen(true);
-                }}
-              >
-                <div className="text-green-600 mt-1">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
+              
+              <div className="space-y-3">
+                <div 
+                  className="flex items-start gap-4 p-4 hover:bg-teal-50/50 border border-slate-100 hover:border-teal-200 cursor-pointer rounded-2xl transition-all"
+                  onClick={() => {
+                    setIsOptionsModalOpen(false);
+                    setIsModalOpen(true);
+                  }}
+                >
+                  <div className="p-2.5 bg-teal-50 text-teal-600 rounded-xl">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-slate-800 text-sm">Register Single Student</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Enter Name, Reg No, DOB, and details manually</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-800">Excel Bulk Upload</h3>
-                  <p className="text-xs text-slate-500 mt-1">Upload spreadsheet with columns mapping details</p>
+
+                <div 
+                  className="flex items-start gap-4 p-4 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-200 cursor-pointer rounded-2xl transition-all"
+                  onClick={() => {
+                    setIsOptionsModalOpen(false);
+                    setIsBulkUploadModalOpen(true);
+                  }}
+                >
+                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-slate-800 text-sm">Excel Bulk Upload</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Upload spreadsheet with student records</p>
+                  </div>
+                </div>
+
+                <div 
+                  className="flex items-start gap-4 p-4 hover:bg-indigo-50/50 border border-slate-100 hover:border-indigo-200 cursor-pointer rounded-2xl transition-all"
+                  onClick={handleDownloadTemplate}
+                >
+                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Download className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-slate-800 text-sm">Download Excel Template</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Get reference template (.xlsx) with proper columns</p>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="px-6 py-4 flex justify-end">
+            <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={() => setIsOptionsModalOpen(false)} 
-                className="font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 transition-colors text-xs"
               >
                 Cancel
               </button>
@@ -433,7 +464,7 @@ export default function StudentsDirectoryPage() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <h2 className="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
                 Register Single Student
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
@@ -454,9 +485,16 @@ export default function StudentsDirectoryPage() {
                   password = `${parts[2]}${parts[1]}${parts[0]}`;
                 }
               }
+              const rawAyVal = formData.get("academicYearId");
+              const matchedAy = academicYears.find(ay => String(ay.id) === String(rawAyVal) || ay.academicYear === rawAyVal);
+              const ayIdNum = Number(rawAyVal);
+              const validAyId = !isNaN(ayIdNum) && ayIdNum > 0 ? ayIdNum : (matchedAy && !isNaN(Number(matchedAy.id)) ? Number(matchedAy.id) : null);
+              const validAyStr = matchedAy?.academicYear || matchedAy?.name || (typeof rawAyVal === 'string' ? rawAyVal : undefined);
 
               const data: any = {
                 fullName: (formData.get("fullName") as string)?.trim(),
+                name: (formData.get("fullName") as string)?.trim(),
+                studentId: (formData.get("registerNumber") as string)?.trim(),
                 regNo: (formData.get("registerNumber") as string)?.trim(),
                 email: (formData.get("email") as string)?.trim(),
                 phone: (formData.get("phone") as string)?.trim() || "",
@@ -466,7 +504,8 @@ export default function StudentsDirectoryPage() {
                 password: password || undefined,
                 sprNo: (formData.get("sprNo") as string)?.trim() || "",
                 departmentId: isCc ? ccInfo?.departmentId : (formData.get("departmentId") ? Number(formData.get("departmentId")) : null),
-                academicYearId: formData.get("academicYearId") ? Number(formData.get("academicYearId")) : null,
+                academicYearId: validAyId,
+                academicYear: validAyStr,
                 yearId: isCc ? (years.find(y => String(y.yearNo) === String(ccInfo?.year) || y.yearName === ccInfo?.year)?.id || null) : (formData.get("yearId") ? Number(formData.get("yearId")) : null),
                 semesterId: formData.get("semesterId") ? Number(formData.get("semesterId")) : null,
                 genderId: formData.get("genderId") ? Number(formData.get("genderId")) : null,
@@ -615,22 +654,11 @@ export default function StudentsDirectoryPage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Group (Optional)</label>
-                  <select name="groupId" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
-                    <option value="">No Group Selected (Optional)</option>
-                    {groups.map(grp => (
-                      <option key={grp.id} value={grp.id}>
-                        {grp.groupName || grp.name || grp.title || grp.teamName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               {/* Guardian Information (matching Flutter 1:1) */}
               <div className="border-t border-slate-100 pt-4 mt-2">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Guardian Information</h3>
+                <h3 className="font-heading text-sm font-bold text-slate-800 mb-3">Guardian Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
@@ -693,6 +721,12 @@ export default function StudentsDirectoryPage() {
               const form = e.currentTarget;
               const formData = new FormData(form);
 
+              const rawEditAyVal = formData.get("academicYearId");
+              const matchedEditAy = academicYears.find(ay => String(ay.id) === String(rawEditAyVal) || ay.academicYear === rawEditAyVal);
+              const editAyIdNum = Number(rawEditAyVal);
+              const validEditAyId = !isNaN(editAyIdNum) && editAyIdNum > 0 ? editAyIdNum : (matchedEditAy && !isNaN(Number(matchedEditAy.id)) ? Number(matchedEditAy.id) : (editingStudent.academicYearId || null));
+              const validEditAyStr = matchedEditAy?.academicYear || matchedEditAy?.name || (typeof rawEditAyVal === 'string' ? rawEditAyVal : editingStudent.academicYear);
+
               const payload: any = {
                 fullName: (formData.get("fullName") as string)?.trim(),
                 email: (formData.get("email") as string)?.trim(),
@@ -702,12 +736,12 @@ export default function StudentsDirectoryPage() {
                 dob: (formData.get("dob") as string) || null,
                 sprNo: (formData.get("sprNo") as string)?.trim() || "",
                 departmentId: formData.get("departmentId") ? Number(formData.get("departmentId")) : (editingStudent.departmentId || null),
-                academicYearId: formData.get("academicYearId") ? Number(formData.get("academicYearId")) : (editingStudent.academicYearId || null),
+                academicYearId: validEditAyId,
+                academicYear: validEditAyStr,
                 yearId: formData.get("yearId") ? Number(formData.get("yearId")) : (editingStudent.yearId || null),
                 semesterId: formData.get("semesterId") ? Number(formData.get("semesterId")) : (editingStudent.semesterId || null),
                 genderId: formData.get("genderId") ? Number(formData.get("genderId")) : (editingStudent.genderId || null),
                 sectionId: formData.get("sectionId") ? Number(formData.get("sectionId")) : (editingStudent.sectionId || null),
-                groupId: formData.get("groupId") ? Number(formData.get("groupId")) : (editingStudent.groupId || editingStudent.teamId || null),
                 active: editingStudent.active ?? true,
               };
 
@@ -896,35 +930,11 @@ export default function StudentsDirectoryPage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Group (Optional)</label>
-                  <select 
-                    name="groupId" 
-                    defaultValue={editingStudent.groupId || editingStudent.teamId || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
-                  >
-                    <option value="">No Group Selected</option>
-                    {groups.map(grp => (
-                      <option key={grp.id} value={grp.id}>
-                        {grp.groupName || grp.name || grp.title || grp.teamName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Reset Password (Optional)</label>
-                  <input 
-                    name="password" 
-                    type="password"
-                    placeholder="Leave blank to keep unchanged" 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
-                  />
-                </div>
               </div>
 
               {/* Guardian Details */}
               <div className="border-t border-slate-100 pt-4 mt-2">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Guardian Information</h3>
+                <h3 className="font-heading text-sm font-bold text-slate-800 mb-3">Guardian Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
@@ -972,20 +982,21 @@ export default function StudentsDirectoryPage() {
                 </div>
               </div>
 
-              <div className="pt-6 flex justify-end gap-3 mt-4 border-t border-slate-100">
+              {/* Modal Footer */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                 <button 
                   type="button" 
                   onClick={() => {
                     setIsEditModalOpen(false);
                     setEditingStudent(null);
                   }} 
-                  className="px-6 py-2.5 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-sm"
+                  className="px-5 py-2.5 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors text-xs cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors cursor-pointer text-sm"
+                  className="px-6 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors text-xs cursor-pointer"
                 >
                   Save Changes
                 </button>
@@ -995,7 +1006,7 @@ export default function StudentsDirectoryPage() {
         </div>
       )}
 
-      {/* ─── Discipline Report Monitor Modal (Matching Flutter _showReportMonitorDialog 1:1) ─── */}
+      {/* Discipline Report Monitor Modal */}
       {isReportMonitorOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-200">
@@ -1005,7 +1016,7 @@ export default function StudentsDirectoryPage() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900">Discipline Report Monitor</h2>
+                  <h2 className="font-heading text-xl font-extrabold text-slate-900">Discipline Report Monitor</h2>
                   <p className="text-xs text-slate-500">Monitor student discipline logs, XP history, and penalty records</p>
                 </div>
               </div>
@@ -1103,50 +1114,86 @@ export default function StudentsDirectoryPage() {
       {/* Bulk Upload File Dialog */}
       {isBulkUploadModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl p-6">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-              <h2 className="text-lg font-bold text-slate-800">Excel Bulk Upload</h2>
-              <button onClick={() => setIsBulkUploadModalOpen(false)} className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+            {/* Modal Header */}
+            <div className="bg-white px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="font-heading text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <FileSpreadsheet className="w-5 h-5 text-teal-600" />
+                  Excel Bulk Upload
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Import multiple student records via spreadsheet</p>
+              </div>
+              <button 
+                onClick={() => setIsBulkUploadModalOpen(false)} 
+                className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-xs text-slate-500">
-                Upload a spreadsheet containing student records. Valid columns should include:
-                <span className="font-mono bg-slate-50 border border-slate-100 rounded px-1 ml-1 text-slate-600">regNo</span>, 
-                <span className="font-mono bg-slate-50 border border-slate-100 rounded px-1 ml-1 text-slate-600">fullName</span>, and 
-                <span className="font-mono bg-slate-50 border border-slate-100 rounded px-1 ml-1 text-slate-600">email</span>.
-              </p>
-
-              {/* Upload Drop Zone / Input */}
-              <div 
-                className="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors bg-slate-50/50"
-                onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = '.xlsx,.xls';
-                  input.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) handleFileUpload(file);
-                  };
-                  input.click();
-                }}
-              >
-                <div className="text-teal-600 mb-3 bg-teal-50 p-3 rounded-full">
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
+            {/* Modal Body with Steps */}
+            <div className="p-6 overflow-y-auto space-y-4 bg-slate-50">
+              {/* Step 1: Download Template */}
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-6 h-6 rounded-full bg-teal-50 text-teal-600 font-extrabold text-xs flex items-center justify-center">
+                    1
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-800">Download Excel Template</h4>
                 </div>
-                <span className="text-sm font-bold text-slate-700">Click to upload spreadsheet</span>
-                <span className="text-xs text-slate-400 mt-1">Accepts .xlsx or .xls files</span>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Download the formatted student import template containing all required columns (regNo, fullName, email, dob, etc.) for reference.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Excel Template (.xlsx)</span>
+                </button>
+              </div>
+
+              {/* Step 2: Upload Excel File */}
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 font-extrabold text-xs flex items-center justify-center">
+                    2
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-800">Choose Excel File &amp; Parse</h4>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Fill in the student details and select your completed Excel file to validate and parse.
+                </p>
+
+                <div 
+                  className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors bg-slate-50/50"
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.xlsx,.xls';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) handleFileUpload(file);
+                    };
+                    input.click();
+                  }}
+                >
+                  <div className="text-emerald-600 mb-2 bg-emerald-50 p-2.5 rounded-full">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-700">Click to choose completed Excel file</span>
+                  <span className="text-[11px] text-slate-400 mt-0.5">Supports .xlsx or .xls files</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            {/* Modal Footer */}
+            <div className="bg-white px-6 py-3 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={() => setIsBulkUploadModalOpen(false)}
-                className="px-5 py-2.5 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors text-xs"
+                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 rounded-xl transition-colors text-xs cursor-pointer"
               >
                 Cancel
               </button>
@@ -1162,7 +1209,7 @@ export default function StudentsDirectoryPage() {
             {/* Modal Header */}
             <div className="bg-[#11998e] text-white px-6 py-4 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-lg font-bold">Verify Parsed Students</h2>
+                <h2 className="font-heading text-lg font-bold">Verify Parsed Students</h2>
                 <p className="text-xs text-white/80 mt-0.5">
                   Selected: {checkedStates.filter(Boolean).length} / {parsedStudents.length} students
                 </p>

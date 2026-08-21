@@ -130,7 +130,7 @@ export default function CaptainGroupTab() {
           <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
             <UserX className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">No Team Assigned</h2>
+          <h2 className="font-heading text-2xl font-bold text-slate-800 mb-2">No Team Assigned</h2>
           <p className="text-slate-500 max-w-md mb-6">
             You are not assigned to any group yet. Please contact your Class Coordinator for team placement.
           </p>
@@ -163,7 +163,7 @@ export default function CaptainGroupTab() {
     <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 pb-32">
       {/* Header Bar matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold">My Team Leaderboard</h1>
+        <h1 className="font-heading text-xl font-bold">My Team Leaderboard</h1>
         <div className="flex items-center gap-2">
           {viewerIsCaptain && (
             <button
@@ -187,7 +187,7 @@ export default function CaptainGroupTab() {
       {/* Header Card matching Flutter _buildHeaderCard */}
       <div className="bg-gradient-to-br from-blue-800 to-blue-600 rounded-2xl p-6 text-white shadow-xl space-y-5">
         <div className="flex justify-between items-start">
-          <h2 className="text-2xl font-extrabold tracking-tight">{teamName}</h2>
+          <h2 className="font-heading text-2xl font-extrabold tracking-tight">{teamName}</h2>
           <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold">
             {stageLabel}
           </span>
@@ -244,7 +244,7 @@ export default function CaptainGroupTab() {
 
       {/* Team Leaderboard Roster Section matching Flutter _buildLeaderboardCard */}
       <div className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-800">Team Leaderboard</h2>
+        <h2 className="font-heading text-lg font-bold text-slate-800">Team Leaderboard</h2>
 
         {teamMembers.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100 shadow-sm">
@@ -334,7 +334,7 @@ export default function CaptainGroupTab() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl">
             <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">Add Classmate to Team</h3>
+              <h3 className="font-heading text-lg font-bold text-slate-900">Add Classmate to Team</h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
                 className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer"

@@ -1,33 +1,36 @@
-import { logger } from '../../../../utils/logger';
 import { useState } from 'react';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { activityService } from '../api/activityService';
 import ActivityForm from '../components/ActivityForm';
+import { activityService } from '../api/activityService';
 
 interface CreateActivityPageProps {
+  subgroupId?: string | number;
+  stageId?: string | number;
+  subgroupName?: string;
   onBack: () => void;
   onSuccess?: () => void;
-  subgroupId?: number;
-  stageId?: number;
-  subgroupName?: string;
 }
 
-export default function CreateActivityPage({ 
-  onBack, 
-  onSuccess,
-  subgroupId, 
-  stageId, 
-  subgroupName = 'Must' 
+export default function CreateActivityPage({
+  subgroupId,
+  stageId,
+  subgroupName,
+  onBack,
+  onSuccess
 }: CreateActivityPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (formData: any) => {
     setIsSubmitting(true);
-    setToast(null);
     try {
-      await activityService.createActivity(data, subgroupId, stageId, subgroupName);
-      setToast({ message: 'Activity created successfully!', type: 'success' });
+      await activityService.createActivity(
+        formData, 
+        subgroupId ? Number(subgroupId) : undefined, 
+        stageId ? Number(stageId) : undefined, 
+        subgroupName
+      );
+      setToast({ message: 'Activity created successfully', type: 'success' });
       setTimeout(() => {
         if (onSuccess) {
           onSuccess();
@@ -36,17 +39,19 @@ export default function CreateActivityPage({
         }
       }, 1000);
     } catch (err: any) {
-      logger.error('Failed to create activity:', err);
-      const msg = err.response?.data?.message || err.message || 'Failed to create activity';
-      setToast({ message: msg, type: 'error' });
+      console.error('Failed to create activity', err);
+      setToast({ 
+        message: err?.response?.data?.message || err?.message || 'Failed to create activity', 
+        type: 'error' 
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative">
-      {/* Web In-App Toast Confirmation Notification */}
+    <div className="flex flex-col min-h-full bg-slate-50">
+      {/* Toast Notification matching Flutter Top SnackBar */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-bold animate-in slide-in-from-top duration-300 ${
           toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
@@ -66,7 +71,7 @@ export default function CreateActivityPage({
           <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-bold text-white">Create New Activity</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Create New Activity</h1>
         </div>
         <button 
           type="submit" 

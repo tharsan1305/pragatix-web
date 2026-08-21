@@ -42,11 +42,13 @@ export class ActivityService {
 
         let categoryXp = 0;
         const activities: Activity[] = activitiesList.map((act: any) => {
+          const actId = Number(act.activityId || act.id || 0);
           const rewardXp = parseInt(act.rewardXp || act.xp || act.xpReward || "0", 10) || 0;
+          const penaltyXp = parseInt(act.penaltyXp || "0", 10) || 0;
           const awardedXp = (act.awardedXp !== undefined && act.awardedXp !== null) 
             ? (parseInt(act.awardedXp, 10) || 0) 
             : 0;
-          const status: ActivityStatus = act.status === 'COMPLETED' || act.isDone 
+          const status: ActivityStatus = act.status === 'COMPLETED' || act.isDone || act.completed === true
             ? 'COMPLETED' 
             : (act.status === 'LOCKED' ? 'LOCKED' : 'PENDING');
           const isCompleted = status === 'COMPLETED';
@@ -56,28 +58,36 @@ export class ActivityService {
           }
 
           const rawEv = act.evidence || act.requiredEvidence;
-          const evidenceArr = Array.isArray(rawEv)
+          let evidenceArr: string[] = Array.isArray(rawEv)
             ? rawEv.map(e => String(e))
             : (rawEv ? [String(rawEv)] : []);
 
+          if (act.manualEvidenceName && act.manualEvidenceName.trim() !== '') {
+            evidenceArr = evidenceArr.map(e => e === 'Manual' ? act.manualEvidenceName : e);
+          }
+
           return {
-            id: Number(act.id || 0),
+            id: actId,
+            activityId: actId,
             activityName: act.activityName || act.name || 'Activity',
             description: act.description || act.activityDescription || '',
             rewardXp,
+            penaltyXp,
             awardedXp,
             status,
             isCompleted,
             buttonEnabled: act.buttonEnabled !== false,
-            buttonText: act.buttonText || 'Request Completion',
+            buttonText: act.buttonText || (isCompleted ? 'Completed' : 'Request Activity'),
             requestStatus: act.requestStatus || (isCompleted ? 'APPROVED' : 'NONE'),
             evidenceUrl: act.evidenceUrl || act.proofUrl || '',
-            facultyName: act.facultyName || act.faculty || act.owner || act.creatorName || '',
-            frequency: act.frequency || act.activityFrequency || '',
+            facultyName: act.facultyName || act.faculty || act.owner || act.creatorName || 'Unassigned',
+            frequency: act.frequency || act.activityFrequency || 'N/A',
             evidence: evidenceArr,
+            manualEvidenceName: act.manualEvidenceName,
             statusPillText: act.statusPillText || act.status || (isCompleted ? 'COMPLETED' : 'NOT_STARTED'),
             allowStudentRequest: act.allowStudentRequest === true || act.allowRequest === true || act.canRequest === true,
             category: act.category || 'OTHER',
+            xpType: act.xpType || 'reward',
           };
         });
 
@@ -142,11 +152,12 @@ export class ActivityService {
    */
   static async submitActivityCompletion(activityId: number, proofUrl?: string, remarks?: string): Promise<boolean> {
     try {
-      // Correct backend endpoint: POST /api/activity-requests
+      // Backend endpoint: POST /api/activity-requests (matches Flutter activity_completion_service.dart)
       const res = await apiClient.post('/api/activity-requests', {
         activityId,
-        proofUrl,
-        remarks,
+        proofUrl: proofUrl || undefined,
+        reason: remarks || undefined,
+        remarks: remarks || undefined,
       });
       return res.data?.success === true || res.status === 200 || res.status === 201;
     } catch (e) {

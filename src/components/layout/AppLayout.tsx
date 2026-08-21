@@ -24,7 +24,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Sidebar role={role} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white shadow-sm h-16 flex items-center px-6">
-          <h2 className="text-xl font-semibold text-gray-800">
+          <h2 className="font-heading text-xl font-semibold text-gray-800">
             Welcome back{role ? `, ${role}` : ''}
           </h2>
         </header>

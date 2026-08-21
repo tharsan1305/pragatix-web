@@ -132,7 +132,7 @@ export default function ProfileTab() {
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Header Bar matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex items-center justify-between">
-        <h1 className="text-xl font-bold">Profile</h1>
+        <h1 className="font-heading text-xl font-bold">Profile</h1>
         <button
           onClick={fetchProfile}
           className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
@@ -149,7 +149,7 @@ export default function ProfileTab() {
             <UserIcon className="w-10 h-10 text-slate-500" />
           </div>
           
-          <h2 className="text-xl font-extrabold text-slate-900 text-center">{profile.fullName}</h2>
+          <h2 className="font-heading text-xl font-extrabold text-slate-900 text-center">{profile.fullName}</h2>
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">
             {profile.role}
           </span>
@@ -157,7 +157,7 @@ export default function ProfileTab() {
 
         {/* Card 1: Personal Information matching Flutter _buildCommonInfoCard */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-1">
-          <h3 className="text-sm font-bold text-slate-900 mb-2">Personal Information</h3>
+          <h3 className="font-heading text-sm font-bold text-slate-900 mb-2">Personal Information</h3>
           <div className="h-px bg-slate-100 -mx-4 mb-2" />
           
           <SharedProfileRow label="Username" value={profile.username} />
@@ -170,7 +170,7 @@ export default function ProfileTab() {
         {/* Card 2 & 3: Academic Details & Performance matching Flutter _buildStudentCard */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 mb-2">Academic Details</h3>
+            <h3 className="font-heading text-sm font-bold text-slate-900 mb-2">Academic Details</h3>
             <div className="h-px bg-slate-100 -mx-4 mb-2" />
 
             <SharedProfileRow label="Register Number" value={profile.studentDetails.registerNumber} />
@@ -180,7 +180,7 @@ export default function ProfileTab() {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-slate-900 mb-2 pt-2">Performance</h3>
+            <h3 className="font-heading text-sm font-bold text-slate-900 mb-2 pt-2">Performance</h3>
             <div className="h-px bg-slate-100 -mx-4 mb-2" />
 
             <SharedProfileRow label="Current XP" value={profile.studentDetails.currentXp} />

@@ -128,7 +128,7 @@ export default function ProfileTab() {
               {getInitials(profile.fullName)}
             </span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">{profile.fullName}</h2>
+          <h2 className="font-heading text-2xl font-extrabold text-slate-900">{profile.fullName}</h2>
           <p className="text-xs font-bold text-slate-400 tracking-wider uppercase mt-0.5">
             {profile.role}
           </p>
@@ -136,7 +136,7 @@ export default function ProfileTab() {
 
         {/* Card 1: Personal Information (Flutter Aligned 1:1) */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-          <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+          <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
             Personal Information
           </h3>
 
@@ -176,7 +176,7 @@ export default function ProfileTab() {
         {/* Card 2: Role-Specific Details (Flutter Aligned 1:1) */}
         {profile.ccDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
               Class Coordinator Info
             </h3>
             <div className="space-y-2.5 text-xs md:text-sm">
@@ -194,7 +194,7 @@ export default function ProfileTab() {
 
         {profile.hodDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
               HOD Statistics
             </h3>
             <div className="space-y-2.5 text-xs md:text-sm">
@@ -212,7 +212,7 @@ export default function ProfileTab() {
 
         {profile.teacherDetails && !profile.ccDetails && !profile.hodDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
               Teacher Information
             </h3>
             <div className="space-y-2.5 text-xs md:text-sm">

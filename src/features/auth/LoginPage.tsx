@@ -222,7 +222,7 @@ export default function LoginPage() {
           <div className="w-24 h-24 rounded-2xl bg-white shadow-lg p-2 flex items-center justify-center overflow-hidden border border-slate-200 mb-4">
             <img src={logoImg} alt="PragatiX Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">
+          <h1 className="font-heading text-2xl font-extrabold tracking-tight">
             <span className="text-indigo-600 font-black">PragatiX</span>{' '}
             <span className="text-slate-800">Sign In</span>
           </h1>

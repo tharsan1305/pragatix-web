@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Lock, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Lock, Unlock, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Stage } from '../types/activity';
 import { ProgressBar } from './ProgressBar';
@@ -12,12 +12,16 @@ interface StageCardProps {
 export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
   const isCompleted = stage.isCompleted || stage.stageStatus === 'COMPLETED';
   const isLocked = (stage.isLocked || stage.stageStatus === 'LOCKED') && !isCompleted;
+  const isClickable = !isCompleted && !isLocked;
   const percentage = Math.round(stage.percentage);
 
   const handleClick = () => {
     if (isLocked) {
       toast.error('This stage is currently locked.');
       return;
+    }
+    if (isCompleted) {
+      toast('This stage is already completed.', { icon: 'ℹ️' });
     }
     onClick(stage);
   };
@@ -37,7 +41,7 @@ export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
               ? 'bg-slate-200 text-slate-500'
               : (isCompleted
                 ? 'bg-emerald-100/90 text-emerald-600'
-                : 'bg-indigo-50 text-indigo-500')
+                : 'bg-indigo-50 text-indigo-600')
           }`}
         >
           {isLocked ? (
@@ -45,13 +49,13 @@ export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
           ) : isCompleted ? (
             <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
           ) : (
-            <Lock className="w-6 h-6 stroke-[2.2]" />
+            <Unlock className="w-6 h-6 stroke-[2.2]" />
           )}
         </div>
 
         {/* Content Details matching Flutter */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-bold text-lg truncate ${isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
+          <h3 className={`font-heading font-bold text-lg truncate ${isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
             {stage.name}
           </h3>
           <div
@@ -70,7 +74,7 @@ export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
         </div>
 
         {/* Right Chevron Arrow matching Flutter */}
-        {!isLocked && <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />}
+        {isClickable && <ChevronRight className="w-5 h-5 text-slate-400 shrink-0" />}
       </div>
 
       {/* Embedded Linear Progress Bar & XP breakdown */}

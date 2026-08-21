@@ -282,7 +282,7 @@ export default function ActivityTab() {
               <button onClick={handleGoBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
                 <ArrowLeft className="w-6 h-6 text-white" />
               </button>
-              <h1 className="text-xl font-bold text-white">{stageName}</h1>
+              <h1 className="font-heading text-xl font-bold text-white">{stageName}</h1>
             </div>
           </div>
 
@@ -293,13 +293,13 @@ export default function ActivityTab() {
                 <Star className="w-6 h-6 fill-teal-600" />
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-lg">{stageName}</h2>
+                <h2 className="font-heading font-bold text-slate-800 text-lg">{stageName}</h2>
                 <p className="text-xs text-slate-500 mt-0.5">{stageDesc}</p>
               </div>
             </div>
 
             {/* Categories */}
-            <h3 className="font-bold text-slate-700 text-xs uppercase tracking-wider">Select Activity Category</h3>
+            <h3 className="font-heading font-bold text-slate-700 text-sm">Select Activity Category</h3>
             <div className="space-y-4">
               {categories.map((cat) => (
                 <div
@@ -368,7 +368,7 @@ export default function ActivityTab() {
               <button onClick={handleGoBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
                 <ArrowLeft className="w-6 h-6 text-white" />
               </button>
-              <h1 className="text-xl font-bold text-white">Assign Staff</h1>
+              <h1 className="font-heading text-xl font-bold text-white">Assign Staff</h1>
             </div>
             <button
               onClick={() => fetchStages(academicYear)}
@@ -386,7 +386,7 @@ export default function ActivityTab() {
                 <GraduationCap className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="font-bold text-slate-800 text-sm md:text-base">
+                <h2 className="font-heading font-bold text-slate-800 text-sm md:text-base">
                   {deptName} • Section {secName}
                 </h2>
                 <p className="text-xs text-slate-500 font-semibold mt-0.5">
@@ -427,7 +427,7 @@ export default function ActivityTab() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-bold text-slate-900 text-lg md:text-xl group-hover:text-teal-600 transition-colors">
+                      <h3 className="font-heading font-bold text-slate-900 text-lg md:text-xl group-hover:text-teal-600 transition-colors">
                         {stage.name || stage.stageName || `Stage ${displayOrder}`}
                       </h3>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase tracking-wider ${
@@ -500,7 +500,7 @@ export default function ActivityTab() {
       {/* Top Header Bar */}
       <div className="bg-[#1E293B] text-white px-6 pt-10 pb-6 shadow-md flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Activities</h1>
+          <h1 className="font-heading text-2xl font-bold">Activities</h1>
           <p className="text-xs text-slate-400 mt-0.5">Explore configured activity stages, thresholds, and assigned tasks</p>
         </div>
 
@@ -638,7 +638,7 @@ export default function ActivityTab() {
                     </div>
 
                     {/* Stage Name */}
-                    <h2 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <h2 className="font-heading text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                       {stage.name || stage.stageName || `Stage ${displayOrder}`}
                     </h2>
 
@@ -721,7 +721,7 @@ function QuickAssignModal({
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-base">Select Activity to Assign Staff</h3>
+              <h3 className="font-heading font-bold text-slate-800 text-base">Select Activity to Assign Staff</h3>
               <p className="text-xs text-slate-500">Pick an activity to configure faculty assignments</p>
             </div>
           </div>
@@ -853,7 +853,7 @@ function CCActivityListPageView({
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
           <div>
-            <h1 className="text-lg md:text-xl font-bold text-white">{categoryTitle}</h1>
+            <h1 className="font-heading text-lg md:text-xl font-bold text-white">{categoryTitle}</h1>
             <p className="text-xs text-white/80">{stageName}</p>
           </div>
         </div>

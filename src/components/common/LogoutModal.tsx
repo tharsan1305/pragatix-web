@@ -51,8 +51,8 @@ export default function LogoutModal({
             <LogOut className="w-7 h-7" />
           </div>
 
-          <h2 id="logout-modal-title" className="text-xl font-bold text-slate-900">
-            Sign Out
+          <h2 id="logout-modal-title" className="font-heading text-xl font-bold text-slate-900">
+            Confirm Logout
           </h2>
 
           <p className="text-sm text-slate-500 mt-2 mb-6 max-w-xs">

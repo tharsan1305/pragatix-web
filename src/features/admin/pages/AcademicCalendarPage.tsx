@@ -312,7 +312,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-white">Monthly Academic Calendar</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Monthly Academic Calendar</h1>
         </div>
       </div>
 
@@ -424,7 +424,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
         {/* Alternate Working Days Card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">
+          <h2 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-2">
             Alternate Working Days
           </h2>
           {currentMonthAwdList.length === 0 ? (
@@ -453,7 +453,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
           <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4 animate-in fade-in slide-in-from-bottom-5">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-base text-slate-900">
+                <h3 className="font-heading font-bold text-base text-slate-900">
                   Selected Date: {selectedDateModal.toDateString()}
                 </h3>
               </div>
@@ -552,7 +552,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
       {showHolidayModal && selectedDateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-bold text-base text-slate-900">Holiday Name</h3>
+            <h3 className="font-heading font-bold text-base text-slate-900">Holiday Name</h3>
             <input
               type="text"
               placeholder="Enter holiday name"
@@ -585,7 +585,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
       {showAwdModal && selectedDateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-bold text-base text-slate-900">Add Alternate Working Day</h3>
+            <h3 className="font-heading font-bold text-base text-slate-900">Add Alternate Working Day</h3>
             
             <div className="space-y-3">
               <div>

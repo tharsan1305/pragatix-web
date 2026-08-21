@@ -168,7 +168,7 @@ export default function StudentDetailsPage() {
         <div className={`p-6 rounded-2xl flex flex-col items-start gap-4 border shadow-sm ${isAccessRestricted ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-700'}`}>
           <div className="flex items-center gap-3">
             {isAccessRestricted ? <Lock className="w-6 h-6 text-amber-600 shrink-0" /> : <FileWarning className="w-6 h-6 text-red-600 shrink-0" />}
-            <h2 className="text-lg font-bold">{isAccessRestricted ? 'Access Restricted' : 'Error'}</h2>
+            <h2 className="font-heading text-lg font-bold">{isAccessRestricted ? 'Access Restricted' : 'Error'}</h2>
           </div>
           <p className="text-sm leading-relaxed">{error || 'Student not found'}</p>
           <button 
@@ -194,7 +194,7 @@ export default function StudentDetailsPage() {
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Student Profile</h1>
+            <h1 className="font-heading text-2xl font-bold text-slate-800">Student Profile</h1>
             <p className="text-xs text-slate-500">View and manage detailed information</p>
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function StudentDetailsPage() {
               )}
             </div>
             
-            <h2 className="mt-4 text-xl font-bold text-slate-800 z-10">{selectedStudent.fullName}</h2>
+            <h2 className="font-heading mt-4 text-xl font-bold text-slate-800 z-10">{selectedStudent.fullName}</h2>
             <p className="text-xs text-slate-500 font-mono font-medium z-10">{selectedStudent.regNo}</p>
             
             <div className="mt-6 w-full flex flex-col gap-2.5">
@@ -257,7 +257,7 @@ export default function StudentDetailsPage() {
           </div>
           
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="text-base font-bold text-slate-800 mb-4">Discipline Score</h3>
+            <h3 className="font-heading text-base font-bold text-slate-800 mb-4">Discipline Score</h3>
             <div className="flex flex-col items-center justify-center py-2">
               <div className="relative w-32 h-32 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -328,7 +328,7 @@ export default function StudentDetailsPage() {
           {/* Recent Disciplinary Logs */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[350px]">
             <div className="px-6 py-4 border-b border-slate-100 bg-white flex justify-between items-center">
-              <h3 className="text-sm font-bold text-slate-800">Discipline Action History</h3>
+              <h3 className="font-heading text-sm font-bold text-slate-800">Discipline Action History</h3>
               <button 
                 onClick={() => id && fetchHistoryLogs(id)} 
                 className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
@@ -376,7 +376,7 @@ export default function StudentDetailsPage() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">Adjust Discipline Points</h3>
+              <h3 className="font-heading font-bold text-slate-800 text-lg">Adjust Discipline Points</h3>
               <button onClick={() => setIsAdjustModalOpen(false)} className="p-1 text-slate-400 hover:bg-slate-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>

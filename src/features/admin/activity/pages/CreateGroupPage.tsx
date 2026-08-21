@@ -78,7 +78,7 @@ export default function CreateGroupPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-800">Create Group</h1>
+        <h1 className="font-heading text-2xl font-bold text-slate-800">Create Group</h1>
         <p className="text-slate-500 mt-1">Assign a captain and create a new student group.</p>
       </div>
 
@@ -91,7 +91,7 @@ export default function CreateGroupPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Academic Scope</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 border-b pb-2">Academic Scope</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold text-slate-700 block mb-1">Academic Year</label>
@@ -105,7 +105,7 @@ export default function CreateGroupPage() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Group Details</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 border-b pb-2">Group Details</h3>
           <div className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-slate-700 block mb-1">Group Name *</label>
@@ -119,7 +119,7 @@ export default function CreateGroupPage() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Assign Captain</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 border-b pb-2">Assign Captain</h3>
           
           {selectedCaptain ? (
             <div className="flex items-center justify-between p-4 bg-indigo-50 border border-indigo-100 rounded-xl">

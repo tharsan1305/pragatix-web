@@ -175,7 +175,7 @@ export default function LeaderboardTab() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col pb-32">
       <div className="bg-slate-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md">
-        <h1 className="text-xl font-bold">Leaderboard</h1>
+        <h1 className="font-heading text-xl font-bold">Leaderboard</h1>
       </div>
 
       {/* Filter Row (Matching Flutter: Only Department and Section for Student) */}

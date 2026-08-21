@@ -13,7 +13,170 @@ const PATHWAYS = [
   { name: "Research", domain: "Academic research, patents", categories: "Research XP, Innovation XP", alignment: "Research Committee" }
 ];
 
-
+const DEFAULT_BADGES_BY_TIER: Record<string, any[]> = {
+  Foundation: [
+    {
+      id: 1,
+      name: "Attendance Warrior",
+      description: "Maintain 95% attendance for a full calendar month.",
+      authority: "Class Coordinator",
+      rarity: "Common",
+      tier: "Foundation",
+    },
+    {
+      id: 2,
+      name: "Participation Star",
+      description: "Actively participate and answer questions in all class hours for a week.",
+      authority: "Class Coordinator",
+      rarity: "Common",
+      tier: "Foundation",
+    },
+    {
+      id: 3,
+      name: "Punctuality Pro",
+      description: "Arrive before the bell rings without any late entries for 2 consecutive weeks.",
+      authority: "Class Coordinator",
+      rarity: "Common",
+      tier: "Foundation",
+    },
+  ],
+  Achievement: [
+    {
+      id: 4,
+      name: "Code Ninja",
+      description: "Complete daily coding challenges on C/Python for 15 consecutive days.",
+      authority: "Technical Coordinator",
+      rarity: "Uncommon",
+      tier: "Achievement",
+    },
+    {
+      id: 5,
+      name: "GPA Master",
+      description: "Score a GPA of 8.5 or higher in the semester examinations.",
+      authority: "HOD / Academic Mentor",
+      rarity: "Uncommon",
+      tier: "Achievement",
+    },
+    {
+      id: 6,
+      name: "Consistency Champion",
+      description: "Maintain all active daily streaks for 30 consecutive days.",
+      authority: "Class Coordinator",
+      rarity: "Uncommon",
+      tier: "Achievement",
+    },
+    {
+      id: 7,
+      name: "Hackathon Finisher",
+      description: "Participate and submit a working project in an internal department hackathon.",
+      authority: "Technical Coordinator",
+      rarity: "Uncommon",
+      tier: "Achievement",
+    },
+  ],
+  Excellence: [
+    {
+      id: 8,
+      name: "Full Stack Warrior",
+      description: "Build and host a web application with complete frontend and backend services.",
+      authority: "Technical Coordinator",
+      rarity: "Rare",
+      tier: "Excellence",
+    },
+    {
+      id: 9,
+      name: "Interview Slayer",
+      description: "Clear the first-round technical mock interviews conducted by internal placement cell.",
+      authority: "Placement Cell",
+      rarity: "Rare",
+      tier: "Excellence",
+    },
+    {
+      id: 10,
+      name: "Internship Achiever",
+      description: "Secure and successfully complete a verified 4-week industry internship.",
+      authority: "HOD / Placement Coordinator",
+      rarity: "Rare",
+      tier: "Excellence",
+    },
+    {
+      id: 11,
+      name: "Event Commander",
+      description: "Lead and organize a technical/non-technical program or seminar in the college.",
+      authority: "Program Coordinator",
+      rarity: "Rare",
+      tier: "Excellence",
+    },
+  ],
+  Elite: [
+    {
+      id: 12,
+      name: "Team Captain Badge",
+      description: "Serve as a team captain and lead the group to an Elite status (4500+ XP).",
+      authority: "HOD / Academic Dean",
+      rarity: "Very Rare",
+      tier: "Elite",
+    },
+    {
+      id: 13,
+      name: "Mentor Hero",
+      description: "Conduct peer teaching and mentor at least 5 junior students to improve their grades.",
+      authority: "Faculty Mentor",
+      rarity: "Very Rare",
+      tier: "Elite",
+    },
+    {
+      id: 14,
+      name: "Research Pioneer",
+      description: "Submit a research paper draft accepted/reviewed by the department committee.",
+      authority: "Research Committee",
+      rarity: "Very Rare",
+      tier: "Elite",
+    },
+    {
+      id: 15,
+      name: "Innovation Catalyst",
+      description: "Develop a working prototype in the CoE/D2P Lab validated by an industry mentor.",
+      authority: "CoE / D2P Lab Mentor",
+      rarity: "Very Rare",
+      tier: "Elite",
+    },
+  ],
+  Legacy: [
+    {
+      id: 16,
+      name: "Startup Builder",
+      description: "Create a viable project proposal incubated or registered as a student startup.",
+      authority: "Incubation Center / Principal",
+      rarity: "Legendary",
+      tier: "Legacy",
+    },
+    {
+      id: 17,
+      name: "Placement Champion",
+      description: "Get placed in a tier-1 company with a package exceeding threshold limit.",
+      authority: "Placement Director",
+      rarity: "Legendary",
+      tier: "Legacy",
+    },
+    {
+      id: 18,
+      name: "JJCET Legend",
+      description: "Reach a lifetime cumulative score of 3500+ XP points.",
+      authority: "Dean of Academics",
+      rarity: "Legendary",
+      tier: "Legacy",
+    },
+    {
+      id: 19,
+      name: "Alumni Pioneer",
+      description: "Act as institutional ambassador and secure industry linkage / MoUs for college.",
+      authority: "Institutional Ambassador",
+      rarity: "Legendary",
+      tier: "Legacy",
+    },
+  ],
+};
 
 export default function LevelsBadgesTab() {
   const { token } = useAuth();
@@ -22,7 +185,7 @@ export default function LevelsBadgesTab() {
   
   const [selectedPathway, setSelectedPathway] = useState<string>("None");
 
-  const [badgesByTier, setBadgesByTier] = useState<Record<string, any[]>>({});
+  const [badgesByTier, setBadgesByTier] = useState<Record<string, any[]>>(DEFAULT_BADGES_BY_TIER);
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<(number | string)[]>([]);
   const [pendingBadgeIds, setPendingBadgeIds] = useState<(number | string)[]>([]);
   
@@ -41,7 +204,7 @@ export default function LevelsBadgesTab() {
   const fetchData = async () => {
     try {
       const progRes = await apiClient.get('/api/v1/student-level/progression');
-      if (progRes.data.success && progRes.data.data) {
+      if (progRes.data?.success && progRes.data?.data) {
         setProgressionData(progRes.data.data);
       }
     } catch {
@@ -51,19 +214,29 @@ export default function LevelsBadgesTab() {
     try {
       const allBadgesRes = await apiClient.get('/api/v1/badges');
       const rawData = allBadgesRes.data?.data || allBadgesRes.data;
-      if (Array.isArray(rawData)) {
+      if (Array.isArray(rawData) && rawData.length > 0) {
         const fetchedBadges: any[] = rawData;
-        const grouped: Record<string, any[]> = {};
+        const grouped: Record<string, any[]> = JSON.parse(JSON.stringify(DEFAULT_BADGES_BY_TIER));
         for (const b of fetchedBadges) {
           const tier = b.tier || b.badgeTier || "Foundation";
           if (!grouped[tier]) grouped[tier] = [];
-          grouped[tier].push({
+          const existingIdx = grouped[tier].findIndex((item: any) => 
+            (b.id && item.id === b.id) || 
+            (b.name && item.name.toLowerCase() === b.name.toLowerCase())
+          );
+          const mappedBadge = {
             id: b.id,
             name: b.name || b.badgeName,
-            description: b.description || 'Badge definition from server',
-            authority: b.approvalAuthority || b.authority || 'Faculty',
-            rarity: b.rarity || 'Common'
-          });
+            description: b.description || 'Maintain high standards to earn this badge.',
+            authority: b.approvalAuthority || b.authority || 'Faculty Mentor',
+            rarity: b.rarity || 'Common',
+            tier: tier,
+          };
+          if (existingIdx >= 0) {
+            grouped[tier][existingIdx] = { ...grouped[tier][existingIdx], ...mappedBadge };
+          } else {
+            grouped[tier].push(mappedBadge);
+          }
         }
         setBadgesByTier(grouped);
       }
@@ -72,12 +245,32 @@ export default function LevelsBadgesTab() {
     }
 
     try {
-      const badgesRes = await apiClient.get('/api/v1/badges/student/me');
-      if (badgesRes.data.success && Array.isArray(badgesRes.data.data)) {
-        const list = badgesRes.data.data;
-        setEarnedBadgeIds(list.filter((b: any) => b.status === "APPROVED").map((b: any) => b.badgeId));
-        setPendingBadgeIds(list.filter((b: any) => b.status === "PENDING").map((b: any) => b.badgeId));
+      const earnedSet = new Set<string | number>();
+      const pendingSet = new Set<string | number>();
+
+      const [badgesRes, myReqsRes] = await Promise.allSettled([
+        apiClient.get('/api/v1/badges/student/me'),
+        apiClient.get('/api/badge-requests/my'),
+      ]);
+
+      if (badgesRes.status === 'fulfilled' && badgesRes.value.data?.success && Array.isArray(badgesRes.value.data.data)) {
+        badgesRes.value.data.data.forEach((b: any) => {
+          const id = b.badgeId || b.badge?.id || b.id;
+          if (b.status === "APPROVED") earnedSet.add(id);
+          if (b.status === "PENDING") pendingSet.add(id);
+        });
       }
+
+      if (myReqsRes.status === 'fulfilled' && myReqsRes.value.data?.success && Array.isArray(myReqsRes.value.data.data)) {
+        myReqsRes.value.data.data.forEach((r: any) => {
+          const id = r.badgeId || r.badge?.id || r.id;
+          if (r.status === "APPROVED") earnedSet.add(id);
+          if (r.status === "PENDING") pendingSet.add(id);
+        });
+      }
+
+      setEarnedBadgeIds(Array.from(earnedSet));
+      setPendingBadgeIds(Array.from(pendingSet));
     } catch {
       // Fallback
     }
@@ -93,11 +286,11 @@ export default function LevelsBadgesTab() {
     }
 
     const allOptions = Object.values(badgesByTier).flat();
-    const selectedObj = allOptions.find(b => String(b.id) === String(selectedBadgeToClaim));
+    const selectedObj = allOptions.find(b => String(b.id) === String(selectedBadgeToClaim) || b.name === selectedBadgeToClaim);
     const badgeId = selectedObj?.id;
     const badgeName = selectedObj?.name || selectedBadgeToClaim;
 
-    if (!badgeId) {
+    if (!badgeId && !badgeName) {
       toast.error("Could not identify the selected badge. Please try again.");
       return;
     }
@@ -111,19 +304,29 @@ export default function LevelsBadgesTab() {
     const toastId = toast.loading("Submitting badge request...");
 
     try {
-      const res = await apiClient.post('/api/badge-requests', {
-        badgeId,
-        badgeName,
-        proofLink: validUrl
-      });
+      let res;
+      try {
+        res = await apiClient.post('/api/badge-requests', {
+          badgeId: typeof badgeId === 'number' ? badgeId : undefined,
+          badgeName,
+          proofLink: validUrl
+        });
+      } catch {
+        res = await apiClient.post('/api/v1/badges/submit', {
+          badgeName,
+          evidenceUrl: validUrl
+        });
+      }
 
       toast.dismiss(toastId);
-      if (res.data?.success === true) {
+      if (res?.data?.success === true || res?.status === 200) {
         toast.success("Badge request submitted successfully.");
-        setPendingBadgeIds(prev => [...prev, badgeId]);
+        if (badgeId) {
+          setPendingBadgeIds(prev => [...prev, badgeId]);
+        }
         fetchData();
       } else {
-        toast.error(res.data?.message || "Failed to submit badge request.");
+        toast.error(res?.data?.message || "Failed to submit badge request.");
       }
     } catch (e: any) {
       toast.dismiss(toastId);
@@ -171,7 +374,7 @@ export default function LevelsBadgesTab() {
       {/* Header */}
       <div className="bg-slate-800 text-white sticky top-0 z-10 shadow-md">
         <div className="px-6 py-4">
-          <h1 className="text-xl font-bold">Levels & Badges</h1>
+          <h1 className="font-heading text-xl font-bold">Levels & Badges</h1>
         </div>
         <div className="flex border-t border-slate-700">
           <button 
@@ -222,7 +425,7 @@ export default function LevelsBadgesTab() {
 
             {/* Pathways */}
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Skill Pathways</h2>
+              <h2 className="font-heading text-lg font-bold text-slate-800">Skill Pathways</h2>
               <p className="text-sm text-slate-500 mb-3">Select your focus domain starting from Level 3 (Innovator).</p>
               
               {!isEligibleForPathway ? (
@@ -263,7 +466,7 @@ export default function LevelsBadgesTab() {
 
             {/* Progression Map */}
             <div>
-              <h2 className="text-lg font-bold text-slate-800 mb-4">Level Progression Map</h2>
+              <h2 className="font-heading text-lg font-bold text-slate-800 mb-4">Level Progression Map</h2>
               <div className="space-y-0">
                 {dynamicLevelsList.map((lvl: any, idx: number) => {
                   const lvlNum = lvl.levelNumber ?? lvl.level;
@@ -299,7 +502,7 @@ export default function LevelsBadgesTab() {
                           'bg-white border-slate-200'
                         }`}>
                           <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-bold text-slate-800 text-[15px]">Lvl {lvlNum}: {lvlTitle}</h3>
+                            <h3 className="font-heading font-bold text-slate-800 text-[15px]">Lvl {lvlNum}: {lvlTitle}</h3>
                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
                               isCurrent ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'
                             }`}>
@@ -327,7 +530,7 @@ export default function LevelsBadgesTab() {
             {Object.entries(badgesByTier).map(([tierName, badges]) => (
               <div key={tierName}>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-lg font-bold text-slate-800">{tierName} Tier</h2>
+                  <h2 className="font-heading text-lg font-bold text-slate-800">{tierName} Tier</h2>
                   <div className="h-px flex-1 bg-slate-200" />
                 </div>
                 
@@ -357,7 +560,7 @@ export default function LevelsBadgesTab() {
                              <Lock className="w-5 h-5 text-slate-400" />}
                           </div>
                           
-                          <h3 className={`font-bold text-sm mb-1 ${isEarned ? 'text-indigo-900' : 'text-slate-800'}`}>
+                          <h3 className={`font-heading font-bold text-sm mb-1 ${isEarned ? 'text-indigo-900' : 'text-slate-800'}`}>
                             {badge.name}
                           </h3>
                           <p className="text-xs text-slate-500 leading-relaxed mb-3">
@@ -396,7 +599,7 @@ export default function LevelsBadgesTab() {
                 <Award className="w-7 h-7" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                <h3 className="font-heading text-lg font-bold text-slate-900 leading-tight">
                   {selectedBadgeObj?.name || selectedBadgeToClaim || "Badge Details"}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -423,7 +626,7 @@ export default function LevelsBadgesTab() {
 
             {/* 6-Step Approval Workflow matching Flutter Screen */}
             <div className="space-y-2 pt-1">
-              <h4 className="text-xs font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
+              <h4 className="font-heading text-xs font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
               
               <div className="space-y-2 text-xs">
                 <div className="flex items-start gap-2.5">

@@ -8,12 +8,12 @@ export default function ContactUsPage() {
         <Link to="/login" className="mr-4 p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-lg font-bold">Contact Us</h1>
+        <h1 className="font-heading text-lg font-bold">Contact Us</h1>
       </header>
 
       <main className="max-w-3xl mx-auto w-full p-6 my-8 bg-white rounded-3xl border border-slate-100 shadow-sm flex-1">
         <span className="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-3">Contact</span>
-        <h1 className="text-2xl font-extrabold text-slate-900 mb-2">Contact Us</h1>
+        <h1 className="font-heading text-2xl font-extrabold text-slate-900 mb-2">Contact Us</h1>
         <p className="text-sm text-slate-500 mb-6 pb-4 border-b border-slate-100">We're here to help. Choose the right contact below for a faster response.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -46,7 +46,7 @@ export default function ContactUsPage() {
           </div>
         </div>
 
-        <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Registered Office</h2>
+        <h2 className="font-heading text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Registered Office</h2>
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
           <p className="text-slate-600 text-sm mb-1"><strong>J.J. College of Engineering and Technology</strong></p>
           <p className="text-slate-600 text-sm mb-1">(Autonomous - Sowdambikaa Group of Institutions)</p>
@@ -56,11 +56,11 @@ export default function ContactUsPage() {
           <p className="text-slate-600 text-sm"><strong>Email:</strong> <a href="mailto:jjcetpm@jjcet.ac.in" className="text-indigo-600 hover:text-indigo-800 underline">jjcetpm@jjcet.ac.in</a></p>
         </div>
 
-        <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Office Hours</h2>
+        <h2 className="font-heading text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Office Hours</h2>
         <p className="text-slate-600 leading-relaxed text-sm"><strong>Working Days:</strong> Monday - Sunday</p>
         <p className="text-slate-600 leading-relaxed text-sm"><strong>Hours:</strong> 9:00 AM - 5:00 PM IST</p>
 
-        <h2 className="text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Student Welfare &amp; Grievance Committees</h2>
+        <h2 className="font-heading text-lg font-bold text-slate-800 mt-6 mb-3 pb-2 border-b-2 border-slate-100">Student Welfare &amp; Grievance Committees</h2>
         <p className="text-slate-600 leading-relaxed text-sm">For matters relating to ragging, harassment, or general student grievances, please contact the relevant committee directly through JJCET's official channels:</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

@@ -102,7 +102,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
               <span>Switch Year</span>
             </button>
           )}
-          <h1 className="text-xl font-bold text-white">Activity & Thresholds</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Activity & Thresholds</h1>
           {academicYear && (
             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/30">
               {academicYear.replace('_', ' ')}
@@ -115,9 +115,9 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
       </div>
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Controls Bar (Matching Flutter 1:1) */}
+        {/* Controls Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-lg font-bold text-slate-800">Configure Stages & Thresholds</h2>
+          <h2 className="font-heading text-lg font-bold text-slate-800">Configure Stages & Thresholds</h2>
           <div className="flex flex-wrap items-center gap-3">
             <button 
               onClick={() => onPushView('all_activities')}
@@ -171,7 +171,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                   <div className="flex-1 pr-4 space-y-3">
                     {/* Header line */}
                     <div className="flex items-center space-x-3">
-                      <h3 className="font-bold text-xl text-slate-900">{stage.name}</h3>
+                      <h3 className="font-heading font-bold text-xl text-slate-900">{stage.name}</h3>
                       <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase border tracking-wider ${
                         statusText === 'ACTIVE' 
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
@@ -183,7 +183,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                       </span>
                     </div>
 
-                    {/* Metrics Row (Order, XP, M, I, G) - 1:1 Flutter Alignment */}
+                    {/* Metrics Row (Order, XP, M, I, G) */}
                     <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
                       <span className="text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
                         Order: {displayOrder}

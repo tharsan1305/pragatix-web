@@ -96,7 +96,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-bold">Captain Rewards — {academicYear.replace('_', ' ')}</h1>
+          <h1 className="font-heading text-xl font-bold">Captain Rewards — {academicYear.replace('_', ' ')}</h1>
           <p className="text-xs text-slate-400 mt-0.5">Configure automated weekly XP rewards for section leaders</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="font-bold text-base">Automatic Leadership Engine</h3>
+              <h3 className="font-heading font-bold text-base">Automatic Leadership Engine</h3>
               <p className="text-xs text-slate-300 mt-0.5">Awards weekly XP directly to Captains & Vice Captains at week end.</p>
             </div>
           </div>

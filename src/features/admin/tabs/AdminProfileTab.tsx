@@ -87,7 +87,7 @@ export default function AdminProfileTab() {
         
         {/* Profile Header matching Flutter SharedProfileHeader */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">
             {profile?.fullName || (isSuper ? 'System Administrator' : 'Administrator')}
           </h1>
           <p className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
@@ -98,7 +98,7 @@ export default function AdminProfileTab() {
         <div className="w-full max-w-md space-y-4">
           {/* 1. Personal Information Card */}
           <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+            <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
               Personal Information
             </h3>
             
@@ -140,7 +140,7 @@ export default function AdminProfileTab() {
           {/* 2. System Statistics Card (Super Admin) matching Flutter */}
           {isSuper && superAdminStats && (
             <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                 System Statistics
               </h3>
               
@@ -164,7 +164,7 @@ export default function AdminProfileTab() {
           {/* 3. Academic Statistics Card (Year Admin) matching Flutter */}
           {isAdmin && !isSuper && adminStats && (
             <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                 Academic Statistics
               </h3>
               

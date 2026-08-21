@@ -48,7 +48,7 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold">Captain &amp; Vice Captain Rewards</h1>
+            <h1 className="font-heading text-xl font-bold">Captain &amp; Vice Captain Rewards</h1>
             <p className="text-xs text-slate-400 mt-0.5">Select an academic year to configure automated weekly reward rules</p>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
             <Award className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="font-bold text-lg">Leadership Reward Engine</h2>
+            <h2 className="font-heading font-bold text-lg">Leadership Reward Engine</h2>
             <p className="text-xs text-slate-300 mt-0.5">Automated weekly XP distribution for Captains and Vice Captains</p>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-base">{y.yearName}</h3>
+                  <h3 className="font-heading font-bold text-slate-900 text-base">{y.yearName}</h3>
                   <p className="text-xs text-slate-500 mt-0.5">Configure Captain &amp; Vice Captain Rewards for {y.yearName}</p>
                 </div>
               </div>

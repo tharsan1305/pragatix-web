@@ -283,7 +283,7 @@ export default function StageDetailsPage({
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+          <h1 className="font-heading text-2xl font-bold text-white">{displayName}</h1>
         </div>
         <button onClick={fetchSubgroups} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -294,14 +294,14 @@ export default function StageDetailsPage({
         {/* Stage Overview & Threshold Card */}
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">{displayName}</h2>
+            <h2 className="font-heading text-2xl font-bold text-slate-900">{displayName}</h2>
             <p className="text-sm text-slate-500 mt-1">{displayDesc || 'Stage configuration & thresholds'}</p>
           </div>
 
           <div className="h-px bg-slate-100" />
 
           <div>
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
+            <h3 className="font-heading text-sm font-bold text-slate-700 mb-3">
               Stage Progression Thresholds
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -348,7 +348,7 @@ export default function StageDetailsPage({
         {/* Activity Categories / Subgroups Roster */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-slate-900">Activity Categories</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Activity Categories</h3>
             {!isTeacherView && (
               <button 
                 onClick={() => openModal()}
@@ -477,7 +477,7 @@ export default function StageDetailsPage({
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="text-lg font-bold text-slate-800">
+              <h2 className="font-heading text-lg font-bold text-slate-800">
                 {editingSubgroup ? 'Edit Subgroup' : 'Add New Subgroup'}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-200 rounded-full">
@@ -552,7 +552,7 @@ export default function StageDetailsPage({
       {unmapActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Remove Activity</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Remove Activity</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove <strong>'{unmapActivityTarget.name}'</strong> from this stage?
             </p>
@@ -578,7 +578,7 @@ export default function StageDetailsPage({
       {deleteActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Delete from System</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Delete from System</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to completely delete <strong>'{deleteActivityTarget.name}'</strong> from the entire system? This is permanent.
             </p>

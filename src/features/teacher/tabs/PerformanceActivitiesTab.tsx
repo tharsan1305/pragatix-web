@@ -289,7 +289,7 @@ export default function PerformanceActivitiesTab() {
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-2xl font-bold text-white flex-1">
+        <h1 className="font-heading text-2xl font-bold text-white flex-1">
           {currentFlowStep === 0 && "Performance Activities"}
           {currentFlowStep === 1 && `${CATEGORY_STYLES[selectedCategory || '']?.label} Events`}
           {currentFlowStep === 2 && "Select Year"}
@@ -334,7 +334,7 @@ export default function PerformanceActivitiesTab() {
                   <div className={`p-3 rounded-xl ${style.bg} ${style.color} mb-4`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-bold text-slate-800 text-lg">{style.label}</h3>
+                  <h3 className="font-heading font-bold text-slate-800 text-lg">{style.label}</h3>
                   <p className="text-xs text-slate-500 mt-1">{count} configured events</p>
                 </button>
               );
@@ -350,7 +350,7 @@ export default function PerformanceActivitiesTab() {
             
           return (
             <div className="space-y-5">
-              <h3 className="text-[15px] font-semibold text-slate-800 ml-1">
+              <h3 className="font-heading text-[15px] font-semibold text-slate-800 ml-1">
                 Select Predefined Event ({filteredEvents.length} available)
               </h3>
               <div className="relative">
@@ -449,7 +449,7 @@ export default function PerformanceActivitiesTab() {
         {currentFlowStep === 5 && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-xl border border-slate-200">
-              <h3 className="font-bold text-slate-800 text-lg">{selectedEvent?.name}</h3>
+              <h3 className="font-heading font-bold text-slate-800 text-lg">{selectedEvent?.name}</h3>
               <p className="text-sm text-slate-500">{selectedYear?.yearName} • {selectedDept?.name || selectedDept?.departmentName} {selectedSection ? `• ${selectedSection}` : ''}</p>
             </div>
             

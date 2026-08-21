@@ -187,7 +187,7 @@ export default function DepartmentsTab({ onBack }: Props) {
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="text-2xl font-bold text-white flex-1">Academic Departments</h1>
+          <h1 className="font-heading text-2xl font-bold text-white flex-1">Academic Departments</h1>
         </div>
       </div>
 
@@ -229,7 +229,7 @@ export default function DepartmentsTab({ onBack }: Props) {
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-[15px]">{dept.name}</h3>
+                    <h3 className="font-heading font-bold text-slate-900 text-[15px]">{dept.name}</h3>
                     <p className="text-xs font-medium text-slate-500">{dept.code}</p>
                   </div>
                 </div>
@@ -262,7 +262,7 @@ export default function DepartmentsTab({ onBack }: Props) {
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
             <div className="p-6 pb-4">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1">
+              <h2 className="font-heading text-[17px] font-bold text-slate-900 mb-1">
                 {editingDept ? `Edit Department: ${editingDept.code}` : 'Add New Department'}
               </h2>
             </div>
@@ -357,7 +357,7 @@ export default function DepartmentsTab({ onBack }: Props) {
       {deletingDeptId !== null && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Delete Department</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Delete Department</h3>
             <p className="text-xs text-slate-500">
               Are you sure you want to delete this department? This action cannot be undone.
             </p>

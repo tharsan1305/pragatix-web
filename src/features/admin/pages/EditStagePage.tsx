@@ -104,7 +104,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
         <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold text-white flex-1">Edit Stage</h1>
+        <h1 className="font-heading text-2xl font-bold text-white flex-1">Edit Stage</h1>
       </div>
 
       <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
@@ -116,7 +116,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
         ) : (
           <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Stage Configuration</h2>
+              <h2 className="font-heading text-xl font-bold text-slate-800">Stage Configuration</h2>
               <p className="text-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
             </div>
 
@@ -184,7 +184,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
 
             <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
               <div>
-                <h3 className="text-base font-bold text-slate-800">Subgroup Thresholds</h3>
+                <h3 className="font-heading text-base font-bold text-slate-800">Subgroup Thresholds</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
               </div>
 

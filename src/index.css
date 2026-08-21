@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --font-heading: 'Times New Roman', Times, serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+@theme {
+  --font-heading: 'Times New Roman', Times, serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
 @keyframes smoothFloat {
   0% {
     transform: scale(1) translate(0, 0);

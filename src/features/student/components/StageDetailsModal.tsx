@@ -35,7 +35,7 @@ export const StageDetailsModal: React.FC<StageDetailsModalProps> = ({
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-xl font-bold text-slate-900">{stage.name}</h1>
+        <h1 className="font-heading text-xl font-bold text-slate-900">{stage.name}</h1>
       </div>
 
       {/* Main Body */}

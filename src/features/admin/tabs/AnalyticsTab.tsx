@@ -772,18 +772,18 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
               )}
-              <h1 className="text-2xl font-black tracking-tight text-white">Analytics Dashboard</h1>
+              <h1 className="font-heading text-2xl font-black tracking-tight text-white">Analytics Dashboard</h1>
               {isSuperAdmin ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                  Super Admin Scope
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 tracking-wider">
+                  SUPER ADMIN SCOPE
                 </span>
               ) : isHOD ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center">
-                  <Lock className="w-3 h-3 mr-1" /> HOD Scoped ({hodUserDept || 'your department'})
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center tracking-wider">
+                  <Lock className="w-3 h-3 mr-1" /> HOD SCOPE — {hodUserDept || 'your department'}
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  Admin Scope
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 tracking-wider">
+                  ADMIN SCOPE
                 </span>
               )}
             </div>
@@ -1114,7 +1114,7 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
                 <div className="flex items-center space-x-2">
                   <Activity className="w-5 h-5 text-blue-600" />
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">Department: Awarded vs Penalty XP</h3>
+                    <h3 className="font-heading font-bold text-slate-900 text-sm">Department: Awarded vs Penalty XP</h3>
                     <p className="text-[11px] text-slate-400">Per-department comparison of issued XP vs penalty deductions</p>
                   </div>
                 </div>
@@ -1172,7 +1172,7 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">Monthly XP Awarded</h3>
+                    <h3 className="font-heading font-bold text-slate-900 text-sm">Monthly XP Awarded</h3>
                     <p className="text-[11px] text-slate-400">Total earned discipline points per month</p>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
@@ -1200,7 +1200,7 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div>
-                    <h3 className="font-bold text-slate-900 text-sm">XP Category Distribution</h3>
+                    <h3 className="font-heading font-bold text-slate-900 text-sm">XP Category Distribution</h3>
                     <p className="text-[11px] text-slate-400">Share across activity categories</p>
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -1241,7 +1241,7 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
                   <div className="flex items-center space-x-1.5">
                     <PieChartIcon className="w-4 h-4 text-purple-600" />
                     <div>
-                      <h3 className="font-bold text-slate-900 text-sm">Stage Tier Distribution</h3>
+                      <h3 className="font-heading font-bold text-slate-900 text-sm">Stage Tier Distribution</h3>
                       <p className="text-[11px] text-slate-400">Student count share by stage tier</p>
                     </div>
                   </div>
@@ -1285,12 +1285,12 @@ export default function AnalyticsTab({ onBack }: AnalyticsTabProps = {}) {
                   <div className="flex items-center space-x-2">
                     <Building className="w-5 h-5 text-indigo-600" />
                     <div>
-                      <h3 className="font-bold text-slate-900 text-sm">Department Performance Leaderboard</h3>
+                      <h3 className="font-heading font-bold text-slate-900 text-sm">Department Performance Leaderboard</h3>
                       <p className="text-[11px] text-slate-400">Institution-wide total discipline XP accumulated by department</p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                    Institution Wide
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 tracking-wider">
+                    INSTITUTION WIDE
                   </span>
                 </div>
 

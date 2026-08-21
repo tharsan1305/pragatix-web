@@ -139,7 +139,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-xl font-bold text-white">Attendance Settings</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Attendance Settings</h1>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
               <Calendar className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-base">Academic Calendar Configuration</h3>
+              <h3 className="font-heading font-bold text-slate-900 text-base">Academic Calendar Configuration</h3>
               <p className="text-xs text-slate-500 mt-0.5">Configure Months, Weeks, and Holidays</p>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
         <form onSubmit={handleSave} className="space-y-4">
           {/* Engine Configuration Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Engine Configuration</h2>
+            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Engine Configuration</h2>
 
             {/* Daily Attendance Engine Toggle */}
             <div className="flex items-start justify-between pt-1">
@@ -241,7 +241,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
 
           {/* Attendance XP Rules Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Attendance XP Rules</h2>
+            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Attendance XP Rules</h2>
 
             {/* Partial Day Penalty */}
             <div className="space-y-1">
@@ -288,7 +288,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
 
           {/* Week Boundary Penalties Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Week Boundary Penalties</h2>
+            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Week Boundary Penalties</h2>
 
             {/* Week Start Full Day Penalty */}
             <div className="space-y-1">

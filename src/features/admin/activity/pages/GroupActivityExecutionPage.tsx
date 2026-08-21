@@ -115,7 +115,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">Group Activity Execution</h1>
+            <h1 className="font-heading text-2xl font-bold">Group Activity Execution</h1>
             <p className="text-xs text-slate-400 mt-0.5">
               Evaluate groups, award XP points
               {year?.yearName ? ` • ${year.yearName}` : ''}
@@ -147,7 +147,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
                     </div>
 
                     <div>
-                      <h3 className="font-bold text-slate-900 text-base">{t.name || t.teamName || 'Group Team'}</h3>
+                      <h3 className="font-heading font-bold text-slate-900 text-base">{t.name || t.teamName || 'Group Team'}</h3>
                       <p className="text-xs text-slate-500 font-medium">Captain: <span className="font-semibold text-slate-700">{t.captainName || 'Not Assigned'}</span> ({t.captainRegNo || t.captainId || 'N/A'})</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">Total Members: {t.size || t.members?.length || 0}</p>
                     </div>
@@ -194,7 +194,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center space-x-3">
               <Award className="w-6 h-6 text-indigo-600" />
-              <h3 className="text-lg font-bold text-slate-900">Award XP to {scoringTeam.name}</h3>
+              <h3 className="font-heading text-lg font-bold text-slate-900">Award XP to {scoringTeam.name}</h3>
             </div>
 
             <form onSubmit={handleAwardXp} className="space-y-4">

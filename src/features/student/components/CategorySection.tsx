@@ -22,7 +22,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     <div className="space-y-3">
       {/* Category Header */}
       <div className="flex justify-between items-center">
-        <h3 className="text-base font-bold text-slate-800">
+        <h3 className="font-heading text-base font-bold text-slate-800">
           {toTitleCase(subgroup.name)}
         </h3>
         <div

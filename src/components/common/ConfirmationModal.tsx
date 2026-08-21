@@ -32,7 +32,7 @@ export default function ConfirmationModal({
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDangerous ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+              <h3 className="font-heading text-lg font-bold text-slate-900">{title}</h3>
             </div>
             <button
               onClick={onCancel}

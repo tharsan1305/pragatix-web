@@ -222,9 +222,33 @@ export default function AdminAttendanceTab({ onBack }: Props) {
     }
 
     if (activeTab === 'present') {
-      list = list.filter((s: any) => s && (s.status === 'PRESENT' || s.isPresent === true || s.status === 'P'));
+      list = list.filter((s: any) => {
+        if (!s) return false;
+        if (period && period.trim()) {
+          const pStatus = (s.periodStatuses?.[period] || s.periodStatuses?.[Number(period)] || s.status || '').toUpperCase();
+          return pStatus === 'P' || pStatus === 'OD' || pStatus === 'PRESENT';
+        }
+        const statuses = Object.values(s.periodStatuses || {}).map((v: any) => String(v).toUpperCase());
+        if (statuses.length > 0) {
+          return statuses.some((v: string) => v === 'P' || v === 'OD' || v === 'PRESENT');
+        }
+        return s.status === 'PRESENT' || s.isPresent === true || s.status === 'P';
+      });
     } else if (activeTab === 'absent') {
-      list = list.filter((s: any) => s && (s.status === 'ABSENT' || s.isPresent === false || s.status === 'A'));
+      list = list.filter((s: any) => {
+        if (!s) return false;
+        if (period && period.trim()) {
+          const pStatus = (s.periodStatuses?.[period] || s.periodStatuses?.[Number(period)] || s.status || '').toUpperCase();
+          return pStatus === 'A' || pStatus === 'L' || pStatus === 'ABSENT';
+        }
+        const statuses = Object.values(s.periodStatuses || {}).map((v: any) => String(v).toUpperCase());
+        if (statuses.length > 0) {
+          const hasPres = statuses.some((v: string) => v === 'P' || v === 'OD' || v === 'PRESENT');
+          const hasAbs = statuses.some((v: string) => v === 'A' || v === 'L' || v === 'ABSENT');
+          return hasAbs || (!hasPres && statuses.every((v: string) => v === '—' || v === 'A' || v === 'L'));
+        }
+        return s.status === 'ABSENT' || s.isPresent === false || s.status === 'A';
+      });
     }
 
     if (searchQuery && searchQuery.trim()) {
@@ -241,10 +265,50 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   };
 
   const processedStudents = getProcessedStudents();
-  const totalCount = summary?.totalStudents ?? (summary?.students?.length || (Array.isArray(summary?.presentStudents) ? (summary.presentStudents.length + (summary.absentStudents?.length || 0)) : 0));
-  const presentCount = summary?.totalPresent ?? (Array.isArray(summary?.presentStudents) ? summary.presentStudents.length : (summary?.students?.filter((s: any) => s.status === 'PRESENT' || s.isPresent).length || 0));
-  const absentCount = summary?.totalAbsent ?? (Array.isArray(summary?.absentStudents) ? summary.absentStudents.length : (summary?.students?.filter((s: any) => s.status === 'ABSENT' || !s.isPresent).length || 0));
-  const attendancePct = summary?.attendancePercentage ?? (totalCount > 0 ? Math.round((presentCount / totalCount) * 1000) / 10 : 0);
+  
+  // Calculate dynamic stats matching selected period or all periods
+  const calculateDynamicStats = () => {
+    if (!summary) return { totalCount: 0, presentCount: 0, absentCount: 0, attendancePct: 0 };
+    
+    let allList: any[] = [];
+    if (summary.students && Array.isArray(summary.students) && summary.students.length > 0) {
+      allList = summary.students;
+    } else {
+      const pList = Array.isArray(summary.presentStudents) ? summary.presentStudents.map((s: any) => ({ ...s, status: 'PRESENT' })) : [];
+      const aList = Array.isArray(summary.absentStudents) ? summary.absentStudents.map((s: any) => ({ ...s, status: 'ABSENT' })) : [];
+      allList = [...pList, ...aList];
+    }
+
+    const total = allList.length || (summary.totalStudents ?? 0);
+    if (total === 0) return { totalCount: 0, presentCount: 0, absentCount: 0, attendancePct: 0 };
+
+    if (period && period.trim()) {
+      let pCount = 0;
+      let aCount = 0;
+      for (const s of allList) {
+        const pStatus = (s.periodStatuses?.[period] || s.periodStatuses?.[Number(period)] || s.status || '').toUpperCase();
+        if (pStatus === 'P' || pStatus === 'OD' || pStatus === 'PRESENT') pCount++;
+        else if (pStatus === 'A' || pStatus === 'L' || pStatus === 'ABSENT') aCount++;
+      }
+      const pct = Math.round((pCount / total) * 1000) / 10;
+      return { totalCount: total, presentCount: pCount, absentCount: aCount, attendancePct: pct };
+    }
+
+    const pCount = summary.totalPresent ?? allList.filter((s: any) => {
+      const statuses = Object.values(s.periodStatuses || {}).map((v: any) => String(v).toUpperCase());
+      return statuses.length > 0 ? statuses.some((v: string) => v === 'P' || v === 'OD' || v === 'PRESENT') : (s.status === 'PRESENT' || s.isPresent);
+    }).length;
+
+    const aCount = summary.totalAbsent ?? allList.filter((s: any) => {
+      const statuses = Object.values(s.periodStatuses || {}).map((v: any) => String(v).toUpperCase());
+      return statuses.length > 0 ? statuses.some((v: string) => v === 'A' || v === 'L' || v === 'ABSENT') : (s.status === 'ABSENT' || !s.isPresent);
+    }).length;
+
+    const pct = summary.attendancePercentage ?? (total > 0 ? Math.round((pCount / total) * 1000) / 10 : 0);
+    return { totalCount: total, presentCount: pCount, absentCount: aCount, attendancePct: pct };
+  };
+
+  const { totalCount, presentCount, absentCount, attendancePct } = calculateDynamicStats();
 
   if (showCalendar) {
     return <AcademicCalendarPage onBack={() => setShowCalendar(false)} />;
@@ -278,7 +342,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
             </button>
           )}
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Attendance Dashboard</h1>
+            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">Attendance Dashboard</h1>
             <p className="text-xs text-slate-400 font-medium hidden sm:block">Monitor student daily attendance, periods, and department metrics</p>
           </div>
         </div>
@@ -444,7 +508,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
               <CalendarOff className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-slate-800">Holiday Configured</h3>
+              <h3 className="font-heading text-2xl font-bold text-slate-800">Holiday Configured</h3>
               <p className="text-sm text-slate-500 mt-1 max-w-sm">
                 This date (<span className="font-semibold text-slate-700">{selectedDate}</span>) is configured as a Holiday in attendance settings. Attendance cannot be recorded.
               </p>

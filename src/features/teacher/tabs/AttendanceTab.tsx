@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle, Check, CalendarX } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
+import { sanitizeAcademicYears } from '../../../utils/academicYearUtils';
 
 interface Student {
   studentId: number;
@@ -26,6 +27,8 @@ export default function AttendanceTab() {
   const [students, setStudents] = useState<Student[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isHoliday, setIsHoliday] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'present' | 'absent'>('all');
+  const [searchFilter, setSearchFilter] = useState<string>('');
 
   // Form State — matching Flutter teacher_attendance_tab.dart 1:1
   const [academicYearId, setAcademicYearId] = useState<number | ''>('');
@@ -92,9 +95,14 @@ export default function AttendanceTab() {
           const raw = Array.isArray(acadYearsRes.value?.data?.data)
             ? acadYearsRes.value.data.data
             : (Array.isArray(acadYearsRes.value?.data) ? acadYearsRes.value.data : []);
-          loadedAcadYears = raw.map((ay: any) => ({
-            id: ay.id,
-            name: ay.yearName || ay.name || `Academic Year ${ay.id}`
+          loadedAcadYears = sanitizeAcademicYears(raw).map((ay) => ({
+            id: typeof ay.id === 'number' ? ay.id : (parseInt(String(ay.id), 10) || 1),
+            name: ay.academicYear || ay.name
+          }));
+        } else {
+          loadedAcadYears = sanitizeAcademicYears([]).map((ay, idx) => ({
+            id: idx + 1,
+            name: ay.academicYear
           }));
         }
         setAcademicYears(loadedAcadYears);
@@ -445,7 +453,7 @@ export default function AttendanceTab() {
   return (
     <div className="flex flex-col h-full bg-slate-50">
       <div className="bg-slate-900 md:bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold flex items-center gap-2">
+        <h1 className="font-heading text-xl font-bold flex items-center gap-2">
           <CalendarCheck className="w-6 h-6" /> Mark Attendance
         </h1>
       </div>
@@ -453,7 +461,6 @@ export default function AttendanceTab() {
       <div className="p-4 flex flex-col md:flex-row gap-6 h-full overflow-hidden">
         {/* Form Section */}
         <div className="w-full md:w-1/3 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4 overflow-y-auto">
-
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Year</label>
             <select
@@ -544,7 +551,7 @@ export default function AttendanceTab() {
           ) : isHoliday ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-rose-50/50 rounded-xl border border-rose-200">
               <CalendarX className="w-16 h-16 text-rose-500 mb-4" />
-              <h3 className="font-bold text-rose-800 text-xl mb-2">Holiday Configured</h3>
+              <h3 className="font-heading font-bold text-rose-800 text-xl mb-2">Holiday Configured</h3>
               <p className="text-sm font-semibold text-rose-600 max-w-md">
                 Attendance cannot be marked. Today is configured as a Holiday in the academic calendar.
               </p>
@@ -557,95 +564,187 @@ export default function AttendanceTab() {
           ) : students.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-500">
               <AlertCircle className="w-12 h-12 text-amber-500 mb-3" />
-              <h3 className="font-bold text-slate-800 text-lg mb-1">No Students Found</h3>
+              <h3 className="font-heading font-bold text-slate-800 text-lg mb-1">No Students Found</h3>
               <p className="text-sm text-slate-500 max-w-sm">
                 {errorMsg || 'No students were found in the database matching your selected Year, Department, and Section.'}
               </p>
               <button
                 onClick={loadStudents}
-                className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold text-sm rounded-lg hover:bg-indigo-100 transition"
+                className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold text-sm rounded-lg hover:bg-indigo-100 transition cursor-pointer"
               >
                 Try Again
               </button>
             </div>
           ) : (
-            <>
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="font-bold text-slate-800 text-lg">Student List</h2>
-                <div className="text-sm font-medium text-slate-500">
-                  Total: {students.length} | Present: {students.filter(s => s.status === 'PRESENT').length} | Absent: {students.filter(s => s.status === 'ABSENT').length}
-                </div>
-              </div>
+            (() => {
+              const presentCount = students.filter((s) => s.status === 'PRESENT').length;
+              const absentCount = students.filter((s) => s.status === 'ABSENT').length;
 
-              {/* Quick Mark All Action Links - Matching Flutter 1:1 */}
-              <div className="flex items-center gap-4 text-xs font-semibold text-rose-500 mb-3">
-                <button 
-                  type="button" 
-                  onClick={markAllPresent} 
-                  className="hover:underline cursor-pointer transition-colors"
-                >
-                  Mark All Present
-                </button>
-                <button 
-                  type="button" 
-                  onClick={markAllAbsent} 
-                  className="hover:underline cursor-pointer transition-colors"
-                >
-                  Mark All Absent
-                </button>
-              </div>
+              const visibleStudents = students.filter((s) => {
+                if (statusFilter === 'present' && s.status !== 'PRESENT') return false;
+                if (statusFilter === 'absent' && s.status !== 'ABSENT') return false;
+                if (searchFilter.trim()) {
+                  const q = searchFilter.toLowerCase().trim();
+                  const name = (s.studentName || '').toLowerCase();
+                  const reg = (s.registerNumber || '').toLowerCase();
+                  return name.includes(q) || reg.includes(q);
+                }
+                return true;
+              });
 
-              <div className="flex-1 overflow-y-auto pr-2 space-y-3">
-                {students.map((student) => (
-                  <div key={student.studentId} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
-                    <div>
-                      <div className="font-bold text-slate-800">{student.studentName}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{student.registerNumber}</div>
+              return (
+                <>
+                  {/* Top Stats & Title */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <h2 className="font-heading font-bold text-slate-800 text-lg">Student List</h2>
+                    <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                      Total: <span className="text-slate-800 font-bold">{students.length}</span> • Present: <span className="text-emerald-700 font-bold">{presentCount}</span> • Absent: <span className="text-rose-700 font-bold">{absentCount}</span>
+                    </div>
+                  </div>
+
+                  {/* Status Tabs and Search Input */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
+                    {/* Search */}
+                    <div className="relative w-full sm:w-60">
+                      <input
+                        type="text"
+                        value={searchFilter}
+                        onChange={(e) => setSearchFilter(e.target.value)}
+                        placeholder="Search student or reg no..."
+                        className="w-full pl-3 pr-8 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-medium"
+                      />
+                      {searchFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchFilter('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
 
-                    {/* Segmented [ P | A ] Control - Matching Flutter 1:1 */}
-                    <div className="inline-flex rounded-full border border-slate-200 p-1 bg-white shadow-inner">
+                    {/* Filter Tabs */}
+                    <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold w-full sm:w-auto">
                       <button
                         type="button"
-                        onClick={() => setStudentStatus(student.studentId, 'PRESENT')}
-                        className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                          student.status === 'PRESENT'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'
+                        onClick={() => setStatusFilter('all')}
+                        className={`flex-1 sm:px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                          statusFilter === 'all'
+                            ? 'bg-white text-slate-900 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900'
                         }`}
                       >
-                        {student.status === 'PRESENT' && <Check className="w-3.5 h-3.5" />}
-                        <span>P</span>
+                        All ({students.length})
                       </button>
                       <button
                         type="button"
-                        onClick={() => setStudentStatus(student.studentId, 'ABSENT')}
-                        className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                          student.status === 'ABSENT'
-                            ? 'bg-rose-500 text-white shadow-sm'
-                            : 'text-slate-500 hover:text-slate-800'
+                        onClick={() => setStatusFilter('present')}
+                        className={`flex-1 sm:px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                          statusFilter === 'present'
+                            ? 'bg-white text-emerald-700 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900'
                         }`}
                       >
-                        {student.status === 'ABSENT' && <Check className="w-3.5 h-3.5" />}
-                        <span>A</span>
+                        Present ({presentCount})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStatusFilter('absent')}
+                        className={`flex-1 sm:px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                          statusFilter === 'absent'
+                            ? 'bg-white text-rose-700 shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Absent ({absentCount})
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
 
-              {/* Purple Pill Save Attendance Button - Matching Flutter 1:1 */}
-              <div className="pt-4 mt-4 border-t border-slate-200 flex justify-center">
-                <button
-                  onClick={submitAttendance}
-                  disabled={submitting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                >
-                  <Save className="w-5 h-5" />
-                  <span>{submitting ? 'Saving...' : 'Save Attendance'}</span>
-                </button>
-              </div>
-            </>
+                  {/* Quick Mark All Action Links - Matching Flutter 1:1 */}
+                  <div className="flex items-center justify-between text-xs font-semibold text-rose-500 mb-3 px-1">
+                    <div className="flex items-center gap-4">
+                      <button 
+                        type="button" 
+                        onClick={markAllPresent} 
+                        className="hover:underline cursor-pointer transition-colors"
+                      >
+                        Mark All Present
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={markAllAbsent} 
+                        className="hover:underline cursor-pointer transition-colors"
+                      >
+                        Mark All Absent
+                      </button>
+                    </div>
+                    <span className="text-slate-400 font-normal">
+                      Showing {visibleStudents.length} of {students.length}
+                    </span>
+                  </div>
+
+                  {/* Student List Scrollable */}
+                  <div className="flex-1 overflow-y-auto pr-2 space-y-2.5">
+                    {visibleStudents.length === 0 ? (
+                      <div className="py-12 text-center text-slate-400 text-xs font-medium">
+                        No students match the selected filter.
+                      </div>
+                    ) : (
+                      visibleStudents.map((student) => (
+                        <div key={student.studentId} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200 shadow-xs">
+                          <div>
+                            <div className="font-bold text-slate-800 text-sm">{student.studentName}</div>
+                            <div className="text-xs text-slate-500 mt-0.5 font-mono">{student.registerNumber}</div>
+                          </div>
+
+                          {/* Segmented [ P | A ] Control - Matching Flutter 1:1 */}
+                          <div className="inline-flex rounded-full border border-slate-200 p-1 bg-white shadow-inner">
+                            <button
+                              type="button"
+                              onClick={() => setStudentStatus(student.studentId, 'PRESENT')}
+                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                                student.status === 'PRESENT'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs'
+                                  : 'text-slate-500 hover:text-slate-800'
+                              }`}
+                            >
+                              {student.status === 'PRESENT' && <Check className="w-3.5 h-3.5" />}
+                              <span>P</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setStudentStatus(student.studentId, 'ABSENT')}
+                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                                student.status === 'ABSENT'
+                                  ? 'bg-rose-500 text-white shadow-xs'
+                                  : 'text-slate-500 hover:text-slate-800'
+                              }`}
+                            >
+                              {student.status === 'ABSENT' && <Check className="w-3.5 h-3.5" />}
+                              <span>A</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Purple Pill Save Attendance Button - Matching Flutter 1:1 */}
+                  <div className="pt-4 mt-4 border-t border-slate-200 flex justify-center">
+                    <button
+                      onClick={submitAttendance}
+                      disabled={submitting}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      <Save className="w-5 h-5" />
+                      <span>{submitting ? 'Saving...' : 'Save Attendance'}</span>
+                    </button>
+                  </div>
+                </>
+              );
+            })()
           )}
         </div>
       </div>

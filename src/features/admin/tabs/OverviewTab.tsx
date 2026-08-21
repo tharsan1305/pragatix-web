@@ -54,7 +54,7 @@ export default function OverviewTab({ onPushView }: Props) {
       {/* Header */}
       <div className="bg-slate-900 px-6 pt-10 pb-6 text-white shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Admin Overview</h1>
+          <h1 className="font-heading text-2xl font-bold">Admin Overview</h1>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => onPushView('analytics')}
@@ -81,7 +81,7 @@ export default function OverviewTab({ onPushView }: Props) {
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-white mb-0.5">Welcome back, System Admin</h2>
+          <h2 className="font-heading text-xl font-bold text-white mb-0.5">Welcome back, System Admin</h2>
           <p className="text-xs text-slate-300">Here is a summary of the discipline system metrics.</p>
         </div>
       </div>
@@ -104,9 +104,9 @@ export default function OverviewTab({ onPushView }: Props) {
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-bold text-sm text-white">Analytics & Executive Reporting</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                      Institution Scope
+                    <h3 className="font-heading font-bold text-sm text-white">Analytics & Executive Reporting</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 tracking-wider">
+                      INSTITUTION SCOPE
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">

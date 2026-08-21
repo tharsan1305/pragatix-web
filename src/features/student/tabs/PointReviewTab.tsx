@@ -151,7 +151,7 @@ export default function PointReviewTab() {
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Header */}
       <div className="bg-slate-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md">
-        <h1 className="text-xl font-bold">XP Tracker</h1>
+        <h1 className="font-heading text-xl font-bold">XP Tracker</h1>
       </div>
 
       {hasCodingBonus && (
@@ -165,7 +165,7 @@ export default function PointReviewTab() {
         
         {/* Category Cards */}
         <section>
-          <h2 className="text-lg font-bold text-slate-800 mb-3">XP Category Summary</h2>
+          <h2 className="font-heading text-lg font-bold text-slate-800 mb-3">XP Category Summary</h2>
           <div className="flex overflow-x-auto gap-3 pb-4 snap-x">
             {Object.entries(xpByCategory).map(([cat, val], idx) => {
               const conf = CATEGORY_CONFIG[cat] || DEFAULT_CATEGORY_CONFIG;
@@ -187,7 +187,7 @@ export default function PointReviewTab() {
 
         {/* History List */}
         <section>
-          <h2 className="text-lg font-bold text-slate-800 mb-3">XP Submission History</h2>
+          <h2 className="font-heading text-lg font-bold text-slate-800 mb-3">XP Submission History</h2>
           
           {history.length === 0 ? (
             <div className="text-center py-10 text-slate-500">
@@ -245,7 +245,7 @@ export default function PointReviewTab() {
           <div className="bg-white w-full sm:w-[480px] rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 max-h-[90vh] overflow-y-auto">
             
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-slate-800">Submit Activity Evidence</h2>
+              <h2 className="font-heading text-xl font-bold text-slate-800">Submit Activity Evidence</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>
@@ -327,7 +327,7 @@ export default function PointReviewTab() {
 
               {currentStep === 4 && (
                 <div>
-                  <h3 className="font-bold text-slate-800 mb-3">Claim Preview</h3>
+                  <h3 className="font-heading font-bold text-slate-800 mb-3">Claim Preview</h3>
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-600 space-y-2">
                     <div><span className="font-medium text-slate-800">Activity:</span> {selectedActivity?.name}</div>
                     <div><span className="font-medium text-slate-800">Category:</span> {selectedCategory}</div>

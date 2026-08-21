@@ -63,7 +63,7 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-bold">Activity &amp; Thresholds</h1>
+            <h1 className="font-heading text-xl font-bold">Activity &amp; Thresholds</h1>
             <p className="text-xs text-red-100 mt-0.5">Select an academic year to manage stages &amp; activities</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
 
       <div className="flex-1 p-6 max-w-xl mx-auto w-full space-y-6 pt-8">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-extrabold text-slate-900">Select Academic Year</h2>
+          <h2 className="font-heading text-2xl font-extrabold text-slate-900">Select Academic Year</h2>
           <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">
             Please select an academic year to manage its stages and activities.
           </p>
@@ -122,7 +122,7 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
                   <div className="flex items-center space-x-2.5">
                     <GraduationCap className="w-5 h-5 text-slate-700" />
                     <div>
-                      <h3 className="font-bold text-slate-900 text-base">{y.yearName}</h3>
+                      <h3 className="font-heading font-bold text-slate-900 text-base">{y.yearName}</h3>
                       <p className="text-xs text-slate-400 font-medium">Manage Stage {y.yearNo || idx + 1} activities</p>
                     </div>
                   </div>

@@ -80,12 +80,7 @@ export default function CCInboxTab({ onBack }: Props) {
 
       // 3. Fetch Penalty requests
       try {
-        let penRes;
-        try {
-          penRes = await apiClient.get('/api/penalties/cc-inbox');
-        } catch (e) {
-          penRes = await apiClient.get('/api/v1/penalties/cc-inbox');
-        }
+        const penRes = await apiClient.get('/api/penalties/cc-inbox');
 
         if (penRes.data?.success) {
           const raw = penRes.data.data;
@@ -128,12 +123,7 @@ export default function CCInboxTab({ onBack }: Props) {
   const fetchMyRequests = async () => {
     setIsLoading(true);
     try {
-      let response;
-      try {
-        response = await apiClient.get('/api/penalties/my-requests');
-      } catch (e) {
-        response = await apiClient.get('/api/v1/penalties/my-requests');
-      }
+      const response = await apiClient.get('/api/penalties/my-requests');
 
       if (response.data?.success) {
         const raw = response.data.data;
@@ -161,11 +151,7 @@ export default function CCInboxTab({ onBack }: Props) {
       } else if (isRemoval) {
         response = await teamService.approveRemovalRequest(item.id);
       } else {
-        try {
-          response = await apiClient.put(`/api/penalties/${item.id}/approve`);
-        } catch (e) {
-          response = await apiClient.put(`/api/v1/penalties/${item.id}/approve`);
-        }
+        response = await apiClient.put(`/api/penalties/${item.id}/approve`);
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
@@ -201,15 +187,9 @@ export default function CCInboxTab({ onBack }: Props) {
       } else if (isRemoval) {
         response = await teamService.rejectRemovalRequest(rejectingItem.id);
       } else {
-        try {
-          response = await apiClient.put(`/api/penalties/${rejectingItem.id}/reject`, {
-            reason: rejectReason
-          });
-        } catch (e) {
-          response = await apiClient.put(`/api/v1/penalties/${rejectingItem.id}/reject`, {
-            reason: rejectReason
-          });
-        }
+        response = await apiClient.put(`/api/penalties/${rejectingItem.id}/reject`, {
+          reason: rejectReason
+        });
       }
       toast.dismiss(toastId);
       if (response.status === 200 || response.data?.success) {
@@ -262,7 +242,7 @@ export default function CCInboxTab({ onBack }: Props) {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-bold">Class Coordinator Inbox</h1>
+            <h1 className="font-heading text-xl font-bold">Class Coordinator Inbox</h1>
             <p className="text-xs text-slate-400">Review student activity completion & penalty requests</p>
           </div>
         </div>
@@ -357,7 +337,7 @@ export default function CCInboxTab({ onBack }: Props) {
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${badgeClass}`}>
                         {badgeLabel}
                       </span>
-                      <h3 className="font-bold text-slate-900 text-base">{studentName}</h3>
+                      <h3 className="font-heading font-bold text-slate-900 text-base">{studentName}</h3>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-extrabold border uppercase tracking-wider ${statusBg}`}>
                       {status}
@@ -455,7 +435,7 @@ export default function CCInboxTab({ onBack }: Props) {
       {rejectingItem && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Reject Request</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Reject Request</h3>
             <p className="text-xs text-slate-500">
               Please enter the reason for rejecting penalty request for <span className="font-semibold text-slate-700">{rejectingItem.studentName}</span>.
             </p>

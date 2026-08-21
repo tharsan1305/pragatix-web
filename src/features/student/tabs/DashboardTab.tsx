@@ -186,7 +186,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
     <div className="bg-slate-50 min-h-screen pb-32">
       {/* Header */}
       <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
-        <h1 className="text-xl font-bold">Student Dashboard</h1>
+        <h1 className="font-heading text-xl font-bold">Student Dashboard</h1>
         <div className="flex items-center gap-3">
           <FireStreakIcon streakCount={displayStreak} onClick={onOpenStreaks} />
 
@@ -205,7 +205,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         <div className="flex justify-between items-center">
           <div>
             <div className="text-slate-500 text-sm">Welcome back,</div>
-            <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+            <h2 className="font-heading text-2xl font-extrabold text-slate-900 flex items-center gap-2">
               {profile.studentName}
               {(profile.isCaptain || profile.isViceCaptain) && (
                 <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500 text-slate-950 uppercase tracking-wider shadow-sm flex items-center gap-1">
@@ -242,7 +242,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Level Progress */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-slate-800">Level {levelNum} — {levelTitle}</h3>
+            <h3 className="font-heading font-bold text-slate-800">Level {levelNum} — {levelTitle}</h3>
             <Stars className="w-6 h-6 text-indigo-500" />
           </div>
           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
@@ -260,7 +260,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {!hasActiveStage ? (
           <div className="bg-red-50 rounded-2xl p-5 border border-red-200 text-center space-y-2">
             <LockKeyhole className="w-8 h-8 mx-auto text-red-500" />
-            <h3 className="font-bold text-red-600 text-base">No Active Stage</h3>
+            <h3 className="font-heading font-bold text-red-600 text-base">No Active Stage</h3>
             <p className="text-xs text-red-500">No active stage is currently available. Activities are locked.</p>
           </div>
         ) : (() => {
@@ -271,7 +271,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
           return (
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-bold text-slate-800 text-base">Stage {currentStage} Progress</h3>
+                <h3 className="font-heading font-bold text-slate-800 text-base">Stage {currentStage} Progress</h3>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                   Active
@@ -318,7 +318,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Active Streaks */}
         <div id="streaks-section">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-bold text-slate-800">Active Streaks</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-800">Active Streaks</h3>
             {onOpenStreaks && (
               <button
                 onClick={onOpenStreaks}
@@ -352,7 +352,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
         {/* Activity Streaks */}
         <div>
-          <h3 className="text-lg font-bold text-slate-800 mb-3">Activity Streaks</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">Activity Streaks</h3>
           {activityStreaks.length === 0 ? (
             <p className="text-slate-500 text-sm">No active activity streaks recorded.</p>
           ) : (
@@ -381,7 +381,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-bold text-slate-800">XP Summary</h3>
+            <h3 className="font-heading font-bold text-slate-800">XP Summary</h3>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex items-center p-2.5 rounded-xl border bg-purple-500/5 border-purple-500/20">
@@ -422,7 +422,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
         {/* Category Bar Chart */}
         <div>
-          <h3 className="text-lg font-bold text-slate-800 mb-3">XP by Category</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">XP by Category</h3>
           <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -450,7 +450,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* My Group Card */}
         <div id="my-group-section">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-bold text-slate-800">My Group</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-800">My Group</h3>
             {onSelectTab && (
               <button
                 onClick={() => onSelectTab(3)}
@@ -519,7 +519,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
         {/* Recent Activities */}
         <div>
-          <h3 className="text-lg font-bold text-slate-800 mb-3">Recent Point Actions</h3>
+          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">Recent Point Actions</h3>
           {history.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center text-slate-500 border border-slate-100 shadow-sm">
               No recent activities recorded.

@@ -150,7 +150,7 @@ export default function RecycleBinPage({ onBack }: Props) {
           <div>
             <div className="flex items-center space-x-2">
               <Trash2 className="w-6 h-6 text-rose-400" />
-              <h1 className="text-2xl font-bold">Recycle Bin</h1>
+              <h1 className="font-heading text-2xl font-bold">Recycle Bin</h1>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
               Restore soft-deleted items or permanently remove them
@@ -223,7 +223,7 @@ export default function RecycleBinPage({ onBack }: Props) {
             <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-700">Recycle Bin is Empty</h3>
+            <h3 className="font-heading text-base font-bold text-slate-700">Recycle Bin is Empty</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
               {searchQuery || selectedType !== 'ALL'
                 ? 'No items match your filter criteria.'
@@ -244,7 +244,7 @@ export default function RecycleBinPage({ onBack }: Props) {
 
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                      <h3 className="font-heading font-bold text-slate-900 text-sm sm:text-base">
                         {item.entityName}
                       </h3>
                       <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border ${getTypeBadgeColor(item.entityType)}`}>
@@ -307,7 +307,7 @@ export default function RecycleBinPage({ onBack }: Props) {
               <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-600" />
               </div>
-              <h3 className="font-bold text-lg text-slate-900">Delete Permanently?</h3>
+              <h3 className="font-heading font-bold text-lg text-slate-900">Delete Permanently?</h3>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
               Are you sure you want to permanently delete{' '}

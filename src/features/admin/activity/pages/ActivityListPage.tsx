@@ -189,7 +189,7 @@ export default function ActivityListPage({
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-white">{cleanTitle} – Activities</h1>
+          <h1 className="font-heading text-xl font-bold text-white">{cleanTitle} – Activities</h1>
         </div>
         <button onClick={fetchActivities} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -199,7 +199,7 @@ export default function ActivityListPage({
       <div className="flex-1 p-6 pb-24 max-w-4xl mx-auto w-full">
         <div className="mb-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-800">{cleanTitle}</h2>
+            <h2 className="font-heading text-2xl font-bold text-slate-800">{cleanTitle}</h2>
             <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 uppercase tracking-wide">
               {categoryLabel}
             </span>
@@ -268,7 +268,7 @@ export default function ActivityListPage({
       {unmapActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Remove Activity</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Remove Activity</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove <strong>'{unmapActivityTarget.name}'</strong> from this stage?
             </p>
@@ -294,7 +294,7 @@ export default function ActivityListPage({
       {deleteActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Delete from System</h3>
+            <h3 className="font-heading text-lg font-bold text-slate-900">Delete from System</h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to completely delete <strong>'{deleteActivityTarget.name}'</strong> from the entire system? This is permanent.
             </p>
@@ -321,7 +321,7 @@ export default function ActivityListPage({
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-in slide-in-from-bottom">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-slate-900">Add Activity</h3>
+              <h3 className="font-heading text-lg font-bold text-slate-900">Add Activity</h3>
               <button onClick={() => setIsAddOptionsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>
@@ -365,7 +365,7 @@ export default function ActivityListPage({
             <div className="bg-[#1E293B] px-5 py-4 flex items-center justify-between text-white border-b border-slate-800">
               <div className="flex items-center space-x-3">
                 <ListPlus className="w-5 h-5 text-white" />
-                <h3 className="text-lg font-bold text-white">Select Existing Activity</h3>
+                <h3 className="font-heading text-lg font-bold text-white">Select Existing Activity</h3>
               </div>
               <button 
                 onClick={() => setIsSelectExistingModalOpen(false)} 

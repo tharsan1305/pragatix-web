@@ -232,7 +232,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
             </button>
           )}
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
+            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
               <ShieldCheck className="w-6 h-6 text-emerald-400" />
               <span>Super Admin Management</span>
             </h1>
@@ -257,7 +257,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <Sparkles className="w-3.5 h-3.5" />
               <span>Super Admin Privileges Active</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Year Administrators</h2>
+            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight">Year Administrators</h2>
             <p className="text-sm text-slate-300 max-w-xl">
               Assign dedicated Year Admins to manage academic years and their departments.
             </p>
@@ -289,7 +289,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <AlertCircle className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-800">No Year Admins Configured</h3>
+              <h3 className="font-heading text-xl font-bold text-slate-800">No Year Admins Configured</h3>
               <p className="text-sm text-slate-500 mt-1">Click "Add Year Admin" to assign administrators to academic years.</p>
             </div>
             <button
@@ -313,7 +313,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                         {admin.fullName ? admin.fullName.charAt(0).toUpperCase() : 'A'}
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-900 text-base">{admin.fullName || admin.username}</h3>
+                        <h3 className="font-heading font-bold text-slate-900 text-base">{admin.fullName || admin.username}</h3>
                         <span className="text-xs font-mono font-semibold text-slate-500">@{admin.username}</span>
                       </div>
                     </div>
@@ -384,7 +384,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-5 h-5 text-red-500" />
-                <h3 className="font-bold text-lg text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
+                <h3 className="font-heading font-bold text-lg text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
               </div>
               <button
                 onClick={() => { setShowAddModal(false); resetForm(); }}
@@ -525,7 +525,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
               </div>
-              <h3 className="font-bold text-lg text-slate-900">Replace Assignment?</h3>
+              <h3 className="font-heading font-bold text-lg text-slate-900">Replace Assignment?</h3>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
               <strong className="text-slate-900 font-bold">"{replaceConfirmData.existingAdminName}"</strong> is already assigned to <span className="font-semibold text-slate-800">{replaceConfirmData.yearName}</span>. Do you want to replace them?
@@ -558,7 +558,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5 text-red-600" />
               </div>
-              <h3 className="font-bold text-lg text-slate-900">Confirm Delete</h3>
+              <h3 className="font-heading font-bold text-lg text-slate-900">Confirm Delete</h3>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove Year Admin <strong className="text-slate-900 font-bold">"{deleteConfirmData.adminName}"</strong>?

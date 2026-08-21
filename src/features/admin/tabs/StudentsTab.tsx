@@ -4,13 +4,15 @@ import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X, UserCheck, School
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import AdminBadgeRequestsTab from './AdminBadgeRequestsTab';
+import { sanitizeAcademicYears } from '../../../utils/academicYearUtils';
+import { downloadStudentTemplate } from '../../../utils/studentTemplateUtils';
 
 interface Props {
   onBack?: () => void;
 }
 
 interface LookupItem {
-  id: number;
+  id: number | string;
   [key: string]: any;
 }
 
@@ -42,6 +44,12 @@ export default function StudentsTab({ onBack }: Props) {
 
   // In-App Delete Confirmation State
   const [deleteConfirmStudent, setDeleteConfirmStudent] = useState<{ id: number; name: string } | null>(null);
+
+  // Pagination & Total Tracking State
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalStudentsCount, setTotalStudentsCount] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Lookups
   const [lookups, setLookups] = useState<{
@@ -142,7 +150,7 @@ export default function StudentsTab({ onBack }: Props) {
 
       setLookups({
         departments: depts,
-        academicYears: deduplicate(ayRes?.data?.data || []),
+        academicYears: sanitizeAcademicYears(ayRes?.data?.data || []),
         years: deduplicate(yearRes?.data?.data || []),
         semesters: deduplicate(semRes?.data?.data || []),
         genders: deduplicate(genRes?.data?.data || []),
@@ -212,14 +220,21 @@ export default function StudentsTab({ onBack }: Props) {
     setFilteredStudents(filtered);
   };
 
-  const fetchStudents = async () => {
-    setIsLoading(true);
+  const fetchStudents = async (isRefresh = false) => {
+    if (!isRefresh) setIsLoading(true);
+    setCurrentPage(0);
     try {
-      const response = await apiClient.get('/api/v1/students?page=0&size=100&sortBy=fullName');
+      const response = await apiClient.get('/api/v1/students?page=0&size=1000&sortBy=fullName');
       if (response.data?.success || response.status === 200) {
         const raw = response.data.data;
         const list = Array.isArray(raw) ? raw : (raw?.content || response.data?.content || []);
+        const total = raw?.totalElements ?? response.data?.totalElements ?? list.length;
+        const pages = raw?.totalPages ?? response.data?.totalPages ?? 1;
+        const isLast = raw?.last ?? (pages <= 1);
+
         setStudents(list);
+        setTotalStudentsCount(total);
+        setHasMore(!isLast && pages > 1);
         applyFilters(list, searchQuery, filterYear, filterDeptId, filterSectionId);
       }
     } catch (e) {
@@ -229,23 +244,47 @@ export default function StudentsTab({ onBack }: Props) {
     }
   };
 
-  const handleDownloadTemplate = async () => {
+  const fetchNextPage = async () => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const response = await apiClient.get(`/api/v1/students?page=${nextPage}&size=1000&sortBy=fullName`);
+      if (response.data?.success || response.status === 200) {
+        const raw = response.data.data;
+        const newList = Array.isArray(raw) ? raw : (raw?.content || response.data?.content || []);
+        const total = raw?.totalElements ?? response.data?.totalElements ?? (students.length + newList.length);
+        const pages = raw?.totalPages ?? response.data?.totalPages ?? 1;
+        const isLast = raw?.last ?? (nextPage + 1 >= pages);
+
+        setStudents(prev => {
+          const existingIds = new Set(prev.map(s => s.id));
+          const merged = [...prev];
+          for (const item of newList) {
+            if (!existingIds.has(item.id)) {
+              merged.push(item);
+              existingIds.add(item.id);
+            }
+          }
+          applyFilters(merged, searchQuery, filterYear, filterDeptId, filterSectionId);
+          return merged;
+        });
+
+        setCurrentPage(nextPage);
+        setTotalStudentsCount(total);
+        setHasMore(!isLast && nextPage + 1 < pages);
+      }
+    } catch (e) {
+      logger.error("Failed to fetch next student page:", e);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleDownloadTemplate = () => {
     const toastId = toast.loading('Downloading template...');
     try {
-      const res = await apiClient.get('/api/v1/students/bulk-upload/template', {
-        responseType: 'blob'
-      });
-      const blob = new Blob([res.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'SPDMS_Student_Bulk_Upload_Template.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(link);
+      downloadStudentTemplate();
       toast.dismiss(toastId);
       toast.success('Template downloaded to your downloads folder!');
     } catch (e: any) {
@@ -513,28 +552,47 @@ export default function StudentsTab({ onBack }: Props) {
     try {
       const payload: any = {
         fullName: formData.fullName.trim(),
+        name: formData.fullName.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         address: formData.address.trim(),
         regNo: formData.regNo.trim(),
+        studentId: formData.regNo.trim(),
         sprNo: formData.sprNo.trim(),
         active: formData.active,
         genderId: formData.genderId ? parseInt(formData.genderId) : null,
+        dateOfBirth: formData.dob || null,
         dob: formData.dob || null,
-        guardianName: formData.guardianName.trim() || null,
-        guardianRel: formData.guardianRel || null,
-        guardianPhone: formData.guardianPhone.trim() || null,
-        guardianEmail: formData.guardianEmail.trim() || null,
         departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
-        academicYearId: formData.academicYearId ? parseInt(formData.academicYearId) : null,
+        academicYearId: formData.academicYearId && !isNaN(parseInt(formData.academicYearId)) ? parseInt(formData.academicYearId) : null,
+        academicYear: lookups.academicYears.find(ay => String(ay.id) === String(formData.academicYearId))?.academicYear || formData.academicYearId || undefined,
         yearId: formData.yearId ? parseInt(formData.yearId) : null,
         semesterId: formData.semesterId ? parseInt(formData.semesterId) : null,
         sectionId: formData.sectionId ? parseInt(formData.sectionId) : null,
-        groupId: formData.groupId ? parseInt(formData.groupId) : null
+        groupId: formData.groupId ? parseInt(formData.groupId) : null,
+        teamId: formData.groupId ? parseInt(formData.groupId) : null,
       };
+
+      if (formData.guardianName.trim()) {
+        payload.guardian = {
+          guardianName: formData.guardianName.trim(),
+          relationship: formData.guardianRel || 'Guardian',
+          phoneNo: formData.guardianPhone.trim() || '',
+          email: formData.guardianEmail.trim() || ''
+        };
+        payload.guardianName = formData.guardianName.trim();
+        payload.guardianRel = formData.guardianRel || 'Guardian';
+        payload.guardianPhone = formData.guardianPhone.trim() || '';
+        payload.guardianEmail = formData.guardianEmail.trim() || '';
+      }
 
       if (formData.password.trim()) {
         payload.password = formData.password.trim();
+      } else if (!editingStudent && formData.dob) {
+        const parts = formData.dob.split("-");
+        if (parts.length === 3) {
+          payload.password = `${parts[2]}${parts[1]}${parts[0]}`;
+        }
       }
 
       if (editingStudent) {
@@ -545,11 +603,6 @@ export default function StudentsTab({ onBack }: Props) {
         if (!formData.regNo.trim()) {
           toast.dismiss(toastId);
           toast.error("Registration Number is required for new students.");
-          return;
-        }
-        if (!formData.password.trim()) {
-          toast.dismiss(toastId);
-          toast.error("Password is required for new students.");
           return;
         }
         await apiClient.post('/api/v1/students', payload);
@@ -596,10 +649,14 @@ export default function StudentsTab({ onBack }: Props) {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">Students Directory</h1>
+            <h1 className="font-heading text-xl font-bold text-white tracking-tight">Students Directory</h1>
             {!isLoading && (
               <p className="text-xs text-slate-300 font-medium">
-                Showing {filteredStudents.length}{students.length > filteredStudents.length ? ` of ${students.length}` : ''} students
+                {searchQuery || filterYear !== 'All' || filterDeptId !== 'All' || filterSectionId !== 'All'
+                  ? `Showing ${filteredStudents.length} of ${totalStudentsCount || students.length} students`
+                  : (totalStudentsCount > 0 && totalStudentsCount > filteredStudents.length
+                    ? `Showing ${filteredStudents.length} of ${totalStudentsCount} students`
+                    : `Showing ${totalStudentsCount || filteredStudents.length} students`)}
               </p>
             )}
           </div>
@@ -764,7 +821,7 @@ export default function StudentsTab({ onBack }: Props) {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h3 className="font-bold text-slate-900 text-sm md:text-base truncate">{name}</h3>
+                        <h3 className="font-heading font-bold text-slate-900 text-sm md:text-base truncate">{name}</h3>
                         <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
                           {student.score ?? student.xp ?? student.points ?? 0} XP
                         </span>
@@ -796,6 +853,24 @@ export default function StudentsTab({ onBack }: Props) {
                 </div>
               );
             })}
+            {hasMore && (
+              <div className="flex justify-center pt-4 pb-2">
+                <button
+                  onClick={fetchNextPage}
+                  disabled={isLoadingMore}
+                  className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs flex items-center space-x-2 shadow-xs cursor-pointer disabled:opacity-50 transition-colors"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-slate-500" />
+                      <span>Loading more students...</span>
+                    </>
+                  ) : (
+                    <span>Load More Students</span>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -816,7 +891,7 @@ export default function StudentsTab({ onBack }: Props) {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
             <div className="bg-[#1E293B] text-white px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold flex items-center gap-2">
+              <h2 className="font-heading text-lg font-bold flex items-center gap-2">
                 <Bell className="w-5 h-5 text-amber-400" />
                 <span>Pending Badge Requests</span>
               </h2>
@@ -846,7 +921,7 @@ export default function StudentsTab({ onBack }: Props) {
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="text-base font-bold text-slate-900">Delete Student</h3>
+              <h3 className="font-heading text-base font-bold text-slate-900">Delete Student</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Are you sure you want to delete <strong className="text-slate-800 font-bold">{deleteConfirmStudent.name}</strong>?
               </p>
@@ -877,7 +952,7 @@ export default function StudentsTab({ onBack }: Props) {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-slate-50 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="p-4 md:p-6 border-b border-slate-200 flex justify-between items-center bg-white rounded-t-2xl">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="font-heading text-lg font-bold text-slate-900">
                 {editingStudent ? 'Edit Student Details' : 'Add New Student'}
               </h2>
               <button 
@@ -1156,11 +1231,11 @@ export default function StudentsTab({ onBack }: Props) {
                 </div>
               </div>
 
-              {/* Section 4: Account & Security */}
+              {/* Section 4: Account & Group Details */}
               <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-4">
                 <h3 className="text-sm font-bold text-slate-700 tracking-wide flex items-center space-x-2">
                   <Shield className="w-4 h-4 text-slate-500" />
-                  <span>Account & Security</span>
+                  <span>Account & Group</span>
                 </h3>
 
                 <div>
@@ -1177,22 +1252,6 @@ export default function StudentsTab({ onBack }: Props) {
                       </option>
                     ))}
                   </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">
-                    {editingStudent ? 'New Password (Optional)' : 'Password'}
-                  </label>
-                  <input 
-                    type="password" 
-                    value={formData.password} 
-                    onChange={e => setFormData({...formData, password: e.target.value})} 
-                    placeholder={editingStudent ? 'Leave blank to keep current password' : 'Enter password'}
-                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm bg-white" 
-                  />
-                  {editingStudent && (
-                    <p className="text-[11px] text-slate-400 mt-1">Leave blank to keep current password</p>
-                  )}
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
@@ -1238,7 +1297,7 @@ export default function StudentsTab({ onBack }: Props) {
             <div className="bg-[#1E293B] text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-base sm:text-lg">Bulk Student Upload</h3>
+                <h3 className="font-heading font-bold text-base sm:text-lg">Bulk Student Upload</h3>
               </div>
               <button
                 onClick={() => {

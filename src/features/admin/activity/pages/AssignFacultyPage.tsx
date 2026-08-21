@@ -410,7 +410,7 @@ export default function AssignFacultyPage({
           <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="text-xl font-bold text-white">Assign Staff & Departments</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Assign Staff & Departments</h1>
         </div>
         <button
           onClick={loadData}
@@ -430,7 +430,7 @@ export default function AssignFacultyPage({
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
                 {safeStr(activity?.subgroup) || safeStr(activity?.category) || 'Activity Task'}
               </span>
-              <h2 className="text-lg md:text-xl font-black text-slate-900 mt-1">
+              <h2 className="font-heading text-lg md:text-xl font-black text-slate-900 mt-1">
                 {activity?.name || 'Activity'}
               </h2>
             </div>
@@ -469,7 +469,7 @@ export default function AssignFacultyPage({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-purple-600" />
-                  <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wide">Global Assignment</h3>
+                  <h3 className="font-heading font-bold text-sm text-slate-900">Global Assignment</h3>
                 </div>
                 <p className="text-xs text-slate-500">
                   Enable to assign this activity to ALL departments, ALL sections, and ALL faculty members automatically.
@@ -491,7 +491,7 @@ export default function AssignFacultyPage({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-indigo-600" />
-                  <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wide">Class Coordinator Assignment</h3>
+                  <h3 className="font-heading font-bold text-sm text-slate-900">Class Coordinator Assignment</h3>
                 </div>
                 <p className="text-xs text-slate-500">
                   Automatically assign this activity to the Class Coordinator (CC) of every section.
@@ -514,7 +514,7 @@ export default function AssignFacultyPage({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Settings className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wide">Attendance Engine Integration</h3>
+                    <h3 className="font-heading font-bold text-sm text-slate-900">Attendance Engine Integration</h3>
                   </div>
                   <p className="text-xs text-slate-500">
                     Automatically generate XP transactions based on student daily attendance.
@@ -551,7 +551,7 @@ export default function AssignFacultyPage({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-slate-900">Departments & Sections Assignment Matrix</h3>
+                <h3 className="font-heading text-base font-black text-slate-900">Departments & Sections Assignment Matrix</h3>
                 <p className="text-xs text-slate-500">Assign specific faculty members per department and section</p>
               </div>
               {assignments.length > 0 && (
@@ -820,7 +820,7 @@ export default function AssignFacultyPage({
 
             {/* CC Faculty Selection List */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="font-bold text-slate-800 text-sm">Select Faculty Member for Class</h3>
+              <h3 className="font-heading font-bold text-slate-800 text-sm">Select Faculty Member for Class</h3>
               <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
                 {ccScopedTeachers.map((teacher) => {
                   const tId = teacher.id || teacher.userId;
@@ -873,7 +873,7 @@ export default function AssignFacultyPage({
             {/* Modal Header */}
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold">Assign Faculty Member</h3>
+                <h3 className="font-heading text-base font-bold">Assign Faculty Member</h3>
                 <p className="text-xs text-slate-300 mt-0.5">
                   {assignModalTarget.deptName}{assignModalTarget.secName ? ` • Section ${assignModalTarget.secName}` : ' • All Sections'}
                 </p>
@@ -956,7 +956,7 @@ export default function AssignFacultyPage({
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="text-base font-bold text-slate-900">{confirmModal.title}</h3>
+              <h3 className="font-heading text-base font-bold text-slate-900">{confirmModal.title}</h3>
               <p className="text-xs text-slate-500 leading-relaxed">{confirmModal.message}</p>
             </div>
 

@@ -4,9 +4,11 @@ export type ActivityStatus = 'COMPLETED' | 'PENDING' | 'LOCKED';
 
 export interface Activity {
   id: number;
+  activityId?: number;
   activityName: string;
   description?: string;
   rewardXp: number;
+  penaltyXp?: number;
   awardedXp?: number;
   status: ActivityStatus;
   isCompleted: boolean;
@@ -17,9 +19,11 @@ export interface Activity {
   facultyName?: string;
   frequency?: string;
   evidence?: string[];
+  manualEvidenceName?: string;
   statusPillText?: string;
   allowStudentRequest?: boolean;
   category?: string;
+  xpType?: string;
 }
 
 export interface Subgroup {

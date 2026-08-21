@@ -87,7 +87,8 @@ export default function TeachersTab({ onBack }: Props) {
       setFilteredUsers(users.filter(u => 
         (u.fullName || '').toLowerCase().includes(query) ||
         (u.username || '').toLowerCase().includes(query) ||
-        (u.email || '').toLowerCase().includes(query)
+        (u.email || '').toLowerCase().includes(query) ||
+        (u.departmentName || '').toLowerCase().includes(query)
       ));
     }
   };
@@ -100,7 +101,7 @@ export default function TeachersTab({ onBack }: Props) {
       const subRoles = roles.filter((r: string) => r !== mainRole);
       
       const matchedDept = lookups.departments.find(d => d.name === user.departmentName);
-      const matchedDeptId = matchedDept ? matchedDept.id.toString() : (user.departmentId ? user.departmentId.toString() : '');
+      const matchedDeptId = user.departmentId ? user.departmentId.toString() : (matchedDept ? matchedDept.id.toString() : '');
 
       setFormData({
         username: user.username || '',
@@ -217,7 +218,7 @@ export default function TeachersTab({ onBack }: Props) {
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="text-2xl font-bold text-white flex-1">Staff Management</h1>
+          <h1 className="font-heading text-2xl font-bold text-white flex-1">Staff Management</h1>
         </div>
       </div>
 
@@ -257,8 +258,8 @@ export default function TeachersTab({ onBack }: Props) {
                     {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-[15px]">{user.fullName || user.username}</h3>
-                    <p className="text-xs font-medium text-slate-500">{user.email || 'No Email'} • {user.department?.name || 'No Dept'}</p>
+                    <h3 className="font-heading font-bold text-slate-900 text-[15px]">{user.fullName || user.username}</h3>
+                    <p className="text-xs font-medium text-slate-500">{user.email || 'No Email'} • {user.departmentName || user.department?.name || 'No Dept'}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {(user.roles || []).map((r: string) => (
                         <span key={r} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded uppercase tracking-wider">
@@ -297,7 +298,7 @@ export default function TeachersTab({ onBack }: Props) {
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
             <div className="p-6 pb-4">
-              <h2 className="text-[17px] font-bold text-slate-900 mb-1">
+              <h2 className="font-heading text-[17px] font-bold text-slate-900 mb-1">
                 {editingUser ? `Edit User: ${editingUser.username}` : 'Create New User'}
               </h2>
             </div>

@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, CheckCircle2, Check, Award } from 'lucide-react';
+import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, CheckCircle2, Check, Award, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
@@ -41,14 +41,19 @@ interface GroupData {
   viceCaptainName?: string;
   viceCaptainRegNo?: string;
   viceCaptain?: any;
+  departmentId?: number | string;
   departmentName?: string;
   department?: any;
+  academicYearId?: number | string;
   academicYearName?: string;
   academicYear?: any;
+  yearId?: number | string;
   yearName?: string;
   year?: any;
+  semesterId?: number | string;
   semesterName?: string;
   semester?: any;
+  sectionId?: number | string;
   sectionName?: string;
   section?: any;
   currentStage?: number;
@@ -86,26 +91,45 @@ const getTeamLevel = (g: GroupData) => {
   return g.currentStage || g.level || 1;
 };
 
-const normalizeYear = (raw: any): string => {
+const normalizeYearString = (raw: any): string => {
   if (!raw) return '';
   const s = String(raw).trim().toUpperCase();
-  if (s.includes('FIRST') || s === '1' || s === 'I' || s.includes('1ST')) return '1';
-  if (s.includes('SECOND') || s === '2' || s === 'II' || s.includes('2ND')) return '2';
-  if (s.includes('THIRD') || s === '3' || s === 'III' || s.includes('3RD')) return '3';
-  if (s.includes('FOURTH') || s === '4' || s === 'IV' || s.includes('4TH')) return '4';
+  if (s.includes('FIRST') || s === '1' || s === 'I' || s.includes('1ST') || s.includes('YEAR 1') || s.includes('1 YEAR')) return '1';
+  if (s.includes('SECOND') || s === '2' || s === 'II' || s.includes('2ND') || s.includes('YEAR 2') || s.includes('2 YEAR')) return '2';
+  if (s.includes('THIRD') || s === '3' || s === 'III' || s.includes('3RD') || s.includes('YEAR 3') || s.includes('3 YEAR')) return '3';
+  if (s.includes('FOURTH') || s === '4' || s === 'IV' || s.includes('4TH') || s.includes('YEAR 4') || s.includes('4 YEAR')) return '4';
   return s;
 };
 
 const isMatchingYear = (itemYear: any, selectedYr: string): boolean => {
-  if (!selectedYr || selectedYr === 'All') return true;
+  if (!selectedYr || selectedYr === 'All' || selectedYr === 'ALL' || selectedYr === 'All Years') return true;
   if (!itemYear) return false;
-  const nItem = normalizeYear(itemYear);
-  const nSel = normalizeYear(selectedYr);
+  const nItem = normalizeYearString(itemYear);
+  const nSel = normalizeYearString(selectedYr);
   return nItem === nSel || String(itemYear).trim().toLowerCase() === String(selectedYr).trim().toLowerCase();
 };
 
+const normalizeSection = (raw: any): string => {
+  if (!raw) return '';
+  return String(raw).replace(/^(SECTION|SEC)\s*/i, '').trim().toUpperCase();
+};
+
+const isMatchingSection = (itemSec: any, selectedSec: string): boolean => {
+  if (!selectedSec || selectedSec === 'All' || selectedSec === 'ALL' || selectedSec === 'All Sections') return true;
+  if (!itemSec) return false;
+  return normalizeSection(itemSec) === normalizeSection(selectedSec);
+};
+
+const isMatchingDept = (itemDept: any, selectedDept: string): boolean => {
+  if (!selectedDept || selectedDept === 'All' || selectedDept === 'ALL' || selectedDept === 'All Departments') return true;
+  if (!itemDept) return false;
+  const d1 = String(itemDept).trim().toLowerCase();
+  const d2 = String(selectedDept).trim().toLowerCase();
+  return d1 === d2 || d1.includes(d2) || d2.includes(d1);
+};
+
 const mapYearToEnumName = (rawYear: string) => {
-  if (!rawYear || rawYear === "All") return undefined;
+  if (!rawYear || rawYear === "All" || rawYear === "ALL" || rawYear === "All Years") return undefined;
   const clean = rawYear.trim().toUpperCase();
   if (clean.includes('FIRST') || clean === '1' || clean === 'I' || clean.includes('1ST')) {
     return 'FIRST_YEAR';
@@ -189,6 +213,17 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
   const [activeDeleteTeam, setActiveDeleteTeam] = useState<GroupData | null>(null);
 
+  // Create Team Modal State (for CC, HOD, and Admins)
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
+  const [createTeamName, setCreateTeamName] = useState('');
+  const [createTeamSize, setCreateTeamSize] = useState<number>(5);
+  const [createCaptainSearchQuery, setCreateCaptainSearchQuery] = useState('');
+  const [createCaptainSearchResults, setCreateCaptainSearchResults] = useState<any[]>([]);
+  const [isSearchingCaptain, setIsSearchingCaptain] = useState(false);
+  const [selectedCreateCaptain, setSelectedCreateCaptain] = useState<any | null>(null);
+
+  const canCreateTeam = isCC || isHOD || isAdmin || isSuperAdmin;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // CC/HOD scope must be resolved (via fetchLookups) before the first team
@@ -219,7 +254,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         setYearList(yearRes.data.data);
         const names = yearRes.data.data.map((y: any) => {
           const raw = String(y.name || y.yearName || y.yearNo || y.academicYear || '').trim();
-          const norm = normalizeYear(raw);
+          const norm = normalizeYearString(raw);
           if (norm === '1') return 'First Year';
           if (norm === '2') return 'Second Year';
           if (norm === '3') return 'Third Year';
@@ -261,9 +296,9 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
             setSelectedSection(secName);
 
             // Strictly lock the options to the CC's assigned class
-            setYears([matchedYr]);
-            setDepts([deptName]);
-            setSections([secName]);
+            setYears(["All", matchedYr]);
+            setDepts(["All", deptName]);
+            setSections(["All", secName]);
           }
         } catch (ccErr) {
           logger.warn("Could not set CC default filter:", ccErr);
@@ -273,7 +308,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         if (hodDeptName) {
           const matchedDept = dNames.find(d => d.toLowerCase().trim() === String(hodDeptName).toLowerCase().trim() || d.toLowerCase().includes(String(hodDeptName).toLowerCase())) || hodDeptName;
           setSelectedDept(matchedDept);
-          setDepts([matchedDept]);
+          setDepts(dNames);
         }
       }
 
@@ -426,6 +461,132 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
     };
   }, [memberSearchQuery, activeAddTeamId]);
 
+  // Cache of all students for captain search matching Flutter StudentSearchProvider
+  const [allStudentsCache, setAllStudentsCache] = useState<any[]>([]);
+
+  // Fetch all students for captain search matching Flutter StudentSearchProvider
+  useEffect(() => {
+    if (!isCreateTeamModalOpen) return;
+
+    let isMounted = true;
+    const fetchStudentsForCaptainSelection = async () => {
+      setIsSearchingCaptain(true);
+      try {
+        let list: any[] = [];
+        const res = await apiClient.get('/api/v1/students?page=0&size=1000&sortBy=fullName');
+        if (res.data?.success && res.data?.data) {
+          const raw = res.data.data;
+          list = Array.isArray(raw) ? raw : (raw.content || []);
+        }
+
+        if (isMounted) {
+          setAllStudentsCache(list);
+        }
+      } catch (err) {
+        logger.error("Error fetching students for captain selection:", err);
+      } finally {
+        if (isMounted) {
+          setIsSearchingCaptain(false);
+        }
+      }
+    };
+
+    fetchStudentsForCaptainSelection();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isCreateTeamModalOpen]);
+
+  // Compute filtered captain candidates based on search query matching Flutter searchStudents
+  useEffect(() => {
+    if (!isCreateTeamModalOpen) {
+      setCreateCaptainSearchResults([]);
+      return;
+    }
+
+    const q = createCaptainSearchQuery.toLowerCase().trim();
+    let filtered = allStudentsCache;
+
+    if (q) {
+      filtered = allStudentsCache.filter((s: any) => {
+        const fullName = String(s.fullName || s.name || '').toLowerCase();
+        const regNo = String(s.regNo || s.registerNumber || '').toLowerCase();
+        const sprNo = String(s.sprNo || '').toLowerCase();
+        const email = String(s.email || '').toLowerCase();
+        const dept = String(s.departmentName || s.department || '').toLowerCase();
+        return fullName.includes(q) || regNo.includes(q) || sprNo.includes(q) || email.includes(q) || dept.includes(q);
+      });
+    }
+
+    // Sort: unassigned students first, then alphabetically
+    filtered = [...filtered].sort((a: any, b: any) => {
+      const aAssigned = Boolean(a.teamName || a.teamId);
+      const bAssigned = Boolean(b.teamName || b.teamId);
+      if (aAssigned !== bAssigned) return aAssigned ? 1 : -1;
+      const nameA = String(a.fullName || a.name || '').toLowerCase();
+      const nameB = String(b.fullName || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    setCreateCaptainSearchResults(filtered);
+  }, [createCaptainSearchQuery, allStudentsCache, isCreateTeamModalOpen]);
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = createTeamName.trim();
+    if (!name) {
+      toast.error("Team name is required");
+      return;
+    }
+    if (createTeamSize < 1) {
+      toast.error("Team capacity must be at least 1");
+      return;
+    }
+    if (!selectedCreateCaptain) {
+      toast.error("Please select a team captain");
+      return;
+    }
+
+    const captainRegNo = selectedCreateCaptain.regNo || selectedCreateCaptain.registerNumber || selectedCreateCaptain.studentId;
+    if (!captainRegNo) {
+      toast.error("Valid Captain registration number is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const toastId = toast.loading("Creating team...");
+    try {
+      const payload: any = {
+        name,
+        size: Number(createTeamSize) || 5,
+        captainStudentId: String(captainRegNo).trim()
+      };
+
+      const response = await apiClient.post('/api/v1/teams', payload);
+      toast.dismiss(toastId);
+
+      if (response.data?.success || response.status === 200 || response.status === 201) {
+        toast.success("Team created successfully!");
+        setIsCreateTeamModalOpen(false);
+        setCreateTeamName('');
+        setCreateTeamSize(5);
+        setSelectedCreateCaptain(null);
+        setCreateCaptainSearchQuery('');
+        setCreateCaptainSearchResults([]);
+        fetchGroups();
+      } else {
+        toast.error(response.data?.message || "Failed to create team");
+      }
+    } catch (err: any) {
+      toast.dismiss(toastId);
+      logger.error("Error creating team:", err);
+      toast.error(err.response?.data?.message || err.message || "Failed to create team");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const fetchGroups = async () => {
     setIsLoading(true);
     try {
@@ -495,32 +656,36 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
   const getFilteredGroups = () => {
     return groups.filter(g => {
       const dept = g.departmentName || (typeof g.department === 'string' ? g.department : g.department?.name);
-      const year = g.yearName || g.year || g.academicYearName;
+      const year = g.yearName || g.year || g.yearId;
       const sec = g.sectionName || (typeof g.section === 'string' ? g.section : g.section?.sectionName);
       const members = g.teamMembers || g.members || g.students || [];
 
-      if (selectedDept !== "All") {
-        const matchDept = dept === selectedDept || members.some((m: any) =>
-          (m.departmentName || (typeof m.department === 'string' ? m.department : m.department?.name)) === selectedDept
+      // 1. Department Filter
+      if (selectedDept && selectedDept !== "All" && selectedDept !== "ALL") {
+        const matchDept = isMatchingDept(dept, selectedDept) || members.some((m: any) =>
+          isMatchingDept(m.departmentName || (typeof m.department === 'string' ? m.department : m.department?.name), selectedDept)
         );
         if (!matchDept) return false;
       }
 
-      if (selectedYear !== "All") {
+      // 2. Year Filter
+      if (selectedYear && selectedYear !== "All" && selectedYear !== "ALL") {
         const matchYear = isMatchingYear(year, selectedYear) || members.some((m: any) =>
-          isMatchingYear(m.yearName || m.year || m.academicYear, selectedYear)
+          isMatchingYear(m.yearName || m.year || m.yearId || m.academicYear, selectedYear)
         );
         if (!matchYear) return false;
       }
 
-      if (selectedSection !== "All") {
-        const matchSec = sec === selectedSection || members.some((m: any) =>
-          (m.sectionName || (typeof m.section === 'string' ? m.section : m.section?.sectionName)) === selectedSection
+      // 3. Section Filter
+      if (selectedSection && selectedSection !== "All" && selectedSection !== "ALL") {
+        const matchSec = isMatchingSection(sec, selectedSection) || members.some((m: any) =>
+          isMatchingSection(m.sectionName || (typeof m.section === 'string' ? m.section : m.section?.sectionName), selectedSection)
         );
         if (!matchSec) return false;
       }
 
-      if (selectedStage !== "All") {
+      // 4. Stage Filter
+      if (selectedStage && selectedStage !== "All" && selectedStage !== "ALL") {
         const level = getTeamLevel(g);
         const targetNum = parseInt(selectedStage.replace(/\D/g, ''), 10);
         if (!isNaN(targetNum)) {
@@ -803,8 +968,24 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
   return (
     <div className="flex flex-col h-full bg-slate-50 relative">
       <div className="bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold">View Groups</h1>
+        <h1 className="font-heading text-xl font-bold">View Groups</h1>
         <div className="flex items-center space-x-2">
+          {canCreateTeam && (
+            <button
+              onClick={() => {
+                setCreateTeamName('');
+                setCreateTeamSize(5);
+                setSelectedCreateCaptain(null);
+                setCreateCaptainSearchQuery('');
+                setCreateCaptainSearchResults([]);
+                setIsCreateTeamModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Team</span>
+            </button>
+          )}
           {(isAdmin || isSuperAdmin) && onPushView && (
             <button
               onClick={() => onPushView('captain_reward_year_selection')}
@@ -824,41 +1005,48 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         </div>
       </div>
 
-      <div className="bg-indigo-50 p-3 flex gap-2 border-b border-indigo-100 z-10 sticky top-[60px]">
+      <div className="bg-indigo-50/80 p-3 flex flex-wrap sm:flex-nowrap gap-2 border-b border-indigo-100 z-10 sticky top-[60px] shadow-xs">
+        {/* Year Filter */}
         <select
-          className={`flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-indigo-500 ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : ''}`}
+          className={`flex-1 min-w-[120px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
           value={selectedYear}
           disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => handleYearChange(e.target.value)}
         >
-          <option disabled>Year</option>
-          {years.map(y => <option key={y} value={y}>{y}</option>)}
+          <option value="All">All Years</option>
+          {years.filter(y => y !== 'All').map(y => <option key={y} value={y}>{y}</option>)}
         </select>
+
+        {/* Dept Filter */}
         <select
-          className={`flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-indigo-500 ${(isCC || isHOD) && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : ''}`}
+          className={`flex-1 min-w-[140px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
           value={selectedDept}
-          disabled={(isCC || isHOD) && !isAdmin && !isSuperAdmin}
+          disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => handleDeptChange(e.target.value)}
         >
-          <option disabled>Dept</option>
-          {depts.map(d => <option key={d} value={d}>{d}</option>)}
+          <option value="All">All Departments</option>
+          {depts.filter(d => d !== 'All').map(d => <option key={d} value={d}>{d}</option>)}
         </select>
+
+        {/* Section Filter */}
         <select
-          className={`flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-indigo-500 ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : ''}`}
+          className={`flex-1 min-w-[110px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-xs font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
           value={selectedSection}
           disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => setSelectedSection(e.target.value)}
         >
-          <option disabled>Section</option>
-          {sections.map(s => <option key={s} value={s}>{s}</option>)}
+          <option value="All">All Sections</option>
+          {sections.filter(s => s !== 'All').map(s => <option key={s} value={s}>{s.startsWith('Section') ? s : `Section ${s}`}</option>)}
         </select>
+
+        {/* Stage Filter */}
         <select
-          className="flex-1 bg-white border border-slate-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-indigo-500 font-semibold text-indigo-700"
+          className="flex-1 min-w-[110px] bg-white border border-indigo-200 rounded-lg px-2.5 py-2 text-xs font-bold text-indigo-700 focus:outline-none focus:border-indigo-500 cursor-pointer"
           value={selectedStage}
           onChange={e => setSelectedStage(e.target.value)}
         >
-          <option disabled>Stage</option>
-          {stages.map(st => <option key={st} value={st}>{st}</option>)}
+          <option value="All">All Stages</option>
+          {stages.filter(st => st !== 'All').map(st => <option key={st} value={st}>{st}</option>)}
         </select>
       </div>
 
@@ -871,6 +1059,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">
             <UsersRound className="w-16 h-16 mb-4 opacity-30" />
             <p className="text-sm font-medium">No groups found</p>
+            {canCreateTeam && (
+              <button
+                onClick={() => {
+                  setCreateTeamName('');
+                  setCreateTeamSize(5);
+                  setSelectedCreateCaptain(null);
+                  setCreateCaptainSearchQuery('');
+                  setCreateCaptainSearchResults([]);
+                  setIsCreateTeamModalOpen(true);
+                }}
+                className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create New Team</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -1069,7 +1273,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-5 shadow-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h1 className="text-2xl font-black text-indigo-950">{groupName}</h1>
+                      <h1 className="font-heading text-2xl font-black text-indigo-950">{groupName}</h1>
                     </div>
                     <span className="bg-amber-400 text-amber-950 text-xs font-black px-3 py-1 rounded-full shadow-sm">
                       Stage {level}
@@ -1114,7 +1318,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
                 {/* Management Actions Grid */}
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-3">Management Actions</h3>
+                  <h3 className="font-heading text-sm font-bold text-slate-700 mb-3">Management Actions</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => openAddMemberModal(tId)}
@@ -1154,7 +1358,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 {/* Team Members List */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-bold text-slate-700">Team Members ({members.length}/{size})</h3>
+                    <h3 className="font-heading text-sm font-bold text-slate-700">Team Members ({members.length}/{size})</h3>
                   </div>
 
                   <div className="space-y-2">
@@ -1238,7 +1442,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 pb-2">
-              <h2 className="text-lg font-bold text-slate-800">Edit Member Limit</h2>
+              <h2 className="font-heading text-lg font-bold text-slate-800">Edit Member Limit</h2>
               <p className="text-xs text-slate-500 mt-1">Set maximum capacity limit for this group.</p>
             </div>
 
@@ -1288,7 +1492,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-800">Add Team Member</h2>
+                  <h2 className="font-heading text-lg font-bold text-slate-800">Add Team Member</h2>
                   <p className="text-xs text-slate-500 font-medium">Search students by Name, Reg No, or SPR No</p>
                 </div>
               </div>
@@ -1435,7 +1639,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
           <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
               <div className="p-6 pb-2">
-                <h2 className="text-lg font-bold text-slate-800">Change Team Captain</h2>
+                <h2 className="font-heading text-lg font-bold text-slate-800">Change Team Captain</h2>
                 <p className="text-xs text-slate-500 mt-1">Select a member to assign as the new Team Captain.</p>
               </div>
 
@@ -1492,7 +1696,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
           <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
               <div className="p-6 pb-2">
-                <h2 className="text-lg font-bold text-slate-800">Change Team Vice Captain</h2>
+                <h2 className="font-heading text-lg font-bold text-slate-800">Change Team Vice Captain</h2>
                 <p className="text-xs text-slate-500 mt-1">Select a member to assign as the new Team Vice Captain.</p>
               </div>
 
@@ -1548,7 +1752,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-bold text-slate-800 mb-1">Delete Group?</h2>
+            <h2 className="font-heading text-lg font-bold text-slate-800 mb-1">Delete Group?</h2>
             <p className="text-xs text-slate-500 mb-6">
               Are you sure you want to delete <span className="font-bold text-slate-800">{activeDeleteTeam.teamName || activeDeleteTeam.name || activeDeleteTeam.groupName}</span>? This action cannot be undone.
             </p>
@@ -1570,6 +1774,210 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 {isSubmitting ? 'Deleting...' : 'Delete Group'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Team Modal */}
+      {isCreateTeamModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="font-heading text-lg font-bold text-slate-800">Create New Team</h2>
+                  <p className="text-xs text-slate-500 font-medium">Configure team details and appoint an initial captain</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsCreateTeamModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTeam} className="p-5 flex-1 flex flex-col overflow-hidden space-y-4">
+              {/* Team Name and Size Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-600 mb-1">Team Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={createTeamName}
+                    onChange={e => setCreateTeamName(e.target.value)}
+                    placeholder="e.g. Cyber Knights, Team Alpha"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm font-semibold transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 mb-1">Capacity *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    required
+                    value={createTeamSize}
+                    onChange={e => setCreateTeamSize(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm font-semibold text-center transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Selected Captain Card (if selected) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Team Captain * {selectedCreateCaptain ? <span className="text-emerald-600 font-semibold">(Selected)</span> : <span className="text-rose-500">(Required)</span>}
+                </label>
+
+                {selectedCreateCaptain ? (
+                  <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+                        <Crown className="w-5 h-5 text-amber-300" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">{selectedCreateCaptain.fullName}</h4>
+                        <p className="text-xs text-slate-600 font-medium">
+                          Reg: <span className="font-semibold text-slate-800">{selectedCreateCaptain.regNo || selectedCreateCaptain.registerNumber}</span>
+                          {selectedCreateCaptain.departmentName && <> • {selectedCreateCaptain.departmentName}</>}
+                          {selectedCreateCaptain.year && <> • Year {selectedCreateCaptain.year}</>}
+                          {selectedCreateCaptain.section && <> • Sec {selectedCreateCaptain.section}</>}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCreateCaptain(null)}
+                      className="px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Change
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {/* Search Field */}
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={createCaptainSearchQuery}
+                        onChange={e => setCreateCaptainSearchQuery(e.target.value)}
+                        placeholder="Search student by Name, Reg No, or SPR No to appoint as Captain..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm font-semibold transition-all"
+                      />
+                    </div>
+
+                    {/* Live Student List */}
+                    <div className="overflow-y-auto max-h-[220px] min-h-[160px] pr-1 space-y-2">
+                      {isSearchingCaptain ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-slate-400 space-y-1.5">
+                          <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
+                          <span className="text-xs font-semibold">Searching students...</span>
+                        </div>
+                      ) : createCaptainSearchQuery.trim() && createCaptainSearchResults.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-center">
+                          <UsersRound className="w-7 h-7 text-slate-300 mb-1" />
+                          <p className="text-xs font-semibold text-slate-600">No students found</p>
+                          <p className="text-[11px] text-slate-400">Try searching by registration number or full name</p>
+                        </div>
+                      ) : createCaptainSearchResults.length > 0 ? (
+                        createCaptainSearchResults.map((s: any) => {
+                          const isAlreadyInTeam = Boolean(s.teamName || s.teamId);
+                          return (
+                            <div
+                              key={s.id || s.regNo}
+                              onClick={() => {
+                                if (isAlreadyInTeam) {
+                                  toast.error(`Student already belongs to team "${s.teamName || 'another team'}"`);
+                                  return;
+                                }
+                                setSelectedCreateCaptain(s);
+                              }}
+                              className={`p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                                isAlreadyInTeam
+                                  ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed'
+                                  : 'bg-white border-slate-200/90 hover:border-emerald-400 hover:bg-emerald-50/40'
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-bold">
+                                  {s.fullName ? s.fullName.charAt(0).toUpperCase() : 'S'}
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-bold text-slate-800">{s.fullName}</h4>
+                                  <p className="text-[11px] text-slate-500 font-medium">
+                                    Reg: <span className="font-semibold text-slate-700">{s.regNo || s.registerNumber}</span>
+                                    {s.departmentName && <> • {s.departmentName}</>}
+                                    {s.year && <> • Year {s.year}</>}
+                                    {s.section && <> • Sec {s.section}</>}
+                                  </p>
+                                  {s.teamName && (
+                                    <p className="text-[10px] font-semibold text-amber-600">
+                                      Already in Team: {s.teamName}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                {isAlreadyInTeam ? (
+                                  <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 bg-slate-100 rounded-md">
+                                    Assigned
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-emerald-600 font-bold hover:underline">
+                                    Select Captain
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="py-6 px-4 bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 text-center">
+                          <p className="text-xs font-semibold text-slate-600">Type above to search live student directory</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">Select an unassigned student to appoint as team captain</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateTeamModalOpen(false)}
+                  className="px-4 py-2.5 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl transition-colors text-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !createTeamName.trim() || !selectedCreateCaptain}
+                  className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center space-x-1.5 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Create Team</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -57,7 +57,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold">My Activity Streaks</h1>
+            <h1 className="font-heading text-xl font-bold">My Activity Streaks</h1>
             <p className="text-xs text-slate-400 mt-0.5">Track your continuous activity execution & records</p>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
         ) : streaks.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl text-center text-slate-500 border border-slate-200 shadow-sm">
             <Zap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="font-bold text-slate-700 text-base">No Activity Streaks Recorded</h3>
+            <h3 className="font-heading font-bold text-slate-700 text-base">No Activity Streaks Recorded</h3>
             <p className="text-xs text-slate-400 mt-1">Complete your assigned activities consistently to build your streak record!</p>
           </div>
         ) : (
@@ -103,7 +103,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-bold text-slate-900 text-lg truncate flex-1 mr-3">{name}</h3>
+                    <h3 className="font-heading font-bold text-slate-900 text-lg truncate flex-1 mr-3">{name}</h3>
 
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1.5 ${

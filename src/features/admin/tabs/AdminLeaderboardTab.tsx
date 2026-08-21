@@ -170,7 +170,7 @@ export default function AdminLeaderboardTab() {
       <div className="bg-slate-800 text-white rounded-b-3xl shadow-lg">
         {/* Title and Action */}
         <div className="px-6 pt-5 pb-3 flex justify-between items-center">
-          <h1 className="text-2xl font-bold tracking-tight">Leaderboard</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">Leaderboard</h1>
           <button
             onClick={() => fetchLeaderboard(selectedYear, selectedDept, selectedSection)}
             disabled={isLoading}

@@ -66,7 +66,7 @@ export default function EditActivityPage({ onBack, onSuccess, activity: initialA
           <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-bold text-white">Edit Event</h1>
+          <h1 className="font-heading text-xl font-bold text-white">Edit Event</h1>
         </div>
         <button 
           type="submit" 

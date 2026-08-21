@@ -354,7 +354,7 @@ export default function TeacherActivityWorkflowPage({
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="text-lg font-bold tracking-wide">{getAppBarTitle()}</h1>
+          <h1 className="font-heading text-lg font-bold tracking-wide">{getAppBarTitle()}</h1>
         </div>
 
         <button
@@ -375,7 +375,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 1: SELECT ACADEMIC YEAR */}
         {currentFlowStep === 1 && (
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-[#1E293B]">Select Academic Year</h2>
+            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Academic Year</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
@@ -410,7 +410,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 2: SELECT DEPARTMENT */}
         {currentFlowStep === 2 && (
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-[#1E293B]">Select Department</h2>
+            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Department</h2>
 
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -457,7 +457,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 3: SELECT SECTION */}
         {currentFlowStep === 3 && (
           <div className="space-y-4">
-            <h2 className="text-base font-bold text-[#1E293B]">Select Section</h2>
+            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Section</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />

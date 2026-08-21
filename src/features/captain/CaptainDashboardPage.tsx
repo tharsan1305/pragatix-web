@@ -42,7 +42,7 @@ export default function CaptainDashboardPage() {
       {/* Sidebar (Desktop) */}
       <div className="hidden md:flex w-64 flex-col bg-slate-900 text-white shadow-xl z-20">
         <div className="p-6 border-b border-slate-800">
-          <h1 className="text-xl font-bold tracking-tight">PragatiX</h1>
+          <h1 className="font-heading text-xl font-bold tracking-tight">PragatiX</h1>
           <p className="text-xs text-slate-400 mt-1">Captain Portal</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-4">

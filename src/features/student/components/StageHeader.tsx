@@ -14,7 +14,7 @@ export const StageHeader: React.FC<StageHeaderProps> = ({ stage }) => {
       {/* Top Row: Title & Completion % */}
       <div className="flex justify-between items-start mb-3">
         <div>
-          <h3 className="text-lg font-bold tracking-tight">Stage Summary</h3>
+          <h3 className="font-heading text-lg font-bold tracking-tight">Stage Summary</h3>
           <span className={`text-xs font-bold ${
             stage.isCompleted ? 'text-emerald-300' : (stage.isLocked ? 'text-slate-300' : 'text-amber-200')
           }`}>

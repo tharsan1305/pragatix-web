@@ -17,7 +17,7 @@ export default function AdminActivityDetailPage({ activity, onBack, onEdit, onAs
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-white">Activity Details</h1>
+            <h1 className="font-heading text-2xl font-bold text-white">Activity Details</h1>
             <p className="text-slate-400 text-sm">{activity.name}</p>
           </div>
         </div>
@@ -42,7 +42,7 @@ export default function AdminActivityDetailPage({ activity, onBack, onEdit, onAs
       <div className="flex-1 p-6 max-w-4xl mx-auto w-full space-y-6">
         
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">General Info</h2>
+          <h2 className="font-heading text-xl font-bold text-slate-800 mb-4">General Info</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-slate-500">Name</p>
@@ -64,7 +64,7 @@ export default function AdminActivityDetailPage({ activity, onBack, onEdit, onAs
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Award & Penalty Rules</h2>
+          <h2 className="font-heading text-xl font-bold text-slate-800 mb-4">Award & Penalty Rules</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-slate-500">Award Enabled</p>
