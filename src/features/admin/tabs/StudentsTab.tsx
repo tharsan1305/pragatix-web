@@ -923,7 +923,7 @@ export default function StudentsTab({ onBack }: Props) {
             <div className="text-center space-y-1.5">
               <h3 className="font-heading text-base font-bold text-slate-900">Delete Student</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Are you sure you want to delete <strong className="text-slate-800 font-bold">{deleteConfirmStudent.name}</strong>?
+                Move <strong className="text-slate-800 font-bold">{deleteConfirmStudent.name}</strong> to the Recycle Bin? This can be restored later.
               </p>
             </div>
 

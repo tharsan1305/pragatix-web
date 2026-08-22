@@ -9,12 +9,13 @@ import LogoutModal from '../../../components/common/LogoutModal';
 
 export default function AdminProfileTab() {
   const { logout, isSuperAdmin } = useAuth();
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
 
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshingCache, setIsRefreshingCache] = useState(false);
+  const [showCacheConfirm, setShowCacheConfirm] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -190,12 +191,12 @@ export default function AdminProfileTab() {
             {/* Refresh DB Cache button for Super Admin */}
             {isSuper && (
               <button
-                onClick={handleRefreshCache}
+                onClick={() => setShowCacheConfirm(true)}
                 disabled={isRefreshingCache}
                 className="w-full py-3.5 px-4 bg-[#3B5998] hover:bg-[#2d4373] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshingCache ? 'animate-spin' : ''}`} />
-                <span>Refresh DB Cache</span>
+                <span>Refresh System Cache</span>
               </button>
             )}
 
@@ -217,6 +218,35 @@ export default function AdminProfileTab() {
           </div>
         </div>
       </div>
+
+      {/* Cache Refresh Confirmation Modal */}
+      {showCacheConfirm && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
+            <h3 className="font-heading font-bold text-base text-slate-900">Refresh System Cache?</h3>
+            <p className="text-sm text-slate-600">This will refresh the database cache for all users system-wide. This action is safe but affects performance temporarily. Continue?</p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setShowCacheConfirm(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowCacheConfirm(false);
+                  handleRefreshCache();
+                }}
+                disabled={isRefreshingCache}
+                className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-1"
+              >
+                {isRefreshingCache ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Logout Confirmation Modal */}
       <LogoutModal

@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { UserPlus, Trash2, Edit2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle, AlertTriangle, Key } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
@@ -39,7 +39,6 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
   // Form State
   const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -78,7 +77,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
   const generateSecurePassword = (): string => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
     let result = 'Admin@';
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
@@ -87,7 +86,6 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
   const handleEditClick = (admin: YearAdmin) => {
     setEditingAdminId(admin.id);
     setUsername(admin.username);
-    setPassword('');
     setFullName(admin.fullName);
     setEmail(admin.email || '');
     setPhone(admin.phone || '');
@@ -103,8 +101,13 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !fullName) {
-      toast.error('Username and full name are required');
+    if (!fullName.trim() || !username.trim()) {
+      toast.error('Full name and username are required');
+      return;
+    }
+
+    if (!email.trim() || !email.includes('@')) {
+      toast.error('A valid Email address is required');
       return;
     }
 
@@ -136,19 +139,18 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
     setReplaceConfirmData(null);
     setIsSubmitting(true);
     try {
-      const finalPassword = password ? password : (!editingAdminId ? generateSecurePassword() : undefined);
-
       const payload: any = {
         username: username.trim(),
         fullName: fullName.trim(),
-        email: email.trim() || undefined,
+        email: email.trim(),
         phone: phone.trim() || undefined,
         assignedYearId: selectedYearId,
         active: true
       };
 
-      if (finalPassword) {
-        payload.password = finalPassword;
+      if (!editingAdminId) {
+        // Automatically supply a secure internal password to satisfy backend entity constraint
+        payload.password = generateSecurePassword();
       }
 
       let res;
@@ -193,7 +195,6 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
   const resetForm = () => {
     setUsername('');
-    setPassword('');
     setFullName('');
     setEmail('');
     setPhone('');
@@ -421,31 +422,18 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                  Password {editingAdminId ? '(Leave blank to keep current)' : '(Leave blank to auto-generate)'}
+                  Email Address * <span className="text-[10px] lowercase text-slate-400 font-normal">(Primary for OTP & Login)</span>
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@jjcet.ac.in"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                   />
-                  {!editingAdminId && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const gen = generateSecurePassword();
-                        setPassword(gen);
-                        toast.success(`Generated: ${gen}`);
-                      }}
-                      className="absolute right-2 top-2 px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-[10px] font-bold flex items-center space-x-1"
-                      title="Generate random secure password"
-                    >
-                      <Key className="w-3 h-3" />
-                      <span>Auto</span>
-                    </button>
-                  )}
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
               </div>
 
@@ -466,26 +454,17 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Email (Optional)</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@jjcet.ac.in"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone (Optional)</label>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (Optional)</label>
+                <div className="relative">
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 9876543210"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                   />
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
               </div>
 

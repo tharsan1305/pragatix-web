@@ -180,27 +180,122 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         return;
       }
 
-      const rows = [
-        ['S.No', 'Register Number', 'Student Name', 'Status', 'Date', 'Period'],
-        ...studentList.map((s: any, idx: number) => [
-          idx + 1,
-          s.registerNumber || s.regNo || 'N/A',
-          s.studentName || s.fullName || 'Student',
-          s.status || (s.isPresent ? 'PRESENT' : 'ABSENT'),
-          selectedDate,
-          period || 'All Periods'
-        ])
-      ];
+      const currentDeptName = departments.find(d => String(d.id) === String(departmentId))?.name || (departmentId ? 'Selected Dept' : 'All Departments');
+      const currentYearName = years.find(y => String(y.id) === String(yearId))?.yearName || years.find(y => String(y.id) === String(yearId))?.name || 'All Years';
+      const currentSecName = filteredSections.find(s => String(s.id) === String(sectionId))?.sectionName || filteredSections.find(s => String(s.id) === String(sectionId))?.name || (sectionId ? 'Selected Section' : 'All Sections');
 
-      const csvContent = 'data:text/csv;charset=utf-8,' + rows.map(e => e.map(val => `"${val}"`).join(',')).join('\n');
-      const encodedUri = encodeURI(csvContent);
+      const isSinglePeriod = Boolean(period && period.trim().length > 0);
+
+      let headers: string[] = [];
+      if (isSinglePeriod) {
+        headers = ['S.No', 'Register Number', 'Student Name', 'Department', 'Year', 'Section', `Period ${period} Status`, 'Date'];
+      } else {
+        headers = ['S.No', 'Register Number', 'Student Name', 'Department', 'Year', 'Section', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'Overall Status', 'Date'];
+      }
+
+      const rows: any[][] = [headers];
+
+      studentList.forEach((s: any, idx: number) => {
+        const rawRegNo = s.registerNumber || s.regNo || 'N/A';
+        // Prefix with tab inside quotes so Excel/WPS Spreadsheet preserves register numbers as text without scientific notation
+        const formattedRegNo = rawRegNo !== 'N/A' ? `\t${rawRegNo}` : 'N/A';
+        const studentName = s.studentName || s.fullName || 'Student';
+        const dept = s.departmentName || currentDeptName;
+        const yr = s.yearName || currentYearName;
+        const sec = s.sectionName || currentSecName;
+
+        const periodMap = s.periodStatuses || {};
+
+        if (isSinglePeriod) {
+          const rawStatus = (periodMap[period] || periodMap[Number(period)] || s.status || '').toUpperCase();
+          let statusText = 'NOT RECORDED';
+          if (rawStatus === 'P' || rawStatus === 'PRESENT') statusText = 'PRESENT';
+          else if (rawStatus === 'A' || rawStatus === 'ABSENT') statusText = 'ABSENT';
+          else if (rawStatus === 'OD') statusText = 'ON DUTY';
+          else if (rawStatus === 'L') statusText = 'LEAVE';
+          else if (rawStatus && rawStatus !== '—') statusText = rawStatus;
+
+          rows.push([
+            idx + 1,
+            formattedRegNo,
+            studentName,
+            dept,
+            yr,
+            sec,
+            statusText,
+            selectedDate
+          ]);
+        } else {
+          // All Periods 1..8
+          const p1 = (periodMap[1] || periodMap['1'] || '—').toUpperCase();
+          const p2 = (periodMap[2] || periodMap['2'] || '—').toUpperCase();
+          const p3 = (periodMap[3] || periodMap['3'] || '—').toUpperCase();
+          const p4 = (periodMap[4] || periodMap['4'] || '—').toUpperCase();
+          const p5 = (periodMap[5] || periodMap['5'] || '—').toUpperCase();
+          const p6 = (periodMap[6] || periodMap['6'] || '—').toUpperCase();
+          const p7 = (periodMap[7] || periodMap['7'] || '—').toUpperCase();
+          const p8 = (periodMap[8] || periodMap['8'] || '—').toUpperCase();
+
+          const allPeriods = [p1, p2, p3, p4, p5, p6, p7, p8];
+          const presentCount = allPeriods.filter(p => p === 'P' || p === 'OD').length;
+          const absentCount = allPeriods.filter(p => p === 'A' || p === 'L').length;
+
+          let overallStatus = 'NOT RECORDED';
+          if (s.status) {
+            overallStatus = s.status;
+          } else if (presentCount === 8) {
+            overallStatus = 'PRESENT';
+          } else if (absentCount === 8) {
+            overallStatus = 'ABSENT';
+          } else if (presentCount > 0 && absentCount === 0) {
+            overallStatus = 'PRESENT';
+          } else if (presentCount > 0 && absentCount > 0) {
+            overallStatus = `PARTIAL (${presentCount}P / ${absentCount}A)`;
+          } else if (absentCount > 0) {
+            overallStatus = 'ABSENT';
+          } else if (allPeriods.every(p => p === 'OD')) {
+            overallStatus = 'ON DUTY';
+          }
+
+          rows.push([
+            idx + 1,
+            formattedRegNo,
+            studentName,
+            dept,
+            yr,
+            sec,
+            p1,
+            p2,
+            p3,
+            p4,
+            p5,
+            p6,
+            p7,
+            p8,
+            overallStatus,
+            selectedDate
+          ]);
+        }
+      });
+
+      const escapeCell = (val: any) => {
+        const str = String(val ?? '');
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const csvString = '\uFEFF' + rows.map(r => r.map(escapeCell).join(',')).join('\r\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `attendance_dashboard_${selectedDate}.csv`);
+      link.setAttribute('href', url);
+      const cleanDept = currentDeptName.replace(/[^a-zA-Z0-9]/g, '_');
+      link.setAttribute('download', `attendance_${cleanDept}_${selectedDate}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success('Attendance report downloaded as CSV!');
+      URL.revokeObjectURL(url);
+
+      toast.success('Attendance report exported successfully!');
     } catch (e) {
       toast.error('Failed to export report');
     } finally {

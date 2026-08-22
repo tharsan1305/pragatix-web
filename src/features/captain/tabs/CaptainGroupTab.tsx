@@ -4,7 +4,7 @@ import { apiClient } from '../../../api/client';
 import { teamService } from '../../../services/teamService';
 import { useAuth } from '../../../store/authContext';
 import toast from 'react-hot-toast';
-import { Users, Star, RefreshCw, UserX, UserPlus, UserMinus, Shield, Award, Calendar, BookOpen, Trophy, X } from 'lucide-react';
+import { Users, Star, RefreshCw, UserX, UserPlus, UserMinus, Shield, Award, Calendar, BookOpen, Trophy, X, Search, Check } from 'lucide-react';
 import ConfirmationModal from '../../../components/common/ConfirmationModal';
 
 export default function CaptainGroupTab() {
@@ -15,7 +15,11 @@ export default function CaptainGroupTab() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [classmates, setClassmates] = useState<any[]>([]);
   const [isClassmatesLoading, setIsClassmatesLoading] = useState(false);
+  const [selectedClassmates, setSelectedClassmates] = useState<any[]>([]);
+  const [classmateSearchQuery, setClassmateSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [pendingRegNo, setPendingRegNo] = useState<string | null>(null);
+  const [isSubmittingMembers, setIsSubmittingMembers] = useState(false);
   const [removalTarget, setRemovalTarget] = useState<{ regNo: string; name: string } | null>(null);
 
   const fetchMyGroup = async () => {
@@ -46,9 +50,18 @@ export default function CaptainGroupTab() {
     fetchMyGroup();
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(classmateSearchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [classmateSearchQuery]);
+
   const openAddMemberModal = async () => {
     setIsAddModalOpen(true);
     setIsClassmatesLoading(true);
+    setSelectedClassmates([]);
+    setClassmateSearchQuery('');
     try {
       const response = await teamService.getMyClassmates();
       const list = response.data?.data ?? response.data ?? [];
@@ -81,6 +94,59 @@ export default function CaptainGroupTab() {
     } finally {
       setPendingRegNo(null);
     }
+  };
+
+  const handleAddSelectedMembers = async () => {
+    if (selectedClassmates.length === 0) {
+      toast.error('Please select at least one classmate to add.');
+      return;
+    }
+
+    const currentCount = teamData?.members?.length || teamData?.teamMembers?.length || 0;
+    const maxCapacity = teamData?.maxTeamSize || teamData?.size || 10;
+    const availableSlots = Math.max(0, maxCapacity - currentCount);
+
+    if (availableSlots > 0 && selectedClassmates.length > availableSlots) {
+      toast.error(`Cannot add ${selectedClassmates.length} members. Only ${availableSlots} slot(s) available.`);
+      return;
+    }
+
+    setIsSubmittingMembers(true);
+    const toastId = toast.loading(`Adding ${selectedClassmates.length} member${selectedClassmates.length > 1 ? 's' : ''}...`);
+
+    let successCount = 0;
+    const errors: string[] = [];
+
+    for (const c of selectedClassmates) {
+      const reg = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
+      const name = c.fullName || c.studentName || c.name || reg;
+      if (!reg) continue;
+
+      try {
+        const response = await teamService.addMemberByCaptain(reg);
+        if (response.data?.success !== false) {
+          successCount++;
+        } else {
+          errors.push(`${name}: ${response.data?.message || 'Failed'}`);
+        }
+      } catch (err: any) {
+        errors.push(`${name}: ${err.response?.data?.message || 'Failed'}`);
+      }
+    }
+
+    toast.dismiss(toastId);
+    if (successCount > 0) {
+      toast.success(`${successCount} member${successCount > 1 ? 's' : ''} added successfully!`);
+      setIsAddModalOpen(false);
+      setSelectedClassmates([]);
+      fetchMyGroup();
+    }
+
+    if (errors.length > 0) {
+      toast.error(`Issues adding some members:\n${errors.slice(0, 2).join('\n')}`);
+    }
+
+    setIsSubmittingMembers(false);
   };
 
   const handleRequestRemovalConfirm = async () => {
@@ -329,56 +395,219 @@ export default function CaptainGroupTab() {
         )}
       </div>
 
-      {/* Add Member Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="font-heading text-lg font-bold text-slate-900">Add Classmate to Team</h3>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {isClassmatesLoading ? (
-                <div className="flex justify-center py-10">
-                  <RefreshCw className="w-6 h-6 animate-spin text-slate-400" />
+      {/* Add Member Modal with Multi-Selection */}
+      {isAddModalOpen && (() => {
+        const currentCount = teamData?.members?.length || teamData?.teamMembers?.length || 0;
+        const maxCapacity = teamData?.maxTeamSize || teamData?.size || 10;
+        const availableSlots = Math.max(0, maxCapacity - currentCount);
+
+        const filteredClassmates = availableClassmates.filter((c: any) => {
+          if (!debouncedSearchQuery.trim()) return true;
+          const q = debouncedSearchQuery.toLowerCase().trim();
+          const name = String(c.fullName || c.studentName || c.name || '').toLowerCase();
+          const reg = String(c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '').toLowerCase();
+          return name.includes(q) || reg.includes(q);
+        });
+
+        const allSelected = filteredClassmates.length > 0 && filteredClassmates.every((c: any) => {
+          const reg = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
+          return selectedClassmates.some((s: any) => (s.regNo || s.studentRegNo || s.registerNumber || s.studentId) === reg);
+        });
+
+        const toggleClassmate = (c: any) => {
+          const reg = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
+          const isSelected = selectedClassmates.some((s: any) => (s.regNo || s.studentRegNo || s.registerNumber || s.studentId) === reg);
+          if (isSelected) {
+            setSelectedClassmates(prev => prev.filter((s: any) => (s.regNo || s.studentRegNo || s.registerNumber || s.studentId) !== reg));
+          } else {
+            if (availableSlots > 0 && selectedClassmates.length >= availableSlots) {
+              toast.error(`Team capacity limit reached (${availableSlots} available slots).`);
+              return;
+            }
+            setSelectedClassmates(prev => [...prev, c]);
+          }
+        };
+
+        const toggleSelectAllClassmates = () => {
+          if (allSelected) {
+            setSelectedClassmates([]);
+          } else {
+            const toAdd = availableSlots > 0 ? filteredClassmates.slice(0, availableSlots) : filteredClassmates;
+            if (availableSlots > 0 && filteredClassmates.length > availableSlots) {
+              toast(`Selected ${availableSlots} classmate(s) to match available capacity.`, { icon: 'ℹ️' });
+            }
+            setSelectedClassmates(toAdd);
+          }
+        };
+
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-lg font-bold text-slate-900">Add Classmates to Team</h3>
+                    <p className="text-xs text-slate-500 font-medium">Select one or more classmates to join your team</p>
+                  </div>
                 </div>
-              ) : availableClassmates.length === 0 ? (
-                <p className="text-center text-sm text-slate-400 py-10">
-                  No available classmates to add.
-                </p>
-              ) : (
-                availableClassmates.map((c: any) => {
-                  const cRegNo = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
-                  const cName = c.fullName || c.studentName || c.name || 'Student';
-                  return (
-                    <div
-                      key={cRegNo || cName}
-                      className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50"
+                <button
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Capacity Banner */}
+              <div className="px-5 py-2.5 bg-indigo-50/50 border-b border-indigo-100/60 flex items-center justify-between text-xs">
+                <span className="font-semibold text-indigo-900">Capacity: {currentCount}/{maxCapacity} members</span>
+                <span className={`font-bold px-2 py-0.5 rounded-full text-[11px] ${availableSlots > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                  {availableSlots > 0 ? `${availableSlots} slot${availableSlots > 1 ? 's' : ''} remaining` : 'Team Full'}
+                </span>
+              </div>
+
+              <div className="p-4 flex-1 flex flex-col overflow-hidden space-y-3">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={classmateSearchQuery}
+                    onChange={(e) => setClassmateSearchQuery(e.target.value)}
+                    placeholder="Search classmates by name or register number..."
+                    className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  />
+                  {classmateSearchQuery && (
+                    <button
+                      onClick={() => setClassmateSearchQuery('')}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
                     >
-                      <div className="min-w-0">
-                        <div className="font-semibold text-sm text-slate-800 truncate">{cName}</div>
-                        <div className="text-xs text-slate-400">{cRegNo}</div>
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Select All Toolbar */}
+                {!isClassmatesLoading && filteredClassmates.length > 0 && (
+                  <div className="flex items-center justify-between text-xs px-1 border-b border-slate-100 pb-2">
+                    <button
+                      type="button"
+                      onClick={toggleSelectAllClassmates}
+                      className="flex items-center gap-2 font-bold text-slate-700 hover:text-indigo-600 cursor-pointer"
+                    >
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${allSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                        {allSelected && <Check className="w-3 h-3 stroke-[3]" />}
                       </div>
-                      <button
-                        onClick={() => handleAddMember(cRegNo, cName)}
-                        disabled={pendingRegNo === cRegNo}
-                        className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 disabled:opacity-40 cursor-pointer"
-                      >
-                        Add
-                      </button>
+                      <span>Select All ({filteredClassmates.length} available)</span>
+                    </button>
+                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full text-[11px]">
+                      {selectedClassmates.length} Selected
+                    </span>
+                  </div>
+                )}
+
+                {/* Classmates List */}
+                <div className="flex-1 overflow-y-auto space-y-2 max-h-[300px] pr-1">
+                  {isClassmatesLoading ? (
+                    <div className="flex justify-center py-10">
+                      <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
                     </div>
-                  );
-                })
-              )}
+                  ) : availableClassmates.length === 0 ? (
+                    <p className="text-center text-sm text-slate-400 py-10">
+                      No available classmates to add.
+                    </p>
+                  ) : filteredClassmates.length === 0 ? (
+                    <p className="text-center text-sm text-slate-400 py-10">
+                      No classmates matching "{classmateSearchQuery}".
+                    </p>
+                  ) : (
+                    filteredClassmates.map((c: any) => {
+                      const cRegNo = c.regNo || c.studentRegNo || c.registerNumber || c.studentId || '';
+                      const cName = c.fullName || c.studentName || c.name || 'Student';
+                      const isSelected = selectedClassmates.some((s: any) => (s.regNo || s.studentRegNo || s.registerNumber || s.studentId) === cRegNo);
+
+                      return (
+                        <div
+                          key={cRegNo || cName}
+                          onClick={() => toggleClassmate(c)}
+                          className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${isSelected
+                              ? 'bg-indigo-50/70 border-indigo-600 ring-2 ring-indigo-600/20 shadow-xs'
+                              : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:bg-slate-50/60'
+                            }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {/* Checkbox */}
+                            <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-all shrink-0 ${isSelected
+                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                                : 'border-slate-300 bg-white hover:border-indigo-400'
+                              }`}>
+                              {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            </div>
+
+                            <div className="min-w-0">
+                              <div className="font-bold text-sm text-slate-800 truncate">{cName}</div>
+                              <div className="text-xs text-slate-500 font-medium">{cRegNo}</div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddMember(cRegNo, cName);
+                            }}
+                            disabled={pendingRegNo === cRegNo}
+                            className="px-3 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shrink-0 ml-2"
+                          >
+                            {pendingRegNo === cRegNo ? 'Adding...' : 'Add Now'}
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-xl text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddSelectedMembers}
+                    disabled={isSubmittingMembers || selectedClassmates.length === 0}
+                    className="px-5 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-xs flex items-center gap-1.5"
+                  >
+                    {isSubmittingMembers ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Adding...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span>
+                          {selectedClassmates.length > 0
+                            ? `Add Selected (${selectedClassmates.length})`
+                            : 'Add Selected'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
       {/* Removal Confirmation Modal */}
       <ConfirmationModal
         isOpen={removalTarget !== null}
