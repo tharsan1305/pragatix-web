@@ -713,7 +713,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
     });
   };
 
+  const isUserTeamCaptain = (team: GroupData): boolean => {
+    if (!user) return false;
+    const userRegNo = (user.regNo || user.registrationNumber || user.studentId || user.id || '').toString().toLowerCase().trim();
+    const teamCaptainRegNo = (team.captainId || team.captainRegNo || team.captain?.regNo || team.captain?.id || '').toString().toLowerCase().trim();
+    return userRegNo && teamCaptainRegNo && userRegNo === teamCaptainRegNo;
+  };
+
   const openEditTeamModal = (team: GroupData) => {
+    if (!isUserTeamCaptain(team) && !isAdmin && !isSuperAdmin) {
+      toast.error("Only team captain can edit team details");
+      return;
+    }
     const tId = team.teamId || team.id || 0;
     const name = team.teamName || team.name || team.groupName || '';
     const size = team.teamCapacity || team.size || team.maxTeamSize || 10;
@@ -1039,6 +1050,10 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
   };
 
   const openDeleteTeamModal = (team: GroupData) => {
+    if (!isUserTeamCaptain(team) && !isAdmin && !isSuperAdmin) {
+      toast.error("Only team captain can delete team");
+      return;
+    }
     setActiveDeleteTeam(team);
   };
 
@@ -1451,7 +1466,13 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                     </button>
                     <button
                       onClick={() => openEditTeamModal(g)}
-                      className="flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 p-3 rounded-xl text-xs font-bold transition-colors border border-indigo-200 shadow-2xs"
+                      disabled={!isUserTeamCaptain(g) && !isAdmin && !isSuperAdmin}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-colors border shadow-2xs ${
+                        isUserTeamCaptain(g) || isAdmin || isSuperAdmin
+                          ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200 cursor-pointer'
+                          : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                      }`}
+                      title={isUserTeamCaptain(g) || isAdmin || isSuperAdmin ? "Edit team details" : "Only team captain can edit"}
                     >
                       <Edit2 className="w-4 h-4" /> Edit Team
                     </button>
@@ -1478,7 +1499,13 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                         </button>
                         <button
                           onClick={() => openDeleteTeamModal(g)}
-                          className="flex items-center justify-center gap-2 bg-red-50 text-red-700 hover:bg-red-100 p-3 rounded-xl text-xs font-bold transition-colors border border-red-200 shadow-2xs"
+                          disabled={!isUserTeamCaptain(g) && !isAdmin && !isSuperAdmin}
+                          className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-colors border shadow-2xs ${
+                            isUserTeamCaptain(g) || isAdmin || isSuperAdmin
+                              ? 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200 cursor-pointer'
+                              : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                          }`}
+                          title={isUserTeamCaptain(g) || isAdmin || isSuperAdmin ? "Delete team" : "Only team captain can delete"}
                         >
                           <Trash2 className="w-4 h-4" /> Delete Team
                         </button>
@@ -1486,7 +1513,13 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                     ) : (
                       <button
                         onClick={() => openDeleteTeamModal(g)}
-                        className="flex items-center justify-center gap-2 bg-red-50 text-red-700 hover:bg-red-100 p-3 rounded-xl text-xs font-bold transition-colors border border-red-200 shadow-2xs col-span-1"
+                        disabled={!isUserTeamCaptain(g) && !isAdmin && !isSuperAdmin}
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-colors border shadow-2xs col-span-1 ${
+                          isUserTeamCaptain(g) || isAdmin || isSuperAdmin
+                            ? 'bg-red-50 text-red-700 hover:bg-red-100 border-red-200 cursor-pointer'
+                            : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                        }`}
+                        title={isUserTeamCaptain(g) || isAdmin || isSuperAdmin ? "Delete team" : "Only team captain can delete"}
                       >
                         <Trash2 className="w-4 h-4" /> Delete Team
                       </button>
