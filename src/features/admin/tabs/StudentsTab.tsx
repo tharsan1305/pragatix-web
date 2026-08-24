@@ -60,6 +60,7 @@ export default function StudentsTab({ onBack }: Props) {
     genders: LookupItem[];
     sections: LookupItem[];
     groups: LookupItem[];
+    guardianRelations: string[];
   }>({
     departments: [],
     academicYears: [],
@@ -67,7 +68,8 @@ export default function StudentsTab({ onBack }: Props) {
     semesters: [],
     genders: [],
     sections: [],
-    groups: []
+    groups: [],
+    guardianRelations: []
   });
 
   // Dynamic sections fetched when department changes in modal
@@ -103,8 +105,6 @@ export default function StudentsTab({ onBack }: Props) {
     active: true
   });
 
-  const guardianRelations = ['Father', 'Mother', 'Guardian', 'Parent'];
-
   useEffect(() => {
     fetchLookups();
     fetchStudents();
@@ -124,14 +124,15 @@ export default function StudentsTab({ onBack }: Props) {
 
   const fetchLookups = async () => {
     try {
-      const [deptRes, ayRes, yearRes, semRes, genRes, secRes, teamRes] = await Promise.all([
+      const [deptRes, ayRes, yearRes, semRes, genRes, secRes, teamRes, guardianRes] = await Promise.all([
         apiClient.get('/api/v1/admin/departments').catch(() => null),
         apiClient.get('/api/v1/admin/academic-years').catch(() => null),
         apiClient.get('/api/v1/admin/years').catch(() => null),
         apiClient.get('/api/v1/admin/semesters').catch(() => null),
         apiClient.get('/api/v1/admin/genders').catch(() => null),
         apiClient.get('/api/v1/admin/sections').catch(() => null),
-        apiClient.get('/api/v1/teams').catch(() => null)
+        apiClient.get('/api/v1/teams').catch(() => null),
+        apiClient.get('/api/v1/admin/guardian-relations').catch(() => null)
       ]);
 
       const deduplicate = (list: any[]) => {
@@ -147,6 +148,8 @@ export default function StudentsTab({ onBack }: Props) {
 
       const depts = deduplicate(deptRes?.data?.data || []);
       const secs = deduplicate(secRes?.data?.data || []);
+      const guardianData = guardianRes?.data?.data || ['Father', 'Mother', 'Guardian', 'Parent'];
+      const guardianRelations = Array.isArray(guardianData) ? guardianData : ['Father', 'Mother', 'Guardian', 'Parent'];
 
       setLookups({
         departments: depts,
@@ -155,7 +158,8 @@ export default function StudentsTab({ onBack }: Props) {
         semesters: deduplicate(semRes?.data?.data || []),
         genders: deduplicate(genRes?.data?.data || []),
         sections: secs,
-        groups: deduplicate(teamRes?.data?.data || [])
+        groups: deduplicate(teamRes?.data?.data || []),
+        guardianRelations
       });
 
       setFilterSectionsList(secs);
@@ -461,9 +465,9 @@ export default function StudentsTab({ onBack }: Props) {
       let rel = g.relationship || '';
       if (rel) {
         rel = rel.charAt(0).toUpperCase() + rel.slice(1).toLowerCase();
-        if (!guardianRelations.includes(rel)) {
+        if (!lookups.guardianRelations.includes(rel)) {
           if (rel.toUpperCase() === 'LOCAL_GUARDIAN') rel = 'Parent';
-          else if (!guardianRelations.includes(rel)) rel = 'Guardian';
+          else if (!lookups.guardianRelations.includes(rel)) rel = 'Guardian';
         }
       }
 
@@ -1101,10 +1105,10 @@ export default function StudentsTab({ onBack }: Props) {
                     <label className="text-xs font-semibold text-slate-600 mb-1 block">Relationship</label>
                     <select 
                       value={formData.guardianRel} 
-                      onChange={e => setFormData({...formData, guardianRel: e.target.value})} 
+                      onChange={e => setFormData({...formData, guardianRel: e.target.value})}
                       className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white text-sm"
                     >
-                      {guardianRelations.map(rel => (
+                      {lookups.guardianRelations.map(rel => (
                         <option key={rel} value={rel}>{rel}</option>
                       ))}
                     </select>

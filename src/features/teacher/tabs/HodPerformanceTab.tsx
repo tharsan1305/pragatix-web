@@ -116,7 +116,7 @@ export default function HodPerformanceTab() {
     setIsLoadingMatrix(true);
     try {
       const deptId = dashboardData?.departmentInfo?.id || '';
-      let url = `/api/admin/attendance/summary?date=${matrixDate}&yearId=${matrixYearId}`;
+      let url = `/api/v1/admin/attendance/summary?date=${matrixDate}&yearId=${matrixYearId}`;
       if (deptId) url += `&departmentId=${deptId}`;
       if (matrixSectionId) url += `&sectionId=${matrixSectionId}`;
 

@@ -131,7 +131,10 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
 
     for (const endpoint of rejectEndpoints) {
       try {
-        const response = await apiClient.put(endpoint, { reason: rejectReason });
+        const response = await apiClient.put(endpoint, {
+          remarks: rejectReason,
+          reason: rejectReason,
+        });
         if (response.status === 200 || response.data?.success) {
           success = true;
           break;
@@ -235,6 +238,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
               const badgeIcon = req.badgeIcon || req.badge?.icon;
               const proofLink = req.proofLink || req.proofUrl || req.documentUrl;
               const status = (req.status || 'PENDING').toUpperCase();
+              const remarksText = req.remarks || req.reason;
 
               return (
                 <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
@@ -251,12 +255,20 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                       <div>
                         <h3 className="font-heading font-bold text-slate-900 text-base">{badgeName}</h3>
                         <p className="text-xs text-slate-600 font-medium">{studentName} <span className="text-slate-400">({regNo})</span></p>
-                        {req.departmentName && (
-                          <p className="text-[11px] text-slate-400 mt-0.5">Dept: {req.departmentName}</p>
+                        {(req.departmentName || req.sectionName || req.academicYear) && (
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {[req.departmentName, req.sectionName ? `Sec ${req.sectionName}` : null, req.academicYear].filter(Boolean).join(' • ')}
+                          </p>
                         )}
-                        {req.reason && (
-                          <p className="text-xs text-slate-500 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
-                            "{req.reason}"
+                        {remarksText && (
+                          <p className="text-xs text-slate-600 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                            Remarks: "{remarksText}"
+                          </p>
+                        )}
+                        {req.reviewedBy && (
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            Reviewed by: <span className="font-medium text-slate-600">{req.reviewedBy}</span>
+                            {req.reviewedAt && ` on ${new Date(req.reviewedAt).toLocaleDateString()}`}
                           </p>
                         )}
                       </div>
@@ -299,7 +311,9 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                         <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 ${
                           status === 'APPROVED' 
                             ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
-                            : 'bg-rose-100 text-rose-800 border border-rose-200'
+                            : status === 'REJECTED'
+                            ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                            : 'bg-slate-100 text-slate-800 border border-slate-200'
                         }`}>
                           {status === 'APPROVED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
                           <span>{status}</span>

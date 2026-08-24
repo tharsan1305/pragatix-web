@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users, Award, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../../services/apiClient';
+import ConfirmationModal from '../../../../components/common/ConfirmationModal';
 
 interface Props {
   activityId?: number;
@@ -31,6 +32,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
   const [remarks, setRemarks] = useState<string>('');
   const [isEqualDistribution, setIsEqualDistribution] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [confirmAwardXp, setConfirmAwardXp] = useState<any>(null);
 
   useEffect(() => {
     if (activeAssignmentId) {
@@ -73,26 +75,38 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
     }
   };
 
-  const handleAwardXp = async (e: React.FormEvent) => {
+  const handleAwardXpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!scoringTeam || !activeAssignmentId) return;
 
+    setConfirmAwardXp({
+      team: scoringTeam,
+      xp: Number(xpValue),
+      remarks: remarks.trim(),
+      isEqual: isEqualDistribution
+    });
+  };
+
+  const handleConfirmAwardXp = async () => {
+    if (!confirmAwardXp || !activeAssignmentId) return;
+
     setIsSubmitting(true);
-    const toastId = toast.loading(`Awarding XP to ${scoringTeam.name || 'team'}...`);
+    const toastId = toast.loading(`Awarding XP to ${confirmAwardXp.team.name || 'team'}...`);
     try {
       const payload = {
         assignmentId: activeAssignmentId,
-        equalDistribution: isEqualDistribution,
-        xp: Number(xpValue),
-        remarks: remarks.trim()
+        equalDistribution: confirmAwardXp.isEqual,
+        xp: confirmAwardXp.xp,
+        remarks: confirmAwardXp.remarks
       };
 
-      const res = await apiClient.post(`/api/v1/group-activities/teams/${scoringTeam.id}/award-xp`, payload);
+      const res = await apiClient.post(`/api/v1/group-activities/teams/${confirmAwardXp.team.id}/award-xp`, payload);
       toast.dismiss(toastId);
       if (res.status === 200 || res.data?.success) {
         toast.success('XP awarded to team successfully!');
         setScoringTeam(null);
         setRemarks('');
+        setConfirmAwardXp(null);
         if (activeAssignmentId) {
           fetchTeamsForAssignment(activeAssignmentId);
         }
@@ -197,7 +211,7 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
               <h3 className="font-heading text-lg font-bold text-slate-900">Award XP to {scoringTeam.name}</h3>
             </div>
 
-            <form onSubmit={handleAwardXp} className="space-y-4">
+            <form onSubmit={handleAwardXpSubmit} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-600 mb-1 block">XP Points *</label>
                 <input
@@ -254,6 +268,19 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
             </form>
           </div>
         </div>
+      )}
+
+      {confirmAwardXp && (
+        <ConfirmationModal
+          isOpen={!!confirmAwardXp}
+          title="Confirm XP Award"
+          message={`Award ${confirmAwardXp.xp} XP to ${confirmAwardXp.team.name}?${confirmAwardXp.remarks ? ` Remarks: ${confirmAwardXp.remarks}` : ''}`}
+          confirmText="Award XP"
+          onConfirm={handleConfirmAwardXp}
+          onCancel={() => setConfirmAwardXp(null)}
+          isLoading={isSubmitting}
+          isDanger
+        />
       )}
     </div>
   );

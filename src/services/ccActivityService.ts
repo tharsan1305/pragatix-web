@@ -94,15 +94,26 @@ export interface CCTeacherAssignment {
  */
 export interface BadgeRequest {
   id: number;
-  studentId: string;
+  studentId: number | string;
   studentName: string;
+  regNo?: string;
+  badgeId?: number;
   badgeName: string;
-  badgeDescription: string;
-  earnedDate: string;
+  badgeIcon?: string;
+  departmentName?: string;
+  sectionName?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
   requestedAt: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  approvedBy?: string;
-  approvalDate?: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  remarks?: string;
+  proofLink?: string;
+  departmentId?: number;
+  sectionId?: number;
+  academicYear?: string;
+  // Legacy / UI helpers
+  badgeDescription?: string;
+  earnedDate?: string;
   rejectionReason?: string;
 }
 
@@ -110,8 +121,9 @@ export interface BadgeRequest {
  * Badge Request Approval/Rejection Payload
  */
 export interface BadgeRequestAction {
-  approvedBy?: string;
+  remarks?: string;
   rejectionReason?: string;
+  approvedBy?: string;
 }
 
 /**
@@ -253,7 +265,7 @@ export const ccActivityService = {
 
   /**
    * Get list of badge requests for CC's students
-   * GET /api/cc/badge-requests
+   * GET /api/v1/cc/badge-requests
    * @param status - Filter by status (PENDING, APPROVED, REJECTED) (optional)
    * @param page - Pagination page number (default: 0)
    * @param size - Page size (default: 20)
@@ -265,7 +277,7 @@ export const ccActivityService = {
       if (status) {
         params.status = status;
       }
-      const response = await apiClient.get<any>('/api/cc/badge-requests', {
+      const response = await apiClient.get<any>('/api/v1/cc/badge-requests', {
         params
       });
       return response.data;
@@ -277,7 +289,7 @@ export const ccActivityService = {
 
   /**
    * Approve a badge request
-   * PUT /api/cc/badge-requests/{id}/approve
+   * PUT /api/v1/cc/badge-requests/{id}/approve
    * @param badgeRequestId - ID of the badge request
    * @param approvalData - Approval details (approvedBy, etc.)
    * @returns Promise with approval result
@@ -285,7 +297,7 @@ export const ccActivityService = {
   approveBadgeRequest: async (badgeRequestId: number, approvalData?: BadgeRequestAction) => {
     try {
       const response = await apiClient.put<any>(
-        `/api/cc/badge-requests/${badgeRequestId}/approve`,
+        `/api/v1/cc/badge-requests/${badgeRequestId}/approve`,
         approvalData || {}
       );
       return response.data;
@@ -297,16 +309,22 @@ export const ccActivityService = {
 
   /**
    * Reject a badge request
-   * PUT /api/cc/badge-requests/{id}/reject
+   * PUT /api/v1/cc/badge-requests/{id}/reject
    * @param badgeRequestId - ID of the badge request
    * @param rejectionData - Rejection details (rejectionReason, etc.)
    * @returns Promise with rejection result
    */
   rejectBadgeRequest: async (badgeRequestId: number, rejectionData?: BadgeRequestAction) => {
     try {
+      const payload = rejectionData
+        ? {
+            remarks: rejectionData.remarks || rejectionData.rejectionReason,
+            ...rejectionData,
+          }
+        : {};
       const response = await apiClient.put<any>(
-        `/api/cc/badge-requests/${badgeRequestId}/reject`,
-        rejectionData || {}
+        `/api/v1/cc/badge-requests/${badgeRequestId}/reject`,
+        payload
       );
       return response.data;
     } catch (error) {

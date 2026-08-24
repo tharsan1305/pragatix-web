@@ -178,6 +178,7 @@ export default function CCInboxTab({ onBack }: Props) {
       let response;
       if (isBadge) {
         response = await apiClient.put(`/api/cc/badge-requests/${rejectingItem.id}/reject`, {
+          remarks: rejectReason,
           reason: rejectReason
         });
       } else if (isAct) {

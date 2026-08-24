@@ -122,7 +122,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
       if (sectionId && sectionId.trim().length > 0) params.append('sectionId', sectionId);
       if (period && period.trim().length > 0) params.append('period', period);
 
-      const res = await apiClient.get(`/api/admin/attendance/summary?${params.toString()}`);
+      const res = await apiClient.get(`/api/v1/admin/attendance/summary?${params.toString()}`);
       const summaryData = res.data?.data || res.data;
 
       if (summaryData) {

@@ -222,6 +222,23 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
     return 'Not Assigned';
   };
 
+  const handleRefreshCache = async () => {
+    const toastId = toast.loading('Refreshing database cache...');
+    try {
+      const res = await apiClient.post('/api/v1/superadmin/cache/refresh');
+      toast.dismiss(toastId);
+      if (res.data?.success || res.status === 200) {
+        toast.success('Database cache refreshed successfully');
+        fetchData();
+      } else {
+        toast.error(res.data?.message || 'Failed to refresh database cache');
+      }
+    } catch (e: any) {
+      toast.dismiss(toastId);
+      toast.error(e.response?.data?.message || 'Failed to refresh database cache');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       {/* Top Header matching Admin Theme */}
@@ -241,13 +258,23 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
           </div>
         </div>
 
-        <button
-          onClick={() => { resetForm(); setShowAddModal(true); }}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-red-500/20 transition-all flex items-center space-x-2"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Add Year Admin</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleRefreshCache}
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors text-xs font-semibold flex items-center space-x-1.5 cursor-pointer"
+            title="Refresh Database Cache"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span className="hidden md:inline">Sync Cache</span>
+          </button>
+          <button
+            onClick={() => { resetForm(); setShowAddModal(true); }}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-red-500/20 transition-all flex items-center space-x-2 cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Add Year Admin</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">

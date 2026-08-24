@@ -1,9 +1,9 @@
 import { logger } from '../../../../utils/logger';
 import { useState, useEffect } from 'react';
 
-import { 
-  Type, Tag, AlignLeft, Hash, CheckCircle2, 
-  PlusCircle, MinusCircle, Star, Repeat, BarChart2, 
+import {
+  Type, Tag, AlignLeft, Hash, CheckCircle2,
+  PlusCircle, MinusCircle, Star, Repeat, BarChart2,
   User, Users, Menu, AlertCircle
 } from 'lucide-react';
 import { activityService } from '../api/activityService';
@@ -15,16 +15,6 @@ interface ActivityFormProps {
   onCancel?: () => void;
   isSubmitting: boolean;
 }
-
-const XP_CATEGORIES = [
-  'Academic', 'Skill', 'Communication', 'Leadership', 'Discipline',
-  'Placement', 'Innovation', 'Community', 'Sports', 'Cultural'
-];
-
-const EVIDENCE_OPTIONS = [
-  'Handwritten', 'Soft Copy', 'Diary / Notebook', 'Weekly Log',
-  'Direct Observation', 'Attendance Register', 'ERP Attendance', 'Manual'
-];
 
 export default function ActivityForm({ initialData, onSubmit, onCancel = () => {}, isSubmitting }: ActivityFormProps) {
   const [formData, setFormData] = useState<Partial<ActivityModel>>({
@@ -50,6 +40,8 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
   });
 
   const [customFrequencies, setCustomFrequencies] = useState<any[]>([]);
+  const [xpCategories, setXpCategories] = useState<string[]>([]);
+  const [evidenceOptions, setEvidenceOptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
@@ -82,7 +74,15 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
   }, [initialData]);
 
   useEffect(() => {
-    activityService.fetchCustomFrequencies().then(setCustomFrequencies).catch(logger.error);
+    Promise.all([
+      activityService.fetchCustomFrequencies(),
+      activityService.fetchXpCategories(),
+      activityService.fetchEvidenceTypes()
+    ]).then(([freqs, categories, evidence]) => {
+      setCustomFrequencies(freqs);
+      setXpCategories(categories);
+      setEvidenceOptions(evidence);
+    }).catch(logger.error);
   }, []);
 
   const handleChange = (field: keyof ActivityModel, value: any) => {
@@ -183,12 +183,12 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
                 <Tag className="w-4 h-4 text-[#EA4335]" />
                 <span>XP Category *</span>
               </label>
-              <select 
-                value={formData.xpCategory} 
-                onChange={e => handleChange('xpCategory', e.target.value)} 
+              <select
+                value={formData.xpCategory}
+                onChange={e => handleChange('xpCategory', e.target.value)}
                 className="w-full p-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl outline-none text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-[#EA4335] cursor-pointer"
               >
-                {XP_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {xpCategories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
@@ -413,9 +413,9 @@ export default function ActivityForm({ initialData, onSubmit, onCancel = () => {
         </div>
 
         <div className="space-y-1">
-          {EVIDENCE_OPTIONS.map(opt => {
-            const current = Array.isArray(formData.evidence) 
-              ? formData.evidence 
+          {evidenceOptions.map(opt => {
+            const current = Array.isArray(formData.evidence)
+              ? formData.evidence
               : (typeof formData.evidence === 'string' && (formData.evidence as string).trim() ? [formData.evidence] : []);
             const isChecked = current.includes(opt);
 

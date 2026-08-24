@@ -142,6 +142,36 @@ export const activityService = {
     return response.data.data;
   },
 
+  fetchXpCategories: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get('/api/v1/admin/xp-categories');
+      const data = response.data?.data || response.data;
+      return Array.isArray(data) ? data : ['Academic', 'Skill', 'Communication', 'Leadership', 'Discipline', 'Placement', 'Innovation', 'Community', 'Sports', 'Cultural'];
+    } catch {
+      return ['Academic', 'Skill', 'Communication', 'Leadership', 'Discipline', 'Placement', 'Innovation', 'Community', 'Sports', 'Cultural'];
+    }
+  },
+
+  fetchEvidenceTypes: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get('/api/v1/admin/evidence-types');
+      const data = response.data?.data || response.data;
+      return Array.isArray(data) ? data : ['Handwritten', 'Soft Copy', 'Diary / Notebook', 'Weekly Log', 'Direct Observation', 'Attendance Register', 'ERP Attendance', 'Manual'];
+    } catch {
+      return ['Handwritten', 'Soft Copy', 'Diary / Notebook', 'Weekly Log', 'Direct Observation', 'Attendance Register', 'ERP Attendance', 'Manual'];
+    }
+  },
+
+  fetchGuardianRelations: async (): Promise<string[]> => {
+    try {
+      const response = await apiClient.get('/api/v1/admin/guardian-relations');
+      const data = response.data?.data || response.data;
+      return Array.isArray(data) ? data : ['Father', 'Mother', 'Guardian', 'Parent'];
+    } catch {
+      return ['Father', 'Mother', 'Guardian', 'Parent'];
+    }
+  },
+
   createCustomFrequency: async (body: any): Promise<any> => {
     const response = await apiClient.post('/api/v1/admin/frequencies/custom', body);
     return response.data.data;
@@ -172,9 +202,10 @@ export const activityService = {
       }
     }
 
-    // Default to valid database subgroup ID 1 if still not resolved
+    // Fail if subgroup ID cannot be resolved
     if (!targetSubgroupId || Number(targetSubgroupId) <= 0) {
-      targetSubgroupId = 1;
+      logger.error('Unable to resolve valid subgroup ID for activity creation', { stageId, subgroupName });
+      throw new Error('Cannot create activity: Unable to determine a valid subgroup. Please ensure stages and subgroups are configured correctly.');
     }
 
     const endpoint = `/api/v1/admin/subgroups/${targetSubgroupId}/activities`;

@@ -109,13 +109,15 @@ export default function AdminLeaderboardTab() {
   useEffect(() => {
     fetchFilters(selectedYear, selectedDept);
     fetchLeaderboard(selectedYear, selectedDept, selectedSection);
-  }, [fetchFilters, fetchLeaderboard, selectedYear, selectedDept, selectedSection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleYearChange = async (val: string | null) => {
     setSelectedYear(val);
+    setSelectedDept(null);
     setSelectedSection(null);
-    await fetchFilters(val, selectedDept);
-    await fetchLeaderboard(val, selectedDept, null);
+    await fetchFilters(val, null);
+    await fetchLeaderboard(val, null, null);
   };
 
   const handleDeptChange = async (val: string | null) => {
@@ -223,7 +225,7 @@ export default function AdminLeaderboardTab() {
               onChange={(e) => handleSectionChange(e.target.value || null)}
               className="w-full bg-white/10 border border-white/20 text-white text-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
             >
-              <option value="" className="text-slate-800">Section</option>
+              <option value="" className="text-slate-800">All Sections</option>
               {sectionOptions.map(opt => (
                 <option key={opt.id} value={String(opt.id)} className="text-slate-800">{opt.name}</option>
               ))}
