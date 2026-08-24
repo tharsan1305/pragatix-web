@@ -26,26 +26,25 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      let response;
+      let response = null;
       try {
         response = await apiClient.get('/api/admin/badge-requests');
       } catch (_e1) {
         try {
           response = await apiClient.get('/api/cc/badge-requests');
         } catch (_e2) {
-          try {
-            response = await apiClient.get('/api/v1/admin/badge-requests');
-          } catch (_e3) {
-            response = await apiClient.get('/api/v1/badges/pending');
-          }
+          response = null;
         }
       }
 
-      if (response.data?.success) {
+      if (response && response.data?.success) {
         const raw = response.data.data;
         const list = Array.isArray(raw) ? raw : (raw?.content || []);
         setRequests(list);
         filterList(list, selectedStatus);
+      } else {
+        setRequests([]);
+        filterList([], selectedStatus);
       }
     } catch (e) {
       logger.error("Failed to fetch badge requests:", e);
@@ -163,16 +162,16 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
             {onBack && (
-              <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+              <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
             <div>
-              <h1 className="font-heading text-2xl font-bold">Badge Requests Approval</h1>
-              <p className="text-xs text-slate-400 mt-0.5">Review student badge applications, proof files, and status decisions</p>
+              <h1 className="type-h3">Badge Requests Approval</h1>
+              <p className="type-caption text-slate-400 mt-0.5">Review student badge applications, proof files, and status decisions</p>
             </div>
           </div>
-          <button onClick={fetchRequests} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors" title="Refresh">
+          <button onClick={fetchRequests} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors" title="Refresh">
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
@@ -187,7 +186,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                 <button
                   key={st}
                   onClick={() => filterList(requests, st, searchQuery)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                  className={`px-4 py-1.5 rounded-full type-caption font-bold transition-all flex items-center space-x-1.5 ${
                     active 
                       ? 'bg-white text-slate-900 shadow-sm' 
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -213,7 +212,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                 setSearchQuery(e.target.value);
                 filterList(requests, selectedStatus, e.target.value);
               }}
-              className="w-full px-3 py-1.5 bg-slate-800 text-white placeholder-slate-400 text-xs rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-1.5 bg-slate-800 text-white placeholder-slate-400 type-body-sm rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
         </div>
@@ -253,20 +252,20 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                       </div>
 
                       <div>
-                        <h3 className="font-heading font-bold text-slate-900 text-base">{badgeName}</h3>
-                        <p className="text-xs text-slate-600 font-medium">{studentName} <span className="text-slate-400">({regNo})</span></p>
+                        <h3 className="type-h5 text-slate-900">{badgeName}</h3>
+                        <p className="type-caption text-slate-600 font-medium">{studentName} <span className="text-slate-400">({regNo})</span></p>
                         {(req.departmentName || req.sectionName || req.academicYear) && (
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="type-fine text-slate-400 mt-0.5">
                             {[req.departmentName, req.sectionName ? `Sec ${req.sectionName}` : null, req.academicYear].filter(Boolean).join(' • ')}
                           </p>
                         )}
                         {remarksText && (
-                          <p className="text-xs text-slate-600 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          <p className="type-caption text-slate-600 italic mt-1 bg-slate-50 p-2 rounded-lg border border-slate-100">
                             Remarks: "{remarksText}"
                           </p>
                         )}
                         {req.reviewedBy && (
-                          <p className="text-[10px] text-slate-400 mt-1">
+                          <p className="type-fine text-slate-400 mt-1">
                             Reviewed by: <span className="font-medium text-slate-600">{req.reviewedBy}</span>
                             {req.reviewedAt && ` on ${new Date(req.reviewedAt).toLocaleDateString()}`}
                           </p>
@@ -280,7 +279,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                           href={getSafeHref(proofLink)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 py-1.5 px-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
+                          className="type-caption text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 py-1.5 px-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>View Proof</span>
@@ -291,7 +290,7 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleApprove(req.id)}
-                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
+                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl type-btn transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
                           >
                             <Check className="w-3.5 h-3.5" />
                             <span>Approve</span>
@@ -301,14 +300,14 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                               setRejectingReq(req);
                               setRejectReason('');
                             }}
-                            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
+                            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl type-btn transition-colors flex items-center space-x-1 shadow-xs cursor-pointer"
                           >
                             <XCircle className="w-3.5 h-3.5" />
                             <span>Reject</span>
                           </button>
                         </div>
                       ) : (
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 ${
+                        <span className={`px-3 py-1 rounded-full type-caption font-bold flex items-center space-x-1 ${
                           status === 'APPROVED' 
                             ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
                             : status === 'REJECTED'
@@ -337,21 +336,21 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                 <XCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-heading text-lg font-bold text-slate-900">Reject Badge Request</h3>
-                <p className="text-xs text-slate-500">{rejectingReq.badgeName || 'Badge'} for {rejectingReq.studentName || 'Student'}</p>
+                <h3 className="type-h4 text-slate-900">Reject Badge Request</h3>
+                <p className="type-caption text-slate-500">{rejectingReq.badgeName || 'Badge'} for {rejectingReq.studentName || 'Student'}</p>
               </div>
             </div>
 
             <form onSubmit={handleRejectSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 mb-1 block">Reason for Rejection *</label>
+                <label className="type-form-label text-slate-700 mb-1 block">Reason for Rejection *</label>
                 <textarea
                   required
                   rows={3}
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   placeholder="Explain why this badge claim is being rejected..."
-                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 text-xs bg-white resize-none"
+                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-rose-500 type-body-sm bg-white resize-none"
                 />
               </div>
 
@@ -362,13 +361,13 @@ export default function AdminBadgeRequestsTab({ onBack }: Props) {
                     setRejectingReq(null);
                     setRejectReason('');
                   }}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold type-btn rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
                   Confirm Rejection
                 </button>

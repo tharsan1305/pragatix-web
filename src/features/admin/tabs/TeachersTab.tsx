@@ -214,11 +214,11 @@ export default function TeachersTab({ onBack }: Props) {
       <div className="bg-slate-900 px-6 pt-12 pb-4 shadow-md z-10">
         <div className="flex items-center space-x-4 mb-2">
           {onBack && (
-            <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+            <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="font-heading text-2xl font-bold text-white flex-1">Staff Management</h1>
+          <h1 className="type-h3 text-white flex-1">Staff Management</h1>
         </div>
       </div>
 
@@ -254,15 +254,15 @@ export default function TeachersTab({ onBack }: Props) {
             {filteredUsers.map(user => (
               <div key={user.id} className="bg-white rounded-xl shadow-sm border border-slate-100 p-2 flex items-center justify-between hover:shadow-md transition-shadow">
                 <div className="flex items-center space-x-4 pl-2">
-                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600 font-bold text-lg">
+                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600 font-bold type-h5">
                     {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-900 text-[15px]">{user.fullName || user.username}</h3>
-                    <p className="text-xs font-medium text-slate-500">{user.email || 'No Email'} • {user.departmentName || user.department?.name || 'No Dept'}</p>
+                    <h3 className="type-h5 text-slate-900">{user.fullName || user.username}</h3>
+                    <p className="type-caption text-slate-500">{user.email || 'No Email'} • {user.departmentName || user.department?.name || 'No Dept'}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {(user.roles || []).map((r: string) => (
-                        <span key={r} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-bold rounded uppercase tracking-wider">
+                        <span key={r} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 type-fine font-bold rounded uppercase tracking-wider">
                           {r.replace('ROLE_', '')}
                         </span>
                       ))}
@@ -298,7 +298,7 @@ export default function TeachersTab({ onBack }: Props) {
         <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
             <div className="p-6 pb-4">
-              <h2 className="font-heading text-[17px] font-bold text-slate-900 mb-1">
+              <h2 className="type-h4 text-slate-900 mb-1">
                 {editingUser ? `Edit User: ${editingUser.username}` : 'Create New User'}
               </h2>
             </div>
@@ -307,37 +307,37 @@ export default function TeachersTab({ onBack }: Props) {
               
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Full Name *</label>
-                  <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                  <label className="type-form-label text-slate-600 mb-1 block">Full Name *</label>
+                  <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Email *</label>
-                  <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                  <label className="type-form-label text-slate-600 mb-1 block">Email *</label>
+                  <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                 </div>
                 {!editingUser && (
                   <>
                     <div>
-                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Username *</label>
-                      <input required type="text" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                      <label className="type-form-label text-slate-600 mb-1 block">Username *</label>
+                      <input required type="text" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-slate-600 mb-1 block">Password *</label>
-                      <input required type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                      <label className="type-form-label text-slate-600 mb-1 block">Password *</label>
+                      <input required type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                     </div>
                   </>
                 )}
                 
                 <div className="pt-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">Department</label>
-                  <select value={formData.departmentId} onChange={e => setFormData({...formData, departmentId: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white text-sm">
+                  <label className="type-form-label text-slate-600 mb-1 block">Department</label>
+                  <select value={formData.departmentId} onChange={e => setFormData({...formData, departmentId: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
                     <option value="">-- None --</option>
                     {lookups.departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
 
                 <div className="pt-2">
-                  <label className="text-xs font-semibold text-slate-600 mb-1 block">System Role *</label>
-                  <select value={formData.mainRole} onChange={e => setFormData({...formData, mainRole: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white text-sm">
+                  <label className="type-form-label text-slate-600 mb-1 block">System Role *</label>
+                  <select value={formData.mainRole} onChange={e => setFormData({...formData, mainRole: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
                     <option value="ROLE_TEACHER">Teacher</option>
                     <option value="ROLE_TRANSPORT">Transport</option>
                   </select>
@@ -346,10 +346,10 @@ export default function TeachersTab({ onBack }: Props) {
                 {formData.mainRole === 'ROLE_TEACHER' && (
                   <div className="pt-2 space-y-4">
                     <div>
-                      <label className="text-sm font-bold text-slate-900 mb-2 block">Teacher Sub-Roles:</label>
+                      <label className="type-form-label type-body-sm font-bold text-slate-900 mb-2 block">Teacher Sub-Roles:</label>
                       <div className="space-y-2 pl-2">
                         {['HOD', 'CC', 'Discipline Commitee', 'Lab instructor', 'PET'].map(subRole => (
-                          <label key={subRole} className="flex items-center space-x-3 text-sm text-slate-700 cursor-pointer">
+                          <label key={subRole} className="flex items-center space-x-3 type-form-label text-slate-700 cursor-pointer">
                             <input 
                               type="checkbox" 
                               checked={formData.subRoles.includes(subRole)}
@@ -365,8 +365,8 @@ export default function TeachersTab({ onBack }: Props) {
                     {formData.subRoles.includes('CC') && (
                       <div className="space-y-4 pl-6 border-l-2 border-slate-200 py-2 mt-2">
                         <div>
-                          <label className="text-xs font-semibold text-slate-600 mb-1 block">Coordinator Year *</label>
-                          <select value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white text-sm">
+                          <label className="type-form-label text-slate-600 mb-1 block">Coordinator Year *</label>
+                          <select value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
                             <option value="">-- Select --</option>
                             <option value="I">I Year</option>
                             <option value="II">II Year</option>
@@ -375,17 +375,17 @@ export default function TeachersTab({ onBack }: Props) {
                           </select>
                         </div>
                         <div>
-                          <label className="text-xs font-semibold text-slate-600 mb-1 block">Coordinator Section *</label>
-                          <input type="text" placeholder="e.g. A" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                          <label className="type-form-label text-slate-600 mb-1 block">Coordinator Section *</label>
+                          <input type="text" placeholder="e.g. A" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                         </div>
                       </div>
                     )}
 
                     <div className="pt-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Subject Specialization:</label>
+                      <label className="type-form-label text-slate-500 uppercase tracking-wider mb-2 block">Subject Specialization:</label>
                       <div className="space-y-2 pl-2">
                         {lookups.subjects.length > 0 ? lookups.subjects.map(s => (
-                          <label key={s.id} className="flex items-center space-x-3 text-sm text-slate-700 cursor-pointer">
+                          <label key={s.id} className="flex items-center space-x-3 type-form-label text-slate-700 cursor-pointer">
                             <input 
                               type="checkbox" 
                               checked={formData.subjectIds.includes(s.id)}
@@ -395,7 +395,7 @@ export default function TeachersTab({ onBack }: Props) {
                             <span>{s.name}</span>
                           </label>
                         )) : (
-                          <div className="text-xs text-slate-400 italic">No subjects configured. Add subjects under 'Manage Subjects'.</div>
+                          <div className="type-caption text-slate-400 italic">No subjects configured. Add subjects under 'Manage Subjects'.</div>
                         )}
                       </div>
                     </div>
@@ -407,7 +407,7 @@ export default function TeachersTab({ onBack }: Props) {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-slate-500 font-semibold hover:bg-slate-100 rounded-lg transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="px-6 py-2 bg-[#EA4335] text-white font-semibold rounded-lg hover:bg-red-600 transition-colors">
+                <button type="submit" className="type-btn px-6 py-2 bg-[#EA4335] text-white font-semibold rounded-lg hover:bg-red-600 transition-colors">
                   {editingUser ? 'Save' : 'Create'}
                 </button>
               </div>

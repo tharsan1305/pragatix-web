@@ -97,18 +97,18 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
       <div className="bg-white px-6 py-4 sticky top-0 z-10 flex items-center border-b border-slate-100 shadow-xs">
         <button
           onClick={onClose}
-          className="p-2 -ml-2 text-slate-900 hover:bg-slate-100 rounded-full transition cursor-pointer"
+          className="p-2 -ml-2 text-slate-900 type-btn hover:bg-slate-100 rounded-full transition cursor-pointer"
           title="Back"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <span className="ml-2 font-bold text-slate-900 text-lg">Activity Details</span>
+        <span className="ml-2 font-bold text-slate-900 type-h5">Activity Details</span>
       </div>
 
       <div className="p-6 max-w-xl mx-auto w-full space-y-6 flex-1 pb-28">
         {/* Status Pill Badge matching Flutter */}
         <div>
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-bold text-xs uppercase tracking-wider ${
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-bold type-caption uppercase tracking-wider ${
             isCompleted 
               ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
               : isPending 
@@ -122,10 +122,10 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
 
         {/* Title & Description matching Flutter */}
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-slate-900 leading-tight">
+          <h1 className="font-heading type-h1 text-slate-900 leading-tight">
             {activity.activityName}
           </h1>
-          <p className="text-sm text-slate-600 mt-2 leading-relaxed whitespace-pre-line">
+          <p className="type-body-sm text-slate-600 mt-2 leading-relaxed whitespace-pre-line">
             {activity.description || 'No description provided.'}
           </p>
         </div>
@@ -134,49 +134,49 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
 
         {/* Information Section Card matching Flutter _InfoRow list */}
         <div className="space-y-3">
-          <h2 className="font-heading text-base font-bold text-slate-900">Information</h2>
+          <h2 className="type-h5 text-slate-900">Information</h2>
           
           <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-4">
             {/* Reward */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 text-sm font-semibold">
+              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
                 <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
                 <span>Reward</span>
               </div>
-              <span className="text-sm font-bold text-slate-900">
+              <span className="type-body-sm font-bold text-slate-900">
                 {activity.rewardXp} XP
               </span>
             </div>
 
             {/* Awarded */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 text-sm font-semibold">
+              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
                 <Award className="w-5 h-5 text-indigo-500" />
                 <span>Awarded</span>
               </div>
-              <span className="text-sm font-bold text-slate-900">
+              <span className="type-body-sm font-bold text-slate-900">
                 {awardedXp} XP
               </span>
             </div>
 
             {/* Faculty / Owner */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 text-sm font-semibold">
+              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
                 <User className="w-5 h-5 text-purple-500" />
                 <span>Faculty / Owner</span>
               </div>
-              <span className="text-sm font-bold text-slate-900 truncate max-w-[200px] text-right">
+              <span className="type-body-sm font-bold text-slate-900 truncate max-w-[200px] text-right">
                 {facultyName}
               </span>
             </div>
 
             {/* Frequency */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 text-sm font-semibold">
+              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
                 <RefreshCw className="w-5 h-5 text-emerald-500" />
                 <span>Frequency</span>
               </div>
-              <span className="text-sm font-bold text-slate-900">
+              <span className="type-body-sm font-bold text-slate-900">
                 {frequency}
               </span>
             </div>
@@ -186,13 +186,13 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
         {/* Required Evidence Section Card matching Flutter */}
         {evidenceList.length > 0 && (
           <div className="space-y-3">
-            <h2 className="font-heading text-base font-bold text-slate-900">Required Evidence</h2>
+            <h2 className="type-h5 text-slate-900">Required Evidence</h2>
             
             <div className="flex flex-wrap gap-2">
               {evidenceList.map((ev, idx) => (
                 <div
                   key={idx}
-                  className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl border border-slate-200"
+                  className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 font-semibold type-caption px-3.5 py-2 rounded-xl border border-slate-200"
                 >
                   <Eye className="w-4 h-4 text-slate-500" />
                   <span>{ev}</span>
@@ -209,7 +209,7 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
               href={getSafeHref(activity.evidenceUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs transition flex items-center justify-center gap-2"
+              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold type-caption transition flex items-center justify-center gap-2"
             >
               <ExternalLink className="w-4 h-4 text-slate-500" />
               View Submission Proof
@@ -222,14 +222,14 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
       {allowStudentRequest && (
         <div className="sticky bottom-0 bg-white border-t border-slate-100 p-4 shadow-lg z-20 max-w-xl mx-auto w-full space-y-3">
           {isCompleted ? (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-3.5 flex items-center gap-2 font-bold text-sm">
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-3.5 flex items-center gap-2 font-bold type-body-sm">
               <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>Completed ✓</span>
             </div>
           ) : (
             <>
               {isRejected && existingRequest && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl type-caption text-rose-700 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                   <div>
                     <strong>Previous request rejected:</strong> {existingRequest.rejectedReason || 'No reason provided'}
@@ -240,7 +240,7 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
               <button
                 onClick={() => setShowDialog(true)}
                 disabled={!buttonEnabled || isLoadingRequests}
-                className={`w-full py-3.5 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm ${
+                className={`w-full py-3.5 rounded-2xl font-bold type-body-sm transition flex items-center justify-center gap-2 shadow-sm ${
                   isPending
                     ? 'bg-amber-100 text-amber-800 cursor-not-allowed'
                     : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
@@ -267,11 +267,11 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
       {showDialog && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[110] flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Request Activity</h3>
+            <h3 className="type-h4 text-slate-900">Request Activity</h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="type-form-label block font-bold text-slate-700 mb-1">
                   Reason / Remarks
                 </label>
                 <textarea
@@ -279,12 +279,12 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="Describe your completion details..."
                   rows={3}
-                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full type-caption p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="type-form-label block font-bold text-slate-700 mb-1">
                   Proof URL (Optional)
                 </label>
                 <input
@@ -292,7 +292,7 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                   value={proofUrl}
                   onChange={(e) => setProofUrl(e.target.value)}
                   placeholder="https://drive.google.com/..."
-                  className="w-full text-xs p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full type-caption p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -300,14 +300,14 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowDialog(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition cursor-pointer"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold type-caption transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold type-caption transition disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit'}
                 </button>

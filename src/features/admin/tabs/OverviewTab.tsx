@@ -2,6 +2,7 @@ import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
 import { RefreshCw, Users, School, Building2, Trophy, Trash2, BarChart3, ArrowRight } from 'lucide-react';
 import apiClient from '../../../services/apiClient';
+import { useAuth } from '../../../store/authContext';
 
 interface Props {
   onPushView: (name: string, props?: any) => void;
@@ -14,6 +15,7 @@ interface Stats {
 }
 
 export default function OverviewTab({ onPushView }: Props) {
+  const { isSuperAdmin, user } = useAuth();
   const [stats, setStats] = useState<Stats>({
     students: 0,
     teachers: 0,
@@ -54,11 +56,11 @@ export default function OverviewTab({ onPushView }: Props) {
       {/* Header */}
       <div className="bg-slate-900 px-6 pt-10 pb-6 text-white shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="font-heading text-2xl font-bold">Admin Overview</h1>
+          <h1 className="type-h3">{isSuperAdmin ? 'Super Admin Overview' : 'Admin Overview'}</h1>
           <div className="flex items-center space-x-2">
             <button
               onClick={() => onPushView('analytics')}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white type-caption rounded-xl transition-all shadow-sm cursor-pointer"
               title="Analytics Dashboard"
             >
               <BarChart3 className="w-4 h-4" />
@@ -73,7 +75,7 @@ export default function OverviewTab({ onPushView }: Props) {
             </button>
             <button
               onClick={fetchStats}
-              className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
+              className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
               title="Refresh Stats"
             >
               <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -81,8 +83,14 @@ export default function OverviewTab({ onPushView }: Props) {
           </div>
         </div>
         <div>
-          <h2 className="font-heading text-xl font-bold text-white mb-0.5">Welcome back, System Admin</h2>
-          <p className="text-xs text-slate-300">Here is a summary of the discipline system metrics.</p>
+          <h2 className="type-h4 text-white mb-0.5">
+            Welcome back, {user?.name ? user.name : (isSuperAdmin ? 'Super Admin' : 'System Admin')}
+          </h2>
+          <p className="type-caption text-slate-300">
+            {isSuperAdmin 
+              ? 'Here is an executive summary of the entire institution discipline metrics.' 
+              : 'Here is a summary of the discipline system metrics.'}
+          </p>
         </div>
       </div>
 
@@ -104,17 +112,17 @@ export default function OverviewTab({ onPushView }: Props) {
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h3 className="font-heading font-bold text-sm text-white">Analytics & Executive Reporting</h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 tracking-wider">
+                    <h3 className="type-h5 text-white">Analytics & Executive Reporting</h3>
+                    <span className="px-2 py-0.5 rounded-full type-fine font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 tracking-wider">
                       INSTITUTION SCOPE
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="type-caption text-slate-400 mt-0.5">
                     Live student engagement, department award vs penalty comparisons & PDF reports
                   </p>
                 </div>
               </div>
-              <button className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 group-hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer self-start sm:self-auto">
+              <button className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 group-hover:bg-indigo-500 text-white font-semibold type-btn rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer self-start sm:self-auto">
                 <span>View Analytics</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -178,8 +186,8 @@ function StatCard({ title, count, icon: Icon, color, bgColor, borderColor, onCli
         </div>
       </div>
       <div>
-        <h4 className="text-3xl font-bold text-slate-900">{count}</h4>
-        <p className="text-xs font-semibold text-slate-500 mt-1">{title}</p>
+        <h4 className="type-h2 text-slate-900">{count}</h4>
+        <p className="type-caption text-slate-500 mt-1">{title}</p>
       </div>
     </div>
   );

@@ -183,11 +183,11 @@ export default function DepartmentsTab({ onBack }: Props) {
       <div className="bg-slate-900 px-6 pt-12 pb-4 shadow-md z-10">
         <div className="flex items-center space-x-4 mb-2">
           {onBack && (
-            <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+            <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="font-heading text-2xl font-bold text-white flex-1">Academic Departments</h1>
+          <h1 className="type-h3 text-white flex-1">Academic Departments</h1>
         </div>
       </div>
 
@@ -229,8 +229,8 @@ export default function DepartmentsTab({ onBack }: Props) {
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-900 text-[15px]">{dept.name}</h3>
-                    <p className="text-xs font-medium text-slate-500">{dept.code}</p>
+                    <h3 className="type-h5 text-slate-900 text-[15px]">{dept.name}</h3>
+                    <p className="type-caption text-slate-500">{dept.code}</p>
                   </div>
                 </div>
                 <div className="flex space-x-1 pr-2">
@@ -270,20 +270,20 @@ export default function DepartmentsTab({ onBack }: Props) {
             <form onSubmit={handleSave} className="px-6 pb-6 space-y-6">
               
               <div>
-                <p className="text-[11px] font-bold text-slate-500 tracking-wider mb-3">DEPARTMENT DETAILS</p>
+                <p className="type-fine font-bold text-slate-500 tracking-wider mb-3">DEPARTMENT DETAILS</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Department Name *</label>
+                    <label className="type-form-label text-slate-600 mb-1 block">Department Name *</label>
                     <div className="relative">
                       <Building2 className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-sm" />
+                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-600 mb-1 block">Department Code *</label>
+                    <label className="type-form-label text-slate-600 mb-1 block">Department Code *</label>
                     <div className="relative">
-                      <div className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 font-mono text-sm">{'</>'}</div>
-                      <input required type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none uppercase text-sm" />
+                      <div className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 font-mono type-body-sm">{'</>'}</div>
+                      <input required type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none uppercase type-body-sm" />
                     </div>
                   </div>
                 </div>
@@ -293,37 +293,37 @@ export default function DepartmentsTab({ onBack }: Props) {
                 <>
                   <div className="h-px bg-slate-200"></div>
                   <div>
-                    <p className="text-[11px] font-bold text-slate-500 tracking-wider mb-3">SECTIONS MANAGEMENT</p>
+                    <p className="type-fine font-bold text-slate-500 tracking-wider mb-3">SECTIONS MANAGEMENT</p>
                     <div className="flex gap-2 mb-4">
                       <input 
                         type="text" 
                         value={newSectionName} 
-                        onChange={e => setNewSectionName(e.target.value)}
+                        onChange={e => setNewSectionName(e.target.value)} 
                         placeholder="Add Section (e.g. A, B)" 
-                        className="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg outline-none focus:border-slate-400 text-sm" 
+                        className="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg outline-none focus:border-slate-400 type-body-sm" 
                       />
                       <button 
                         type="button" 
                         onClick={handleAddSection} 
-                        className="bg-slate-900 text-white px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
+                        className="type-btn bg-slate-900 text-white px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
                       >
                         <Plus className="w-5 h-5" />
                       </button>
                     </div>
 
                     {isLoadingSections ? (
-                      <div className="text-center py-4 text-slate-400 text-xs flex items-center justify-center">
+                      <div className="text-center py-4 text-slate-400 type-caption flex items-center justify-center">
                         <RefreshCw className="w-4 h-4 animate-spin mr-2" />
                         Loading sections...
                       </div>
                     ) : deptSections.length === 0 ? (
                       <div className="text-center py-4 bg-slate-50 border border-slate-100 rounded-xl">
-                        <p className="text-sm text-slate-450">No sections added yet.</p>
+                        <p className="type-body-sm text-slate-450">No sections added yet.</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                         {deptSections.map((sec: any) => (
-                          <div key={sec.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                          <div key={sec.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl type-caption">
                             <span className="font-semibold text-slate-800">Section {sec.sectionName || sec.name}</span>
                             <button
                               type="button"
@@ -341,10 +341,10 @@ export default function DepartmentsTab({ onBack }: Props) {
               )}
               
               <div className="flex justify-end space-x-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-slate-500 font-semibold hover:bg-slate-100 rounded-lg transition-colors">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-slate-500 type-btn hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="px-6 py-2 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors">
+                <button type="submit" className="type-btn px-6 py-2 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors cursor-pointer">
                   Save
                 </button>
               </div>
@@ -357,20 +357,20 @@ export default function DepartmentsTab({ onBack }: Props) {
       {deletingDeptId !== null && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Delete Department</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="type-h4 text-slate-900">Delete Department</h3>
+            <p className="type-caption text-slate-500">
               Are you sure you want to delete this department? This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3 pt-2">
               <button
                 onClick={() => setDeletingDeptId(null)}
-                className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deletingDeptId)}
-                className="px-5 py-2 bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 rounded-lg shadow-xs"
+                className="px-5 py-2 bg-rose-600 text-white type-btn hover:bg-rose-700 rounded-lg shadow-xs cursor-pointer"
               >
                 Confirm Delete
               </button>

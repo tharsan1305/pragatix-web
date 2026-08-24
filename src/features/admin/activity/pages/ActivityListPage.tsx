@@ -182,29 +182,29 @@ export default function ActivityListPage({
     .filter(g => g.activities.length > 0);
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative">
+    <div className="flex flex-col min-h-full bg-slate-50 relative overflow-x-hidden">
       {/* Top Header */}
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center space-x-4 sticky top-0 z-10">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+      <div className="bg-slate-900 px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6 flex items-center gap-3 sticky top-0 z-10 shadow-md">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors shrink-0 cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1">
-          <h1 className="font-heading text-xl font-bold text-white">{cleanTitle} – Activities</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="type-h5 sm:type-h4 text-white truncate">{cleanTitle} – Activities</h1>
         </div>
-        <button onClick={fetchActivities} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={fetchActivities} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors shrink-0 cursor-pointer">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      <div className="flex-1 p-6 pb-24 max-w-4xl mx-auto w-full">
-        <div className="mb-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-2xl font-bold text-slate-800">{cleanTitle}</h2>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 uppercase tracking-wide">
+      <div className="flex-1 px-3.5 sm:px-6 py-4 sm:py-6 pb-28 max-w-4xl mx-auto w-full">
+        <div className="mb-4 sm:mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="type-h4 sm:type-h3 text-slate-800 truncate">{cleanTitle}</h2>
+            <span className="type-fine sm:type-caption font-bold px-2.5 py-0.5 sm:py-1 rounded-md bg-red-50 text-red-700 border border-red-200 uppercase tracking-wide shrink-0">
               {categoryLabel}
             </span>
           </div>
-          <p className="text-sm text-slate-600 mt-2 font-medium">
+          <p className="type-body-sm text-slate-600 mt-2 font-medium">
             {activities.length} activities configured
           </p>
         </div>
@@ -212,7 +212,7 @@ export default function ActivityListPage({
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <span className="text-sm font-medium">{error}</span>
+            <span className="type-body-sm font-medium">{error}</span>
           </div>
         )}
 
@@ -222,8 +222,8 @@ export default function ActivityListPage({
           </div>
         ) : activities.length === 0 ? (
           <div className="text-center py-16 text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-200">
-            <p className="text-lg font-medium text-slate-700 mb-2">No Activities Found</p>
-            <p className="text-sm text-slate-500">Tap the Add Activity button to create one for this category.</p>
+            <h3 className="type-h5 text-slate-700 mb-2">No Activities Found</h3>
+            <p className="type-body-sm text-slate-500">Tap the Add Activity button to create one for this category.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -268,20 +268,20 @@ export default function ActivityListPage({
       {unmapActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Remove Activity</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <h3 className="type-h4 text-slate-900">Remove Activity</h3>
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove <strong>'{unmapActivityTarget.name}'</strong> from this stage?
             </p>
             <div className="flex justify-end space-x-3 pt-2">
               <button 
                 onClick={() => setUnmapActivityTarget(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleUnmapConfirm}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold rounded-xl shadow-md transition-colors"
               >
                 Remove from Stage
               </button>
@@ -294,20 +294,20 @@ export default function ActivityListPage({
       {deleteActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Delete from System</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <h3 className="type-h4 text-slate-900">Delete from System</h3>
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               Are you sure you want to completely delete <strong>'{deleteActivityTarget.name}'</strong> from the entire system? This is permanent.
             </p>
             <div className="flex justify-end space-x-3 pt-2">
               <button 
                 onClick={() => setDeleteActivityTarget(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold rounded-xl shadow-md transition-colors"
               >
                 Delete Everywhere
               </button>
@@ -321,7 +321,7 @@ export default function ActivityListPage({
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-in slide-in-from-bottom">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="font-heading text-lg font-bold text-slate-900">Add Activity</h3>
+              <h3 className="type-h4 text-slate-900">Add Activity</h3>
               <button onClick={() => setIsAddOptionsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>
@@ -337,19 +337,19 @@ export default function ActivityListPage({
               >
                 <PlusCircle className="w-6 h-6 text-[#EA4335]" />
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900">Create New Activity</h4>
-                  <p className="text-xs text-slate-500">Create a brand new activity for this stage</p>
+                  <h4 className="font-bold type-body-sm text-slate-900">Create New Activity</h4>
+                  <p className="type-caption text-slate-500">Create a brand new activity for this stage</p>
                 </div>
               </button>
 
               <button 
                 onClick={handleOpenAddExisting}
-                className="w-full p-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl flex items-center space-x-4 text-left transition-colors"
+                className="w-full p-4 type-btn bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl flex items-center space-x-4 text-left transition-colors"
               >
                 <ListPlus className="w-6 h-6 text-blue-600" />
                 <div>
-                  <h4 className="font-bold text-sm text-slate-900">Add Existing Activity</h4>
-                  <p className="text-xs text-slate-500">Select from activities already in the system</p>
+                  <h4 className="font-bold type-body-sm text-slate-900">Add Existing Activity</h4>
+                  <p className="type-caption text-slate-500">Select from activities already in the system</p>
                 </div>
               </button>
             </div>
@@ -365,7 +365,7 @@ export default function ActivityListPage({
             <div className="bg-[#1E293B] px-5 py-4 flex items-center justify-between text-white border-b border-slate-800">
               <div className="flex items-center space-x-3">
                 <ListPlus className="w-5 h-5 text-white" />
-                <h3 className="font-heading text-lg font-bold text-white">Select Existing Activity</h3>
+                <h3 className="type-h4 text-white">Select Existing Activity</h3>
               </div>
               <button 
                 onClick={() => setIsSelectExistingModalOpen(false)} 
@@ -380,10 +380,10 @@ export default function ActivityListPage({
               {isFetchingGrouped ? (
                 <div className="flex flex-col items-center justify-center py-16 text-slate-500">
                   <RefreshCw className="w-8 h-8 animate-spin text-[#EA4335] mb-2" />
-                  <span className="text-sm font-medium">Loading activities...</span>
+                  <span className="type-body-sm font-medium">Loading activities...</span>
                 </div>
               ) : filteredGroups.length === 0 ? (
-                <div className="flex items-center justify-center py-16 px-6 text-center text-slate-500 text-base font-medium">
+                <div className="flex items-center justify-center py-16 px-6 text-center text-slate-500 type-body font-medium">
                   No available activities found.
                 </div>
               ) : (
@@ -397,7 +397,7 @@ export default function ActivityListPage({
                         {/* Section Header */}
                         <div className="bg-slate-100 px-4 py-2.5 mt-2 mb-1 flex items-center space-x-2 border-y border-slate-200/60">
                           <IconComponent className="w-4 h-4 text-[#EA4335]" />
-                          <span className="font-bold text-xs tracking-wider text-[#1E293B] uppercase">
+                          <span className="font-bold type-caption tracking-wider text-[#1E293B] uppercase">
                             {sectionTitle}
                           </span>
                         </div>
@@ -411,21 +411,21 @@ export default function ActivityListPage({
                               className="w-full text-left p-4 hover:bg-slate-50 transition-colors flex flex-col space-y-2 group"
                             >
                               <div className="flex items-start justify-between gap-3">
-                                <h4 className="font-bold text-base text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2">
+                                <h4 className="font-bold type-h4 text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2">
                                   {act.name}
                                 </h4>
-                                <span className="px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full shrink-0">
+                                <span className="px-2.5 py-0.5 type-caption font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full shrink-0">
                                   +{act.awardXp} XP
                                 </span>
                               </div>
 
                               {act.description && act.description.trim().length > 0 && (
-                                <p className="text-xs text-slate-600 line-clamp-2">
+                                <p className="type-caption text-slate-600 line-clamp-2">
                                   {act.description}
                                 </p>
                               )}
 
-                              <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 pt-1">
+                              <div className="flex items-center flex-wrap gap-x-4 gap-y-1 type-caption text-slate-600 pt-1">
                                 <span className="flex items-center font-medium">
                                   <Repeat className="w-3.5 h-3.5 text-slate-400 mr-1" />
                                   {act.awardFrequency}

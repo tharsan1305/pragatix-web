@@ -141,7 +141,7 @@ export default function RecycleBinPage({ onBack }: Props) {
           {onBack && (
             <button
               onClick={onBack}
-              className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors"
+              className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors"
               title="Go Back"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -150,9 +150,9 @@ export default function RecycleBinPage({ onBack }: Props) {
           <div>
             <div className="flex items-center space-x-2">
               <Trash2 className="w-6 h-6 text-rose-400" />
-              <h1 className="font-heading text-2xl font-bold">Recycle Bin</h1>
+              <h1 className="type-h3">Recycle Bin</h1>
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="type-caption text-slate-300 mt-0.5">
               Restore soft-deleted items or permanently remove them
             </p>
           </div>
@@ -161,7 +161,7 @@ export default function RecycleBinPage({ onBack }: Props) {
         <button
           onClick={fetchItems}
           disabled={isLoading}
-          className="p-2.5 bg-slate-800 rounded-xl text-white hover:bg-slate-700 transition-colors flex items-center space-x-2 text-xs font-semibold"
+          className="p-2.5 bg-slate-800 rounded-xl text-white hover:bg-slate-700 transition-colors flex items-center space-x-2 type-caption"
           title="Refresh"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -173,7 +173,7 @@ export default function RecycleBinPage({ onBack }: Props) {
         {/* Info Banner */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start space-x-3 text-amber-800">
           <ShieldAlert className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-          <div className="text-xs space-y-1">
+          <div className="type-caption space-y-1">
             <p className="font-bold text-amber-900">Soft-Deletion Policy</p>
             <p className="text-amber-700">
               Deleted items remain in the Recycle Bin for up to 30 days before being automatically purged from the system. You can restore them anytime or permanently delete them now.
@@ -190,7 +190,7 @@ export default function RecycleBinPage({ onBack }: Props) {
               placeholder="Search deleted items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl type-caption text-slate-800 outline-none focus:ring-2 focus:ring-slate-900 shadow-xs"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function RecycleBinPage({ onBack }: Props) {
               <button
                 key={t}
                 onClick={() => setSelectedType(t)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                className={`px-3 py-1.5 rounded-xl type-caption font-bold transition-all shrink-0 ${
                   selectedType === t
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -216,15 +216,15 @@ export default function RecycleBinPage({ onBack }: Props) {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <RefreshCw className="w-8 h-8 animate-spin text-rose-500" />
-            <p className="text-xs font-semibold text-slate-500">Loading Recycle Bin...</p>
+            <p className="type-caption text-slate-500">Loading Recycle Bin...</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="font-heading text-base font-bold text-slate-700">Recycle Bin is Empty</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <h3 className="type-h5 text-slate-700">Recycle Bin is Empty</h3>
+            <p className="type-caption text-slate-500 max-w-sm mx-auto">
               {searchQuery || selectedType !== 'ALL'
                 ? 'No items match your filter criteria.'
                 : 'There are no soft-deleted records in the system.'}
@@ -244,15 +244,15 @@ export default function RecycleBinPage({ onBack }: Props) {
 
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-heading font-bold text-slate-900 text-sm sm:text-base">
+                      <h3 className="type-h5 text-slate-900">
                         {item.entityName}
                       </h3>
-                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border ${getTypeBadgeColor(item.entityType)}`}>
+                      <span className={`px-2 py-0.5 rounded-lg type-fine font-black uppercase border ${getTypeBadgeColor(item.entityType)}`}>
                         {item.entityType}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 type-caption text-slate-500 font-medium">
                       {item.deletedAt && (
                         <div className="flex items-center space-x-1">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -276,7 +276,7 @@ export default function RecycleBinPage({ onBack }: Props) {
                   <button
                     onClick={() => handleRestore(item)}
                     disabled={isProcessing}
-                    className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-2xs disabled:opacity-50"
+                    className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl type-btn transition-colors flex items-center space-x-1.5 shadow-2xs disabled:opacity-50 cursor-pointer"
                     title="Restore item"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -286,7 +286,7 @@ export default function RecycleBinPage({ onBack }: Props) {
                   <button
                     onClick={() => setDeleteConfirmItem(item)}
                     disabled={isProcessing}
-                    className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-2xs disabled:opacity-50"
+                    className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl type-btn transition-colors flex items-center space-x-1.5 shadow-2xs disabled:opacity-50 cursor-pointer"
                     title="Permanently Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -307,9 +307,9 @@ export default function RecycleBinPage({ onBack }: Props) {
               <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-600" />
               </div>
-              <h3 className="font-heading font-bold text-lg text-slate-900">Delete Permanently?</h3>
+              <h3 className="type-h5 text-slate-900">Delete Permanently?</h3>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="type-caption text-slate-600 leading-relaxed">
               Are you sure you want to permanently delete{' '}
               <strong className="text-slate-900 font-bold">"{deleteConfirmItem.entityName}"</strong> ({deleteConfirmItem.entityType})?
               <br />
@@ -322,7 +322,7 @@ export default function RecycleBinPage({ onBack }: Props) {
                 type="button"
                 onClick={() => setDeleteConfirmItem(null)}
                 disabled={isProcessing}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
               >
                 Cancel
               </button>
@@ -330,7 +330,7 @@ export default function RecycleBinPage({ onBack }: Props) {
                 type="button"
                 onClick={handlePermanentDelete}
                 disabled={isProcessing}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center space-x-1.5"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold type-btn shadow-md disabled:opacity-50 flex items-center space-x-1.5"
               >
                 {isProcessing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Delete Forever</span>

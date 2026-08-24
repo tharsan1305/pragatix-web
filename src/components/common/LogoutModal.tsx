@@ -51,11 +51,11 @@ export default function LogoutModal({
             <LogOut className="w-7 h-7" />
           </div>
 
-          <h2 id="logout-modal-title" className="font-heading text-xl font-bold text-slate-900">
+          <h2 id="logout-modal-title" className="type-h4 text-slate-900">
             Confirm Logout
           </h2>
 
-          <p className="text-sm text-slate-500 mt-2 mb-6 max-w-xs">
+          <p className="type-body-sm text-slate-500 mt-2 mb-6 max-w-xs">
             Are you sure you want to sign out? Your active session will end.
           </p>
 
@@ -63,7 +63,7 @@ export default function LogoutModal({
             <button
               type="button"
               onClick={onCancel}
-              className="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-sm transition-colors"
+              className="type-btn w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -71,7 +71,7 @@ export default function LogoutModal({
               type="button"
               onClick={onConfirm}
               disabled={isSubmitting}
-              className="w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl text-sm transition-colors shadow-md shadow-rose-600/20 disabled:opacity-50"
+              className="type-btn w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl transition-colors shadow-md shadow-rose-600/20 disabled:opacity-50 cursor-pointer"
             >
               {isSubmitting ? 'Signing Out...' : 'Sign Out'}
             </button>

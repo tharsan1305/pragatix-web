@@ -168,12 +168,12 @@ export default function StudentDetailsPage() {
         <div className={`p-6 rounded-2xl flex flex-col items-start gap-4 border shadow-sm ${isAccessRestricted ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-700'}`}>
           <div className="flex items-center gap-3">
             {isAccessRestricted ? <Lock className="w-6 h-6 text-amber-600 shrink-0" /> : <FileWarning className="w-6 h-6 text-red-600 shrink-0" />}
-            <h2 className="font-heading text-lg font-bold">{isAccessRestricted ? 'Access Restricted' : 'Error'}</h2>
+            <h2 className="type-h4">{isAccessRestricted ? 'Access Restricted' : 'Error'}</h2>
           </div>
-          <p className="text-sm leading-relaxed">{error || 'Student not found'}</p>
+          <p className="type-body-sm leading-relaxed">{error || 'Student not found'}</p>
           <button 
             onClick={() => navigate(-1)}
-            className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 font-semibold text-xs transition-colors shadow-xs"
+            className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 type-btn transition-colors shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Go Back
           </button>
@@ -194,8 +194,8 @@ export default function StudentDetailsPage() {
             <ArrowLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div>
-            <h1 className="font-heading text-2xl font-bold text-slate-800">Student Profile</h1>
-            <p className="text-xs text-slate-500">View and manage detailed information</p>
+            <h1 className="type-h3 text-slate-800">Student Profile</h1>
+            <p className="type-caption text-slate-500">View and manage detailed information</p>
           </div>
         </div>
         
@@ -203,7 +203,7 @@ export default function StudentDetailsPage() {
           <button 
             onClick={handleToggleCaptain}
             disabled={isCaptainLoading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white font-semibold text-xs transition-colors shadow-sm ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white type-btn transition-colors shadow-sm cursor-pointer ${
               isCurrentlyCaptain ? 'bg-amber-600 hover:bg-amber-700' : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
@@ -213,7 +213,7 @@ export default function StudentDetailsPage() {
 
           <button 
             onClick={() => setIsDeleteModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-red-600 hover:bg-red-50 transition-colors font-medium text-xs shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 rounded-xl text-red-600 hover:bg-red-50 transition-colors type-btn shadow-sm cursor-pointer"
           >
             <Trash2 className="w-4 h-4" /> Delete
           </button>
@@ -227,7 +227,7 @@ export default function StudentDetailsPage() {
             <div className="absolute top-0 w-full h-24 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-90"></div>
             
             <div className="w-24 h-24 bg-white rounded-full p-1 mt-8 z-10 relative shadow-md">
-              <div className="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center text-3xl font-bold text-indigo-600">
+              <div className="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center type-h2 text-indigo-600">
                 {selectedStudent.fullName?.charAt(0) || 'S'}
               </div>
               {isCurrentlyCaptain && (
@@ -237,19 +237,19 @@ export default function StudentDetailsPage() {
               )}
             </div>
             
-            <h2 className="font-heading mt-4 text-xl font-bold text-slate-800 z-10">{selectedStudent.fullName}</h2>
-            <p className="text-xs text-slate-500 font-mono font-medium z-10">{selectedStudent.regNo}</p>
+            <h2 className="font-heading mt-4 type-h2 text-slate-800 z-10">{selectedStudent.fullName}</h2>
+            <p className="type-caption text-slate-500 font-mono font-medium z-10">{selectedStudent.regNo}</p>
             
             <div className="mt-6 w-full flex flex-col gap-2.5">
-              <div className="flex items-center gap-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-3 type-caption text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <Mail className="w-4 h-4 text-slate-400 shrink-0" />
                 <span className="truncate">{selectedStudent.email || 'No email provided'}</span>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-3 type-caption text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <Building className="w-4 h-4 text-slate-400 shrink-0" />
                 <span>{selectedStudent.departmentName || 'No Department'}</span>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-3 type-caption text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <Hash className="w-4 h-4 text-slate-400 shrink-0" />
                 <span>Year {selectedStudent.year || 'N/A'} • Sec {selectedStudent.section || 'N/A'}</span>
               </div>
@@ -257,7 +257,7 @@ export default function StudentDetailsPage() {
           </div>
           
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-heading text-base font-bold text-slate-800 mb-4">Discipline Score</h3>
+            <h3 className="type-h5 text-slate-800 mb-4">Discipline Score</h3>
             <div className="flex flex-col items-center justify-center py-2">
               <div className="relative w-32 h-32 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -272,7 +272,7 @@ export default function StudentDetailsPage() {
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-3xl font-bold text-slate-800">{selectedStudent.disciplineScore ?? 0}</span>
+                  <span className="type-h2 text-slate-800">{selectedStudent.disciplineScore ?? 0}</span>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PTS</span>
                 </div>
               </div>
@@ -280,13 +280,13 @@ export default function StudentDetailsPage() {
               <div className="mt-6 w-full space-y-2">
                 <button 
                   onClick={() => setIsAdjustModalOpen(true)}
-                  className="w-full py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-indigo-50 text-indigo-700 rounded-xl type-caption font-bold hover:bg-indigo-100 transition-colors flex items-center justify-center gap-2"
                 >
                   <PlusCircle className="w-4 h-4" /> Adjust Points
                 </button>
                 <button 
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-100 transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 rounded-xl type-caption font-bold hover:bg-rose-100 transition-colors flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete Profile</span>
@@ -305,7 +305,7 @@ export default function StudentDetailsPage() {
                 <FileWarning className="w-4 h-4 text-orange-500" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">Logs</span>
               </div>
-              <span className="text-2xl font-bold text-slate-800">{historyLogs.length}</span>
+              <span className="type-h3 text-slate-800">{historyLogs.length}</span>
              </div>
              
              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
@@ -313,7 +313,7 @@ export default function StudentDetailsPage() {
                 <Award className="w-4 h-4 text-indigo-500" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">Score</span>
               </div>
-              <span className="text-2xl font-bold text-indigo-600">{selectedStudent.disciplineScore ?? 0}</span>
+              <span className="type-h3 text-indigo-600">{selectedStudent.disciplineScore ?? 0}</span>
              </div>
              
              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
@@ -321,14 +321,14 @@ export default function StudentDetailsPage() {
                 <Medal className="w-4 h-4 text-amber-500" />
                 <span className="text-[10px] font-bold uppercase tracking-wider">Captain</span>
               </div>
-              <span className="text-sm font-bold text-slate-800 mt-1">{isCurrentlyCaptain ? 'YES' : 'NO'}</span>
+              <span className="type-body-sm font-bold text-slate-800 mt-1">{isCurrentlyCaptain ? 'YES' : 'NO'}</span>
              </div>
           </div>
           
           {/* Recent Disciplinary Logs */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[350px]">
             <div className="px-6 py-4 border-b border-slate-100 bg-white flex justify-between items-center">
-              <h3 className="font-heading text-sm font-bold text-slate-800">Discipline Action History</h3>
+              <h3 className="type-h5 text-slate-800">Discipline Action History</h3>
               <button 
                 onClick={() => id && fetchHistoryLogs(id)} 
                 className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
@@ -339,11 +339,11 @@ export default function StudentDetailsPage() {
             </div>
 
             {isLoadingHistory ? (
-              <div className="p-8 text-center text-slate-400 text-sm">Loading history logs...</div>
+              <div className="p-8 text-center text-slate-400 type-body-sm">Loading history logs...</div>
             ) : historyLogs.length === 0 ? (
               <div className="p-8 flex-1 flex flex-col items-center justify-center text-slate-400">
                 <FileWarning className="w-12 h-12 mb-3 opacity-20" />
-                <p className="text-sm font-medium">No discipline logs recorded yet</p>
+                <p className="type-body-sm font-medium">No discipline logs recorded yet</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
@@ -354,13 +354,13 @@ export default function StudentDetailsPage() {
                         {log.points >= 0 ? <PlusCircle className="w-4 h-4" /> : <MinusCircle className="w-4 h-4" />}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-800 text-sm">{log.reason || 'Point adjustment'}</div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="font-semibold text-slate-800 type-body-sm">{log.reason || 'Point adjustment'}</div>
+                        <div className="type-fine text-slate-400">
                           {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Recent'}
                         </div>
                       </div>
                     </div>
-                    <div className={`font-bold text-sm ${log.points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`type-body-sm font-bold ${log.points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {log.points >= 0 ? `+${log.points}` : log.points} pts
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function StudentDetailsPage() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-heading font-bold text-slate-800 text-lg">Adjust Discipline Points</h3>
+              <h3 className="font-heading font-bold text-slate-800 type-h3">Adjust Discipline Points</h3>
               <button onClick={() => setIsAdjustModalOpen(false)} className="p-1 text-slate-400 hover:bg-slate-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>
@@ -384,7 +384,7 @@ export default function StudentDetailsPage() {
 
             <form onSubmit={handleAdjustPoints} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Points (+ or -)</label>
+                <label className="type-form-label block font-bold text-slate-600 mb-1">Points (+ or -)</label>
                 <input 
                   type="number" 
                   required 
@@ -393,17 +393,17 @@ export default function StudentDetailsPage() {
                   className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none font-bold text-slate-800" 
                   placeholder="e.g. 5 or -10" 
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">Use positive number to reward, negative number to deduct.</span>
+                <span className="type-fine text-slate-400 mt-1 block">Use positive number to reward, negative number to deduct.</span>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Reason *</label>
+                <label className="type-form-label block font-bold text-slate-600 mb-1">Reason *</label>
                 <textarea 
                   required 
                   rows={3} 
                   value={reason} 
                   onChange={(e) => setReason(e.target.value)} 
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none text-sm" 
+                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none type-body-sm" 
                   placeholder="Provide a reason for point modification..." 
                 />
               </div>
@@ -412,14 +412,14 @@ export default function StudentDetailsPage() {
                 <button 
                   type="button" 
                   onClick={() => setIsAdjustModalOpen(false)} 
-                  className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-5 py-2.5 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
                   disabled={isSubmittingPoints} 
-                  className="px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors disabled:opacity-50"
+                  className="px-6 py-2.5 type-caption font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors disabled:opacity-50"
                 >
                   {isSubmittingPoints ? 'Saving...' : 'Submit Adjustment'}
                 </button>

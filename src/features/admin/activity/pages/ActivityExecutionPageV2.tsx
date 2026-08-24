@@ -113,8 +113,8 @@ export default function ActivityExecutionPageV2() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold">{data.activity?.name || 'Activity Execution'}</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="type-h4">{data.activity?.name || 'Activity Execution'}</h1>
+            <p className="type-caption text-slate-400 mt-0.5">
               {data.assignment?.departmentName || 'Scope'} | Max XP: {data.activity?.xpReward || 0}
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function ActivityExecutionPageV2() {
 
         <button 
           onClick={loadData}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
+          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
           title="Refresh"
         >
           <RefreshCw className="w-5 h-5" />
@@ -138,7 +138,7 @@ export default function ActivityExecutionPageV2() {
             placeholder="Search by student name or register number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 outline-none text-sm"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 outline-none type-body-sm"
           />
         </div>
 
@@ -159,29 +159,29 @@ export default function ActivityExecutionPageV2() {
                   }`}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold type-h5">
                       {student.fullName?.charAt(0) || 'S'}
                     </div>
                     {isAwarded && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full type-caption font-bold bg-green-100 text-green-700">
                         <CheckCircle className="w-3.5 h-3.5" /> PASSED
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-bold text-slate-800 truncate text-base">{student.fullName}</h3>
-                  <p className="text-xs text-slate-500 font-mono mb-4">{student.regNo || student.studentId}</p>
+                  <h3 className="type-h5 text-slate-800 truncate">{student.fullName}</h3>
+                  <p className="type-caption text-slate-500 font-mono mb-4">{student.regNo || student.studentId}</p>
 
                   <div className="flex gap-2 border-t border-slate-100 pt-3">
                     <button
                       onClick={() => handleOpenAwardModal(student, true)}
-                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white type-btn rounded-xl transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                     >
                       <Award className="w-4 h-4" /> Pass / Award
                     </button>
                     <button
                       onClick={() => handleOpenAwardModal(student, false)}
-                      className="py-2 px-3 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-xl text-xs transition-colors flex items-center justify-center"
+                      className="py-2 px-3 bg-red-50 text-red-600 hover:bg-red-100 type-btn rounded-xl transition-colors flex items-center justify-center cursor-pointer"
                       title="Fail Activity"
                     >
                       <XCircle className="w-4 h-4" />
@@ -199,14 +199,14 @@ export default function ActivityExecutionPageV2() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-lg">
+              <h3 className="font-bold text-slate-800 type-h3">
                 Log {resultStatus} for {selectedStudent.fullName}
               </h3>
             </div>
 
             <form onSubmit={handleSubmitAward} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">XP Points</label>
+                <label className="type-form-label block font-bold text-slate-600 mb-1">XP Points</label>
                 <input
                   type="number"
                   required
@@ -217,12 +217,12 @@ export default function ActivityExecutionPageV2() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Remarks / Feedback</label>
+                <label className="type-form-label block font-bold text-slate-600 mb-1">Remarks / Feedback</label>
                 <textarea
                   rows={3}
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none text-sm"
+                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none type-body-sm"
                   placeholder="Optional remarks..."
                 />
               </div>
@@ -231,14 +231,14 @@ export default function ActivityExecutionPageV2() {
                 <button
                   type="button"
                   onClick={() => setSelectedStudent(null)}
-                  className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-5 py-2.5 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors disabled:opacity-50"
+                  className="px-6 py-2.5 type-caption font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Saving...' : 'Confirm'}
                 </button>

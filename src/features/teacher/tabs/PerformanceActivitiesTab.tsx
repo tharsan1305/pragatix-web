@@ -85,12 +85,7 @@ export default function PerformanceActivitiesTab() {
   const fetchMyActivities = async () => {
     setIsLoading(true);
     try {
-      let response;
-      try {
-        response = await apiClient.get('/api/v1/admin/my-activities');
-      } catch (err) {
-        response = await apiClient.get('/api/v1/teacher/my-activities');
-      }
+      const response = await apiClient.get('/api/v1/admin/my-activities');
       if (response.data?.success) {
         setMyActivities(response.data.data || []);
       }
@@ -285,11 +280,11 @@ export default function PerformanceActivitiesTab() {
       {/* Dynamic Header */}
       <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center shadow-md relative">
         {currentFlowStep > 0 && (
-          <button onClick={handleBack} className="mr-4 p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+          <button onClick={handleBack} className="mr-4 p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <h1 className="font-heading text-2xl font-bold text-white flex-1">
+        <h1 className="type-h3 text-white flex-1">
           {currentFlowStep === 0 && "Performance Activities"}
           {currentFlowStep === 1 && `${CATEGORY_STYLES[selectedCategory || '']?.label} Events`}
           {currentFlowStep === 2 && "Select Year"}
@@ -302,7 +297,7 @@ export default function PerformanceActivitiesTab() {
         {isCC && currentFlowStep === 0 && (
           <div className="flex items-center space-x-2 ml-4">
             {pendingBadges > 0 && (
-              <span className="px-3 py-1 bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold rounded-full">
+              <span className="px-3 py-1 bg-amber-500/20 border border-amber-400/40 text-amber-300 type-caption font-bold rounded-full">
                 {pendingBadges} Pending Request{pendingBadges > 1 ? 's' : ''}
               </span>
             )}
@@ -334,8 +329,8 @@ export default function PerformanceActivitiesTab() {
                   <div className={`p-3 rounded-xl ${style.bg} ${style.color} mb-4`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-heading font-bold text-slate-800 text-lg">{style.label}</h3>
-                  <p className="text-xs text-slate-500 mt-1">{count} configured events</p>
+                  <h3 className="type-h5 text-slate-800">{style.label}</h3>
+                  <p className="type-caption text-slate-500 mt-1">{count} configured events</p>
                 </button>
               );
             })}
@@ -350,7 +345,7 @@ export default function PerformanceActivitiesTab() {
             
           return (
             <div className="space-y-5">
-              <h3 className="font-heading text-[15px] font-semibold text-slate-800 ml-1">
+              <h3 className="type-h6 text-slate-800 ml-1">
                 Select Predefined Event ({filteredEvents.length} available)
               </h3>
               <div className="relative">
@@ -360,7 +355,7 @@ export default function PerformanceActivitiesTab() {
                   placeholder="Search Event..."
                   value={eventSearch}
                   onChange={e => setEventSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm placeholder:text-slate-400"
+                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none type-body-sm placeholder:text-slate-400"
                 />
               </div>
               <div className="space-y-4 pb-20">
@@ -371,13 +366,13 @@ export default function PerformanceActivitiesTab() {
                     className="w-full bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-row items-center justify-between hover:shadow-md transition-shadow"
                   >
                     <div className="text-left flex-1 pr-4">
-                      <h4 className="font-bold text-slate-800 text-[15px] leading-tight mb-1">{event.name}</h4>
-                      <p className="text-xs text-slate-500 leading-snug line-clamp-2">
+                      <h4 className="type-h6 text-slate-800 leading-tight mb-1">{event.name}</h4>
+                      <p className="type-caption text-slate-500 leading-snug line-clamp-2">
                         {event.description || event.type || 'Individual'}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-sm font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100/50">
+                      <span className="type-body-sm font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100/50">
                         {event.awardXp} XP
                       </span>
                     </div>
@@ -395,7 +390,7 @@ export default function PerformanceActivitiesTab() {
               <button
                 key={idx}
                 onClick={() => onYearSelected(yr)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-800 text-lg text-left hover:bg-slate-50"
+                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
               >
                 {yr.yearName}
               </button>
@@ -413,7 +408,7 @@ export default function PerformanceActivitiesTab() {
                 placeholder="Search departments..."
                 value={deptSearch}
                 onChange={e => setDeptSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none type-body-sm"
               />
             </div>
             {isLoading ? <p>Loading departments...</p> : availableDepts
@@ -422,7 +417,7 @@ export default function PerformanceActivitiesTab() {
               <button
                 key={idx}
                 onClick={() => onDeptSelected(d)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-800 text-lg text-left hover:bg-slate-50"
+                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
               >
                 {d.name || d.departmentName}
               </button>
@@ -437,7 +432,7 @@ export default function PerformanceActivitiesTab() {
               <button
                 key={idx}
                 onClick={() => onSectionSelected(s)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-800 text-lg text-left hover:bg-slate-50"
+                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
               >
                 {s.sectionName || s.name}
               </button>
@@ -449,8 +444,8 @@ export default function PerformanceActivitiesTab() {
         {currentFlowStep === 5 && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-xl border border-slate-200">
-              <h3 className="font-heading font-bold text-slate-800 text-lg">{selectedEvent?.name}</h3>
-              <p className="text-sm text-slate-500">{selectedYear?.yearName} • {selectedDept?.name || selectedDept?.departmentName} {selectedSection ? `• ${selectedSection}` : ''}</p>
+              <h3 className="type-h5 text-slate-800">{selectedEvent?.name}</h3>
+              <p className="type-body-sm text-slate-500">{selectedYear?.yearName} • {selectedDept?.name || selectedDept?.departmentName} {selectedSection ? `• ${selectedSection}` : ''}</p>
             </div>
             
             <div className="relative">
@@ -495,7 +490,7 @@ export default function PerformanceActivitiesTab() {
                   />
                   <div>
                     <h4 className="font-bold text-slate-800">{student.fullName}</h4>
-                    <p className="text-xs text-slate-500">{student.studentId} • {student.year} • {student.section}</p>
+                    <p className="type-caption text-slate-500">{student.studentId} • {student.year} • {student.section}</p>
                   </div>
                 </div>
               ))}
@@ -512,7 +507,7 @@ export default function PerformanceActivitiesTab() {
               <button 
                 onClick={submitAward}
                 disabled={isAwarding || selectedStudentIds.size === 0}
-                className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="w-full type-btn bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 {isAwarding ? 'Awarding...' : `Award XP to ${selectedStudentIds.size} Student(s)`}
               </button>

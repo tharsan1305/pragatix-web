@@ -24,14 +24,14 @@ export default function GroupActivitySecPage() {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         <div>
-          <h1 className="font-heading text-2xl font-bold text-white">Select Section</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{year.yearName} • {dept.deptName || dept.name || dept.code}</p>
+          <h1 className="type-h3 text-white">Select Section</h1>
+          <p className="type-caption text-slate-400 mt-0.5">{year.yearName} • {dept.deptName || dept.name || dept.code}</p>
         </div>
       </div>
 
       <div className="flex-1 p-6 max-w-2xl mx-auto w-full">
         {!sections || sections.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-500 text-sm">
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-500 type-body-sm">
             No sections available.
           </div>
         ) : (
@@ -40,7 +40,7 @@ export default function GroupActivitySecPage() {
               <button
                 key={sec.id}
                 onClick={() => handleSelectSection(sec)}
-                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold text-base text-slate-800 flex justify-between items-center transition-all hover:shadow-sm cursor-pointer"
+                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold type-body text-slate-800 flex justify-between items-center transition-all hover:shadow-sm cursor-pointer"
               >
                 <div className="flex items-center space-x-3">
                   <Layers className="w-5 h-5 text-indigo-600" />

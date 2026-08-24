@@ -331,10 +331,10 @@ export default function TeamManagementTab() {
   return (
     <div className="flex flex-col h-full bg-slate-50">
       <div className="bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="font-heading text-xl font-bold">Team Management</h1>
+        <h1 className="type-h4">Team Management</h1>
         <button
           onClick={fetchTeams}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
+          className="p-2 type-btn hover:bg-white/10 rounded-full transition-colors"
           title="Refresh"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -349,7 +349,7 @@ export default function TeamManagementTab() {
         ) : teams.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">
             <UsersRound className="w-16 h-16 mb-4 opacity-30" />
-            <p className="text-sm font-medium">No teams found</p>
+            <p className="type-body-sm font-medium">No teams found</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -380,7 +380,7 @@ export default function TeamManagementTab() {
                             Stage {level}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5 truncate">
+                        <p className="type-caption text-slate-500 mt-0.5 truncate">
                           Captain: {captainName} • {memberCount}/{size} members
                         </p>
                       </div>
@@ -405,7 +405,7 @@ export default function TeamManagementTab() {
                             setMemberSearchQuery('');
                             setSelectedMembersToAssign([]);
                           }}
-                          className="flex items-center gap-1.5 bg-green-50 text-green-700 hover:bg-green-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-green-50 text-green-700 hover:bg-green-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
                         >
                           <UserPlus className="w-3.5 h-3.5" /> Add Member
                         </button>
@@ -415,19 +415,19 @@ export default function TeamManagementTab() {
                             setEditTeamNameInput(teamName);
                             setEditTeamSizeInput(size.toString());
                           }}
-                          className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
                         >
                           <Edit2 className="w-3.5 h-3.5" /> Edit Team
                         </button>
                         <button
                           onClick={() => setActiveChangeCaptainTeam(team)}
-                          className="flex items-center gap-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
                         >
                           <Crown className="w-3.5 h-3.5" /> Change Captain
                         </button>
                         <button
                           onClick={() => setActiveDeleteTeam(team)}
-                          className="flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Delete Team
                         </button>
@@ -441,12 +441,12 @@ export default function TeamManagementTab() {
                           return (
                             <div key={i} className="p-3 border-b border-slate-100 last:border-0 flex items-center justify-between hover:bg-slate-50">
                               <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isCaptain ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center type-caption font-bold ${isCaptain ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-600'}`}>
                                   {isCaptain ? <Crown className="w-4 h-4" /> : (m.fullName || m.name || "S")?.charAt(0)}
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <span className="font-bold text-xs text-slate-800">{m.fullName || m.name || "Student"}</span>
+                                    <span className="font-bold type-caption text-slate-800">{m.fullName || m.name || "Student"}</span>
                                     {isCaptain && <span className="bg-amber-100 text-amber-800 text-[9px] font-black px-1.5 py-0.5 rounded-full">CAPTAIN</span>}
                                   </div>
                                   <span className="text-[11px] text-slate-400">{mRegNo}</span>
@@ -480,38 +480,38 @@ export default function TeamManagementTab() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
             <div className="p-6">
-              <h2 className="text-lg font-bold text-slate-900 mb-4">Edit Team</h2>
+              <h2 className="type-h4 text-slate-900 mb-4">Edit Team</h2>
               <form onSubmit={handleUpdateTeam} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Team Name</label>
+                  <label className="type-form-label block text-slate-700 mb-1">Team Name</label>
                   <input
                     type="text"
                     value={editTeamNameInput}
                     onChange={(e) => setEditTeamNameInput(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg type-body-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Team Capacity</label>
+                  <label className="type-form-label block text-slate-700 mb-1">Team Capacity</label>
                   <input
                     type="number"
                     value={editTeamSizeInput}
                     onChange={(e) => setEditTeamSizeInput(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg type-body-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
                   />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button
                     type="button"
                     onClick={() => setActiveEditTeam(null)}
-                    className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg text-sm"
+                    className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 text-sm disabled:opacity-50"
+                    className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 type-btn disabled:opacity-50"
                   >
                     {isSubmitting ? 'Saving...' : 'Save'}
                   </button>
@@ -528,7 +528,7 @@ export default function TeamManagementTab() {
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center justify-between">
-                <h3 className="font-heading text-lg font-bold text-slate-900">Add Team Members</h3>
+                <h3 className="type-h4 text-slate-900">Add Team Members</h3>
                 <button
                   onClick={() => setActiveAddTeamId(null)}
                   className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
@@ -546,7 +546,7 @@ export default function TeamManagementTab() {
                   value={memberSearchQuery}
                   onChange={(e) => setMemberSearchQuery(e.target.value)}
                   placeholder="Search by name or register number..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:border-indigo-500 outline-none"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg type-caption focus:bg-white focus:border-indigo-500 outline-none"
                 />
               </div>
 
@@ -556,7 +556,7 @@ export default function TeamManagementTab() {
                     <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
                   </div>
                 ) : memberSearchResults.length === 0 ? (
-                  <p className="text-center text-sm text-slate-400 py-10">
+                  <p className="text-center type-body-sm text-slate-400 py-10">
                     No available students found.
                   </p>
                 ) : (
@@ -583,8 +583,8 @@ export default function TeamManagementTab() {
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <div className="font-bold text-sm text-slate-800">{sName}</div>
-                            <div className="text-xs text-slate-500">{sReg}</div>
+                            <div className="font-bold type-body-sm text-slate-800">{sName}</div>
+                            <div className="type-caption text-slate-500">{sReg}</div>
                           </div>
                           <div className={`w-5 h-5 rounded border flex items-center justify-center ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300'}`}>
                             {isSelected && <Check className="w-3.5 h-3.5" />}
@@ -600,7 +600,7 @@ export default function TeamManagementTab() {
                 <button
                   type="button"
                   onClick={() => setActiveAddTeamId(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg text-sm"
+                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -608,7 +608,7 @@ export default function TeamManagementTab() {
                   type="button"
                   onClick={handleAddMembers}
                   disabled={isSubmitting || selectedMembersToAssign.length === 0}
-                  className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 text-sm disabled:opacity-50"
+                  className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 type-btn disabled:opacity-50"
                 >
                   {isSubmitting ? 'Adding...' : `Add (${selectedMembersToAssign.length})`}
                 </button>
@@ -622,21 +622,21 @@ export default function TeamManagementTab() {
       {activeDeleteTeam && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Delete Team?</h2>
-            <p className="text-sm text-slate-600 mb-6">
+            <h2 className="type-h4 text-slate-900 mb-2">Delete Team?</h2>
+            <p className="type-body-sm text-slate-600 mb-6">
               This action cannot be undone. Are you sure?
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setActiveDeleteTeam(null)}
-                className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg text-sm"
+                className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteTeam}
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 text-sm disabled:opacity-50"
+                className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 type-btn disabled:opacity-50"
               >
                 {isSubmitting ? 'Deleting...' : 'Delete'}
               </button>
@@ -649,14 +649,14 @@ export default function TeamManagementTab() {
       {activeChangeCaptainTeam && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Change Team Captain</h2>
+            <h2 className="type-h4 text-slate-900 mb-4">Change Team Captain</h2>
             <form onSubmit={handleChangeCaptain} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-2">Select New Captain</label>
+                <label className="type-form-label block text-slate-700 mb-2">Select New Captain</label>
                 <select
                   value={selectedNewCaptainRegNo}
                   onChange={(e) => setSelectedNewCaptainRegNo(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg type-body-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
                 >
                   <option value="">-- Select a member --</option>
                   {(activeChangeCaptainTeam.teamMembers || activeChangeCaptainTeam.members || []).map((m: any, i: number) => (
@@ -670,14 +670,14 @@ export default function TeamManagementTab() {
                 <button
                   type="button"
                   onClick={() => setActiveChangeCaptainTeam(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg text-sm"
+                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !selectedNewCaptainRegNo}
-                  className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 text-sm disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 type-btn disabled:opacity-50"
                 >
                   {isSubmitting ? 'Updating...' : 'Change'}
                 </button>

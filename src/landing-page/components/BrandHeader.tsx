@@ -60,7 +60,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ showLoginButton = true
             <img
               src={PRAGATIX_LOGO_PATH}
               alt="PragatiX logo"
-              className="h-9 sm:h-12 md:h-14 w-auto object-contain"
+              className="h-11 sm:h-15 md:h-17 w-auto object-contain"
               loading="eager"
             />
           </Link>
@@ -71,14 +71,14 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({ showLoginButton = true
           {showLoginButton ? (
             <Link
               to="/login"
-              className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200 cursor-pointer"
+              className="type-btn inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-md shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200 cursor-pointer"
             >
               Log in
             </Link>
           ) : (
             <Link
               to="/"
-              className="inline-flex items-center text-xs sm:text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors"
+              className="type-nav inline-flex items-center text-slate-600 hover:text-indigo-600 transition-colors"
             >
               ← Back to Home
             </Link>

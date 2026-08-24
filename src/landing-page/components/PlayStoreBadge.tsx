@@ -50,10 +50,10 @@ export const PlayStoreBadge: React.FC<PlayStoreBadgeProps> = ({
       </svg>
 
       <div className="flex flex-col text-left">
-        <span className="text-[10px] uppercase font-semibold text-slate-300 tracking-wider leading-none">
+        <span className="type-fine uppercase font-semibold text-slate-300 tracking-wider leading-none">
           GET IT ON
         </span>
-        <span className="text-base sm:text-lg font-bold text-white tracking-tight leading-tight">
+        <span className="type-h4 text-white tracking-tight leading-tight">
           Google Play
         </span>
       </div>

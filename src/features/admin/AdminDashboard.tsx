@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Footer from '../../components/common/Footer';
 import OverviewTab from './tabs/OverviewTab';
@@ -30,29 +30,54 @@ import AdminLeaderboardTab from './tabs/AdminLeaderboardTab';
 import YearSelectionPage from './pages/YearSelectionPage';
 import RecycleBinPage from './recycle_bin/pages/RecycleBinPage';
 import PageLoader from '../../components/common/PageLoader';
-import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, Trophy, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Activity, Users, User, CalendarCheck, Award, Trophy, ShieldCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
+import apiClient from '../../services/apiClient';
 
 export default function AdminDashboard() {
   const { isSuperAdmin } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isTabLoading, setIsTabLoading] = useState(false);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('pragatix_admin_sidebar_collapsed') === 'true';
+  });
 
-  const tabSlugs = [
-    'overview',
-    'activity',
-    'attendance',
-    'groups',
-    'requests',
-    ...(isSuperAdmin ? ['admins'] : []),
-    'leaderboard',
-    'profile'
-  ];
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        let res = null;
+        try {
+          res = await apiClient.get('/api/admin/badge-requests');
+        } catch {
+          try {
+            res = await apiClient.get('/api/cc/badge-requests');
+          } catch {
+            res = null;
+          }
+        }
+        if (res?.data?.success && Array.isArray(res.data.data)) {
+          const pending = res.data.data.filter((r: any) => (r.status || '').toUpperCase() === 'PENDING').length;
+          setPendingRequestsCount(pending);
+        }
+      } catch {
+        // ignore network error
+      }
+    };
+    fetchPendingCount();
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('pragatix_admin_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   const currentViewName = searchParams.get('view');
   const currentTabSlug = currentViewName === 'leaderboard' ? 'leaderboard' : (searchParams.get('tab') || 'overview');
-  const foundIdx = tabSlugs.indexOf(currentTabSlug);
-  const activeTab = foundIdx !== -1 ? foundIdx : 0;
   
   const currentViewProps = useMemo(() => {
     const p: Record<string, any> = {};
@@ -97,8 +122,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleTabClick = (idx: number) => {
-    const slug = tabSlugs[idx] || 'overview';
+  const handleTabClick = (slug: string) => {
     setIsTabLoading(true);
     setSearchParams({ tab: slug });
     setTimeout(() => {
@@ -106,19 +130,55 @@ export default function AdminDashboard() {
     }, 250);
   };
 
-  const tabs: { name: string; icon: any; Component: React.ComponentType<any> }[] = [
-    { name: 'Overview', icon: LayoutDashboard, Component: OverviewTab },
-    { name: 'Activity', icon: Activity, Component: isSuperAdmin ? YearSelectionPage : ActivityTab },
-    { name: 'Attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
-    { name: 'Groups', icon: Users, Component: TeacherGroupManagementTab },
-    { name: 'Requests', icon: Award, Component: AdminBadgeRequestsTab },
-    ...(isSuperAdmin ? [{ name: 'Admins', icon: ShieldCheck, Component: SuperAdminManagementTab }] : []),
-    { name: 'Leaderboard', icon: Trophy, Component: AdminLeaderboardTab },
-    { name: 'Profile', icon: User, Component: AdminProfileTab }
+  interface NavItem {
+    name: string;
+    slug: string;
+    icon: any;
+    Component: React.ComponentType<any>;
+    badge?: number;
+  }
+
+  interface NavSection {
+    title: string;
+    items: NavItem[];
+  }
+
+  const navSections: NavSection[] = [
+    {
+      title: 'MONITOR',
+      items: [
+        { name: 'Overview', slug: 'overview', icon: LayoutDashboard, Component: OverviewTab },
+        { name: 'Activity', slug: 'activity', icon: Activity, Component: isSuperAdmin ? YearSelectionPage : ActivityTab },
+        { name: 'Attendance', slug: 'attendance', icon: CalendarCheck, Component: AdminAttendanceTab },
+      ]
+    },
+    {
+      title: 'MANAGE',
+      items: [
+        { name: 'Groups', slug: 'groups', icon: Users, Component: TeacherGroupManagementTab },
+        { name: 'Requests', slug: 'requests', icon: Award, Component: AdminBadgeRequestsTab, badge: pendingRequestsCount },
+        ...(isSuperAdmin ? [{ name: 'Admins', slug: 'admins', icon: ShieldCheck, Component: SuperAdminManagementTab }] : []),
+      ]
+    },
+    {
+      title: 'INSIGHTS',
+      items: [
+        { name: 'Leaderboard', slug: 'leaderboard', icon: Trophy, Component: AdminLeaderboardTab },
+        { name: 'Profile', slug: 'profile', icon: User, Component: AdminProfileTab }
+      ]
+    }
   ];
 
+  const flatNavItems = useMemo(() => {
+    return navSections.flatMap(s => s.items);
+  }, [navSections]);
+
+  const currentTabItem = useMemo(() => {
+    return flatNavItems.find(i => i.slug === currentTabSlug) || flatNavItems[0];
+  }, [flatNavItems, currentTabSlug]);
+
   const renderActiveTabComponent = () => {
-    const ActiveComp = tabs[activeTab]?.Component || OverviewTab;
+    const ActiveComp = (currentTabItem?.Component || OverviewTab) as any;
     return <ActiveComp onPushView={pushView} onNavigateTab={(slug: string) => setSearchParams({ tab: slug })} />;
   };
 
@@ -181,30 +241,185 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-slate-50 flex-col md:flex-row">
-      {isTabLoading && <PageLoader message={`Opening ${tabs[activeTab]?.name || 'Tab'}...`} fullScreen={true} />}
+      {isTabLoading && <PageLoader message={`Opening ${currentTabItem?.name || 'Page'}...`} fullScreen={true} />}
       {/* Sidebar (Desktop) */}
-      <div className="hidden md:flex w-64 flex-col bg-slate-900 text-white shadow-xl z-20">
-        <div className="p-6 border-b border-slate-800">
-          <h1 className="font-heading text-xl font-bold tracking-tight">PragatiX</h1>
-          <p className="text-xs text-slate-400 mt-1">Admin Portal</p>
-        </div>
-        <nav className="flex-1 overflow-y-auto py-4">
-          {tabs.map((tab, idx) => (
+      <div className={`hidden md:flex flex-col bg-slate-900 text-white shadow-xl z-20 transition-all duration-300 ease-in-out shrink-0 ${
+        isSidebarCollapsed ? 'w-20' : 'w-64'
+      }`}>
+        {/* Header & Toggle Button */}
+        <div className={`flex items-center justify-between border-b border-slate-800 transition-all ${
+          isSidebarCollapsed ? 'p-4 justify-center' : 'p-6'
+        }`}>
+          {!isSidebarCollapsed && (
+            <div className="overflow-hidden min-w-0">
+              <h1 className="type-h4 tracking-tight whitespace-nowrap">PragatiX</h1>
+              <p className="type-caption text-slate-400 mt-0.5 whitespace-nowrap">
+                {isSuperAdmin ? 'Super Admin Portal' : 'Admin Portal'}
+              </p>
+            </div>
+          )}
+          
+          <div className="relative group/toggle">
             <button
-              key={idx}
-              onClick={() => handleTabClick(idx)}
-              className={`w-full flex items-center px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === idx 
-                  ? 'bg-red-600 text-white border-l-4 border-red-400' 
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white border-l-4 border-transparent'
+              onClick={toggleSidebar}
+              className={`p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors cursor-pointer flex items-center justify-center ${
+                isSidebarCollapsed ? 'w-10 h-10' : ''
               }`}
+              aria-label={isSidebarCollapsed ? 'Open sidebar' : 'Close sidebar'}
+              title={isSidebarCollapsed ? 'Open sidebar' : 'Close sidebar'}
             >
-              <tab.icon className={`w-5 h-5 mr-3 ${activeTab === idx ? 'text-red-200' : 'text-slate-400'}`} />
-              {tab.name}
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="w-5 h-5" />
+              ) : (
+                <PanelLeftClose className="w-5 h-5" />
+              )}
             </button>
+            {/* Pill Tooltip matching screenshot */}
+            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-black text-white text-xs font-semibold rounded-full whitespace-nowrap opacity-0 pointer-events-none group-hover/toggle:opacity-100 transition-opacity z-50 shadow-2xl border border-slate-700">
+              {isSidebarCollapsed ? 'Open sidebar' : 'Close sidebar'}
+            </div>
+          </div>
+        </div>
+
+        {/* Grouped Navigation Sections */}
+        <nav className="flex-1 overflow-y-auto py-3 space-y-4 px-3">
+          {navSections.map((section, sIdx) => (
+            <div key={sIdx} className="space-y-1">
+              {/* Section Header (Hidden when Collapsed) */}
+              {!isSidebarCollapsed ? (
+                <div className="px-3 pt-2 pb-1 type-fine font-bold text-slate-500 uppercase tracking-wider">
+                  {section.title}
+                </div>
+              ) : sIdx > 0 ? (
+                <div className="h-px bg-slate-800 my-2 mx-1" />
+              ) : null}
+
+              {/* Section Items */}
+              {section.items.map((item) => {
+                const isActive = currentTabSlug === item.slug && !currentViewName;
+                const Icon = item.icon;
+                return (
+                  <div key={item.slug} className="relative group/navitem">
+                    <button
+                      onClick={() => handleTabClick(item.slug)}
+                      className={`w-full flex items-center type-nav transition-all cursor-pointer rounded-2xl ${
+                        isSidebarCollapsed 
+                          ? 'justify-center p-3' 
+                          : 'justify-between px-3.5 py-2.5'
+                      } ${
+                        isActive 
+                          ? 'bg-[#fff1f2] text-[#e11d48] font-bold shadow-xs' 
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                      title={isSidebarCollapsed ? item.name : undefined}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-[#e11d48]' : 'text-slate-400 group-hover/navitem:text-slate-200'}`} />
+                        {!isSidebarCollapsed && <span className="truncate">{item.name}</span>}
+                      </div>
+
+                      {/* Pill Badge (e.g. Requests Count) */}
+                      {!isSidebarCollapsed && item.badge !== undefined && (
+                        <span className={`px-2 py-0.5 rounded-full type-fine font-bold ${
+                          isActive 
+                            ? 'bg-[#e11d48]/15 text-[#e11d48]' 
+                            : 'bg-slate-800 text-slate-400 group-hover/navitem:bg-slate-700'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Floating Tooltip in Collapsed Mode */}
+                    {isSidebarCollapsed && (
+                      <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-950 text-white type-caption rounded-xl whitespace-nowrap opacity-0 pointer-events-none group-hover/navitem:opacity-100 transition-opacity z-50 shadow-2xl border border-slate-700 font-semibold flex items-center gap-2">
+                        <span>{item.name}</span>
+                        {item.badge !== undefined && (
+                          <span className="px-1.5 py-0.2 bg-slate-800 text-slate-300 rounded-full type-fine">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ))}
         </nav>
       </div>
+
+      {/* Mobile Slide-Over Drawer */}
+      {isMobileDrawerOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileDrawerOpen(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="relative flex flex-col w-4/5 max-w-xs bg-slate-900 text-white h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-800">
+              <div>
+                <h2 className="type-h4 tracking-tight">PragatiX</h2>
+                <p className="type-caption text-slate-400 mt-0.5">
+                  {isSuperAdmin ? 'Super Admin Portal' : 'Admin Portal'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsMobileDrawerOpen(false)}
+                className="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 transition-colors"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Navigation inside Drawer */}
+            <nav className="flex-1 overflow-y-auto p-4 space-y-4">
+              {navSections.map((section, sIdx) => (
+                <div key={sIdx} className="space-y-1">
+                  <div className="px-3 pt-1 pb-1 type-fine font-bold text-slate-500 uppercase tracking-wider">
+                    {section.title}
+                  </div>
+                  {section.items.map((item) => {
+                    const isActive = currentTabSlug === item.slug && !currentViewName;
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.slug}
+                        onClick={() => {
+                          handleTabClick(item.slug);
+                          setIsMobileDrawerOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-3 type-nav rounded-2xl transition-all cursor-pointer ${
+                          isActive 
+                            ? 'bg-[#fff1f2] text-[#e11d48] font-bold shadow-sm' 
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-5 h-5 ${isActive ? 'text-[#e11d48]' : 'text-slate-400'}`} />
+                          <span>{item.name}</span>
+                        </div>
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className={`px-2 py-0.5 rounded-full type-fine font-bold ${
+                            isActive ? 'bg-[#e11d48]/15 text-[#e11d48]' : 'bg-slate-800 text-slate-300'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -215,21 +430,72 @@ export default function AdminDashboard() {
           <Footer />
         </div>
         
-        {/* Bottom Nav (Mobile) */}
-        <div className="md:hidden fixed bottom-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50">
-          <div className="flex justify-around items-center h-16">
-            {tabs.map((tab, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleTabClick(idx)}
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${
-                  activeTab === idx ? 'text-red-500' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <tab.icon className={`w-5 h-5 ${activeTab === idx ? 'stroke-2' : 'stroke-[1.5]'}`} />
-                <span className="text-[10px] font-medium">{tab.name}</span>
-              </button>
-            ))}
+        {/* Bottom Nav (Mobile) - Clean 5-Item Responsive Grid */}
+        <div className="md:hidden fixed bottom-0 w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.3)] z-40">
+          <div className="grid grid-cols-5 items-center h-16 px-1">
+            {/* 1. Overview */}
+            <button
+              onClick={() => handleTabClick('overview')}
+              className={`flex flex-col items-center justify-center h-full space-y-1 transition-colors cursor-pointer ${
+                currentTabSlug === 'overview' && !currentViewName ? 'text-[#e11d48]' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span className="type-fine font-medium">Overview</span>
+            </button>
+
+            {/* 2. Activity */}
+            <button
+              onClick={() => handleTabClick('activity')}
+              className={`flex flex-col items-center justify-center h-full space-y-1 transition-colors cursor-pointer ${
+                currentTabSlug === 'activity' && !currentViewName ? 'text-[#e11d48]' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Activity className="w-5 h-5" />
+              <span className="type-fine font-medium">Activity</span>
+            </button>
+
+            {/* 3. Attendance */}
+            <button
+              onClick={() => handleTabClick('attendance')}
+              className={`flex flex-col items-center justify-center h-full space-y-1 transition-colors cursor-pointer ${
+                currentTabSlug === 'attendance' && !currentViewName ? 'text-[#e11d48]' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <CalendarCheck className="w-5 h-5" />
+              <span className="type-fine font-medium">Attendance</span>
+            </button>
+
+            {/* 4. Requests with Live Badge */}
+            <button
+              onClick={() => handleTabClick('requests')}
+              className={`relative flex flex-col items-center justify-center h-full space-y-1 transition-colors cursor-pointer ${
+                currentTabSlug === 'requests' && !currentViewName ? 'text-[#e11d48]' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <div className="relative">
+                <Award className="w-5 h-5" />
+                {pendingRequestsCount > 0 && (
+                  <span className="absolute -top-1 -right-2 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center leading-none">
+                    {pendingRequestsCount}
+                  </span>
+                )}
+              </div>
+              <span className="type-fine font-medium">Requests</span>
+            </button>
+
+            {/* 5. Menu (Opens Drawer for Groups, Admins, Leaderboard, Profile) */}
+            <button
+              onClick={() => setIsMobileDrawerOpen(true)}
+              className={`flex flex-col items-center justify-center h-full space-y-1 transition-colors cursor-pointer ${
+                ['groups', 'admins', 'leaderboard', 'profile'].includes(currentTabSlug) && !currentViewName
+                  ? 'text-[#e11d48]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Menu className="w-5 h-5" />
+              <span className="type-fine font-medium">Menu</span>
+            </button>
           </div>
         </div>
       </div>

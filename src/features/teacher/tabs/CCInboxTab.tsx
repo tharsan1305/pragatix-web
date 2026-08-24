@@ -238,13 +238,13 @@ export default function CCInboxTab({ onBack }: Props) {
       <div className="bg-slate-900 text-white p-4 md:p-6 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {onBack && (
-            <button onClick={onBack} className="p-2 hover:bg-slate-800 rounded-full transition-colors cursor-pointer">
+            <button onClick={onBack} className="p-2 type-btn hover:bg-slate-800 rounded-full transition-colors cursor-pointer">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="font-heading text-xl font-bold">Class Coordinator Inbox</h1>
-            <p className="text-xs text-slate-400">Review student activity completion & penalty requests</p>
+            <h1 className="type-h4">Class Coordinator Inbox</h1>
+            <p className="type-caption text-slate-400">Review student activity completion & penalty requests</p>
           </div>
         </div>
         <button
@@ -261,7 +261,7 @@ export default function CCInboxTab({ onBack }: Props) {
         <div className="flex space-x-2">
           <button
             onClick={() => handleMainTabChange('MY_CLASS')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl type-caption font-bold transition-all cursor-pointer ${
               mainTab === 'MY_CLASS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -269,7 +269,7 @@ export default function CCInboxTab({ onBack }: Props) {
           </button>
           <button
             onClick={() => handleMainTabChange('MY_REQUESTS')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl type-caption font-bold transition-all cursor-pointer ${
               mainTab === 'MY_REQUESTS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -283,7 +283,7 @@ export default function CCInboxTab({ onBack }: Props) {
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full type-fine font-bold uppercase transition-all cursor-pointer ${
                 activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
               }`}
             >
@@ -301,7 +301,7 @@ export default function CCInboxTab({ onBack }: Props) {
         ) : currentList.length === 0 ? (
           <div className="text-center py-16 text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="font-semibold text-slate-700">No {activeTab.toLowerCase()} requests found.</p>
+            <p className="type-body-sm font-semibold text-slate-700">No {activeTab.toLowerCase()} requests found.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -335,18 +335,18 @@ export default function CCInboxTab({ onBack }: Props) {
                   {/* Top Header Row: Student Name + Type + Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${badgeClass}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full type-fine font-bold uppercase ${badgeClass}`}>
                         {badgeLabel}
                       </span>
-                      <h3 className="font-heading font-bold text-slate-900 text-base">{studentName}</h3>
+                      <h3 className="type-h5 text-slate-900">{studentName}</h3>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-extrabold border uppercase tracking-wider ${statusBg}`}>
+                    <span className={`px-3 py-1 rounded-full type-caption font-bold border uppercase tracking-wider ${statusBg}`}>
                       {status}
                     </span>
                   </div>
 
                   {/* Register Number */}
-                  <p className="text-xs font-semibold text-slate-600">
+                  <p className="type-caption text-slate-600">
                     Register No: <span className="text-slate-900 font-bold">{regNo}</span>
                   </p>
 
@@ -354,16 +354,16 @@ export default function CCInboxTab({ onBack }: Props) {
 
                   {/* Activity Details */}
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-800">
+                    <p className="type-caption font-bold text-slate-800">
                       Activity: <span className="text-slate-600 font-medium">{activity}</span>
                     </p>
                     {!isAct && penaltyXP > 0 && (
-                      <p className="text-xs font-extrabold text-rose-600">
+                      <p className="type-caption font-extrabold text-rose-600">
                         Penalty XP: -{penaltyXP}
                       </p>
                     )}
                     {reason && (
-                      <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-1">
+                      <p className="type-caption text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-1">
                         <strong>Note / Reason:</strong> {reason}
                       </p>
                     )}
@@ -373,7 +373,7 @@ export default function CCInboxTab({ onBack }: Props) {
                           href={getSafeHref(proofUrl)}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold border border-blue-200 transition"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg type-caption border border-blue-200 transition"
                         >
                           🔗 View Proof Link
                         </a>
@@ -382,7 +382,7 @@ export default function CCInboxTab({ onBack }: Props) {
                   </div>
 
                   {/* Requested Time & Reviewer Details */}
-                  <div className="pt-2 border-t border-slate-100 text-xs text-slate-400 space-y-1">
+                  <div className="pt-2 border-t border-slate-100 type-caption text-slate-400 space-y-1">
                     <div className="flex items-center space-x-1.5">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
                       <span>Submitted: {formatDate(submittedTime)}</span>
@@ -404,7 +404,7 @@ export default function CCInboxTab({ onBack }: Props) {
                       </div>
                     )}
                     {rejectedReason && status === 'REJECTED' && (
-                      <p className="mt-2 text-xs text-rose-600 italic">Rejection Reason: {rejectedReason}</p>
+                      <p className="mt-2 type-caption text-rose-600 italic">Rejection Reason: {rejectedReason}</p>
                     )}
                   </div>
 
@@ -412,13 +412,13 @@ export default function CCInboxTab({ onBack }: Props) {
                     <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end space-x-3">
                       <button
                         onClick={() => setRejectingItem(req)}
-                        className="px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
+                        className="px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl type-btn transition-colors cursor-pointer"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleApprove(req)}
-                        className="px-5 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl font-semibold text-xs transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                        className="px-5 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl type-btn transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
                         <span>Approve {isAct ? 'Activity' : isRemoval ? 'Removal' : 'Penalty'}</span>
@@ -436,8 +436,8 @@ export default function CCInboxTab({ onBack }: Props) {
       {rejectingItem && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Reject Request</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="type-h4 text-slate-900">Reject Request</h3>
+            <p className="type-caption text-slate-500">
               Please enter the reason for rejecting penalty request for <span className="font-semibold text-slate-700">{rejectingItem.studentName}</span>.
             </p>
             <form onSubmit={handleRejectSubmit} className="space-y-4">
@@ -447,19 +447,19 @@ export default function CCInboxTab({ onBack }: Props) {
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
                 placeholder="Enter rejection reason..."
-                className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 type-body-sm"
               />
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setRejectingItem(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg"
+                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 rounded-lg shadow-xs"
+                  className="px-5 py-2 bg-rose-600 text-white type-btn hover:bg-rose-700 rounded-lg shadow-xs cursor-pointer"
                 >
                   Confirm Reject
                 </button>

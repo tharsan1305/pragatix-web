@@ -87,11 +87,11 @@ export default function StudentAttendanceTab() {
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Header Bar matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex items-center justify-between">
-        <h1 className="font-heading text-xl font-bold">Attendance</h1>
+        <h1 className="type-h4">Attendance</h1>
 
         <button
           onClick={fetchAttendance}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
+          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
           title="Refresh Attendance"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -104,16 +104,16 @@ export default function StudentAttendanceTab() {
             <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
           </div>
         ) : error ? (
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-center space-x-3 text-sm font-semibold">
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-center space-x-3 type-body-sm font-semibold">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{error}</span>
           </div>
         ) : !stats ? (
           <div className="bg-white p-8 rounded-2xl text-center border border-slate-100 shadow-sm flex flex-col items-center gap-4">
-            <p className="text-sm font-medium text-slate-500">No attendance data available.</p>
+            <p className="type-body-sm font-medium text-slate-500">No attendance data available.</p>
             <button
               onClick={fetchAttendance}
-              className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition cursor-pointer"
+              className="inline-flex items-center type-btn px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition cursor-pointer"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Retry
@@ -125,33 +125,33 @@ export default function StudentAttendanceTab() {
             <div className="grid grid-cols-2 gap-4">
               {/* Card 1: Overall */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-[90px]">
-                <span className="text-xs font-semibold text-slate-500">Overall</span>
-                <div className="text-2xl font-bold text-blue-600">{stats.percentage}%</div>
+                <span className="type-caption text-slate-500">Overall</span>
+                <div className="type-h3 text-blue-600">{stats.percentage}%</div>
               </div>
 
               {/* Card 2: Monthly */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-[90px]">
-                <span className="text-xs font-semibold text-slate-500">Monthly</span>
-                <div className="text-2xl font-bold text-teal-600">{stats.monthlyPercentage}%</div>
+                <span className="type-caption text-slate-500">Monthly</span>
+                <div className="type-h3 text-teal-600">{stats.monthlyPercentage}%</div>
               </div>
 
               {/* Card 3: Present Days */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-[90px]">
-                <span className="text-xs font-semibold text-slate-500">Present Days</span>
-                <div className="text-2xl font-bold text-emerald-600">{stats.presentDays}</div>
+                <span className="type-caption text-slate-500">Present Days</span>
+                <div className="type-h3 text-emerald-600">{stats.presentDays}</div>
               </div>
 
               {/* Card 4: Absent Days */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-[90px]">
-                <span className="text-xs font-semibold text-slate-500">Absent Days</span>
-                <div className="text-2xl font-bold text-rose-600">{stats.absentDays}</div>
+                <span className="type-caption text-slate-500">Absent Days</span>
+                <div className="type-h3 text-rose-600">{stats.absentDays}</div>
               </div>
             </div>
 
             {/* Attendance History Header & Date Filter matching Flutter */}
             <div className="space-y-3 pt-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h2 className="font-heading text-lg font-bold text-slate-800">Attendance History</h2>
+                <h2 className="type-h4 text-slate-800">Attendance History</h2>
 
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
@@ -160,13 +160,13 @@ export default function StudentAttendanceTab() {
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+                      className="type-caption text-slate-700 bg-transparent outline-none cursor-pointer"
                     />
                   </div>
                   {selectedDate && (
                     <button
                       onClick={() => setSelectedDate('')}
-                      className="text-xs font-bold text-rose-600 hover:text-rose-700 px-2 py-1.5 bg-rose-50 rounded-lg flex items-center gap-1 transition cursor-pointer"
+                      className="type-caption font-bold text-rose-600 hover:text-rose-700 px-2 py-1.5 bg-rose-50 rounded-lg flex items-center gap-1 transition cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                       Clear
@@ -176,7 +176,7 @@ export default function StudentAttendanceTab() {
               </div>
 
               {/* Filter Tabs: All / Present / Absent */}
-              <div className="flex bg-slate-200/80 p-1 rounded-xl text-xs font-bold w-full sm:w-auto">
+              <div className="flex bg-slate-200/80 p-1 rounded-xl type-caption font-bold w-full sm:w-auto">
                 <button
                   onClick={() => setActiveFilter('all')}
                   className={`flex-1 sm:px-4 py-1.5 rounded-lg transition-all cursor-pointer ${
@@ -213,7 +213,7 @@ export default function StudentAttendanceTab() {
             {/* Logs Listing matching Flutter _buildHistoryList */}
             {filteredRecords.length === 0 ? (
               <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100 shadow-sm">
-                <p className="text-sm font-medium">
+                <p className="type-body-sm font-medium">
                   {selectedDate
                     ? 'No attendance records found for this date.'
                     : activeFilter !== 'all'
@@ -239,11 +239,11 @@ export default function StudentAttendanceTab() {
                         )}
 
                         <div className="min-w-0">
-                          <div className="text-sm font-bold text-slate-800 truncate">
+                          <div className="type-body-sm font-bold text-slate-800 truncate">
                             Date: {r.date} {r.period ? `| Period: ${r.period}` : ''}
                           </div>
                           {r.remarks && (
-                            <div className="text-xs text-slate-400 truncate">
+                            <div className="type-caption text-slate-400 truncate">
                               Remarks: {r.remarks}
                             </div>
                           )}
@@ -251,7 +251,7 @@ export default function StudentAttendanceTab() {
                       </div>
 
                       <span
-                        className={`text-xs font-bold px-2.5 py-0.5 rounded-md shrink-0 ${
+                        className={`type-caption font-bold px-2.5 py-0.5 rounded-md shrink-0 ${
                           isPresent
                             ? 'text-emerald-600 bg-emerald-50'
                             : 'text-rose-600 bg-rose-50'

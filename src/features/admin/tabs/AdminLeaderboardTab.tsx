@@ -139,25 +139,26 @@ export default function AdminLeaderboardTab() {
 
   const renderPodiumCell = (student: LeaderboardStudent, rank: number, height: string, iconColor: string) => {
     if (!student) return null;
+    const isFirst = rank === 1;
     return (
-      <div className="flex flex-col items-center justify-end" style={{ height: '220px' }}>
-        <Trophy className="w-6 h-6 mb-1.5" style={{ color: iconColor }} />
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-white/15 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl bg-slate-700 shadow-md">
+      <div className="flex flex-col items-center justify-end flex-1 max-w-[105px] sm:max-w-[130px] px-0.5">
+        <Trophy className={`mb-1 ${isFirst ? 'w-6 h-6' : 'w-5 h-5'}`} style={{ color: iconColor }} />
+        <div className="relative mb-1">
+          <div className={`${isFirst ? 'w-15 h-15 sm:w-16 sm:h-16' : 'w-12 h-12 sm:w-14 sm:h-14'} rounded-full bg-white/15 flex items-center justify-center`}>
+            <div className={`${isFirst ? 'w-12 h-12 sm:w-13 sm:h-13' : 'w-10 h-10 sm:w-12 sm:h-12'} rounded-full flex items-center justify-center text-white font-bold ${isFirst ? 'type-h4' : 'type-h5'} bg-slate-700 shadow-md`}>
               {student.fullName ? student.fullName[0].toUpperCase() : 'S'}
             </div>
           </div>
         </div>
-        <div className="mt-2 w-28 text-center text-white font-bold text-[11px] truncate">
+        <div className="w-full text-center text-white font-bold type-fine truncate px-1" title={student.fullName}>
           {student.fullName}
         </div>
-        <div className="text-white/70 text-[9px] font-medium mb-1.5">
-          {student.departmentName || 'Dept'} • {student.score} pts
+        <div className="text-amber-300 font-bold type-fine mb-2 text-center" title={`${student.score} pts`}>
+          {student.score} <span className="text-white/60 text-[11px] font-normal">pts</span>
         </div>
         
         <div 
-          className={`w-24 ${height} rounded-t-xl border flex items-center justify-center text-lg font-bold shadow-inner`} 
+          className={`w-full max-w-[85px] sm:max-w-[100px] ${height} rounded-t-2xl border flex items-center justify-center type-h4 font-bold shadow-inner`} 
           style={{ backgroundColor: `${iconColor}20`, borderColor: `${iconColor}50`, color: iconColor }}
         >
           #{rank}
@@ -172,7 +173,7 @@ export default function AdminLeaderboardTab() {
       <div className="bg-slate-800 text-white rounded-b-3xl shadow-lg">
         {/* Title and Action */}
         <div className="px-6 pt-5 pb-3 flex justify-between items-center">
-          <h1 className="font-heading text-2xl font-bold tracking-tight">Leaderboard</h1>
+          <h1 className="type-h3 tracking-tight">Leaderboard</h1>
           <button
             onClick={() => fetchLeaderboard(selectedYear, selectedDept, selectedSection)}
             disabled={isLoading}
@@ -190,7 +191,7 @@ export default function AdminLeaderboardTab() {
             <select
               value={selectedYear ?? ''}
               onChange={(e) => handleYearChange(e.target.value || null)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
+              className="w-full bg-white/10 border border-white/20 text-white type-body-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
             >
               <option value="" className="text-slate-800">All Years</option>
               {yearOptions.map(opt => (
@@ -206,7 +207,7 @@ export default function AdminLeaderboardTab() {
               value={selectedDept ?? ''}
               disabled={isHOD}
               onChange={(e) => handleDeptChange(e.target.value || null)}
-              className={`w-full bg-white/10 border border-white/20 text-white text-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer ${
+              className={`w-full bg-white/10 border border-white/20 text-white type-body-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer ${
                 isHOD ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
@@ -223,7 +224,7 @@ export default function AdminLeaderboardTab() {
             <select
               value={selectedSection ?? ''}
               onChange={(e) => handleSectionChange(e.target.value || null)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
+              className="w-full bg-white/10 border border-white/20 text-white type-body-sm font-semibold rounded-xl pl-3.5 pr-8 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
             >
               <option value="" className="text-slate-800">All Sections</option>
               {sectionOptions.map(opt => (
@@ -253,7 +254,7 @@ export default function AdminLeaderboardTab() {
         ) : filteredList.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-12">
             <FilterX className="w-16 h-16 mb-3 text-slate-300" />
-            <p className="text-sm font-medium">No students found on leaderboard.</p>
+            <p className="type-body-sm font-medium">No students found on leaderboard.</p>
           </div>
         ) : (
           <div className="flex-1 px-5 py-2 overflow-y-auto max-w-5xl mx-auto w-full">
@@ -268,16 +269,16 @@ export default function AdminLeaderboardTab() {
                     #{rank}
                   </div>
                   <div className="ml-3.5 flex-1 min-w-0">
-                    <div className="font-bold text-sm text-slate-800 truncate flex items-center gap-1.5">
+                    <div className="font-bold type-body-sm text-slate-800 truncate flex items-center gap-1.5">
                       {s.teamRole === 'CAPTAIN' && <span title="Captain">👑</span>}
                       {s.teamRole === 'VICE_CAPTAIN' && <span title="Vice Captain">🥈</span>}
                       <span>{s.fullName}</span>
                     </div>
-                    <div className="text-xs text-slate-500 truncate mt-0.5">
+                    <div className="type-caption text-slate-500 truncate mt-0.5">
                       {s.regNo} • {s.departmentName} • Year {s.year} - {s.section}
                     </div>
                   </div>
-                  <div className="ml-3 font-bold text-indigo-600 text-sm whitespace-nowrap">
+                  <div className="ml-3 font-bold text-indigo-600 type-body-sm whitespace-nowrap">
                     {s.score} pts
                   </div>
                 </div>

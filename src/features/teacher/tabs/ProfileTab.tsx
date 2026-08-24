@@ -124,23 +124,23 @@ export default function ProfileTab() {
         {/* Top Avatar Header (Flutter Aligned 1:1) */}
         <div className="flex flex-col items-center justify-center">
           <div className="w-24 h-24 rounded-full bg-rose-100/70 border-4 border-white shadow-md flex items-center justify-center mb-3">
-            <span className="text-3xl font-black text-rose-500">
+            <span className="type-h2 font-black text-rose-500">
               {getInitials(profile.fullName)}
             </span>
           </div>
-          <h2 className="font-heading text-2xl font-extrabold text-slate-900">{profile.fullName}</h2>
-          <p className="text-xs font-bold text-slate-400 tracking-wider uppercase mt-0.5">
+          <h2 className="type-h3 text-slate-900">{profile.fullName}</h2>
+          <p className="type-caption font-bold text-slate-400 tracking-wider uppercase mt-0.5">
             {profile.role}
           </p>
         </div>
 
         {/* Card 1: Personal Information (Flutter Aligned 1:1) */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-          <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+          <h3 className="type-h5 text-slate-900 text-center pb-2 border-b border-slate-100">
             Personal Information
           </h3>
 
-          <div className="space-y-2.5 text-xs md:text-sm">
+          <div className="space-y-2.5 type-caption">
             <div className="flex justify-between items-center">
               <span className="font-semibold text-slate-400">Username</span>
               <span className="font-bold text-slate-900">{profile.username}</span>
@@ -176,10 +176,10 @@ export default function ProfileTab() {
         {/* Card 2: Role-Specific Details (Flutter Aligned 1:1) */}
         {profile.ccDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="type-h5 text-slate-900 text-center pb-2 border-b border-slate-100">
               Class Coordinator Info
             </h3>
-            <div className="space-y-2.5 text-xs md:text-sm">
+            <div className="space-y-2.5 type-caption">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-slate-400">Section</span>
                 <span className="font-bold text-slate-900">{profile.ccDetails.section || 'Not Available'}</span>
@@ -194,10 +194,10 @@ export default function ProfileTab() {
 
         {profile.hodDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="type-h5 text-slate-900 text-center pb-2 border-b border-slate-100">
               HOD Statistics
             </h3>
-            <div className="space-y-2.5 text-xs md:text-sm">
+            <div className="space-y-2.5 type-caption">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-slate-400">Total Faculty</span>
                 <span className="font-bold text-slate-900">{profile.hodDetails.totalFaculty ?? 0}</span>
@@ -212,10 +212,10 @@ export default function ProfileTab() {
 
         {profile.teacherDetails && !profile.ccDetails && !profile.hodDetails && (
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <h3 className="font-heading font-bold text-slate-900 text-base text-center pb-2 border-b border-slate-100">
+            <h3 className="type-h5 text-slate-900 text-center pb-2 border-b border-slate-100">
               Teacher Information
             </h3>
-            <div className="space-y-2.5 text-xs md:text-sm">
+            <div className="space-y-2.5 type-caption">
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-slate-400">Employee ID</span>
                 <span className="font-bold text-slate-900">{profile.teacherDetails.employeeId || 'Not Available'}</span>
@@ -237,7 +237,7 @@ export default function ProfileTab() {
           {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 text-sm cursor-pointer"
+            className="w-full bg-[#DC2626] hover:bg-[#B91C1C] text-white type-btn py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -246,7 +246,7 @@ export default function ProfileTab() {
 
         {/* Footer */}
         <div className="text-center pt-4 pb-2">
-          <p className="text-xs font-semibold text-slate-400 tracking-wide">
+          <p className="type-caption text-slate-400 tracking-wide">
             JJCET © 2026 All rights reserved
           </p>
         </div>

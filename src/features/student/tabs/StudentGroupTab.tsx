@@ -50,13 +50,13 @@ export default function StudentGroupTab() {
           <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
             <UserX className="w-10 h-10" />
           </div>
-          <h2 className="font-heading text-2xl font-bold text-slate-800 mb-2">No Team Assigned</h2>
+          <h2 className="type-h3 text-slate-800 mb-2">No Team Assigned</h2>
           <p className="text-slate-500 max-w-md mb-6">
             You are not assigned to any group yet. Please contact your Class Coordinator for team placement.
           </p>
           <button
             onClick={fetchMyTeam}
-            className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
+            className="inline-flex items-center type-btn px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
@@ -83,10 +83,10 @@ export default function StudentGroupTab() {
     <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 pb-32">
       {/* Header Bar */}
       <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-md flex justify-between items-center">
-        <h1 className="font-heading text-xl font-bold">My Team</h1>
+        <h1 className="type-h4">My Team</h1>
         <button
           onClick={fetchMyTeam}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
+          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
           title="Refresh Team"
         >
           <RefreshCw className="w-5 h-5" />
@@ -96,14 +96,14 @@ export default function StudentGroupTab() {
       {/* Header Card - READ-ONLY */}
       <div className="bg-gradient-to-br from-blue-800 to-blue-600 rounded-2xl p-6 text-white shadow-xl space-y-5">
         <div className="flex justify-between items-start">
-          <h2 className="font-heading text-2xl font-extrabold tracking-tight">{teamName}</h2>
-          <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold">
+          <h2 className="type-h2 tracking-tight">{teamName}</h2>
+          <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full type-caption font-bold">
             {stageLabel}
           </span>
         </div>
 
         {/* Info Chips */}
-        <div className="flex flex-wrap gap-2 text-xs">
+        <div className="flex flex-wrap gap-2 type-caption">
           <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md">
             <BookOpen className="w-3.5 h-3.5 text-white/80" />
             {department}
@@ -125,13 +125,13 @@ export default function StudentGroupTab() {
         <div className="flex justify-around items-center pt-2">
           <div className="flex flex-col items-center">
             <Star className="w-6 h-6 text-white/80 mb-1 fill-amber-300" />
-            <span className="text-lg font-extrabold">{totalTeamXp} XP</span>
+            <span className="type-h4">{totalTeamXp} XP</span>
             <span className="text-[11px] text-white/70">Total Team XP</span>
           </div>
 
           <div className="flex flex-col items-center">
             <Users className="w-6 h-6 text-white/80 mb-1" />
-            <span className="text-lg font-extrabold">{currentMembers} / {maxMembers}</span>
+            <span className="type-h4">{currentMembers} / {maxMembers}</span>
             <span className="text-[11px] text-white/70">Members</span>
           </div>
         </div>
@@ -139,21 +139,21 @@ export default function StudentGroupTab() {
         <div className="h-px bg-white/20" />
 
         {/* Captain / Vice Captain Info - READ-ONLY */}
-        <div className="grid grid-cols-2 gap-4 text-xs">
+        <div className="grid grid-cols-2 gap-4 type-caption">
           <div>
             <div className="text-white/70">Captain</div>
-            <div className="font-semibold text-sm truncate">{captainName}</div>
+            <div className="font-semibold type-body-sm truncate">{captainName}</div>
           </div>
           <div>
             <div className="text-white/70">Vice Captain</div>
-            <div className="font-semibold text-sm truncate">{viceCaptainName}</div>
+            <div className="font-semibold type-body-sm truncate">{viceCaptainName}</div>
           </div>
         </div>
       </div>
 
       {/* Team Leaderboard Roster Section - READ-ONLY */}
       <div className="space-y-3">
-        <h2 className="font-heading text-lg font-bold text-slate-800">Team Leaderboard</h2>
+        <h2 className="type-h4 text-slate-800">Team Leaderboard</h2>
 
         {teamMembers.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100 shadow-sm">
@@ -182,19 +182,19 @@ export default function StudentGroupTab() {
                       ) : rankInTeam === 2 ? (
                         <Award className="w-6 h-6 text-slate-400" />
                       ) : (
-                        <span className="font-extrabold text-slate-400 text-sm">{rankInTeam}</span>
+                        <span className="font-extrabold text-slate-400 type-body-sm">{rankInTeam}</span>
                       )}
                     </div>
 
                     {/* Member Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-blue-200/80 text-blue-900 font-extrabold flex items-center justify-center text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-200/80 text-blue-900 font-extrabold flex items-center justify-center type-body-sm shrink-0">
                       {name[0]?.toUpperCase() || 'S'}
                     </div>
 
                     {/* Member Details */}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 text-sm truncate">{name}</span>
+                        <span className="font-bold text-slate-900 type-body-sm truncate">{name}</span>
                         {isCaptain && (
                           <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
                             👑 CAPTAIN
@@ -207,14 +207,14 @@ export default function StudentGroupTab() {
                         )}
                       </div>
 
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">
+                      <div className="type-caption text-slate-500 font-medium mt-0.5">
                         {memberStage}
                       </div>
                     </div>
                   </div>
 
                   {/* Score - READ-ONLY */}
-                  <div className="flex items-center gap-1 text-sm font-extrabold text-amber-600 shrink-0 ml-3">
+                  <div className="flex items-center gap-1 type-body-sm font-extrabold text-amber-600 shrink-0 ml-3">
                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                     <span>{memberXp}</span>
                   </div>

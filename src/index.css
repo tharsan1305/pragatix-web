@@ -1,21 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+@import "./styles/typography.css";
 @import "tailwindcss";
 
-:root {
-  --font-heading: 'Times New Roman', Times, serif;
-  --font-body: 'Inter', sans-serif;
-}
-
 @theme {
-  --font-heading: 'Times New Roman', Times, serif;
-  --font-body: 'Inter', sans-serif;
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-sans: var(--font-body);
 }
 
-.font-heading {
-  font-family: var(--font-heading);
-}
-
-.font-body {
+body {
   font-family: var(--font-body);
+  color: #171717;
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes smoothFloat {

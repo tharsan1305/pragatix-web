@@ -55,11 +55,11 @@ export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
 
         {/* Content Details matching Flutter */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-heading font-bold text-lg truncate ${isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
+          <h3 className={`type-h5 truncate ${isLocked ? 'text-slate-500' : 'text-slate-800'}`}>
             {stage.name}
           </h3>
           <div
-            className={`text-xs font-bold mt-0.5 ${
+            className={`type-caption font-bold mt-0.5 ${
               isLocked
                 ? 'text-slate-500'
                 : (isCompleted ? 'text-emerald-600' : 'text-amber-600')
@@ -79,7 +79,7 @@ export const StageCard: React.FC<StageCardProps> = ({ stage, onClick }) => {
 
       {/* Embedded Linear Progress Bar & XP breakdown */}
       <div className="pt-3 border-t border-slate-100 space-y-2">
-        <div className="flex justify-between items-center text-xs text-slate-500 font-medium">
+        <div className="flex justify-between items-center type-caption text-slate-500 font-medium">
           <span>Current XP: <strong className="text-slate-900">{stage.currentXp}</strong> / {stage.expectedXp}</span>
           <span>Subgroups: <strong className="text-slate-900">{stage.completedSubgroups}/{stage.totalSubgroups}</strong></span>
         </div>

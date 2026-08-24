@@ -351,7 +351,7 @@ export default function LevelsBadgesTab() {
   if (activeTab === 'levels' && !progressionData) {
     return (
       <div className="bg-slate-50 min-h-screen flex items-center justify-center p-8">
-        <p className="text-slate-500 font-medium text-sm">Progression data unavailable</p>
+        <p className="text-slate-500 font-medium type-body-sm">Progression data unavailable</p>
       </div>
     );
   }
@@ -374,17 +374,17 @@ export default function LevelsBadgesTab() {
       {/* Header */}
       <div className="bg-slate-800 text-white sticky top-0 z-10 shadow-md">
         <div className="px-6 py-4">
-          <h1 className="font-heading text-xl font-bold">Levels & Badges</h1>
+          <h1 className="type-h4">Levels & Badges</h1>
         </div>
         <div className="flex border-t border-slate-700">
           <button 
-            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'levels' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`flex-1 py-3 type-body-sm font-bold border-b-2 transition-colors ${activeTab === 'levels' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
             onClick={() => setActiveTab('levels')}
           >
             Level & Pathway
           </button>
           <button 
-            className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'badges' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`flex-1 py-3 type-body-sm font-bold border-b-2 transition-colors ${activeTab === 'badges' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
             onClick={() => setActiveTab('badges')}
           >
             Badge Collection
@@ -400,15 +400,15 @@ export default function LevelsBadgesTab() {
             <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-3xl p-6 shadow-lg shadow-indigo-500/20 text-white">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <div className="text-xs font-bold text-indigo-200 tracking-wider mb-1">CURRENT LEVEL</div>
-                  <div className="text-2xl font-bold">Lvl {currentLevelNum}: {currentLevelTitle}</div>
+                  <div className="type-caption font-bold text-indigo-200 tracking-wider mb-1">CURRENT LEVEL</div>
+                  <div className="type-h3">Lvl {currentLevelNum}: {currentLevelTitle}</div>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                   <Zap className="w-6 h-6 text-amber-300 fill-amber-300" />
                 </div>
               </div>
               
-              <div className="flex justify-between text-sm font-bold mb-2">
+              <div className="flex justify-between type-body-sm font-bold mb-2">
                 <span>{displayTotalXp} XP Points</span>
                 <span className="text-indigo-200">
                   {progressionData?.isMaxLevel ? 'Maximum Level Achieved' : `Target: ${xpMax} XP (Remaining: ${remainingXp})`}
@@ -425,17 +425,17 @@ export default function LevelsBadgesTab() {
 
             {/* Pathways */}
             <div>
-              <h2 className="font-heading text-lg font-bold text-slate-800">Skill Pathways</h2>
-              <p className="text-sm text-slate-500 mb-3">Select your focus domain starting from Level 3 (Innovator).</p>
+              <h2 className="type-h4 text-slate-800">Skill Pathways</h2>
+              <p className="type-body-sm text-slate-500 mb-3">Select your focus domain starting from Level 3 (Innovator).</p>
               
               {!isEligibleForPathway ? (
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 items-center text-slate-500">
                   <Lock className="w-5 h-5 shrink-0" />
-                  <span className="text-sm font-medium">Unlocks at Level 3 (Innovator) — 501+ XP</span>
+                  <span className="type-body-sm font-medium">Unlocks at Level 3 (Innovator) — 501+ XP</span>
                 </div>
               ) : (
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                  <label className="text-sm font-bold text-slate-800 flex gap-2 items-center">
+                  <label className="type-form-label type-body-sm font-bold text-slate-800 flex gap-2 items-center">
                     <HelpCircle className="w-4 h-4 text-indigo-600" /> Choose Your Active Pathway
                   </label>
                   <select 
@@ -453,7 +453,7 @@ export default function LevelsBadgesTab() {
                     const activeP = PATHWAYS.find(p => p.name === selectedPathway);
                     if (!activeP) return null;
                     return (
-                      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-sm text-indigo-900 mt-2 space-y-1">
+                      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 type-body-sm text-indigo-900 mt-2 space-y-1">
                         <div><span className="font-bold opacity-70">Domain:</span> {activeP.domain}</div>
                         <div><span className="font-bold opacity-70">Focus XP:</span> {activeP.categories}</div>
                         <div><span className="font-bold opacity-70">Mentor:</span> {activeP.alignment}</div>
@@ -466,7 +466,7 @@ export default function LevelsBadgesTab() {
 
             {/* Progression Map */}
             <div>
-              <h2 className="font-heading text-lg font-bold text-slate-800 mb-4">Level Progression Map</h2>
+              <h2 className="type-h4 text-slate-800 mb-4">Level Progression Map</h2>
               <div className="space-y-0">
                 {dynamicLevelsList.map((lvl: any, idx: number) => {
                   const lvlNum = lvl.levelNumber ?? lvl.level;
@@ -509,8 +509,8 @@ export default function LevelsBadgesTab() {
                               {stageText}
                             </span>
                           </div>
-                          <div className="text-emerald-500 text-xs font-bold mb-3">XP Range: {range}</div>
-                          <div className="text-sm text-slate-600 mb-2"><span className="font-medium opacity-80">Objective:</span> {objective}</div>
+                          <div className="text-emerald-500 type-caption font-bold mb-3">XP Range: {range}</div>
+                          <div className="type-body-sm text-slate-600 mb-2"><span className="font-medium opacity-80">Objective:</span> {objective}</div>
                           <div className="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
                             Unlocks: {unlocks}
                           </div>
@@ -530,7 +530,7 @@ export default function LevelsBadgesTab() {
             {Object.entries(badgesByTier).map(([tierName, badges]) => (
               <div key={tierName}>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="font-heading text-lg font-bold text-slate-800">{tierName} Tier</h2>
+                  <h2 className="type-h4 text-slate-800">{tierName} Tier</h2>
                   <div className="h-px flex-1 bg-slate-200" />
                 </div>
                 
@@ -560,24 +560,24 @@ export default function LevelsBadgesTab() {
                              <Lock className="w-5 h-5 text-slate-400" />}
                           </div>
                           
-                          <h3 className={`font-heading font-bold text-sm mb-1 ${isEarned ? 'text-indigo-900' : 'text-slate-800'}`}>
+                          <h3 className={`type-h6 mb-1 ${isEarned ? 'text-indigo-900' : 'text-slate-800'}`}>
                             {badge.name}
                           </h3>
-                          <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                          <p className="type-caption text-slate-500 leading-relaxed mb-3">
                             {badge.description}
                           </p>
                         </div>
                         
                         <div className="mt-auto flex justify-between items-end border-t border-slate-100 pt-3">
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${
+                          <span className={`type-fine font-bold px-2 py-0.5 rounded uppercase ${
                             isEarned ? 'bg-indigo-200/60 text-indigo-800' : 'bg-slate-100 text-slate-500'
                           }`}>
                             {badge.rarity}
                           </span>
                           
-                          {isEarned && <span className="text-xs font-bold text-indigo-600">Earned!</span>}
-                          {isPending && <span className="text-xs font-bold text-amber-600">Pending</span>}
-                          {!isEarned && !isPending && <span className="text-xs font-bold text-slate-400">Locked</span>}
+                          {isEarned && <span className="type-caption font-bold text-indigo-600">Earned!</span>}
+                          {isPending && <span className="type-caption font-bold text-amber-600">Pending</span>}
+                          {!isEarned && !isPending && <span className="type-caption font-bold text-slate-400">Locked</span>}
                         </div>
                       </div>
                     );
@@ -599,14 +599,14 @@ export default function LevelsBadgesTab() {
                 <Award className="w-7 h-7" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-heading text-lg font-bold text-slate-900 leading-tight">
+                <h3 className="type-h4 text-slate-900 leading-tight">
                   {selectedBadgeObj?.name || selectedBadgeToClaim || "Badge Details"}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 uppercase">
                     {selectedBadgeObj?.rarity || "COMMON"}
                   </span>
-                  <span className="text-xs text-slate-400 font-medium">
+                  <span className="type-caption text-slate-400 font-medium">
                     Authority: {selectedBadgeObj?.authority || "Faculty"}
                   </span>
                 </div>
@@ -620,15 +620,15 @@ export default function LevelsBadgesTab() {
             </div>
 
             {/* Description */}
-            <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
+            <p className="type-caption text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
               {selectedBadgeObj?.description || "Maintain high discipline and participation standards to earn this badge."}
             </p>
 
             {/* 6-Step Approval Workflow matching Flutter Screen */}
             <div className="space-y-2 pt-1">
-              <h4 className="font-heading text-xs font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
+              <h4 className="font-heading type-caption font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
               
-              <div className="space-y-2 text-xs">
+              <div className="space-y-2 type-caption">
                 <div className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                   <div>
@@ -686,7 +686,7 @@ export default function LevelsBadgesTab() {
                 <input 
                   type="url"
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 type-body-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   placeholder="Proof Link (Required)"
                   value={evidenceUrl}
                   onChange={e => setEvidenceUrl(e.target.value)}
@@ -696,7 +696,7 @@ export default function LevelsBadgesTab() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl text-sm font-bold shadow-md transition-colors disabled:opacity-50"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl type-body-sm font-bold shadow-md transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Claim'}
               </button>

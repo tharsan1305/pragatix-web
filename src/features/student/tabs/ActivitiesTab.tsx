@@ -65,12 +65,12 @@ export const ActivitiesTab: React.FC = () => {
     <div className="bg-slate-50 min-h-screen pb-32">
       {/* Top App Header matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
-        <h1 className="font-heading text-xl font-bold">Activities & Stages</h1>
+        <h1 className="type-h4">Activities & Stages</h1>
         <div className="flex items-center gap-3">
           <FireStreakIcon streakCount={maxStreak} />
           <button
             onClick={loadData}
-            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
+            className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
             title="Refresh Stages"
           >
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -81,10 +81,10 @@ export const ActivitiesTab: React.FC = () => {
       <div className="p-5 max-w-3xl mx-auto space-y-6">
         {/* Journey Header */}
         <div>
-          <h2 className="font-heading text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h2 className="type-h2 text-slate-900 tracking-tight">
             Your Journey
           </h2>
-          <p className="text-xs font-medium text-slate-500 mt-1">
+          <p className="type-caption text-slate-500 mt-1">
             Complete subgroups to unlock the next stages.
           </p>
         </div>

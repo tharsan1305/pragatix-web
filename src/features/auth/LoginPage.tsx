@@ -71,7 +71,7 @@ export default function LoginPage() {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setError('Email / Username / Reg No is required');
+      setError('Email is required');
       return;
     }
 
@@ -203,7 +203,7 @@ export default function LoginPage() {
       <div className="absolute top-6 left-6 z-10">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 type-fine font-semibold text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Landing Page</span>
@@ -222,11 +222,11 @@ export default function LoginPage() {
           <div className="w-24 h-24 rounded-2xl bg-white shadow-lg p-2 flex items-center justify-center overflow-hidden border border-slate-200 mb-4">
             <img src={logoImg} alt="PragatiX Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="font-heading text-2xl font-extrabold tracking-tight">
-            <span className="text-indigo-600 font-black">PragatiX</span>{' '}
+          <h1 className="type-h2 tracking-tight">
+            <span className="text-indigo-600 font-bold">PragatiX</span>{' '}
             <span className="text-slate-800">Sign In</span>
           </h1>
-          <p className="mt-1.5 text-sm text-slate-500">
+          <p className="mt-1.5 type-body-sm text-slate-500">
             {step === 'email'
               ? 'Enter your email to receive an OTP'
               : 'Enter the 4-digit OTP sent to your email'}
@@ -241,7 +241,7 @@ export default function LoginPage() {
 
         {/* ── Success Banner ── */}
         {successMsg && (
-          <div className="mb-5 p-3 bg-green-50 text-green-700 rounded-xl text-sm flex items-start gap-2 border border-green-100">
+          <div className="mb-5 p-3 bg-green-50 text-green-700 rounded-xl type-body-sm flex items-start gap-2 border border-green-100">
             <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -249,7 +249,7 @@ export default function LoginPage() {
 
         {/* ── Error Banner ── */}
         {error && (
-          <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-xl text-sm flex items-start gap-2 border border-red-100">
+          <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-xl type-body-sm flex items-start gap-2 border border-red-100">
             <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -259,20 +259,20 @@ export default function LoginPage() {
         {step === 'email' && (
           <form onSubmit={handleRequestOtp} className="space-y-5">
             <div>
-              <label htmlFor="login-email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                Email / Username / Reg No
+              <label htmlFor="login-email" className="block type-form-label text-slate-700 mb-1.5">
+                Email
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
                   id="login-email"
-                  type="text"
+                  type="email"
                   autoComplete="email"
                   autoFocus
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError(null); }}
                   placeholder="e.g. user@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 type-body-sm transition-all"
                 />
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function LoginPage() {
               id="send-otp-btn"
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200 mt-2"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white type-btn py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200 mt-2 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -300,7 +300,7 @@ export default function LoginPage() {
           <form onSubmit={handleVerifyOtp} className="space-y-5">
             {/* OTP digit boxes */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3 text-center">
+              <label className="block type-form-label text-slate-700 mb-3 text-center">
                 Enter 4-digit OTP
               </label>
               <div className="flex justify-center gap-3">
@@ -316,7 +316,7 @@ export default function LoginPage() {
                     onChange={e => handleOtpChange(i, e.target.value)}
                     onKeyDown={e => handleOtpKeyDown(i, e)}
                     autoFocus={i === 0}
-                    className="w-14 h-14 text-center text-xl font-bold border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 transition-all"
+                    className="w-14 h-14 text-center type-h3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 transition-all"
                   />
                 ))}
               </div>
@@ -324,7 +324,7 @@ export default function LoginPage() {
 
             {/* ── Timer & Resend ── */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-sm font-semibold">
+              <div className="flex items-center gap-1.5 type-caption">
                 <Timer className={`w-4 h-4 ${secondsRemaining > 0 ? 'text-indigo-600' : 'text-red-500'}`} />
                 {secondsRemaining > 0 ? (
                   <span className="text-slate-700">Expires in: {formatTimer(secondsRemaining)}</span>
@@ -336,7 +336,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleRequestOtp()}
                 disabled={secondsRemaining > 0 || isLoading}
-                className="text-sm font-bold text-indigo-600 hover:text-indigo-800 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+                className="type-btn text-indigo-600 hover:text-indigo-800 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 Resend OTP
               </button>
@@ -353,7 +353,7 @@ export default function LoginPage() {
                 clearTimer();
                 setSecondsRemaining(0);
               }}
-              className="w-full flex items-center justify-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 type-btn text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Change Email
@@ -364,7 +364,7 @@ export default function LoginPage() {
               id="verify-otp-btn"
               type="submit"
               disabled={isLoading || otp.replace(/\s/g, '').length < 4 || secondsRemaining === 0}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white type-btn py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200 cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -382,69 +382,9 @@ export default function LoginPage() {
         )}
 
         {/* ── Footer ── */}
-        <footer className="mt-8 pt-5 border-t border-slate-100" role="contentinfo">
-          {/* Navigation Links */}
-          <nav aria-label="Legal and compliance" className="mb-4">
-            <ul className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[11px] font-semibold text-slate-600">
-              <li>
-                <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Contact Us
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Terms of Service
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Privacy Policy
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Security
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/cookies" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Cookie &amp; Tracking Policy
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/dpdp-compliance" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  DPDP Compliance
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Account &amp; Data Deletion
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/disclaimer" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Disclaimer
-                </a>
-              </li>
-              <li aria-hidden="true" className="text-slate-300 select-none">•</li>
-              <li>
-                <a href="/data-safety" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 rounded-sm transition-colors">
-                  Data Safety Policy
-                </a>
-              </li>
-            </ul>
-          </nav>
-
-          {/* Copyright */}
-          <p className="text-center text-[11px] font-medium text-slate-400">
-            JJCET © 2026 · All rights reserved
+        <footer className="mt-8 pt-4 border-t border-slate-100" role="contentinfo">
+          <p className="text-center type-fine text-slate-400">
+            © 2026 PragatiX · JJCET. All rights reserved.
           </p>
         </footer>
       </div>

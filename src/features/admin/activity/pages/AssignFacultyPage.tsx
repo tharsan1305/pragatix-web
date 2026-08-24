@@ -407,14 +407,14 @@ export default function AssignFacultyPage({
       {/* Header Bar */}
       <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+          <button onClick={onBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
-          <h1 className="font-heading text-xl font-bold text-white">Assign Staff & Departments</h1>
+          <h1 className="type-h4 text-white">Assign Staff & Departments</h1>
         </div>
         <button
           onClick={loadData}
-          className="p-2 hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+          className="p-2 type-btn hover:bg-white/10 rounded-full transition text-white cursor-pointer"
           title="Refresh"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -427,24 +427,24 @@ export default function AssignFacultyPage({
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
+              <span className="type-fine font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
                 {safeStr(activity?.subgroup) || safeStr(activity?.category) || 'Activity Task'}
               </span>
-              <h2 className="font-heading text-lg md:text-xl font-black text-slate-900 mt-1">
+              <h2 className="type-h2 font-black text-slate-900 mt-1">
                 {activity?.name || 'Activity'}
               </h2>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1 rounded-lg">
+              <span className="type-caption font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1 rounded-lg">
                 XP: {safeXp(activity)}
               </span>
-              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">
+              <span className="type-caption font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">
                 {assignments.length} Total Assignments
               </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+          <div className="flex flex-wrap gap-2 type-caption text-slate-600">
             {activity?.awardEnabled && (
               <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 Award XP: {activity.awardXp || safeXp(activity)}
@@ -469,9 +469,9 @@ export default function AssignFacultyPage({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-purple-600" />
-                  <h3 className="font-heading font-bold text-sm text-slate-900">Global Assignment</h3>
+                  <h3 className="type-h5 type-body-sm text-slate-900">Global Assignment</h3>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="type-caption text-slate-500">
                   Enable to assign this activity to ALL departments, ALL sections, and ALL faculty members automatically.
                 </p>
               </div>
@@ -491,9 +491,9 @@ export default function AssignFacultyPage({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-indigo-600" />
-                  <h3 className="font-heading font-bold text-sm text-slate-900">Class Coordinator Assignment</h3>
+                  <h3 className="type-h5 type-body-sm text-slate-900">Class Coordinator Assignment</h3>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="type-caption text-slate-500">
                   Automatically assign this activity to the Class Coordinator (CC) of every section.
                 </p>
               </div>
@@ -514,9 +514,9 @@ export default function AssignFacultyPage({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Settings className="w-4 h-4 text-blue-600" />
-                    <h3 className="font-heading font-bold text-sm text-slate-900">Attendance Engine Integration</h3>
+                    <h3 className="type-h5 type-body-sm text-slate-900">Attendance Engine Integration</h3>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="type-caption text-slate-500">
                     Automatically generate XP transactions based on student daily attendance.
                   </p>
                 </div>
@@ -530,11 +530,11 @@ export default function AssignFacultyPage({
 
               {attendanceEngineEnabled && (
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-4">
-                  <label className="text-xs font-bold text-slate-700">Integration Rule</label>
+                  <label className="type-form-label text-slate-700">Integration Rule</label>
                   <select
                     value={attendanceRule}
                     onChange={(e) => setAttendanceRule(e.target.value)}
-                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-blue-500"
+                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 type-caption text-slate-800 outline-none focus:border-blue-500"
                   >
                     <option value="DAILY">Daily Check (Apply partial/full day penalty)</option>
                     <option value="WEEKLY">Weekly Check (Apply perfect week reward)</option>
@@ -551,13 +551,13 @@ export default function AssignFacultyPage({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-heading text-base font-black text-slate-900">Departments & Sections Assignment Matrix</h3>
-                <p className="text-xs text-slate-500">Assign specific faculty members per department and section</p>
+                <h3 className="type-h5 font-black text-slate-900">Departments & Sections Assignment Matrix</h3>
+                <p className="type-caption text-slate-500">Assign specific faculty members per department and section</p>
               </div>
               {assignments.length > 0 && (
                 <button
                   onClick={handleUnassignAll}
-                  className="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
+                  className="type-caption font-bold text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Unassign All
                 </button>
@@ -571,7 +571,7 @@ export default function AssignFacultyPage({
             ) : departments.length === 0 ? (
               <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">
                 <Building2 className="w-12 h-12 mx-auto mb-2 text-slate-300" />
-                <p className="font-semibold text-sm">No departments found in the system</p>
+                <p className="font-semibold type-body-sm">No departments found in the system</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -586,15 +586,15 @@ export default function AssignFacultyPage({
                       <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
                         <div>
                           <div className="flex items-center gap-2.5">
-                            <span className="text-base">🏢</span>
-                            <h4 className="font-bold text-slate-900 text-base">{deptName}</h4>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">
+                            <span className="type-body">🏢</span>
+                            <h4 className="font-bold text-slate-900 type-h4">{deptName}</h4>
+                            <span className="type-fine font-mono px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">
                               {dept.code || dept.deptCode || 'DEPT'}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500 mt-0.5">Configure Assignments</p>
+                          <p className="type-caption text-slate-500 mt-0.5">Configure Assignments</p>
                         </div>
-                        <span className="text-xs text-slate-500 font-semibold">
+                        <span className="type-caption text-slate-500 font-semibold">
                           {hasSections ? `${sections.length} Sections` : 'Department Wide'}
                         </span>
                       </div>
@@ -614,7 +614,7 @@ export default function AssignFacultyPage({
 
                             return (
                               <div key={secId} className="space-y-1.5">
-                                <h5 className="font-bold text-slate-800 text-sm">{secName}</h5>
+                                <h5 className="font-bold text-slate-800 type-h5">{secName}</h5>
 
                                 {validAssignments.length > 0 ? (
                                   <div className="space-y-2">
@@ -629,13 +629,13 @@ export default function AssignFacultyPage({
                                         >
                                           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                                           <div>
-                                            <p className="text-sm font-bold text-emerald-800 leading-tight">
+                                            <p className="type-body-sm font-bold text-emerald-800 leading-tight">
                                               {a.teacherName || 'Faculty Member'}
                                             </p>
-                                            <p className="text-xs text-emerald-700 mt-0.5">
+                                            <p className="type-caption text-emerald-700 mt-0.5">
                                               Role • {a.teacherUsername || 'Faculty'} • {deptName}
                                             </p>
-                                            <p className="text-xs text-emerald-600 italic mt-0.5 font-medium">
+                                            <p className="type-caption text-emerald-600 italic mt-0.5 font-medium">
                                               Tap to Change
                                             </p>
                                           </div>
@@ -661,7 +661,7 @@ export default function AssignFacultyPage({
                                   >
                                     <X className="w-4 h-4 text-rose-600 shrink-0" />
                                     <div>
-                                      <p className="text-xs font-semibold text-rose-700">❌ No Faculty Assigned</p>
+                                      <p className="type-caption text-rose-700">❌ No Faculty Assigned</p>
                                       <p className="text-[11px] text-rose-600 font-medium">Tap to Assign</p>
                                     </div>
                                   </div>
@@ -680,7 +680,7 @@ export default function AssignFacultyPage({
 
                             return (
                               <div className="space-y-1.5">
-                                <h5 className="font-bold text-slate-800 text-sm">Department-wide Assignment</h5>
+                                <h5 className="font-bold text-slate-800 type-h5">Department-wide Assignment</h5>
 
                                 {validAssignments.length > 0 ? (
                                   <div className="space-y-2">
@@ -695,13 +695,13 @@ export default function AssignFacultyPage({
                                         >
                                           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                                           <div>
-                                            <p className="text-sm font-bold text-emerald-800 leading-tight">
+                                            <p className="type-body-sm font-bold text-emerald-800 leading-tight">
                                               {a.teacherName || 'Faculty Member'}
                                             </p>
-                                            <p className="text-xs text-emerald-700 mt-0.5">
+                                            <p className="type-caption text-emerald-700 mt-0.5">
                                               Role • {a.teacherUsername || 'Faculty'} • {deptName}
                                             </p>
-                                            <p className="text-xs text-emerald-600 italic mt-0.5 font-medium">
+                                            <p className="type-caption text-emerald-600 italic mt-0.5 font-medium">
                                               Tap to Change
                                             </p>
                                           </div>
@@ -727,7 +727,7 @@ export default function AssignFacultyPage({
                                   >
                                     <X className="w-4 h-4 text-rose-600 shrink-0" />
                                     <div>
-                                      <p className="text-xs font-semibold text-rose-700">❌ No Faculty Assigned</p>
+                                      <p className="type-caption text-rose-700">❌ No Faculty Assigned</p>
                                       <p className="text-[11px] text-rose-600 font-medium">Tap to Assign</p>
                                     </div>
                                   </div>
@@ -748,7 +748,7 @@ export default function AssignFacultyPage({
               <button
                 type="button"
                 onClick={onBack}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-slate-300 bg-white hover:bg-slate-50 font-bold text-sm text-slate-700 transition cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-slate-300 bg-white hover:bg-slate-50 font-bold type-btn text-slate-700 transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -757,7 +757,7 @@ export default function AssignFacultyPage({
                 <button
                   type="button"
                   onClick={handleUnassignAll}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-rose-300 bg-rose-50 hover:bg-rose-100 font-bold text-sm text-rose-600 transition cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-rose-300 bg-rose-50 hover:bg-rose-100 font-bold type-btn text-rose-600 transition cursor-pointer"
                 >
                   Unassign All
                 </button>
@@ -766,7 +766,7 @@ export default function AssignFacultyPage({
               <button
                 onClick={handleSaveConfiguration}
                 disabled={isSaving}
-                className="flex-1 w-full bg-[#11998E] hover:bg-[#0d7d74] disabled:bg-slate-300 text-white py-3.5 px-6 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="flex-1 w-full bg-[#11998E] hover:bg-[#0d7d74] disabled:bg-slate-300 text-white py-3.5 px-6 rounded-2xl font-bold type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin text-white" /> : <CheckCircle2 className="w-5 h-5" />}
                 <span>Save Assignments</span>
@@ -779,7 +779,7 @@ export default function AssignFacultyPage({
         {isCC && (
           <div className="space-y-4">
             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+              <div className="flex items-center gap-2 type-caption font-bold text-slate-800">
                 <Calendar className="w-4 h-4 text-teal-600" />
                 <span>Assignment Duration</span>
               </div>
@@ -795,7 +795,7 @@ export default function AssignFacultyPage({
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800">Only Today</h4>
+                    <h4 className="type-caption font-bold text-slate-800">Only Today</h4>
                     <p className="text-[10px] text-slate-500">Expires midnight</p>
                   </div>
                 </div>
@@ -811,7 +811,7 @@ export default function AssignFacultyPage({
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800">Permanent</h4>
+                    <h4 className="type-caption font-bold text-slate-800">Permanent</h4>
                     <p className="text-[10px] text-slate-500">Fixed assigned faculty</p>
                   </div>
                 </div>
@@ -820,7 +820,7 @@ export default function AssignFacultyPage({
 
             {/* CC Faculty Selection List */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-              <h3 className="font-heading font-bold text-slate-800 text-sm">Select Faculty Member for Class</h3>
+              <h3 className="type-h5 text-slate-800">Select Faculty Member for Class</h3>
               <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
                 {ccScopedTeachers.map((teacher) => {
                   const tId = teacher.id || teacher.userId;
@@ -834,13 +834,13 @@ export default function AssignFacultyPage({
                         }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${isSelected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold type-caption ${isSelected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
                           {name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-800 text-xs">{name}</h4>
-                          <p className="text-[11px] text-slate-500">{teacher.departmentName || teacher.department || 'Faculty'}</p>
+                          <h4 className="type-body-sm font-bold text-slate-800">{name}</h4>
+                          <p className="type-fine text-slate-500">{teacher.departmentName || teacher.department || 'Faculty'}</p>
                         </div>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'bg-teal-600 border-teal-600 text-white' : 'border-slate-300 bg-white'
@@ -855,7 +855,7 @@ export default function AssignFacultyPage({
               <button
                 onClick={handleCcAssign}
                 disabled={!selectedTeacherId}
-                className="w-full bg-[#11998E] hover:bg-[#0d7d74] disabled:bg-slate-300 text-white py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full bg-[#11998E] hover:bg-[#0d7d74] disabled:bg-slate-300 text-white py-3.5 px-4 rounded-2xl font-bold type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 <CheckCircle2 className="w-5 h-5" />
                 <span>Assign to Class</span>
@@ -873,8 +873,8 @@ export default function AssignFacultyPage({
             {/* Modal Header */}
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between">
               <div>
-                <h3 className="font-heading text-base font-bold">Assign Faculty Member</h3>
-                <p className="text-xs text-slate-300 mt-0.5">
+                <h3 className="type-h5">Assign Faculty Member</h3>
+                <p className="type-caption text-slate-300 mt-0.5">
                   {assignModalTarget.deptName}{assignModalTarget.secName ? ` • Section ${assignModalTarget.secName}` : ' • All Sections'}
                 </p>
               </div>
@@ -895,7 +895,7 @@ export default function AssignFacultyPage({
                   value={modalSearchQuery}
                   onChange={(e) => setModalSearchQuery(e.target.value)}
                   placeholder="Search faculty by name, department, ID..."
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-semibold text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 type-caption text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
             </div>
@@ -905,7 +905,7 @@ export default function AssignFacultyPage({
               {filteredModalTeachers.length === 0 ? (
                 <div className="text-center py-10 text-slate-400">
                   <User className="w-8 h-8 mx-auto mb-1 text-slate-300" />
-                  <p className="font-semibold text-xs text-slate-500">No matching faculty members found</p>
+                  <p className="font-semibold type-caption text-slate-500">No matching faculty members found</p>
                 </div>
               ) : (
                 filteredModalTeachers.map((teacher) => {
@@ -920,12 +920,12 @@ export default function AssignFacultyPage({
                       className="p-3.5 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/40 transition-all flex items-center justify-between gap-3 cursor-pointer"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-teal-100 text-teal-800 font-bold text-xs flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-full bg-teal-100 text-teal-800 font-bold type-caption flex items-center justify-center">
                           {name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-900 text-xs md:text-sm">{name}</h4>
-                          <p className="text-[11px] text-slate-500">{dept} • {teacher.username || teacher.email}</p>
+                          <h4 className="type-body-sm font-bold text-slate-900">{name}</h4>
+                          <p className="type-fine text-slate-500">{dept} • {teacher.username || teacher.email}</p>
                         </div>
                       </div>
 
@@ -934,7 +934,7 @@ export default function AssignFacultyPage({
                           e.stopPropagation();
                           handleAssignFaculty(teacher);
                         }}
-                        className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl type-caption font-bold shadow-xs transition-colors cursor-pointer"
                       >
                         Assign
                       </button>
@@ -956,22 +956,22 @@ export default function AssignFacultyPage({
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="font-heading text-base font-bold text-slate-900">{confirmModal.title}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{confirmModal.message}</p>
+              <h3 className="type-h5 text-slate-900">{confirmModal.title}</h3>
+              <p className="type-caption text-slate-500 leading-relaxed">{confirmModal.message}</p>
             </div>
 
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setConfirmModal(null)}
-                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 type-caption font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmModal.onConfirm}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold shadow-md transition cursor-pointer"
               >
                 {confirmModal.confirmText || 'Confirm'}
               </button>

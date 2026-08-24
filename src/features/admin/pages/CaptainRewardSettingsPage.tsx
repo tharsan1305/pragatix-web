@@ -92,12 +92,12 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
   return (
     <div className="flex flex-col min-h-full bg-slate-50 pb-20">
       <div className="bg-slate-900 px-6 pt-10 pb-5 shadow-md text-white flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="font-heading text-xl font-bold">Captain Rewards — {academicYear.replace('_', ' ')}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Configure automated weekly XP rewards for section leaders</p>
+          <h1 className="type-h4">Captain Rewards — {academicYear.replace('_', ' ')}</h1>
+          <p className="type-caption text-slate-400 mt-0.5">Configure automated weekly XP rewards for section leaders</p>
         </div>
       </div>
 
@@ -109,19 +109,19 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-base">Automatic Leadership Engine</h3>
-              <p className="text-xs text-slate-300 mt-0.5">Awards weekly XP directly to Captains & Vice Captains at week end.</p>
+              <h3 className="type-h5">Automatic Leadership Engine</h3>
+              <p className="type-caption text-slate-300 mt-0.5">Awards weekly XP directly to Captains & Vice Captains at week end.</p>
             </div>
           </div>
 
           {/* Engine Toggle */}
           <div className="flex items-center justify-between pt-2">
             <div>
-              <h4 className="font-bold text-slate-800 text-sm">Reward Engine</h4>
-              <p className="text-xs text-slate-400 mt-0.5">Enable/Disable the weekly automated reward engine</p>
+              <h4 className="type-h5 text-slate-800">Reward Engine</h4>
+              <p className="type-caption text-slate-400 mt-0.5">Enable/Disable the weekly automated reward engine</p>
             </div>
 
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer type-form-label">
               <input
                 type="checkbox"
                 checked={settings.engineEnabled}
@@ -136,7 +136,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
 
           {/* Captain Weekly XP */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Captain Weekly Reward XP *</label>
+            <label className="type-form-label block font-bold text-slate-700">Captain Weekly Reward XP *</label>
             <div className="relative">
               <Star className="w-4 h-4 text-amber-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -144,15 +144,15 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
                 required
                 value={settings.captainXp}
                 onChange={(e) => setSettings({ ...settings, captainXp: parseInt(e.target.value) || 0 })}
-                className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold text-slate-800"
+                className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 type-body-sm font-bold text-slate-800"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">XP</span>
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 type-caption font-bold text-slate-400">XP</span>
             </div>
           </div>
 
           {/* Vice Captain Weekly XP */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Vice Captain Weekly Reward XP *</label>
+            <label className="type-form-label block font-bold text-slate-700">Vice Captain Weekly Reward XP *</label>
             <div className="relative">
               <Star className="w-4 h-4 text-amber-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -160,15 +160,15 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
                 required
                 value={settings.viceCaptainXp}
                 onChange={(e) => setSettings({ ...settings, viceCaptainXp: parseInt(e.target.value) || 0 })}
-                className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold text-slate-800"
+                className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 type-body-sm font-bold text-slate-800"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">XP</span>
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 type-caption font-bold text-slate-400">XP</span>
             </div>
           </div>
 
           {/* Execution Time */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700">Automated Execution Time (24h) *</label>
+            <label className="type-form-label block font-bold text-slate-700">Automated Execution Time (24h) *</label>
             <div className="relative">
               <Clock className="w-4 h-4 text-indigo-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -176,7 +176,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
                 required
                 value={settings.executionTime}
                 onChange={(e) => setSettings({ ...settings, executionTime: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 text-sm font-bold text-slate-800"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-600 type-body-sm font-bold text-slate-800"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
             <button
               type="button"
               onClick={handleReset}
-              className="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-100 transition-colors flex items-center space-x-1.5"
+              className="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-xl font-bold type-btn hover:bg-slate-100 transition-colors flex items-center space-x-1.5"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Reset Defaults</span>
@@ -194,7 +194,7 @@ export default function CaptainRewardSettingsPage({ academicYear, onBack }: Prop
             <button
               type="submit"
               disabled={isSaving}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-colors shadow-sm disabled:opacity-50 flex items-center space-x-1.5"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold type-btn transition-colors shadow-sm disabled:opacity-50 flex items-center space-x-1.5"
             >
               <Save className="w-4 h-4" />
               <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>

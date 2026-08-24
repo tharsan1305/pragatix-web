@@ -38,13 +38,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="font-heading text-xl font-bold mb-2 text-slate-100">Something went wrong</h2>
-            <p className="text-slate-400 text-sm mb-4">
+            <h2 className="type-h4 mb-2 text-slate-100">Something went wrong</h2>
+            <p className="text-slate-400 type-body-sm mb-4">
               An unexpected application error occurred. Click below to reload the page safely.
             </p>
 
             {this.state.error && (
-              <div className="mb-4 text-left bg-slate-900/80 p-3 rounded-xl border border-red-500/20 text-xs text-red-300 font-mono overflow-auto max-h-40">
+              <div className="mb-4 text-left bg-slate-900/80 p-3 rounded-xl border border-red-500/20 type-fine text-red-300 font-mono overflow-auto max-h-40">
                 <p className="font-bold text-red-400 mb-1">{this.state.error.name}: {this.state.error.message}</p>
                 {this.state.error.stack && (
                   <pre className="text-[10px] text-slate-400 whitespace-pre-wrap leading-tight">{this.state.error.stack.split('\n').slice(0, 5).join('\n')}</pre>
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <button
               onClick={this.handleReload}
-              className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl transition shadow-lg shadow-orange-500/25"
+              className="type-btn w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition shadow-lg shadow-orange-500/25 cursor-pointer"
             >
               Reload PragatiX
             </button>

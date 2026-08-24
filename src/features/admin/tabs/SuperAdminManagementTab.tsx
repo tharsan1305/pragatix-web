@@ -250,18 +250,18 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
             </button>
           )}
           <div>
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center space-x-2">
+            <h1 className="type-h3 tracking-tight text-white flex items-center space-x-2">
               <ShieldCheck className="w-6 h-6 text-emerald-400" />
               <span>Super Admin Management</span>
             </h1>
-            <p className="text-xs text-slate-400 font-medium hidden sm:block">Manage Year Admins, assignments, and permissions</p>
+            <p className="type-caption text-slate-400 font-medium hidden sm:block">Manage Year Admins, assignments, and permissions</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={handleRefreshCache}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors text-xs font-semibold flex items-center space-x-1.5 cursor-pointer"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors type-caption flex items-center space-x-1.5 cursor-pointer"
             title="Refresh Database Cache"
           >
             <RefreshCw className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
           </button>
           <button
             onClick={() => { resetForm(); setShowAddModal(true); }}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-xs shadow-lg shadow-red-500/20 transition-all flex items-center space-x-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white type-btn shadow-lg shadow-red-500/20 transition-all flex items-center space-x-2 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add Year Admin</span>
@@ -281,26 +281,26 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
         {/* Metric Banner Card */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
           <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 type-caption font-bold">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Super Admin Privileges Active</span>
             </div>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight">Year Administrators</h2>
-            <p className="text-sm text-slate-300 max-w-xl">
+            <h2 className="type-h3 tracking-tight text-white">Year Administrators</h2>
+            <p className="type-body-sm text-slate-300 max-w-xl">
               Assign dedicated Year Admins to manage academic years and their departments.
             </p>
           </div>
 
           <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10">
             <div className="text-center px-4 border-r border-white/10">
-              <span className="block text-2xl font-black text-white">{admins.length}</span>
-              <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Total Admins</span>
+              <span className="block type-h3 font-black text-white">{admins.length}</span>
+              <span className="type-caption text-slate-300 uppercase tracking-wider">Total Admins</span>
             </div>
             <div className="text-center px-4">
-              <span className="block text-2xl font-black text-emerald-400">
+              <span className="block type-h3 font-black text-emerald-400">
                 {admins.filter(a => a.assignedYearId != null || !!a.academicYear).length} / {yearsList.length || 4}
               </span>
-              <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider">Assigned Years</span>
+              <span className="type-caption text-slate-300 uppercase tracking-wider">Assigned Years</span>
             </div>
           </div>
         </div>
@@ -309,7 +309,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
             <RefreshCw className="w-10 h-10 animate-spin text-red-500" />
-            <p className="text-sm font-semibold text-slate-600">Loading Year Admins...</p>
+            <p className="type-body font-semibold text-slate-600">Loading Year Admins...</p>
           </div>
         ) : admins.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
@@ -317,12 +317,12 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <AlertCircle className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="font-heading text-xl font-bold text-slate-800">No Year Admins Configured</h3>
-              <p className="text-sm text-slate-500 mt-1">Click "Add Year Admin" to assign administrators to academic years.</p>
+              <h3 className="type-h3 type-h5 text-slate-800">No Year Admins Configured</h3>
+              <p className="type-body text-slate-500 mt-1">Click "Add Year Admin" to assign administrators to academic years.</p>
             </div>
             <button
               onClick={() => { resetForm(); setShowAddModal(true); }}
-              className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+              className="type-btn px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer"
             >
               Add First Year Admin
             </button>
@@ -337,12 +337,12 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-black text-lg flex items-center justify-center shadow-md">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-black type-h5 flex items-center justify-center shadow-md">
                         {admin.fullName ? admin.fullName.charAt(0).toUpperCase() : 'A'}
                       </div>
                       <div>
-                        <h3 className="font-heading font-bold text-slate-900 text-base">{admin.fullName || admin.username}</h3>
-                        <span className="text-xs font-mono font-semibold text-slate-500">@{admin.username}</span>
+                        <h3 className="type-h5 text-slate-900">{admin.fullName || admin.username}</h3>
+                        <span className="type-caption font-mono font-semibold text-slate-500">@{admin.username}</span>
                       </div>
                     </div>
 
@@ -364,7 +364,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100 text-xs font-medium text-slate-600">
+                  <div className="space-y-2 pt-2 border-t border-slate-100 type-caption text-slate-600">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
                       <span>Assigned Year: <strong className="text-slate-800 font-bold">{formatAcademicYear(admin)}</strong></span>
@@ -412,11 +412,11 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-5 h-5 text-red-500" />
-                <h3 className="font-heading font-bold text-lg text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
+                <h3 className="type-h5 text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
               </div>
               <button
                 onClick={() => { setShowAddModal(false); resetForm(); }}
-                className="text-slate-400 hover:text-slate-600 font-bold text-lg p-1"
+                className="text-slate-400 hover:text-slate-600 type-h5 p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -424,32 +424,32 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name *</label>
+                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Dr. Rajesh Kumar"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Username / Admin ID *</label>
+                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Username / Admin ID *</label>
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. year1_admin"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                  Email Address * <span className="text-[10px] lowercase text-slate-400 font-normal">(Primary for OTP & Login)</span>
+                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">
+                  Email Address * <span className="type-fine lowercase text-slate-400 font-normal">(Primary for OTP & Login)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -458,19 +458,19 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@jjcet.ac.in"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                   />
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Assigned Academic Year *</label>
+                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Assigned Academic Year *</label>
                 <select
                   required
                   value={selectedYearId ?? ''}
                   onChange={(e) => setSelectedYearId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                 >
                   <option value="">-- Select Academic Year --</option>
                   {yearsList.map(y => (
@@ -482,14 +482,14 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (Optional)</label>
+                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Phone Number (Optional)</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 9876543210"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
                   />
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
@@ -499,14 +499,14 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 <button
                   type="button"
                   onClick={() => { setShowAddModal(false); resetForm(); }}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center space-x-2"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold type-btn shadow-md disabled:opacity-50 flex items-center space-x-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -531,23 +531,23 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
               </div>
-              <h3 className="font-heading font-bold text-lg text-slate-900">Replace Assignment?</h3>
+              <h3 className="type-h5 text-slate-900">Replace Assignment?</h3>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               <strong className="text-slate-900 font-bold">"{replaceConfirmData.existingAdminName}"</strong> is already assigned to <span className="font-semibold text-slate-800">{replaceConfirmData.yearName}</span>. Do you want to replace them?
             </p>
             <div className="pt-2 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setReplaceConfirmData(null)}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeSave}
-                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md"
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold type-btn shadow-md"
               >
                 Replace
               </button>
@@ -564,23 +564,23 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5 text-red-600" />
               </div>
-              <h3 className="font-heading font-bold text-lg text-slate-900">Confirm Delete</h3>
+              <h3 className="type-h5 text-slate-900">Confirm Delete</h3>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove Year Admin <strong className="text-slate-900 font-bold">"{deleteConfirmData.adminName}"</strong>?
             </p>
             <div className="pt-2 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmData(null)}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 font-bold text-xs"
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeDelete}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold type-btn shadow-md"
               >
                 Delete
               </button>

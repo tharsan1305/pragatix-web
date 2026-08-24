@@ -7,8 +7,32 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ["'Times New Roman'", 'Times', 'serif'],
-        body: ["'Inter'", 'sans-serif'],
+        heading: [
+          "Montserrat",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        body: [
+          "Google Sans",
+          "Open Sans",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
+        sans: [
+          "Google Sans",
+          "Open Sans",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
       },
     },
   },

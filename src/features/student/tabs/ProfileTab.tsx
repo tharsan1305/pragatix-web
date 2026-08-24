@@ -97,10 +97,10 @@ export default function ProfileTab() {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-slate-50 gap-4 p-8 text-center">
         <AlertCircle className="w-10 h-10 text-rose-500" />
-        <p className="text-sm font-semibold text-rose-600">Error loading profile: {error}</p>
+        <p className="type-body-sm font-semibold text-rose-600">Error loading profile: {error}</p>
         <button
           onClick={fetchProfile}
-          className="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
+          className="inline-flex items-center type-btn px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
         >
           <RefreshCw className="w-4 h-4 mr-2" />
           Retry
@@ -112,7 +112,7 @@ export default function ProfileTab() {
   if (!profile) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
-        <p className="text-slate-500 font-medium text-sm">Profile not found.</p>
+        <p className="text-slate-500 font-medium type-body-sm">Profile not found.</p>
       </div>
     );
   }
@@ -123,8 +123,8 @@ export default function ProfileTab() {
 
   const SharedProfileRow = ({ label, value }: { label: string; value: string | number }) => (
     <div className="flex justify-between items-center py-2">
-      <span className="text-xs font-semibold text-slate-500">{label}</span>
-      <span className="text-xs font-bold text-slate-800 text-right">{value}</span>
+      <span className="type-caption text-slate-500">{label}</span>
+      <span className="type-caption font-bold text-slate-800 text-right">{value}</span>
     </div>
   );
 
@@ -132,10 +132,10 @@ export default function ProfileTab() {
     <div className="bg-slate-50 min-h-screen pb-24">
       {/* Header Bar matching Flutter AppBar */}
       <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex items-center justify-between">
-        <h1 className="font-heading text-xl font-bold">Profile</h1>
+        <h1 className="type-h4">Profile</h1>
         <button
           onClick={fetchProfile}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
+          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
           title="Refresh Profile"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -149,15 +149,15 @@ export default function ProfileTab() {
             <UserIcon className="w-10 h-10 text-slate-500" />
           </div>
           
-          <h2 className="font-heading text-xl font-extrabold text-slate-900 text-center">{profile.fullName}</h2>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+          <h2 className="type-h2 text-slate-900 text-center">{profile.fullName}</h2>
+          <span className="type-caption font-bold text-slate-400 uppercase tracking-wider mt-0.5">
             {profile.role}
           </span>
         </div>
 
         {/* Card 1: Personal Information matching Flutter _buildCommonInfoCard */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-1">
-          <h3 className="font-heading text-sm font-bold text-slate-900 mb-2">Personal Information</h3>
+          <h3 className="type-h5 text-slate-900 mb-2">Personal Information</h3>
           <div className="h-px bg-slate-100 -mx-4 mb-2" />
           
           <SharedProfileRow label="Username" value={profile.username} />
@@ -170,7 +170,7 @@ export default function ProfileTab() {
         {/* Card 2 & 3: Academic Details & Performance matching Flutter _buildStudentCard */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-4">
           <div>
-            <h3 className="font-heading text-sm font-bold text-slate-900 mb-2">Academic Details</h3>
+            <h3 className="type-h5 text-slate-900 mb-2">Academic Details</h3>
             <div className="h-px bg-slate-100 -mx-4 mb-2" />
 
             <SharedProfileRow label="Register Number" value={profile.studentDetails.registerNumber} />
@@ -180,7 +180,7 @@ export default function ProfileTab() {
           </div>
 
           <div>
-            <h3 className="font-heading text-sm font-bold text-slate-900 mb-2 pt-2">Performance</h3>
+            <h3 className="type-h5 text-slate-900 mb-2 pt-2">Performance</h3>
             <div className="h-px bg-slate-100 -mx-4 mb-2" />
 
             <SharedProfileRow label="Current XP" value={profile.studentDetails.currentXp} />
@@ -194,7 +194,7 @@ export default function ProfileTab() {
           {/* Logout Button */}
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+            className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl type-btn transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -203,7 +203,7 @@ export default function ProfileTab() {
 
         {/* Footer */}
         <div className="text-center pt-4 pb-2">
-          <p className="text-xs font-semibold text-slate-400 tracking-wide">
+          <p className="type-caption text-slate-400 tracking-wide">
             JJCET © 2026 All rights reserved
           </p>
         </div>

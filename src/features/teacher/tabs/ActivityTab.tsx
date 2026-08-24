@@ -279,10 +279,10 @@ export default function ActivityTab() {
           {/* Header */}
           <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={handleGoBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+              <button onClick={handleGoBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
                 <ArrowLeft className="w-6 h-6 text-white" />
               </button>
-              <h1 className="font-heading text-xl font-bold text-white">{stageName}</h1>
+              <h1 className="type-h4 text-white">{stageName}</h1>
             </div>
           </div>
 
@@ -293,13 +293,13 @@ export default function ActivityTab() {
                 <Star className="w-6 h-6 fill-teal-600" />
               </div>
               <div>
-                <h2 className="font-heading font-bold text-slate-800 text-lg">{stageName}</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{stageDesc}</p>
+                <h2 className="type-h5 text-slate-800">{stageName}</h2>
+                <p className="type-caption text-slate-500 mt-0.5">{stageDesc}</p>
               </div>
             </div>
 
             {/* Categories */}
-            <h3 className="font-heading font-bold text-slate-700 text-sm">Select Activity Category</h3>
+            <h3 className="type-h5 text-slate-700">Select Activity Category</h3>
             <div className="space-y-4">
               {categories.map((cat) => (
                 <div
@@ -313,18 +313,18 @@ export default function ActivityTab() {
                   className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-teal-500 cursor-pointer transition-all flex justify-between items-center group"
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${cat.badgeBg}`}>
+                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold type-caption ${cat.badgeBg}`}>
                       {cat.badge}
                     </span>
                     <div>
-                      <h4 className="font-bold text-slate-900 group-hover:text-teal-600 text-base transition-colors">
+                      <h4 className="font-bold text-slate-900 group-hover:text-teal-600 type-h4 transition-colors">
                         {cat.title}
                       </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">{cat.subtitle}</p>
+                      <p className="type-caption text-slate-500 mt-0.5">{cat.subtitle}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-lg border ${cat.color}`}>
+                    <span className={`type-caption font-bold px-3 py-1 rounded-lg border ${cat.color}`}>
                       Min: {cat.threshold} XP
                     </span>
                     <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
@@ -365,10 +365,10 @@ export default function ActivityTab() {
           {/* Top Header Bar matching Flutter teal gradient 1:1 */}
           <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={handleGoBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+              <button onClick={handleGoBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
                 <ArrowLeft className="w-6 h-6 text-white" />
               </button>
-              <h1 className="font-heading text-xl font-bold text-white">Assign Staff</h1>
+              <h1 className="type-h4 text-white">Assign Staff</h1>
             </div>
             <button
               onClick={() => fetchStages(academicYear)}
@@ -386,10 +386,10 @@ export default function ActivityTab() {
                 <GraduationCap className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="font-heading font-bold text-slate-800 text-sm md:text-base">
+                <h2 className="type-h5 text-slate-800">
                   {deptName} • Section {secName}
                 </h2>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                <p className="type-caption text-slate-500 font-semibold mt-0.5">
                   Academic Year: {yrName}
                 </p>
               </div>
@@ -397,7 +397,7 @@ export default function ActivityTab() {
 
             <button
               onClick={() => setShowQuickAssignModal(true)}
-              className="bg-[#11998E] hover:bg-[#0d7d74] text-white text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="bg-[#11998E] hover:bg-[#0d7d74] text-white type-caption font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Assign Staff</span>
@@ -427,7 +427,7 @@ export default function ActivityTab() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-heading font-bold text-slate-900 text-lg md:text-xl group-hover:text-teal-600 transition-colors">
+                      <h3 className="type-h5 text-slate-900 group-hover:text-teal-600 transition-colors">
                         {stage.name || stage.stageName || `Stage ${displayOrder}`}
                       </h3>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase tracking-wider ${
@@ -443,7 +443,7 @@ export default function ActivityTab() {
                   </div>
 
                   {/* Chips row (Order, XP, M, I, G) - matching screenshot 1:1 */}
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                  <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
                     <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
                       Order: {displayOrder}
                     </span>
@@ -500,8 +500,8 @@ export default function ActivityTab() {
       {/* Top Header Bar */}
       <div className="bg-[#1E293B] text-white px-6 pt-10 pb-6 shadow-md flex justify-between items-center">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Activities</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Explore configured activity stages, thresholds, and assigned tasks</p>
+          <h1 className="type-h3">Activities</h1>
+          <p className="type-caption text-slate-400 mt-0.5">Explore configured activity stages, thresholds, and assigned tasks</p>
         </div>
 
         {/* Action Header Icons (Matching Flutter Header 1:1) */}
@@ -561,7 +561,7 @@ export default function ActivityTab() {
       <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-5">
         {/* Academic Year Selector Card - Matching Flutter 1:1 */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center space-x-3 text-slate-700 font-bold text-sm">
+          <div className="flex items-center space-x-3 text-slate-700 font-bold type-body-sm">
             <div className="p-2.5 bg-slate-100 rounded-xl text-slate-600">
               <Calendar className="w-5 h-5" />
             </div>
@@ -571,7 +571,7 @@ export default function ActivityTab() {
             value={academicYear}
             disabled={isCC && !isAdmin && !isSuperAdmin}
             onChange={(e) => setAcademicYear(e.target.value)}
-            className={`w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-xl px-5 py-3 focus:ring-2 focus:ring-slate-800 outline-none ${
+            className={`w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-900 type-body-sm font-bold rounded-xl px-5 py-3 focus:ring-2 focus:ring-slate-800 outline-none ${
               isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700' : 'cursor-pointer'
             }`}
           >
@@ -587,7 +587,7 @@ export default function ActivityTab() {
         {isCC && (
           <button
             onClick={() => handlePushView('assign_staff_stages')}
-            className="w-full bg-[#0D9488] hover:bg-[#0F766E] text-white py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-[#0D9488] hover:bg-[#0F766E] text-white py-3.5 px-4 rounded-2xl type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <UserCheck className="w-5 h-5" />
             <span>Assign Staff</span>
@@ -602,8 +602,8 @@ export default function ActivityTab() {
         ) : stagesList.length === 0 ? (
           <div className="text-center py-16 text-slate-500 bg-white rounded-2xl border border-slate-200 shadow-xs">
             <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="text-base font-semibold text-slate-800">No activity stages configured for {academicYear.replace('_', ' ')}.</p>
-            <p className="text-xs text-slate-400 mt-1">Select another academic year or contact system admin.</p>
+            <p className="type-h5 text-slate-800">No activity stages configured for {academicYear.replace('_', ' ')}.</p>
+            <p className="type-caption text-slate-400 mt-1">Select another academic year or contact system admin.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -632,18 +632,18 @@ export default function ActivityTab() {
                       }`}>
                         {statusText}
                       </span>
-                      <span className="text-xs font-bold text-slate-600">
+                      <span className="type-caption font-bold text-slate-600">
                         Expected: {expectedXp} XP
                       </span>
                     </div>
 
                     {/* Stage Name */}
-                    <h2 className="font-heading text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <h2 className="type-h4 text-slate-900 group-hover:text-blue-600 transition-colors">
                       {stage.name || stage.stageName || `Stage ${displayOrder}`}
                     </h2>
 
                     {/* Threshold Badges (Order, M, I, G) - 1:1 Flutter Alignment */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
                       <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
                         Order: {displayOrder}
                       </span>
@@ -721,11 +721,11 @@ function QuickAssignModal({
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-slate-800 text-base">Select Activity to Assign Staff</h3>
-              <p className="text-xs text-slate-500">Pick an activity to configure faculty assignments</p>
+              <h3 className="type-h5 text-slate-800">Select Activity to Assign Staff</h3>
+              <p className="type-caption text-slate-500">Pick an activity to configure faculty assignments</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition text-slate-500 cursor-pointer">
+          <button onClick={onClose} className="p-2 type-btn hover:bg-slate-200 rounded-full transition text-slate-500 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -737,7 +737,7 @@ function QuickAssignModal({
               <button
                 key={stg.id}
                 onClick={() => setSelectedStageId(stg.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex-shrink-0 px-4 py-2 rounded-xl type-caption font-bold whitespace-nowrap transition-all cursor-pointer ${
                   selectedStageId === stg.id
                     ? 'bg-[#11998E] text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -767,8 +767,8 @@ function QuickAssignModal({
                 className="bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 hover:shadow-sm cursor-pointer transition-all flex justify-between items-center group"
               >
                 <div>
-                  <h4 className="font-bold text-slate-800 group-hover:text-teal-600 text-sm">{act.name}</h4>
-                  <p className="text-xs text-slate-500 mt-0.5">{act.description || 'Activity task'}</p>
+                  <h4 className="type-body-sm font-bold text-slate-800 group-hover:text-teal-600">{act.name}</h4>
+                  <p className="type-caption text-slate-500 mt-0.5">{act.description || 'Activity task'}</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
               </div>
@@ -849,17 +849,17 @@ function CCActivityListPageView({
       {/* Header Bar matching Flutter teal gradient 1:1 */}
       <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition cursor-pointer">
+          <button onClick={onBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
           <div>
-            <h1 className="font-heading text-lg md:text-xl font-bold text-white">{categoryTitle}</h1>
-            <p className="text-xs text-white/80">{stageName}</p>
+            <h1 className="type-h4 text-white">{categoryTitle}</h1>
+            <p className="type-caption text-white/80">{stageName}</p>
           </div>
         </div>
         <button
           onClick={fetchActivities}
-          className="p-2 hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+          className="p-2 type-btn hover:bg-white/10 rounded-full transition text-white cursor-pointer"
           title="Refresh"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -875,7 +875,7 @@ function CCActivityListPageView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search activity by name or description..."
-            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-xs"
+            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2.5 type-caption text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-xs"
           />
           {searchQuery && (
             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
@@ -892,8 +892,8 @@ function CCActivityListPageView({
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-6">
             <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="font-bold text-slate-700 text-sm">No activities found in {categoryTitle}</p>
-            <p className="text-xs text-slate-400 mt-1">Try selecting another category or academic year.</p>
+            <p className="font-bold text-slate-700 type-body-sm">No activities found in {categoryTitle}</p>
+            <p className="type-caption text-slate-400 mt-1">Try selecting another category or academic year.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -904,20 +904,20 @@ function CCActivityListPageView({
               >
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
+                    <span className="type-fine font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
                       {safeStr(act.subgroup) || safeStr(act.category) || subgroupFilter || 'Activity'}
                     </span>
-                    <span className="text-xs font-bold text-slate-600">
+                    <span className="type-caption font-bold text-slate-600">
                       XP: {act.awardXp ?? (typeof act.xp === 'object' ? 0 : (act.xp || 0))}
                     </span>
                   </div>
-                  <h3 className="font-bold text-slate-900 text-base">{act.name}</h3>
-                  <p className="text-xs text-slate-500">{act.description || 'Configured activity task'}</p>
+                  <h3 className="type-h5 text-slate-900">{act.name}</h3>
+                  <p className="type-caption text-slate-500">{act.description || 'Configured activity task'}</p>
                 </div>
 
                 <button
                   onClick={() => onSelectAssign(act)}
-                  className="bg-[#11998E] hover:bg-[#0d7d74] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                  className="bg-[#11998E] hover:bg-[#0d7d74] text-white type-caption font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
                 >
                   <UserCheck className="w-4 h-4" />
                   <span>Assign Staff</span>

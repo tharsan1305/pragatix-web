@@ -81,12 +81,12 @@ export default function GroupActivityYearPage({ onBack, onPushView, activityId: 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       <div className="bg-slate-900 px-6 pt-10 pb-6 flex items-center space-x-4 shadow-md">
-        <button onClick={handleBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={handleBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="font-heading text-2xl font-bold text-white">Select Academic Year</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Group activity execution drill-down</p>
+          <h1 className="type-h3 text-white">Select Academic Year</h1>
+          <p className="type-caption text-slate-400 mt-0.5">Group activity execution drill-down</p>
         </div>
       </div>
 
@@ -98,8 +98,8 @@ export default function GroupActivityYearPage({ onBack, onPushView, activityId: 
         ) : error ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
             <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" />
-            <p className="text-sm font-semibold text-slate-700">{error}</p>
-            <button onClick={fetchYears} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold">
+            <p className="type-body-sm font-semibold text-slate-700">{error}</p>
+            <button onClick={fetchYears} className="px-4 py-2 bg-slate-900 text-white rounded-xl type-caption">
               Retry
             </button>
           </div>
@@ -109,7 +109,7 @@ export default function GroupActivityYearPage({ onBack, onPushView, activityId: 
               <button
                 key={y.yearNo}
                 onClick={() => handleSelectYear(y)}
-                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold text-base text-slate-800 flex justify-between items-center transition-all hover:shadow-sm"
+                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold type-body text-slate-800 flex justify-between items-center transition-all hover:shadow-sm"
               >
                 <span className="font-heading">{y.yearName}</span>
                 <ChevronRight className="w-5 h-5 text-slate-400" />

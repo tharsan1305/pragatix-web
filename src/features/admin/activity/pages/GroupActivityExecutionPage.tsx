@@ -125,12 +125,12 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
       {/* Header Bar */}
       <div className="bg-[#1E293B] px-6 pt-10 pb-5 shadow-md text-white">
         <div className="flex items-center space-x-4">
-          <button onClick={handleBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+          <button onClick={handleBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <div>
-            <h1 className="font-heading text-2xl font-bold">Group Activity Execution</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="type-h3">Group Activity Execution</h1>
+            <p className="type-caption text-slate-400 mt-0.5">
               Evaluate groups, award XP points
               {year?.yearName ? ` • ${year.yearName}` : ''}
               {dept?.deptName || dept?.name ? ` • ${dept.deptName || dept.name}` : ''}
@@ -156,26 +156,26 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
               <div key={t.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold text-lg border border-indigo-200/60 shrink-0">
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold type-h5 border border-indigo-200/60 shrink-0">
                       <Users className="w-6 h-6" />
                     </div>
 
                     <div>
-                      <h3 className="font-heading font-bold text-slate-900 text-base">{t.name || t.teamName || 'Group Team'}</h3>
-                      <p className="text-xs text-slate-500 font-medium">Captain: <span className="font-semibold text-slate-700">{t.captainName || 'Not Assigned'}</span> ({t.captainRegNo || t.captainId || 'N/A'})</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Total Members: {t.size || t.members?.length || 0}</p>
+                      <h3 className="type-h5 text-slate-900">{t.name || t.teamName || 'Group Team'}</h3>
+                      <p className="type-caption text-slate-500 font-medium">Captain: <span className="font-semibold text-slate-700">{t.captainName || 'Not Assigned'}</span> ({t.captainRegNo || t.captainId || 'N/A'})</p>
+                      <p className="type-fine text-slate-400 mt-0.5">Total Members: {t.size || t.members?.length || 0}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 self-end md:self-center">
                     {t.isAwarded ? (
-                      <span className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-semibold text-xs border border-slate-200 cursor-not-allowed">
+                      <span className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-semibold type-caption border border-slate-200 cursor-not-allowed">
                         XP Already Awarded
                       </span>
                     ) : (
                       <button
                         onClick={() => setScoringTeam(t)}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-xs transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl type-btn transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer"
                       >
                         <Award className="w-4 h-4" />
                         <span>Award XP</span>
@@ -186,10 +186,10 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
 
                 {t.members && t.members.length > 0 && (
                   <div className="mt-4 pt-3 border-t border-slate-100">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Group Members:</p>
+                    <p className="type-caption font-bold text-slate-500 uppercase tracking-wider mb-2">Group Members:</p>
                     <div className="flex flex-wrap gap-2">
                       {t.members.map((m: any, idx: number) => (
-                        <span key={m.id || idx} className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-medium rounded-lg border border-slate-200">
+                        <span key={m.id || idx} className="px-2.5 py-1 bg-slate-100 text-slate-700 type-caption rounded-lg border border-slate-200">
                           {m.fullName || m.studentName} ({m.regNo || m.registerNumber})
                         </span>
                       ))}
@@ -208,36 +208,36 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center space-x-3">
               <Award className="w-6 h-6 text-indigo-600" />
-              <h3 className="font-heading text-lg font-bold text-slate-900">Award XP to {scoringTeam.name}</h3>
+              <h3 className="type-h4 text-slate-900">Award XP to {scoringTeam.name}</h3>
             </div>
 
             <form onSubmit={handleAwardXpSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600 mb-1 block">XP Points *</label>
+                <label className="type-form-label text-slate-600 mb-1 block">XP Points *</label>
                 <input
                   required
                   type="number"
                   min={1}
                   value={xpValue}
                   onChange={e => setXpValue(Number(e.target.value))}
-                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm bg-white"
+                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 type-body-sm bg-white"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-600 mb-1 block">Remarks / Comments</label>
+                <label className="type-form-label text-slate-600 mb-1 block">Remarks / Comments</label>
                 <textarea
                   rows={2}
                   value={remarks}
                   onChange={e => setRemarks(e.target.value)}
                   placeholder="Enter remarks for group activity evaluation..."
-                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 text-sm bg-white"
+                  className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 type-body-sm bg-white"
                 />
               </div>
 
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-semibold text-slate-700">Equal Distribution to Members</span>
-                <label className="relative inline-flex items-center cursor-pointer">
+                <span className="type-caption text-slate-700">Equal Distribution to Members</span>
+                <label className="relative inline-flex items-center cursor-pointer type-form-label">
                   <input
                     type="checkbox"
                     checked={isEqualDistribution}
@@ -252,14 +252,14 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
                 <button
                   type="button"
                   onClick={() => setScoringTeam(null)}
-                  className="px-4 py-2 text-slate-600 font-semibold text-xs hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 rounded-lg shadow-xs flex items-center space-x-1 cursor-pointer"
+                  className="px-5 py-2 bg-indigo-600 text-white font-semibold type-btn hover:bg-indigo-700 rounded-lg shadow-xs flex items-center space-x-1 cursor-pointer"
                 >
                   {isSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin mr-1" />}
                   <span>Confirm Award</span>
@@ -274,12 +274,11 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
         <ConfirmationModal
           isOpen={!!confirmAwardXp}
           title="Confirm XP Award"
-          message={`Award ${confirmAwardXp.xp} XP to ${confirmAwardXp.team.name}?${confirmAwardXp.remarks ? ` Remarks: ${confirmAwardXp.remarks}` : ''}`}
+          description={`Award ${confirmAwardXp.xp} XP to ${confirmAwardXp.team.name}?${confirmAwardXp.remarks ? ` Remarks: ${confirmAwardXp.remarks}` : ''}`}
           confirmText="Award XP"
           onConfirm={handleConfirmAwardXp}
           onCancel={() => setConfirmAwardXp(null)}
-          isLoading={isSubmitting}
-          isDanger
+          isDangerous={false}
         />
       )}
     </div>

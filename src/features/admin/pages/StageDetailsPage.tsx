@@ -279,13 +279,13 @@ export default function StageDetailsPage({
     <div className="flex flex-col min-h-full bg-slate-50">
       {/* Top Bar */}
       <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h1 className="font-heading text-2xl font-bold text-white">{displayName}</h1>
+          <h1 className="type-h3 text-white">{displayName}</h1>
         </div>
-        <button onClick={fetchSubgroups} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={fetchSubgroups} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
@@ -294,14 +294,14 @@ export default function StageDetailsPage({
         {/* Stage Overview & Threshold Card */}
         <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
           <div>
-            <h2 className="font-heading text-2xl font-bold text-slate-900">{displayName}</h2>
-            <p className="text-sm text-slate-500 mt-1">{displayDesc || 'Stage configuration & thresholds'}</p>
+            <h2 className="type-h3 text-slate-900">{displayName}</h2>
+            <p className="type-body-sm text-slate-500 mt-1">{displayDesc || 'Stage configuration & thresholds'}</p>
           </div>
 
           <div className="h-px bg-slate-100" />
 
           <div>
-            <h3 className="font-heading text-sm font-bold text-slate-700 mb-3">
+            <h3 className="type-h5 text-slate-700 mb-3">
               Stage Progression Thresholds
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -310,8 +310,8 @@ export default function StageDetailsPage({
                   <Star className="w-5 h-5 fill-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-rose-600">Must</p>
-                  <p className="text-lg font-bold text-slate-900">{mustXP} XP</p>
+                  <p className="type-caption font-bold text-rose-600">Must</p>
+                  <p className="type-h4 text-slate-900">{mustXP} XP</p>
                 </div>
               </div>
 
@@ -320,8 +320,8 @@ export default function StageDetailsPage({
                   <User className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-blue-600">Individual</p>
-                  <p className="text-lg font-bold text-slate-900">{individualXP} XP</p>
+                  <p className="type-caption font-bold text-blue-600">Individual</p>
+                  <p className="type-h4 text-slate-900">{individualXP} XP</p>
                 </div>
               </div>
             </div>
@@ -331,8 +331,8 @@ export default function StageDetailsPage({
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs font-bold text-emerald-600">Group</p>
-                <p className="text-lg font-bold text-slate-900">{groupXP} XP</p>
+                <p className="type-caption font-bold text-emerald-600">Group</p>
+                <p className="type-h4 text-slate-900">{groupXP} XP</p>
               </div>
             </div>
           </div>
@@ -341,18 +341,18 @@ export default function StageDetailsPage({
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <span className="text-sm font-medium">{error}</span>
+            <span className="type-body-sm font-medium">{error}</span>
           </div>
         )}
 
         {/* Activity Categories / Subgroups Roster */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Activity Categories</h3>
+            <h3 className="type-h4 text-slate-900">Activity Categories</h3>
             {!isTeacherView && (
               <button 
                 onClick={() => openModal()}
-                className="flex items-center space-x-1.5 bg-[#EA4335] hover:bg-red-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-transform active:scale-95 cursor-pointer"
+                className="flex items-center space-x-1.5 bg-[#EA4335] hover:bg-red-600 text-white px-3.5 py-2 rounded-xl type-caption font-bold shadow-sm transition-transform active:scale-95 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Subgroup</span>
@@ -387,8 +387,8 @@ export default function StageDetailsPage({
                           <IconComponent className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-base text-slate-900">{subName}</h4>
-                          <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                          <h4 className="font-bold type-h4 text-slate-900">{subName}</h4>
+                          <p className="type-caption text-slate-500 mt-0.5 font-medium">
                             Threshold: {sub.threshold || 150} XP
                           </p>
                         </div>
@@ -405,7 +405,7 @@ export default function StageDetailsPage({
                               subgroupName: subName 
                             });
                           }}
-                          className="text-xs font-bold px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
+                          className="type-caption font-bold px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
                         >
                           View Full List
                         </button>
@@ -423,12 +423,12 @@ export default function StageDetailsPage({
                             <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
                           </div>
                         ) : acts.length === 0 ? (
-                          <div className="text-center py-6 text-slate-500 text-sm">
+                          <div className="text-center py-6 text-slate-500 type-body-sm">
                             <p className="font-medium text-slate-700 mb-1">No activities in this category yet.</p>
                             {!isTeacherView && (
                               <button
                                 onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                                className="text-xs font-bold text-blue-600 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                                className="type-caption font-bold text-blue-600 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Plus className="w-3.5 h-3.5" /> Add First Activity
                               </button>
@@ -437,11 +437,11 @@ export default function StageDetailsPage({
                         ) : (
                           <div className="space-y-3">
                             <div className="flex justify-between items-center px-1 mb-2">
-                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Activities in {subName}</span>
+                              <span className="type-caption font-bold uppercase tracking-wider text-slate-500">Activities in {subName}</span>
                               {!isTeacherView && (
                                 <button
                                   onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                                  className="flex items-center gap-1 bg-[#EA4335] text-white hover:bg-red-600 px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                  className="flex items-center gap-1 bg-[#EA4335] text-white hover:bg-red-600 px-3 py-1 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                                 >
                                   <Plus className="w-3.5 h-3.5" /> Add Activity
                                 </button>
@@ -477,7 +477,7 @@ export default function StageDetailsPage({
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="font-heading text-lg font-bold text-slate-800">
+              <h2 className="type-h4 text-slate-800">
                 {editingSubgroup ? 'Edit Subgroup' : 'Add New Subgroup'}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-200 rounded-full">
@@ -487,22 +487,22 @@ export default function StageDetailsPage({
             
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Subgroup Name *</label>
+                <label className="type-form-label text-slate-700">Subgroup Name *</label>
                 <input 
                   required 
                   type="text" 
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
                   placeholder="e.g. Must, Individual, Group"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none type-body-sm" 
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Category Type *</label>
+                <label className="type-form-label text-slate-700">Category Type *</label>
                 <select 
                   value={formData.category} 
                   onChange={e => setFormData({...formData, category: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white type-body-sm"
                 >
                   <option value="must">Must-Do Activity (must)</option>
                   <option value="individual">Individual Activity (individual)</option>
@@ -510,22 +510,22 @@ export default function StageDetailsPage({
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Threshold (XP) *</label>
+                <label className="type-form-label text-slate-700">Threshold (XP) *</label>
                 <input 
                   required 
                   type="number" 
                   value={formData.threshold} 
                   onChange={e => setFormData({...formData, threshold: e.target.value})} 
                   placeholder="e.g. 150"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none type-body-sm" 
                 />
               </div>
               
               <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-slate-100">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="px-5 py-2 bg-blue-600 text-white text-xs font-bold rounded-xl hover:bg-blue-700 shadow-md">
+                <button type="submit" className="px-5 py-2 bg-blue-600 text-white type-btn rounded-xl hover:bg-blue-700 shadow-md cursor-pointer">
                   {editingSubgroup ? 'Update' : 'Save Subgroup'}
                 </button>
               </div>
@@ -552,20 +552,20 @@ export default function StageDetailsPage({
       {unmapActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Remove Activity</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <h3 className="type-h4 text-slate-900">Remove Activity</h3>
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               Are you sure you want to remove <strong>'{unmapActivityTarget.name}'</strong> from this stage?
             </p>
             <div className="flex justify-end space-x-3 pt-2">
               <button 
                 onClick={() => setUnmapActivityTarget(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleUnmapConfirm}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold rounded-xl shadow-md transition-colors"
               >
                 Remove from Stage
               </button>
@@ -578,20 +578,20 @@ export default function StageDetailsPage({
       {deleteActivityTarget && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
-            <h3 className="font-heading text-lg font-bold text-slate-900">Delete from System</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <h3 className="type-h4 text-slate-900">Delete from System</h3>
+            <p className="type-body-sm text-slate-600 leading-relaxed">
               Are you sure you want to completely delete <strong>'{deleteActivityTarget.name}'</strong> from the entire system? This is permanent.
             </p>
             <div className="flex justify-end space-x-3 pt-2">
               <button 
                 onClick={() => setDeleteActivityTarget(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleDeleteConfirm}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold rounded-xl shadow-md transition-colors"
               >
                 Delete Everywhere
               </button>

@@ -24,7 +24,7 @@ export const ScoreBadge: React.FC<ScoreBadgeProps> = ({ score, showLabel = true 
   }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border ${badgeColor}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full type-caption border ${badgeColor}`}>
       <span className="font-semibold mr-1">{score} XP</span>
       {showLabel && <span className="opacity-90">• {label}</span>}
     </span>

@@ -53,7 +53,7 @@ export default function CreateActivityPage({
     <div className="flex flex-col min-h-full bg-slate-50">
       {/* Toast Notification matching Flutter Top SnackBar */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-bold animate-in slide-in-from-top duration-300 ${
+        <div className={`fixed top-4 right-4 z-50 px-5 py-3.5 rounded-2xl shadow-xl flex items-center space-x-3 type-body-sm font-bold animate-in slide-in-from-top duration-300 ${
           toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
         }`}>
           {toast.type === 'success' ? (
@@ -68,16 +68,16 @@ export default function CreateActivityPage({
       {/* Top Header */}
       <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 z-10 shadow-md">
         <div className="flex items-center space-x-4">
-          <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+          <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-heading text-xl font-bold text-white">Create New Activity</h1>
+          <h1 className="type-h4 text-white">Create New Activity</h1>
         </div>
         <button 
           type="submit" 
           form="activity-form"
           disabled={isSubmitting} 
-          className="text-white font-bold text-sm px-4 py-2 bg-[#EA4335] hover:bg-red-600 rounded-xl transition-colors disabled:opacity-50"
+          className="text-white font-bold type-btn px-4 py-2 bg-[#EA4335] hover:bg-red-600 rounded-xl transition-colors disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save'}
         </button>

@@ -33,13 +33,20 @@ function NavigationTransition({ children }: { children: React.ReactNode }) {
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
+    // Immediately scroll to the top of the page on route change
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
     setIsNavigating(true);
     const timer = setTimeout(() => {
       setIsNavigating(false);
+      // Double check scroll position once transition completes
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   return (
     <>

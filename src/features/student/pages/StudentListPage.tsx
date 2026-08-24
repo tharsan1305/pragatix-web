@@ -25,12 +25,12 @@ export default function StudentListPage() {
     <div className="flex flex-col h-full space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-bold text-slate-800">Students Directory</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage and monitor student discipline records</p>
+          <h1 className="type-h3 text-slate-800">Students Directory</h1>
+          <p className="type-body-sm text-slate-500 mt-1">Manage and monitor student discipline records</p>
         </div>
         <button 
           onClick={() => {/* Open add modal or navigate */}}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg type-body-sm font-medium transition-colors flex items-center gap-2"
         >
           <UserPlus className="w-4 h-4" />
           Add Student
@@ -49,9 +49,9 @@ export default function StudentListPage() {
           <Search className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" />
         </form>
         
-        <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors w-full sm:w-auto">
+        <button className="flex items-center gap-2 type-btn px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors w-full sm:w-auto">
           <Filter className="w-4 h-4" />
-          <span className="text-sm font-medium">Filters</span>
+          <span className="type-body-sm font-medium">Filters</span>
         </button>
       </div>
 
@@ -66,14 +66,14 @@ export default function StudentListPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
-                <th className="p-4 font-semibold">Student</th>
-                <th className="p-4 font-semibold">ID / Reg No</th>
-                <th className="p-4 font-semibold">Department</th>
-                <th className="p-4 font-semibold">Year/Sec</th>
-                <th className="p-4 font-semibold text-center">Score</th>
-                <th className="p-4 font-semibold">Status</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 type-table-head">
+                <th className="p-4 type-table-head">Student</th>
+                <th className="p-4 type-table-head">ID / Reg No</th>
+                <th className="p-4 type-table-head">Department</th>
+                <th className="p-4 type-table-head">Year/Sec</th>
+                <th className="p-4 type-table-head text-center">Score</th>
+                <th className="p-4 type-table-head">Status</th>
+                <th className="p-4 type-table-head text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -97,7 +97,7 @@ export default function StudentListPage() {
                   <tr key={student.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold type-body-sm">
                           {student.fullName.charAt(0)}
                         </div>
                         <div>
@@ -106,7 +106,7 @@ export default function StudentListPage() {
                             {student.teamRole === 'VICE_CAPTAIN' && <span className="text-slate-700 text-[10px] font-bold bg-slate-100 border border-slate-300 px-1.5 py-0.5 rounded">🥈 Vice Captain</span>}
                             <span>{student.fullName}</span>
                           </p>
-                          <p className="text-xs text-slate-500">{student.email}</p>
+                          <p className="type-caption text-slate-500">{student.email}</p>
                         </div>
                       </div>
                     </td>
@@ -114,7 +114,7 @@ export default function StudentListPage() {
                     <td className="p-4 text-slate-600">{student.departmentName || 'N/A'}</td>
                     <td className="p-4 text-slate-600">{student.year}-{student.section}</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                      <span className={`px-2.5 py-1 rounded-full type-caption ${
                         student.disciplineScore >= 80 ? 'bg-green-100 text-green-700' :
                         student.disciplineScore >= 50 ? 'bg-yellow-100 text-yellow-700' :
                         'bg-red-100 text-red-700'
@@ -123,7 +123,7 @@ export default function StudentListPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                      <span className="px-2.5 py-1 rounded-full type-caption bg-slate-100 text-slate-700">
                         {student.status || 'Active'}
                       </span>
                     </td>

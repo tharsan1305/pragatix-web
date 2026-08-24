@@ -25,7 +25,7 @@ export const StatusChip: React.FC<StatusChipProps> = ({ status, size = 'md' }) =
 
   const sizeClasses = size === 'sm' 
     ? 'px-2 py-0.5 text-[10px] font-bold' 
-    : 'px-2.5 py-1 text-xs font-bold';
+    : 'px-2.5 py-1 type-caption font-bold';
 
   return (
     <span className={`inline-flex items-center rounded-full border ${styles} ${sizeClasses}`}>

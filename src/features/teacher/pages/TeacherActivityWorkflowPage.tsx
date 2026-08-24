@@ -354,7 +354,7 @@ export default function TeacherActivityWorkflowPage({
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="font-heading text-lg font-bold tracking-wide">{getAppBarTitle()}</h1>
+          <h1 className="type-h4 tracking-wide">{getAppBarTitle()}</h1>
         </div>
 
         <button
@@ -375,7 +375,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 1: SELECT ACADEMIC YEAR */}
         {currentFlowStep === 1 && (
           <div className="space-y-4">
-            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Academic Year</h2>
+            <h2 className="type-h5 text-[#1E293B]">Select Academic Year</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
@@ -383,7 +383,7 @@ export default function TeacherActivityWorkflowPage({
             ) : availableYearsList.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <School className="w-14 h-14 text-slate-300 mb-3" />
-                <p className="text-sm font-medium text-slate-500">No available years found for this activity</p>
+                <p className="type-body-sm font-medium text-slate-500">No available years found for this activity</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -397,7 +397,7 @@ export default function TeacherActivityWorkflowPage({
                       <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
                         <School className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 text-sm">{yr.yearName}</span>
+                      <span className="font-bold text-slate-800 type-body-sm">{yr.yearName}</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                   </div>
@@ -410,7 +410,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 2: SELECT DEPARTMENT */}
         {currentFlowStep === 2 && (
           <div className="space-y-4">
-            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Department</h2>
+            <h2 className="type-h5 text-[#1E293B]">Select Department</h2>
 
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -419,7 +419,7 @@ export default function TeacherActivityWorkflowPage({
                 placeholder="Search Department…"
                 value={deptSearchQuery}
                 onChange={(e) => setDeptSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl text-sm outline-none focus:border-[#11998E]"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl type-body-sm outline-none focus:border-[#11998E]"
               />
             </div>
 
@@ -430,7 +430,7 @@ export default function TeacherActivityWorkflowPage({
             ) : filteredDepts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <Building2 className="w-14 h-14 text-slate-300 mb-3" />
-                <p className="text-sm font-medium text-slate-500">No departments found</p>
+                <p className="type-body-sm font-medium text-slate-500">No departments found</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -444,7 +444,7 @@ export default function TeacherActivityWorkflowPage({
                       <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
                         <Building2 className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 text-sm">{dept.name}</span>
+                      <span className="font-bold text-slate-800 type-body-sm">{dept.name}</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-400" />
                   </div>
@@ -457,7 +457,7 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 3: SELECT SECTION */}
         {currentFlowStep === 3 && (
           <div className="space-y-4">
-            <h2 className="font-heading text-base font-bold text-[#1E293B]">Select Section</h2>
+            <h2 className="type-h5 text-[#1E293B]">Select Section</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
                 <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
@@ -474,7 +474,7 @@ export default function TeacherActivityWorkflowPage({
                       <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center">
                         <Layers className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 text-sm">
+                      <span className="font-bold text-slate-800 type-body-sm">
                         Section {sec.sectionName || sec.name}
                       </span>
                     </div>
@@ -492,15 +492,15 @@ export default function TeacherActivityWorkflowPage({
             {/* Header — shows penalty vs award mode with correct color */}
             <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-800">Select Students</span>
+                <span className="type-body-sm font-bold text-slate-800">Select Students</span>
                 <span
-                  className="text-xs font-bold px-3 py-1 rounded-xl border"
+                  className="type-caption font-bold px-3 py-1 rounded-xl border"
                   style={{ color: themeColor, backgroundColor: themeColorLight, borderColor: themeColor + '50' }}
                 >
                   {xpLabel}: {xpAmount} XP
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="type-caption text-slate-500 mt-1">
                 {activity?.name} · Cap: {activity?.cap ?? 1}
               </p>
             </div>
@@ -514,7 +514,7 @@ export default function TeacherActivityWorkflowPage({
                   placeholder="Search Student by Name/ID…"
                   value={studentSearchQuery}
                   onChange={(e) => setStudentSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-sm outline-none focus:border-[#11998E]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl type-body-sm outline-none focus:border-[#11998E]"
                 />
               </div>
 
@@ -532,10 +532,10 @@ export default function TeacherActivityWorkflowPage({
                 >
                   {selectAll && <CheckCircle className="w-3 h-3 text-white" />}
                 </div>
-                <span className="text-sm font-bold text-slate-700">Select All Students</span>
+                <span className="type-body-sm font-bold text-slate-700">Select All Students</span>
                 {selectedStudentIds.size > 0 && (
                   <span
-                    className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
+                    className="ml-auto type-caption font-bold px-2 py-0.5 rounded-full"
                     style={{ color: themeColor, backgroundColor: themeColorLight }}
                   >
                     {selectedStudentIds.size} selected
@@ -552,7 +552,7 @@ export default function TeacherActivityWorkflowPage({
             ) : filteredStudents.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-slate-100 p-8">
                 <AlertCircle className="w-12 h-12 text-slate-300 mb-2" />
-                <p className="text-sm font-medium text-slate-500">
+                <p className="type-body-sm font-medium text-slate-500">
                   {eligibleStudents.length === 0
                     ? 'No eligible students found for this activity'
                     : 'No students match search criteria'}
@@ -590,15 +590,15 @@ export default function TeacherActivityWorkflowPage({
                           )}
                         </div>
                         <div>
-                          <h4 className="font-semibold text-sm text-slate-800">{student.fullName}</h4>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5">
+                          <h4 className="font-semibold type-body-sm text-slate-800">{student.fullName}</h4>
+                          <p className="type-caption text-slate-500 font-mono mt-0.5">
                             {student.regNo || student.studentId}
                           </p>
                         </div>
                       </div>
 
                       {isAwarded && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full type-caption font-bold bg-green-100 text-green-700">
                           <CheckCircle className="w-3.5 h-3.5" /> PASSED
                         </span>
                       )}
@@ -615,12 +615,12 @@ export default function TeacherActivityWorkflowPage({
                 placeholder="Add optional description/remarks…"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#11998E]"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl type-body-sm outline-none focus:border-[#11998E]"
               />
               <button
                 onClick={handleBatchAward}
                 disabled={isAwarding || selectedStudentIds.size === 0}
-                className="w-full py-3 font-bold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 font-bold rounded-xl type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 style={{
                   backgroundColor: isAwarding || selectedStudentIds.size === 0 ? '#94A3B8' : themeColor,
                   color: 'white',

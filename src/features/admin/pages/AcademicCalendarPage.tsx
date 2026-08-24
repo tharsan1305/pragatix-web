@@ -308,11 +308,11 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
     <div className="flex flex-col min-h-full bg-slate-50 pb-20">
       {/* Header Bar */}
       <div className="bg-[#1E293B] px-6 pt-10 pb-5 shadow-md text-white flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="font-heading text-xl font-bold text-white">Monthly Academic Calendar</h1>
+          <h1 className="type-h4 text-white">Monthly Academic Calendar</h1>
         </div>
       </div>
 
@@ -322,7 +322,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="bg-slate-50 border border-slate-300 text-slate-800 text-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
+            className="bg-slate-50 border border-slate-300 text-slate-800 type-body-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
           >
             {MONTH_NAMES.map((m, idx) => (
               <option key={m} value={idx + 1}>
@@ -334,7 +334,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="bg-slate-50 border border-slate-300 text-slate-800 text-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
+            className="bg-slate-50 border border-slate-300 text-slate-800 type-body-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
           >
             {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
               <option key={y} value={y}>
@@ -345,7 +345,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
           <button
             onClick={loadCalendarData}
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-800 type-btn hover:bg-slate-100 rounded-xl transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -354,7 +354,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
         {/* Calendar Card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
           {/* Days Header */}
-          <div className="grid grid-cols-7 text-center font-bold text-xs text-slate-800 pb-2">
+          <div className="grid grid-cols-7 text-center font-bold type-caption text-slate-800 pb-2">
             <div>Su</div>
             <div>Mo</div>
             <div>Tu</div>
@@ -400,7 +400,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                   <div
                     key={idx}
                     onClick={() => setSelectedDateModal(item.date)}
-                    className={`relative h-12 sm:h-14 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-transform active:scale-95 text-sm font-semibold select-none ${bgClasses}`}
+                    className={`relative h-12 sm:h-14 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-transform active:scale-95 type-body-sm font-semibold select-none ${bgClasses}`}
                   >
                     <span>{item.date.getDate()}</span>
 
@@ -424,17 +424,17 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
         {/* Alternate Working Days Card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <h2 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-2">
+          <h2 className="type-h5 text-slate-900 border-b border-slate-100 pb-2">
             Alternate Working Days
           </h2>
           {currentMonthAwdList.length === 0 ? (
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="type-caption text-slate-500 font-medium">
               No alternate working days configured for this month.
             </p>
           ) : (
             <div className="space-y-2">
               {currentMonthAwdList.map((a) => (
-                <div key={a.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold space-y-1">
+                <div key={a.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 type-caption space-y-1">
                   <div className="flex justify-between text-slate-800">
                     <span>Date: {a.effectiveDate}</span>
                     <span className="text-blue-600 font-bold">{a.workingDay} for {a.originalHolidayDay}</span>
@@ -453,7 +453,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
           <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4 animate-in fade-in slide-in-from-bottom-5">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-heading font-bold text-base text-slate-900">
+                <h3 className="type-h5 text-slate-900">
                   Selected Date: {selectedDateModal.toDateString()}
                 </h3>
               </div>
@@ -474,7 +474,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setSelectedDateModal(null);
                     toast.success('Week start date set. Click end date to finish week.');
                   }}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-emerald-50 text-emerald-700 rounded-xl text-sm font-bold transition-colors flex items-center justify-between"
+                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-emerald-50 text-emerald-700 rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between"
                 >
                   <span>Set as Week Start</span>
                 </button>
@@ -486,7 +486,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setPendingWeekStart(null);
                     setSelectedDateModal(null);
                   }}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-sm font-bold transition-colors flex items-center justify-between"
+                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between"
                 >
                   <span>Cancel Week Start</span>
                 </button>
@@ -500,7 +500,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setSelectedDateModal(null);
                     handleCreateWeek(start, end);
                   }}
-                  className="w-full text-left px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-colors flex items-center justify-between shadow-sm"
+                  className="w-full text-left px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between shadow-sm"
                 >
                   <span>Set as Week End</span>
                 </button>
@@ -510,7 +510,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               {!getHolidayForDate(selectedDateModal) && (
                 <button
                   onClick={() => setShowHolidayModal(true)}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-amber-50 text-amber-700 rounded-xl text-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-amber-50 text-amber-700 rounded-xl type-body-sm font-bold transition-colors"
                 >
                   Mark as Holiday
                 </button>
@@ -520,7 +520,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               {!getAwdForDate(selectedDateModal) && (
                 <button
                   onClick={() => setShowAwdModal(true)}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-blue-50 text-blue-700 rounded-xl text-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-blue-50 text-blue-700 rounded-xl type-body-sm font-bold transition-colors"
                 >
                   Set as Alternate Working Day
                 </button>
@@ -538,7 +538,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                       getAwdForDate(selectedDateModal)
                     )
                   }
-                  className="w-full text-left px-4 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl type-body-sm font-bold transition-colors"
                 >
                   Remove Configuration
                 </button>
@@ -552,13 +552,13 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
       {showHolidayModal && selectedDateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-heading font-bold text-base text-slate-900">Holiday Name</h3>
+            <h3 className="type-h5 text-slate-900">Holiday Name</h3>
             <input
               type="text"
               placeholder="Enter holiday name"
               value={holidayNameInput}
               onChange={(e) => setHolidayNameInput(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-slate-400 font-medium"
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm outline-none focus:ring-2 focus:ring-slate-400 font-medium"
             />
             <div className="flex justify-end space-x-2">
               <button
@@ -566,13 +566,13 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                   setShowHolidayModal(false);
                   setHolidayNameInput('');
                 }}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateHoliday}
-                className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm"
+                className="px-4 py-2 type-btn text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm cursor-pointer"
               >
                 Save
               </button>
@@ -585,22 +585,22 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
       {showAwdModal && selectedDateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-heading font-bold text-base text-slate-900">Add Alternate Working Day</h3>
+            <h3 className="type-h5 text-slate-900">Add Alternate Working Day</h3>
             
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Effective Date</label>
-                <div className="px-3.5 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-700">
+                <label className="type-form-label block font-bold text-slate-700 mb-1">Effective Date</label>
+                <div className="px-3.5 py-2 bg-slate-100 rounded-xl type-caption font-bold text-slate-700">
                   {formatDateStr(selectedDateModal)}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Original Holiday Day</label>
+                <label className="type-form-label block font-bold text-slate-700 mb-1">Original Holiday Day</label>
                 <select
                   value={awdForm.originalHolidayDay}
                   onChange={(e) => setAwdForm({ ...awdForm, originalHolidayDay: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption font-bold outline-none"
                 >
                   {DAYS_OF_WEEK.map((d) => (
                     <option key={d} value={d}>
@@ -611,11 +611,11 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Working Day</label>
+                <label className="type-form-label block font-bold text-slate-700 mb-1">Working Day</label>
                 <select
                   value={awdForm.workingDay}
                   onChange={(e) => setAwdForm({ ...awdForm, workingDay: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption font-bold outline-none"
                 >
                   {DAYS_OF_WEEK.map((d) => (
                     <option key={d} value={d}>
@@ -626,13 +626,13 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Reason (e.g. Saturday Compensation)</label>
+                <label className="type-form-label block font-bold text-slate-700 mb-1">Reason (e.g. Saturday Compensation)</label>
                 <input
                   type="text"
                   placeholder="Enter reason"
                   value={awdForm.reason}
                   onChange={(e) => setAwdForm({ ...awdForm, reason: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption outline-none"
                 />
               </div>
             </div>
@@ -643,13 +643,13 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                   setShowAwdModal(false);
                   setAwdForm({ originalHolidayDay: 'SATURDAY', workingDay: 'WEDNESDAY', reason: '' });
                 }}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateAwd}
-                className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm"
+                className="px-4 py-2 type-caption font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm"
               >
                 Save
               </button>

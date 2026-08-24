@@ -96,15 +96,15 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
           {onBackToYearSelection && (
             <button
               onClick={onBackToYearSelection}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl type-caption flex items-center space-x-1.5 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Switch Year</span>
             </button>
           )}
-          <h1 className="font-heading text-xl font-bold text-white">Activity & Thresholds</h1>
+          <h1 className="type-h4 text-white">Activity & Thresholds</h1>
           {academicYear && (
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/30">
+            <span className="type-caption font-bold px-2.5 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/30">
               {academicYear.replace('_', ' ')}
             </span>
           )}
@@ -117,18 +117,18 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
       <div className="flex-1 p-6 space-y-6">
         {/* Controls Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="font-heading text-lg font-bold text-slate-800">Configure Stages & Thresholds</h2>
+          <h2 className="type-h4 text-slate-800">Configure Stages & Thresholds</h2>
           <div className="flex flex-wrap items-center gap-3">
             <button 
               onClick={() => onPushView('all_activities')}
-              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
+              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl type-body-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
             >
               <ListFilter className="w-4 h-4" />
               <span>All Activities</span>
             </button>
             <button 
               onClick={() => onPushView('create_stage')}
-              className="flex items-center space-x-2 bg-[#EA4335] hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
+              className="flex items-center space-x-2 bg-[#EA4335] hover:bg-red-600 text-white px-4 py-2 rounded-xl type-body-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Stage</span>
@@ -142,8 +142,8 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
           </div>
         ) : stages.length === 0 ? (
           <div className="text-center py-12 text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-200">
-            <p className="text-base font-semibold text-slate-700">No stages configured yet.</p>
-            <p className="text-sm text-slate-400 mt-1">Click Add Stage above to create one.</p>
+            <p className="type-h5 text-slate-700">No stages configured yet.</p>
+            <p className="type-body-sm text-slate-400 mt-1">Click Add Stage above to create one.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -171,8 +171,8 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                   <div className="flex-1 pr-4 space-y-3">
                     {/* Header line */}
                     <div className="flex items-center space-x-3">
-                      <h3 className="font-heading font-bold text-xl text-slate-900">{stage.name}</h3>
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase border tracking-wider ${
+                      <h3 className="type-h5 text-slate-900">{stage.name}</h3>
+                      <span className={`type-fine font-bold px-2.5 py-0.5 rounded-md uppercase border tracking-wider ${
                         statusText === 'ACTIVE' 
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
                           : statusText === 'UPCOMING'
@@ -184,7 +184,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                     </div>
 
                     {/* Metrics Row (Order, XP, M, I, G) */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
                       <span className="text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
                         Order: {displayOrder}
                       </span>

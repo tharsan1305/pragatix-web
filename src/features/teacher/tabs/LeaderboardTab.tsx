@@ -99,8 +99,8 @@ export default function TeacherLeaderboardTab() {
       {/* Top Header Bar */}
       <div className="bg-slate-900 text-white px-6 pt-10 pb-6 shadow-md flex justify-between items-center">
         <div>
-          <h1 className="font-heading text-2xl font-bold">Student Leaderboard</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Real-time student rankings across departments and sections</p>
+          <h1 className="type-h3">Student Leaderboard</h1>
+          <p className="type-caption text-slate-400 mt-0.5">Real-time student rankings across departments and sections</p>
         </div>
 
         <button
@@ -122,7 +122,7 @@ export default function TeacherLeaderboardTab() {
           <select
             value={selectedYear ?? ''}
             onChange={(e) => handleYearChange(e.target.value || null)}
-            className="w-full bg-slate-900/90 border border-slate-700 text-white text-xs font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+            className="w-full bg-slate-900/90 border border-slate-700 text-white type-caption font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="">Year (All)</option>
             {yearOptions.map(opt => (
@@ -139,7 +139,7 @@ export default function TeacherLeaderboardTab() {
           <select
             value={selectedDept ?? ''}
             onChange={(e) => handleDeptChange(e.target.value || null)}
-            className="w-full bg-slate-900/90 border border-slate-700 text-white text-xs font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+            className="w-full bg-slate-900/90 border border-slate-700 text-white type-caption font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="">Department (All)</option>
             {departmentOptions.map(opt => (
@@ -156,7 +156,7 @@ export default function TeacherLeaderboardTab() {
           <select
             value={selectedSection ?? ''}
             onChange={(e) => handleSectionChange(e.target.value || null)}
-            className="w-full bg-slate-900/90 border border-slate-700 text-white text-xs font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+            className="w-full bg-slate-900/90 border border-slate-700 text-white type-caption font-bold rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
           >
             <option value="">Section (All)</option>
             {sectionOptions.map(opt => (
@@ -178,8 +178,8 @@ export default function TeacherLeaderboardTab() {
         ) : leaderboardList.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center text-slate-400 flex flex-col items-center justify-center space-y-3">
             <FilterX className="w-12 h-12 text-slate-300" />
-            <p className="font-semibold text-slate-700 text-base">No students found on leaderboard.</p>
-            <p className="text-xs text-slate-500 max-w-xs">
+            <p className="font-semibold text-slate-700 type-body">No students found on leaderboard.</p>
+            <p className="type-caption text-slate-500 max-w-xs">
               Try selecting a different Year, Department, or Section filter.
             </p>
           </div>
@@ -188,7 +188,7 @@ export default function TeacherLeaderboardTab() {
             {/* Top 3 Visual Podium Section */}
             {leaderboardList.length >= 3 && (
               <div className="bg-slate-900 rounded-3xl p-6 shadow-xl text-white">
-                <div className="text-center text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-4">
+                <div className="text-center type-caption font-extrabold uppercase tracking-widest text-slate-400 mb-4">
                   Top Performers
                 </div>
                 <div className="flex items-end justify-center gap-2 sm:gap-6 pt-4 pb-2">
@@ -196,16 +196,16 @@ export default function TeacherLeaderboardTab() {
                   {leaderboardList[1] && (
                     <div className="flex flex-col items-center flex-1 max-w-[120px]">
                       <Trophy className="w-6 h-6 text-slate-300 mb-1" />
-                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-slate-400 flex items-center justify-center text-white font-extrabold type-h5 shadow-md">
                         {(leaderboardList[1].fullName || leaderboardList[1].studentName || 'S')[0]}
                       </div>
-                      <span className="font-bold text-xs text-slate-100 truncate w-full text-center mt-2">
+                      <span className="font-bold type-caption text-slate-100 truncate w-full text-center mt-2">
                         {leaderboardList[1].fullName || leaderboardList[1].studentName}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold mb-2">
+                      <span className="type-fine text-slate-400 font-semibold mb-2">
                         {leaderboardList[1].totalXp ?? leaderboardList[1].score ?? 0} pts
                       </span>
-                      <div className="w-full h-24 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-slate-300 text-base shadow-inner">
+                      <div className="w-full h-24 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-slate-300 type-body shadow-inner">
                         #2
                       </div>
                     </div>
@@ -215,16 +215,16 @@ export default function TeacherLeaderboardTab() {
                   {leaderboardList[0] && (
                     <div className="flex flex-col items-center flex-1 max-w-[130px]">
                       <Trophy className="w-8 h-8 text-amber-400 fill-amber-400 mb-1 animate-bounce" />
-                      <div className="w-16 h-16 rounded-full bg-indigo-600 border-2 border-amber-400 flex items-center justify-center text-white font-extrabold text-xl shadow-lg ring-4 ring-amber-400/20">
+                      <div className="w-16 h-16 rounded-full bg-indigo-600 border-2 border-amber-400 flex items-center justify-center text-white font-extrabold type-h4 shadow-lg ring-4 ring-amber-400/20">
                         {(leaderboardList[0].fullName || leaderboardList[0].studentName || 'S')[0]}
                       </div>
-                      <span className="font-bold text-sm text-amber-300 truncate w-full text-center mt-2">
+                      <span className="font-bold type-body-sm text-amber-300 truncate w-full text-center mt-2">
                         {leaderboardList[0].fullName || leaderboardList[0].studentName}
                       </span>
-                      <span className="text-xs text-amber-200/80 font-bold mb-2">
+                      <span className="type-caption text-amber-200/80 font-bold mb-2">
                         {leaderboardList[0].totalXp ?? leaderboardList[0].score ?? 0} pts
                       </span>
-                      <div className="w-full h-32 bg-amber-500/20 border border-amber-500/40 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-400 text-xl shadow-inner">
+                      <div className="w-full h-32 bg-amber-500/20 border border-amber-500/40 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-400 type-h4 shadow-inner">
                         #1
                       </div>
                     </div>
@@ -234,16 +234,16 @@ export default function TeacherLeaderboardTab() {
                   {leaderboardList[2] && (
                     <div className="flex flex-col items-center flex-1 max-w-[120px]">
                       <Trophy className="w-6 h-6 text-amber-700 mb-1" />
-                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-amber-700 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+                      <div className="w-14 h-14 rounded-full bg-slate-800 border-2 border-amber-700 flex items-center justify-center text-white font-extrabold type-h5 shadow-md">
                         {(leaderboardList[2].fullName || leaderboardList[2].studentName || 'S')[0]}
                       </div>
-                      <span className="font-bold text-xs text-slate-100 truncate w-full text-center mt-2">
+                      <span className="font-bold type-caption text-slate-100 truncate w-full text-center mt-2">
                         {leaderboardList[2].fullName || leaderboardList[2].studentName}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold mb-2">
+                      <span className="type-fine text-slate-400 font-semibold mb-2">
                         {leaderboardList[2].totalXp ?? leaderboardList[2].score ?? 0} pts
                       </span>
-                      <div className="w-full h-20 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-700 text-base shadow-inner">
+                      <div className="w-full h-20 bg-slate-800 border border-slate-700 rounded-t-2xl flex items-center justify-center font-extrabold text-amber-700 type-body shadow-inner">
                         #3
                       </div>
                     </div>
@@ -268,21 +268,21 @@ export default function TeacherLeaderboardTab() {
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       {/* Rank Indicator */}
-                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center font-extrabold text-xs text-slate-600 shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center font-extrabold type-caption text-slate-600 shrink-0">
                         #{rank}
                       </div>
 
                       {/* Student Info */}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-slate-900 text-sm truncate">{name}</span>
+                          <span className="font-bold text-slate-900 type-body-sm truncate">{name}</span>
                           {isCaptain && (
                             <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
                               👑 CAPTAIN
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        <p className="type-caption text-slate-500 font-medium mt-0.5">
                           {student.departmentName} • {student.year} {student.section && `• Sec ${student.section}`} {regNo && `(${regNo})`}
                         </p>
                       </div>
@@ -290,8 +290,8 @@ export default function TeacherLeaderboardTab() {
 
                     {/* Score */}
                     <div className="text-right shrink-0 ml-3">
-                      <span className="text-base font-extrabold text-indigo-600">{score}</span>
-                      <span className="text-xs font-bold text-slate-400 ml-1">pts</span>
+                      <span className="type-body font-extrabold text-indigo-600">{score}</span>
+                      <span className="type-caption font-bold text-slate-400 ml-1">pts</span>
                     </div>
                   </div>
                 );

@@ -16,8 +16,8 @@ export const XpProgressBar: React.FC<XpProgressBarProps> = ({
   return (
     <div className="w-full bg-white rounded-lg p-4 shadow-sm border border-gray-100">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-semibold text-gray-700">{level}</span>
-        <span className="text-sm font-medium text-indigo-600">
+        <span className="type-caption text-gray-700">{level}</span>
+        <span className="type-caption text-indigo-600">
           {currentScore} / {maxScore} XP ({Math.round(percentage)}%)
         </span>
       </div>

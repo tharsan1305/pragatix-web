@@ -44,19 +44,19 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
     <div className="flex flex-col min-h-full bg-slate-50 pb-20">
       <div className="bg-slate-900 px-6 pt-10 pb-5 shadow-md text-white flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+          <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-heading text-xl font-bold">Captain &amp; Vice Captain Rewards</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Select an academic year to configure automated weekly reward rules</p>
+            <h1 className="type-h4">Captain &amp; Vice Captain Rewards</h1>
+            <p className="type-caption text-slate-400 mt-0.5">Select an academic year to configure automated weekly reward rules</p>
           </div>
         </div>
 
         <button
           onClick={fetchYears}
           disabled={isLoading}
-          className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors"
+          className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors"
           title="Refresh"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -69,30 +69,30 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
             <Award className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="font-heading font-bold text-lg">Leadership Reward Engine</h2>
-            <p className="text-xs text-slate-300 mt-0.5">Automated weekly XP distribution for Captains and Vice Captains</p>
+            <h2 className="type-h5">Leadership Reward Engine</h2>
+            <p className="type-caption text-slate-300 mt-0.5">Automated weekly XP distribution for Captains and Vice Captains</p>
           </div>
         </div>
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <RefreshCw className="w-8 h-8 animate-spin text-amber-500" />
-            <p className="text-xs font-semibold text-slate-500">Loading academic years...</p>
+            <p className="type-caption text-slate-500">Loading academic years...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-            <p className="text-sm font-bold text-slate-800">{error}</p>
+            <p className="type-body-sm font-bold text-slate-800">{error}</p>
             <button
               onClick={fetchYears}
-              className="px-4 py-2 bg-amber-600 text-white rounded-xl text-xs font-bold hover:bg-amber-700"
+              className="px-4 py-2 bg-amber-600 text-white rounded-xl type-btn hover:bg-amber-700 cursor-pointer"
             >
               Retry
             </button>
           </div>
         ) : yearsList.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
-            <p className="text-sm font-bold text-slate-700">No configured academic years found.</p>
+            <p className="type-body-sm font-bold text-slate-700">No configured academic years found.</p>
           </div>
         ) : (
           yearsList.map((y) => (
@@ -106,8 +106,8 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-slate-900 text-base">{y.yearName}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Configure Captain &amp; Vice Captain Rewards for {y.yearName}</p>
+                  <h3 className="type-h5 text-slate-900">{y.yearName}</h3>
+                  <p className="type-caption text-slate-500 mt-0.5">Configure Captain &amp; Vice Captain Rewards for {y.yearName}</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />

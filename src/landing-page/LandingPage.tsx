@@ -79,18 +79,18 @@ export const LandingPage: React.FC = () => {
               <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
                 
                 {/* Trust Pill */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs sm:text-sm font-bold shadow-xs">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-900 type-caption font-bold shadow-xs">
                   <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
                   <span>Official Institutional Performance & Development Platform</span>
                 </div>
 
                 {/* Headline */}
-                <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
+                <h1 className="type-display text-slate-900 tracking-tight">
                   Every step forward, counted.
                 </h1>
 
                 {/* Subhead */}
-                <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-xl">
+                <p className="type-body-lg text-slate-600 max-w-xl">
                   PragatiX turns your academics, skills, leadership, and growth into one clear journey — earn XP for everything that makes you industry-ready, and watch it add up in real time.
                 </p>
 
@@ -98,7 +98,7 @@ export const LandingPage: React.FC = () => {
                 <div className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                   <Link
                     to="/login"
-                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-2xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all duration-200 group cursor-pointer"
+                    className="type-btn inline-flex items-center justify-center gap-2.5 px-8 py-4 text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-2xl shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/35 transition-all duration-200 group cursor-pointer"
                   >
                     <span>Log in to PragatiX</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -107,7 +107,7 @@ export const LandingPage: React.FC = () => {
 
                 {/* Get the App & Google Play Badge */}
                 <div className="pt-4 flex flex-col items-start gap-2.5">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <span className="type-caption font-bold uppercase tracking-wider text-slate-400">
                     Also available on Android
                   </span>
                   <PlayStoreBadge />
@@ -151,18 +151,18 @@ export const LandingPage: React.FC = () => {
                   {/* Campus Location Badge Overlay */}
                   <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 sm:right-5 p-3.5 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-white/60 shadow-lg text-left">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 text-indigo-600 font-bold text-xs">
+                      <div className="flex items-center gap-1.5 text-indigo-600 font-bold type-caption">
                         <MapPin className="w-3.5 h-3.5 shrink-0" />
                         <span>J.J. College of Engineering and Technology</span>
                       </div>
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 hidden sm:inline-block">
+                      <span className="type-fine uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 hidden sm:inline-block">
                         Autonomous
                       </span>
                     </div>
-                    <p className="text-[11px] sm:text-xs text-slate-600 mt-1 font-medium leading-relaxed">
+                    <p className="type-fine text-slate-600 mt-1 font-medium leading-relaxed">
                       Ammapettai, Poolangulathupatti Post, NH-45 (Trichy–Dindigul Highway), Tiruchirappalli, Tamil Nadu – 620009
                     </p>
-                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-indigo-600">
+                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between type-fine font-bold text-indigo-600">
                       <a
                         href="https://www.google.com/maps/place/J.J.+College+of+Engineering+and+Technology/@10.7275908,78.5608574,218m/data=!3m1!1e3!4m6!3m5!1s0x3baa672ea9836699:0x7fe0abc63dbbca35!8m2!3d10.7276946!4d78.5610385!16s%2Fm%2F027xtyh!5m1!1e4?entry=ttu&g_ep=EgoyMDI2MDgxMi4wIKXMDSoASAFQAw%3D%3D"
                         target="_blank"
@@ -198,7 +198,7 @@ export const LandingPage: React.FC = () => {
 
         {/* 3. Trust Line */}
         <div className="py-6 bg-white border-t border-slate-200/80 text-center px-4 sm:px-6">
-          <p className="max-w-3xl mx-auto text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
+          <p className="max-w-3xl mx-auto type-body-sm font-semibold text-slate-600 leading-relaxed">
             Built for JJCET, administered by the Sowdambikaa Group of Institutions — this isn't a third-party app bolted onto college life. It's how JJCET tracks and celebrates your growth, officially.
           </p>
         </div>

@@ -72,8 +72,8 @@ export default function GroupActivityDeptPage() {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         <div>
-          <h1 className="font-heading text-2xl font-bold text-white">Select Department</h1>
-          <p className="text-xs text-slate-400 mt-0.5">{year.yearName}</p>
+          <h1 className="type-h3 text-white">Select Department</h1>
+          <p className="type-caption text-slate-400 mt-0.5">{year.yearName}</p>
         </div>
       </div>
 
@@ -85,13 +85,13 @@ export default function GroupActivityDeptPage() {
         ) : error ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
             <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" />
-            <p className="text-sm font-semibold text-slate-700">{error}</p>
-            <button onClick={fetchDepartments} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold">
+            <p className="type-body-sm font-semibold text-slate-700">{error}</p>
+            <button onClick={fetchDepartments} className="px-4 py-2 bg-slate-900 text-white rounded-xl type-caption">
               Retry
             </button>
           </div>
         ) : departments.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-500 text-sm">
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm text-slate-500 type-body-sm">
             No departments available for this selection.
           </div>
         ) : (
@@ -100,7 +100,7 @@ export default function GroupActivityDeptPage() {
               <button
                 key={dept.id}
                 onClick={() => handleSelectDept(dept)}
-                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold text-base text-slate-800 flex justify-between items-center transition-all hover:shadow-sm cursor-pointer"
+                className="w-full bg-white p-5 rounded-2xl shadow-xs border border-slate-200/80 hover:border-slate-400 font-bold type-body text-slate-800 flex justify-between items-center transition-all hover:shadow-sm cursor-pointer"
               >
                 <div className="flex items-center space-x-3">
                   <Building2 className="w-5 h-5 text-blue-600" />

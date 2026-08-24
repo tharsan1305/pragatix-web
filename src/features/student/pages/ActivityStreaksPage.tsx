@@ -52,19 +52,19 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
         <div className="flex items-center space-x-4">
           <button
             onClick={onBack}
-            className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors text-white"
+            className="p-2 type-btn bg-slate-800 rounded-full hover:bg-slate-700 transition-colors text-white"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-heading text-xl font-bold">My Activity Streaks</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Track your continuous activity execution & records</p>
+            <h1 className="type-h4">My Activity Streaks</h1>
+            <p className="type-caption text-slate-400 mt-0.5">Track your continuous activity execution & records</p>
           </div>
         </div>
 
         <button
           onClick={fetchStreaks}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors text-white"
+          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full transition-colors text-white"
           title="Refresh Streaks"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -79,13 +79,13 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
         ) : error ? (
           <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 shrink-0" />
-            <span className="text-sm font-semibold">{error}</span>
+            <span className="type-body-sm font-semibold">{error}</span>
           </div>
         ) : streaks.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl text-center text-slate-500 border border-slate-200 shadow-sm">
             <Zap className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="font-heading font-bold text-slate-700 text-base">No Activity Streaks Recorded</h3>
-            <p className="text-xs text-slate-400 mt-1">Complete your assigned activities consistently to build your streak record!</p>
+            <h3 className="type-h5 text-slate-700">No Activity Streaks Recorded</h3>
+            <p className="type-caption text-slate-400 mt-1">Complete your assigned activities consistently to build your streak record!</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -103,10 +103,10 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-heading font-bold text-slate-900 text-lg truncate flex-1 mr-3">{name}</h3>
+                    <h3 className="font-heading font-bold text-slate-900 type-h3 truncate flex-1 mr-3">{name}</h3>
 
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1.5 ${
+                      className={`px-3 py-1 rounded-full type-caption font-bold flex items-center space-x-1.5 ${
                         isBroken
                           ? 'bg-rose-100 text-rose-700 border border-rose-200'
                           : 'bg-amber-100 text-amber-800 border border-amber-300'
@@ -118,7 +118,7 @@ export default function ActivityStreaksPage({ onBack }: ActivityStreaksPageProps
                   </div>
 
                   {longest > 0 && (
-                    <div className="pt-3 border-t border-slate-100 flex items-center space-x-2 text-xs font-semibold text-slate-600">
+                    <div className="pt-3 border-t border-slate-100 flex items-center space-x-2 type-caption text-slate-600">
                       <Trophy className="w-4 h-4 text-amber-500" />
                       <span>Longest Streak Record: <strong className="text-slate-800">{longest} Days</strong></span>
                     </div>

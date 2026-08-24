@@ -27,10 +27,10 @@ export default function PageLoader({ message = 'Loading...', fullScreen = true }
       </div>
 
       {/* Loading Title & Message */}
-      <h3 className="font-heading text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-1">
+      <h3 className="type-h4 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-1">
         PragatiX
       </h3>
-      <p className="text-sm font-medium text-slate-500 animate-pulse">
+      <p className="type-body-sm font-medium text-slate-500 animate-pulse">
         {message}
       </p>
     </div>

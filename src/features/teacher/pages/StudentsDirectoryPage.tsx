@@ -267,7 +267,7 @@ export default function StudentsDirectoryPage() {
         <button onClick={() => navigate(-1)} className="mr-4 p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-heading text-xl font-bold text-white flex-1 truncate">Students Directory</h1>
+        <h1 className="type-h4 text-white flex-1 truncate">Students Directory</h1>
         
         {/* Header Icons to match Flutter 1:1 */}
         <div className="flex items-center space-x-2 text-white">
@@ -287,7 +287,7 @@ export default function StudentsDirectoryPage() {
           </button>
           <button 
             onClick={fetchStudents} 
-            className="p-2 hover:bg-slate-800 rounded-full transition-colors cursor-pointer" 
+            className="p-2 type-btn hover:bg-slate-800 rounded-full transition-colors cursor-pointer" 
             title="Refresh List"
           >
             <RefreshCw className="w-5 h-5" />
@@ -304,7 +304,7 @@ export default function StudentsDirectoryPage() {
             placeholder="Search by student name or reg n..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-12 py-3 bg-white border border-slate-300 rounded-2xl shadow-sm focus:ring-2 focus:ring-teal-500 outline-none text-sm"
+            className="w-full pl-12 pr-12 py-3 bg-white border border-slate-300 rounded-2xl shadow-sm focus:ring-2 focus:ring-teal-500 outline-none type-body-sm"
           />
           {searchQuery && (
             <button 
@@ -319,7 +319,7 @@ export default function StudentsDirectoryPage() {
         {loading ? (
           <div className="flex-1 flex items-center justify-center text-slate-500">Loading students...</div>
         ) : filteredStudents.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">No students found.</div>
+          <div className="flex-1 flex items-center justify-center text-slate-500 type-body-sm">No students found.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredStudents.map(student => (
@@ -329,11 +329,11 @@ export default function StudentsDirectoryPage() {
                 className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xl">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold type-h4">
                     {student.fullName?.charAt(0) || 'S'}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 mr-1">
+                    <span className="type-caption font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 mr-1">
                       {student.score ?? student.xp ?? student.points ?? 0} pts
                     </span>
                     <button 
@@ -359,8 +359,8 @@ export default function StudentsDirectoryPage() {
                     </button>
                   </div>
                 </div>
-                <h3 className="font-heading font-bold text-slate-800 text-lg truncate">{student.fullName}</h3>
-                <div className="text-xs text-slate-500 space-y-0.5 mt-1">
+                <h3 className="type-h5 text-slate-800 truncate">{student.fullName}</h3>
+                <div className="type-caption text-slate-500 space-y-0.5 mt-1">
                   <p><span className="font-medium text-slate-700">Reg No:</span> {student.studentId || student.regNo || student.registerNumber || 'N/A'}</p>
                   {(student.sprNo || student.spr_no) && (
                     <p><span className="font-medium text-slate-700">SPR:</span> {student.sprNo || student.spr_no}</p>
@@ -391,7 +391,7 @@ export default function StudentsDirectoryPage() {
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="p-6">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h2 className="font-heading text-xl font-bold text-slate-800">Add Students</h2>
+                <h2 className="type-h4 text-slate-800">Add Students</h2>
                 <button 
                   onClick={() => setIsOptionsModalOpen(false)}
                   className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
@@ -412,8 +412,8 @@ export default function StudentsDirectoryPage() {
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-800 text-sm">Register Single Student</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Enter Name, Reg No, DOB, and details manually</p>
+                    <h3 className="type-h5 text-slate-800">Register Single Student</h3>
+                    <p className="type-caption text-slate-500 mt-0.5">Enter Name, Reg No, DOB, and details manually</p>
                   </div>
                 </div>
 
@@ -428,8 +428,8 @@ export default function StudentsDirectoryPage() {
                     <Upload className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-800 text-sm">Excel Bulk Upload</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Upload spreadsheet with student records</p>
+                    <h3 className="type-h5 text-slate-800">Excel Bulk Upload</h3>
+                    <p className="type-caption text-slate-500 mt-0.5">Upload spreadsheet with student records</p>
                   </div>
                 </div>
 
@@ -441,8 +441,8 @@ export default function StudentsDirectoryPage() {
                     <Download className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-slate-800 text-sm">Download Excel Template</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Get reference template (.xlsx) with proper columns</p>
+                    <h3 className="type-h5 text-slate-800">Download Excel Template</h3>
+                    <p className="type-caption text-slate-500 mt-0.5">Get reference template (.xlsx) with proper columns</p>
                   </div>
                 </div>
               </div>
@@ -450,7 +450,7 @@ export default function StudentsDirectoryPage() {
             <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={() => setIsOptionsModalOpen(false)} 
-                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 transition-colors text-xs"
+                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 transition-colors type-btn cursor-pointer"
               >
                 Cancel
               </button>
@@ -464,7 +464,7 @@ export default function StudentsDirectoryPage() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="font-heading text-xl font-bold text-slate-800 flex items-center gap-2">
+              <h2 className="type-h4 text-slate-800 flex items-center gap-2">
                 Register Single Student
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
@@ -535,37 +535,37 @@ export default function StudentsDirectoryPage() {
             }} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Student Name *</label>
-                  <input name="fullName" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="e.g. John Doe" />
+                  <label className="block type-form-label text-slate-500 mb-1">Student Name *</label>
+                  <input name="fullName" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="e.g. John Doe" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Register Number * (reg_no)</label>
-                  <input name="registerNumber" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="e.g. 24IT001" />
+                  <label className="block type-form-label text-slate-500 mb-1">Register Number * (reg_no)</label>
+                  <input name="registerNumber" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="e.g. 24IT001" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">SPR Number (spr_no)</label>
-                  <input name="sprNo" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="Optional" />
+                  <label className="block type-form-label text-slate-500 mb-1">SPR Number (spr_no)</label>
+                  <input name="sprNo" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="Optional" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Email *</label>
-                  <input name="email" required type="email" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="student@example.com" />
+                  <label className="block type-form-label text-slate-500 mb-1">Email *</label>
+                  <input name="email" required type="email" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="student@example.com" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Phone Number</label>
-                  <input name="phone" type="tel" maxLength={10} className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="10 digits" />
+                  <label className="block type-form-label text-slate-500 mb-1">Phone Number</label>
+                  <input name="phone" type="tel" maxLength={10} className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="10 digits" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Address</label>
-                  <input name="address" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="Full address" />
+                  <label className="block type-form-label text-slate-500 mb-1">Address</label>
+                  <input name="address" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="Full address" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Date of Birth *</label>
-                  <input name="dob" required type="date" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" />
+                  <label className="block type-form-label text-slate-500 mb-1">Date of Birth *</label>
+                  <input name="dob" required type="date" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Department *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Department *</label>
                   {isCc ? (
-                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 text-sm font-semibold flex justify-between items-center">
+                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 type-body-sm font-semibold flex justify-between items-center">
                       <span>{ccInfo?.departmentName || 'N/A'}</span>
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
@@ -578,7 +578,7 @@ export default function StudentsDirectoryPage() {
                         setSelectedCreateDeptId(e.target.value);
                         fetchSectionsForDept(e.target.value, false);
                       }}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none"
                     >
                       <option value="" disabled>Select Dept</option>
                       {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -586,8 +586,8 @@ export default function StudentsDirectoryPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year *</label>
-                  <select name="academicYearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                  <label className="block type-form-label text-slate-500 mb-1">Academic Year *</label>
+                  <select name="academicYearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none">
                     <option value="" disabled selected>Select Academic Year</option>
                     {academicYears.map(ay => (
                       <option key={ay.id} value={ay.id}>
@@ -597,14 +597,14 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Year *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Year *</label>
                   {isCc ? (
-                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 text-sm font-semibold flex justify-between items-center">
+                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 type-body-sm font-semibold flex justify-between items-center">
                       <span>Year {ccInfo?.year || 'N/A'}</span>
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
                   ) : (
-                    <select name="yearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <select name="yearId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none">
                       <option value="" disabled selected>Select Year</option>
                       {years.map(y => (
                         <option key={y.id} value={y.id}>
@@ -615,8 +615,8 @@ export default function StudentsDirectoryPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Semester *</label>
-                  <select name="semesterId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                  <label className="block type-form-label text-slate-500 mb-1">Semester *</label>
+                  <select name="semesterId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none">
                     <option value="" disabled selected>Select Semester</option>
                     {semesters.map(s => (
                       <option key={s.id} value={s.id}>
@@ -626,14 +626,14 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Section (Optional)</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Section (Optional)</label>
                   {isCc ? (
-                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 text-sm font-semibold flex justify-between items-center">
+                    <div className="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 type-body-sm font-semibold flex justify-between items-center">
                       <span>Section {ccInfo?.sectionName || 'N/A'}</span>
                       <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked (CC)</span>
                     </div>
                   ) : (
-                    <select name="sectionId" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                    <select name="sectionId" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none">
                       <option value="">No Section Selected (Optional)</option>
                       {(createDeptSections.length > 0 ? createDeptSections : sections).map(sec => (
                         <option key={sec.id} value={sec.id}>
@@ -644,8 +644,8 @@ export default function StudentsDirectoryPage() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Gender *</label>
-                  <select name="genderId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white animate-none">
+                  <label className="block type-form-label text-slate-500 mb-1">Gender *</label>
+                  <select name="genderId" required className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white animate-none">
                     <option value="" disabled selected>Select Gender</option>
                     {genders.map(g => (
                       <option key={g.id} value={g.id}>
@@ -658,15 +658,15 @@ export default function StudentsDirectoryPage() {
 
               {/* Guardian Information (matching Flutter 1:1) */}
               <div className="border-t border-slate-100 pt-4 mt-2">
-                <h3 className="font-heading text-sm font-bold text-slate-800 mb-3">Guardian Information</h3>
+                <h3 className="type-h5 text-slate-800 mb-3">Guardian Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
-                    <input name="guardianName" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="Parent / Guardian Name" />
+                    <label className="block type-form-label text-slate-500 mb-1">Guardian Name</label>
+                    <input name="guardianName" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="Parent / Guardian Name" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Relationship</label>
-                    <select name="guardianRel" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm bg-white">
+                    <label className="block type-form-label text-slate-500 mb-1">Relationship</label>
+                    <select name="guardianRel" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm bg-white">
                       <option value="Father">Father</option>
                       <option value="Mother">Mother</option>
                       <option value="Guardian">Guardian</option>
@@ -674,12 +674,12 @@ export default function StudentsDirectoryPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Parent Mobile Number</label>
-                    <input name="guardianPhone" type="tel" maxLength={10} className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="10 digits" />
+                    <label className="block type-form-label text-slate-500 mb-1">Parent Mobile Number</label>
+                    <input name="guardianPhone" type="tel" maxLength={10} className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="10 digits" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Email</label>
-                    <input name="guardianEmail" type="email" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 text-sm" placeholder="guardian@example.com" />
+                    <label className="block type-form-label text-slate-500 mb-1">Guardian Email</label>
+                    <input name="guardianEmail" type="email" className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-teal-500 type-body-sm" placeholder="guardian@example.com" />
                   </div>
                 </div>
               </div>
@@ -688,7 +688,7 @@ export default function StudentsDirectoryPage() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" className="px-6 py-2.5 font-bold text-white bg-[#11998e] hover:bg-[#0f7d74] rounded shadow-md transition-colors">
+                <button type="submit" className="type-btn px-6 py-2.5 font-bold text-white bg-[#11998e] hover:bg-[#0f7d74] rounded shadow-md transition-colors">
                   Register
                 </button>
               </div>
@@ -702,7 +702,7 @@ export default function StudentsDirectoryPage() {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <h2 className="type-h4 text-slate-800 flex items-center gap-2">
                 <Pencil className="w-5 h-5 text-indigo-600" /> Edit Student Details
               </h2>
               <button 
@@ -779,88 +779,88 @@ export default function StudentsDirectoryPage() {
             }} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Student Name *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Student Name *</label>
                   <input 
                     name="fullName" 
                     required 
                     defaultValue={editingStudent.fullName || editingStudent.name || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Register Number (reg_no)</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Register Number (reg_no)</label>
                   <input 
                     name="registerNumber" 
                     disabled
                     defaultValue={editingStudent.studentId || editingStudent.regNo || editingStudent.registerNumber || ''} 
-                    className="w-full p-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-xl outline-none text-sm font-medium cursor-not-allowed" 
+                    className="w-full p-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-xl outline-none type-body-sm font-medium cursor-not-allowed" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">SPR Number (spr_no)</label>
+                  <label className="block type-form-label text-slate-500 mb-1">SPR Number (spr_no)</label>
                   <input 
                     name="sprNo" 
                     defaultValue={editingStudent.sprNo || editingStudent.spr_no || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Email *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Email *</label>
                   <input 
                     name="email" 
                     required 
                     type="email" 
                     defaultValue={editingStudent.email || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Phone Number</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Phone Number</label>
                   <input 
                     name="phone" 
                     type="tel" 
                     maxLength={10} 
                     defaultValue={editingStudent.phone || editingStudent.phoneNo || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Address</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Address</label>
                   <input 
                     name="address" 
                     defaultValue={editingStudent.address || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Date of Birth</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Date of Birth</label>
                   <input 
                     name="dob" 
                     type="date" 
                     defaultValue={editingStudent.dateOfBirth || editingStudent.dob || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium" 
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm font-medium" 
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Department *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Department *</label>
                   <select 
                     name="departmentId" 
                     defaultValue={editingStudent.departmentId || ''} 
                     onChange={e => {
                       fetchSectionsForDept(e.target.value, true);
                     }}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="" disabled>Select Dept</option>
                     {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Academic Year</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Academic Year</label>
                   <select 
                     name="academicYearId" 
                     defaultValue={editingStudent.academicYearId || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="">Select Academic Year</option>
                     {academicYears.map(ay => (
@@ -871,11 +871,11 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Year *</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Year *</label>
                   <select 
                     name="yearId" 
                     defaultValue={editingStudent.yearId || editingStudent.year || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="" disabled>Select Year</option>
                     {years.map(y => (
@@ -886,11 +886,11 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Semester</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Semester</label>
                   <select 
                     name="semesterId" 
                     defaultValue={editingStudent.semesterId || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="">Select Semester</option>
                     {semesters.map(s => (
@@ -901,11 +901,11 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Section</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Section</label>
                   <select 
                     name="sectionId" 
                     defaultValue={editingStudent.sectionId || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="">No Section Selected</option>
                     {(editDeptSections.length > 0 ? editDeptSections : sections).map(sec => (
@@ -916,11 +916,11 @@ export default function StudentsDirectoryPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">Gender</label>
+                  <label className="block type-form-label text-slate-500 mb-1">Gender</label>
                   <select 
                     name="genderId" 
                     defaultValue={editingStudent.genderId || ''} 
-                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white font-medium animate-none"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white font-medium animate-none"
                   >
                     <option value="">Select Gender</option>
                     {genders.map(g => (
@@ -934,23 +934,23 @@ export default function StudentsDirectoryPage() {
 
               {/* Guardian Details */}
               <div className="border-t border-slate-100 pt-4 mt-2">
-                <h3 className="font-heading text-sm font-bold text-slate-800 mb-3">Guardian Information</h3>
+                <h3 className="type-h5 text-slate-800 mb-3">Guardian Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Name</label>
+                    <label className="block type-form-label text-slate-500 mb-1">Guardian Name</label>
                     <input 
                       name="guardianName" 
                       defaultValue={editingStudent.guardian?.guardianName || editingStudent.guardianName || ''} 
-                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm" 
                       placeholder="Parent / Guardian Name" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Relationship</label>
+                    <label className="block type-form-label text-slate-500 mb-1">Relationship</label>
                     <select 
                       name="guardianRel" 
                       defaultValue={editingStudent.guardian?.relationship || editingStudent.guardianRel || 'Father'} 
-                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm bg-white"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm bg-white"
                     >
                       <option value="Father">Father</option>
                       <option value="Mother">Mother</option>
@@ -959,23 +959,23 @@ export default function StudentsDirectoryPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Parent Mobile Number</label>
+                    <label className="block type-form-label text-slate-500 mb-1">Parent Mobile Number</label>
                     <input 
                       name="guardianPhone" 
                       type="tel" 
                       maxLength={10} 
                       defaultValue={editingStudent.guardian?.phoneNo || editingStudent.guardianPhone || ''} 
-                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm" 
                       placeholder="10 digits" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Guardian Email</label>
+                    <label className="block type-form-label text-slate-500 mb-1">Guardian Email</label>
                     <input 
                       name="guardianEmail" 
                       type="email" 
                       defaultValue={editingStudent.guardian?.email || editingStudent.guardianEmail || ''} 
-                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 text-sm" 
+                      className="w-full p-2.5 border border-slate-300 rounded-xl outline-none focus:border-indigo-500 type-body-sm" 
                       placeholder="guardian@example.com" 
                     />
                   </div>
@@ -990,13 +990,13 @@ export default function StudentsDirectoryPage() {
                     setIsEditModalOpen(false);
                     setEditingStudent(null);
                   }} 
-                  className="px-5 py-2.5 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors text-xs cursor-pointer"
+                  className="px-5 py-2.5 font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-colors type-btn cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors text-xs cursor-pointer"
+                  className="px-6 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors type-btn cursor-pointer"
                 >
                   Save Changes
                 </button>
@@ -1016,8 +1016,8 @@ export default function StudentsDirectoryPage() {
                   <Sparkles className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="font-heading text-xl font-extrabold text-slate-900">Discipline Report Monitor</h2>
-                  <p className="text-xs text-slate-500">Monitor student discipline logs, XP history, and penalty records</p>
+                  <h2 className="type-h2 text-slate-900">Discipline Report Monitor</h2>
+                  <p className="type-caption text-slate-500">Monitor student discipline logs, XP history, and penalty records</p>
                 </div>
               </div>
               <button 
@@ -1047,13 +1047,13 @@ export default function StudentsDirectoryPage() {
                       await handleSearchDisciplineReport();
                     }
                   }}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm outline-none focus:border-teal-500 font-medium"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm outline-none focus:border-teal-500 font-medium"
                 />
               </div>
               <button
                 onClick={handleSearchDisciplineReport}
                 disabled={isSearchingReport || !reportRegNo.trim()}
-                className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold text-sm shadow-md transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold type-btn shadow-md transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
               >
                 {isSearchingReport ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 Search
@@ -1062,7 +1062,7 @@ export default function StudentsDirectoryPage() {
 
             {/* Search Results / Logs List */}
             {reportError && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-sm font-medium mb-4 flex items-center gap-2">
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl type-body-sm font-medium mb-4 flex items-center gap-2">
                 <ShieldAlert className="w-5 h-5 shrink-0 text-rose-500" />
                 <span>{reportError}</span>
               </div>
@@ -1071,10 +1071,10 @@ export default function StudentsDirectoryPage() {
             {reportStudentInfo && (
               <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl mb-4 flex justify-between items-center">
                 <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm">{reportStudentInfo.fullName}</h4>
-                  <p className="text-xs text-slate-500">{reportStudentInfo.regNo} • {reportStudentInfo.departmentName ?? 'Department'}</p>
+                  <h4 className="type-h5 text-slate-900">{reportStudentInfo.fullName}</h4>
+                  <p className="type-caption text-slate-500">{reportStudentInfo.regNo} • {reportStudentInfo.departmentName ?? 'Department'}</p>
                 </div>
-                <span className="text-xs font-extrabold px-3 py-1 bg-teal-100 text-teal-800 rounded-full">
+                <span className="type-caption font-extrabold px-3 py-1 bg-teal-100 text-teal-800 rounded-full">
                   Score: {reportStudentInfo.score ?? 0} XP
                 </span>
               </div>
@@ -1088,12 +1088,12 @@ export default function StudentsDirectoryPage() {
               ) : reportLogs.length === 0 ? (
                 <div className="text-center py-10 text-slate-400 border border-dashed border-slate-200 rounded-2xl">
                   <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                  <p className="text-sm font-semibold text-slate-600">No discipline logs found</p>
-                  <p className="text-xs text-slate-400 mt-1">Enter a valid student registration number to search logs.</p>
+                  <p className="type-body-sm font-semibold text-slate-600">No discipline logs found</p>
+                  <p className="type-caption text-slate-400 mt-1">Enter a valid student registration number to search logs.</p>
                 </div>
               ) : (
                 reportLogs.map((log: any, idx: number) => (
-                  <div key={idx} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                  <div key={idx} className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex justify-between items-center type-caption">
                     <div>
                       <div className="font-bold text-slate-800">{log.activityName || log.title || 'Discipline Record'}</div>
                       <div className="text-slate-500 mt-0.5">{log.date || log.createdAt || 'Recent'}</div>
@@ -1118,11 +1118,11 @@ export default function StudentsDirectoryPage() {
             {/* Modal Header */}
             <div className="bg-white px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h2 className="font-heading text-lg font-bold text-slate-800 flex items-center gap-2">
+                <h2 className="type-h4 text-slate-800 flex items-center gap-2">
                   <FileSpreadsheet className="w-5 h-5 text-teal-600" />
                   Excel Bulk Upload
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">Import multiple student records via spreadsheet</p>
+                <p className="type-caption text-slate-500 mt-0.5">Import multiple student records via spreadsheet</p>
               </div>
               <button 
                 onClick={() => setIsBulkUploadModalOpen(false)} 
@@ -1137,18 +1137,18 @@ export default function StudentsDirectoryPage() {
               {/* Step 1: Download Template */}
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-6 h-6 rounded-full bg-teal-50 text-teal-600 font-extrabold text-xs flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-teal-50 text-teal-600 font-extrabold type-caption flex items-center justify-center">
                     1
                   </div>
-                  <h4 className="font-bold text-sm text-slate-800">Download Excel Template</h4>
+                  <h4 className="font-bold type-body-sm text-slate-800">Download Excel Template</h4>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="type-caption text-slate-500 leading-relaxed">
                   Download the formatted student import template containing all required columns (regNo, fullName, email, dob, etc.) for reference.
                 </p>
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
-                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl type-caption font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Excel Template (.xlsx)</span>
@@ -1158,12 +1158,12 @@ export default function StudentsDirectoryPage() {
               {/* Step 2: Upload Excel File */}
               <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2.5">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 font-extrabold text-xs flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 font-extrabold type-caption flex items-center justify-center">
                     2
                   </div>
-                  <h4 className="font-bold text-sm text-slate-800">Choose Excel File &amp; Parse</h4>
+                  <h4 className="font-bold type-body-sm text-slate-800">Choose Excel File &amp; Parse</h4>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="type-caption text-slate-500 leading-relaxed">
                   Fill in the student details and select your completed Excel file to validate and parse.
                 </p>
 
@@ -1183,7 +1183,7 @@ export default function StudentsDirectoryPage() {
                   <div className="text-emerald-600 mb-2 bg-emerald-50 p-2.5 rounded-full">
                     <Upload className="w-6 h-6" />
                   </div>
-                  <span className="text-xs font-bold text-slate-700">Click to choose completed Excel file</span>
+                  <span className="type-caption font-bold text-slate-700">Click to choose completed Excel file</span>
                   <span className="text-[11px] text-slate-400 mt-0.5">Supports .xlsx or .xls files</span>
                 </div>
               </div>
@@ -1193,7 +1193,7 @@ export default function StudentsDirectoryPage() {
             <div className="bg-white px-6 py-3 border-t border-slate-100 flex justify-end">
               <button 
                 onClick={() => setIsBulkUploadModalOpen(false)}
-                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 rounded-xl transition-colors text-xs cursor-pointer"
+                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 rounded-xl transition-colors type-btn cursor-pointer"
               >
                 Cancel
               </button>
@@ -1209,8 +1209,8 @@ export default function StudentsDirectoryPage() {
             {/* Modal Header */}
             <div className="bg-[#11998e] text-white px-6 py-4 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="font-heading text-lg font-bold">Verify Parsed Students</h2>
-                <p className="text-xs text-white/80 mt-0.5">
+                <h2 className="type-h4">Verify Parsed Students</h2>
+                <p className="type-caption text-white/80 mt-0.5">
                   Selected: {checkedStates.filter(Boolean).length} / {parsedStudents.length} students
                 </p>
               </div>
@@ -1226,7 +1226,7 @@ export default function StudentsDirectoryPage() {
             <div className="flex-1 overflow-auto p-6">
               {/* Error Rows Accordion (if any skipped rows) */}
               {rejectedRows.length > 0 && (
-                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-4 text-xs text-rose-700">
+                <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-4 type-caption text-rose-700">
                   <div className="font-bold flex items-center gap-1.5 mb-2">
                     <ShieldAlert className="w-4 h-4 text-rose-500" />
                     <span>{rejectedRows.length} Rows Skipped due to Errors:</span>
@@ -1252,16 +1252,16 @@ export default function StudentsDirectoryPage() {
                   }}
                   className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4"
                 />
-                <label htmlFor="check-all" className="text-xs font-bold text-slate-600 cursor-pointer select-none">
+                <label htmlFor="check-all" className="type-form-label text-slate-600 cursor-pointer select-none">
                   Select All / Unselect All
                 </label>
               </div>
 
               {/* Responsive Scroll Table */}
               <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full text-left border-collapse type-table-cell">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold type-table-head">
                       <th className="p-3 w-10"></th>
                       <th className="p-3 min-w-[150px]">Student Name *</th>
                       <th className="p-3 min-w-[100px]">Reg No *</th>
@@ -1417,7 +1417,7 @@ export default function StudentsDirectoryPage() {
             <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-end gap-3 shrink-0">
               <button 
                 onClick={() => setIsVerificationModalOpen(false)}
-                className="px-5 py-2.5 font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors text-sm"
+                className="px-5 py-2.5 font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors type-btn cursor-pointer"
               >
                 Cancel
               </button>
@@ -1456,7 +1456,7 @@ export default function StudentsDirectoryPage() {
                   }
                 }}
                 disabled={isImporting}
-                className="px-6 py-2.5 font-bold text-white bg-[#11998e] hover:bg-[#0f7d74] rounded-xl shadow-md transition-colors disabled:opacity-50 text-sm flex items-center gap-1.5"
+                className="px-6 py-2.5 font-bold text-white bg-[#11998e] hover:bg-[#0f7d74] rounded-xl shadow-md transition-colors disabled:opacity-50 type-btn flex items-center gap-1.5 cursor-pointer"
               >
                 {isImporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Proceed Import</span>

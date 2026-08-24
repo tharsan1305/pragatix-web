@@ -101,28 +101,28 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
   return (
     <div className="flex flex-col min-h-full bg-slate-50">
       <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="font-heading text-2xl font-bold text-white flex-1">Edit Stage</h1>
+        <h1 className="type-h3 text-white flex-1">Edit Stage</h1>
       </div>
 
       <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
         {isLoading ? (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 flex flex-col items-center justify-center space-y-4">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm font-medium text-slate-600">Loading Stage details...</p>
+            <p className="type-body-sm font-medium text-slate-600">Loading Stage details...</p>
           </div>
         ) : (
           <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
             <div>
-              <h2 className="font-heading text-xl font-bold text-slate-800">Stage Configuration</h2>
-              <p className="text-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
+              <h2 className="type-h4 text-slate-800">Stage Configuration</h2>
+              <p className="type-body-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
             </div>
 
           <div className="space-y-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Stage Name *</label>
+              <label className="type-form-label type-body-sm font-medium text-slate-700">Stage Name *</label>
               <input 
                 required 
                 type="text" 
@@ -134,7 +134,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Academic Year *</label>
+              <label className="type-form-label type-body-sm font-medium text-slate-700">Academic Year *</label>
               <select
                 value={formData.academicYear}
                 onChange={e => setFormData({...formData, academicYear: e.target.value})}
@@ -148,7 +148,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
             </div>
             
             <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Description</label>
+              <label className="type-form-label type-body-sm font-medium text-slate-700">Description</label>
               <textarea 
                 value={formData.description} 
                 onChange={e => setFormData({...formData, description: e.target.value})} 
@@ -160,7 +160,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Expected XP *</label>
+                <label className="type-form-label type-body-sm font-medium text-slate-700">Expected XP *</label>
                 <input 
                   required
                   type="number" 
@@ -171,7 +171,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Display Order</label>
+                <label className="type-form-label type-body-sm font-medium text-slate-700">Display Order</label>
                 <input 
                   type="number" 
                   value={formData.displayOrder} 
@@ -184,13 +184,13 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
 
             <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
               <div>
-                <h3 className="font-heading text-base font-bold text-slate-800">Subgroup Thresholds</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
+                <h3 className="type-h5 text-slate-800">Subgroup Thresholds</h3>
+                <p className="type-caption text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-slate-700">Must Threshold</label>
+                  <label className="type-form-label type-body-sm font-medium text-slate-700">Must Threshold</label>
                   <input 
                     type="number" 
                     value={formData.mustThreshold} 
@@ -200,7 +200,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-slate-700">Individual Threshold</label>
+                  <label className="type-form-label type-body-sm font-medium text-slate-700">Individual Threshold</label>
                   <input 
                     type="number" 
                     value={formData.individualThreshold} 
@@ -210,7 +210,7 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-slate-700">Group Threshold</label>
+                  <label className="type-form-label type-body-sm font-medium text-slate-700">Group Threshold</label>
                   <input 
                     type="number" 
                     value={formData.groupThreshold} 
@@ -227,14 +227,14 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
             <button 
               type="button" 
               onClick={onBack} 
-              className="px-6 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+              className="type-btn px-6 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isSaving}
-              className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 flex items-center"
+              className="type-btn px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 flex items-center"
             >
               <Save className="w-4 h-4 mr-2" />
               {isSaving ? 'Saving...' : 'Update Stage'}

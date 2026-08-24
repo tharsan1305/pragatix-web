@@ -122,7 +122,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
       if (sectionId && sectionId.trim().length > 0) params.append('sectionId', sectionId);
       if (period && period.trim().length > 0) params.append('period', period);
 
-      const res = await apiClient.get(`/api/v1/admin/attendance/summary?${params.toString()}`);
+      const res = await apiClient.get(`/api/admin/attendance/summary?${params.toString()}`);
       const summaryData = res.data?.data || res.data;
 
       if (summaryData) {
@@ -437,8 +437,8 @@ export default function AdminAttendanceTab({ onBack }: Props) {
             </button>
           )}
           <div>
-            <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">Attendance Dashboard</h1>
-            <p className="text-xs text-slate-400 font-medium hidden sm:block">Monitor student daily attendance, periods, and department metrics</p>
+            <h1 className="type-h3 tracking-tight text-white">Attendance Dashboard</h1>
+            <p className="type-caption text-slate-400 font-medium hidden sm:block">Monitor student daily attendance, periods, and department metrics</p>
           </div>
         </div>
 
@@ -446,7 +446,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
           <button
             onClick={handleExport}
             disabled={isExporting}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 text-xs font-semibold"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 type-caption"
             title="Export to Excel / CSV"
           >
             {isExporting ? <RefreshCw className="w-4 h-4 animate-spin text-orange-400" /> : <Download className="w-4 h-4" />}
@@ -455,7 +455,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
 
           <button
             onClick={() => setShowSettings(true)}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 text-xs font-semibold"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 type-caption"
             title="Attendance Settings"
           >
             <Settings className="w-4 h-4" />
@@ -470,7 +470,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
           {isLoadingLookups ? (
             <div className="flex items-center justify-center py-8 text-slate-400 space-x-2">
               <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
-              <span className="text-sm font-medium">Loading filters...</span>
+              <span className="type-body-sm font-medium">Loading filters...</span>
             </div>
           ) : (
             <>
@@ -483,7 +483,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                       <select
                         value={yearId}
                         onChange={(e) => setYearId(e.target.value)}
-                        className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
+                        className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
                       >
                         <option value="">Select Academic Year</option>
                         {years.map((y) => (
@@ -503,7 +503,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                     <select
                       value={departmentId}
                       onChange={(e) => handleDepartmentChange(e.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
+                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
                     >
                       <option value="">All Departments</option>
                       {departments.map((d) => (
@@ -522,7 +522,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                     <select
                       value={sectionId}
                       onChange={(e) => setSectionId(e.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
+                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
                     >
                       <option value="">All Sections</option>
                       {filteredSections.map((s) => (
@@ -543,7 +543,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer"
+                        className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer"
                       />
                       <Calendar className="w-5 h-5 text-slate-400 ml-2 pointer-events-none" />
                     </div>
@@ -557,7 +557,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                     <select
                       value={period}
                       onChange={(e) => setPeriod(e.target.value)}
-                      className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
+                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
                     >
                       <option value="">All Periods</option>
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
@@ -575,7 +575,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                 <button
                   onClick={fetchSummary}
                   disabled={isLoading}
-                  className="w-full max-w-md py-3.5 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-red-500/25 transition-all transform active:scale-98 flex items-center justify-center space-x-2"
+                  className="w-full max-w-md py-3.5 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-extrabold type-btn rounded-2xl shadow-lg shadow-red-500/25 transition-all transform active:scale-98 flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>
@@ -595,7 +595,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
             <RefreshCw className="w-10 h-10 animate-spin text-red-500" />
-            <p className="text-sm font-semibold text-slate-600">Fetching attendance records...</p>
+            <p className="type-body-sm font-semibold text-slate-600">Fetching attendance records...</p>
           </div>
         ) : isHoliday ? (
           <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
@@ -603,8 +603,8 @@ export default function AdminAttendanceTab({ onBack }: Props) {
               <CalendarOff className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="font-heading text-2xl font-bold text-slate-800">Holiday Configured</h3>
-              <p className="text-sm text-slate-500 mt-1 max-w-sm">
+              <h3 className="type-h3 text-slate-800">Holiday Configured</h3>
+              <p className="type-body-sm text-slate-500 mt-1 max-w-sm">
                 This date (<span className="font-semibold text-slate-700">{selectedDate}</span>) is configured as a Holiday in attendance settings. Attendance cannot be recorded.
               </p>
             </div>
@@ -615,26 +615,26 @@ export default function AdminAttendanceTab({ onBack }: Props) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {/* Card 1: Total */}
               <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-xs font-bold text-slate-600 mb-1">Total</span>
-                <span className="text-2xl sm:text-3xl font-black text-[#2563EB]">{totalCount}</span>
+                <span className="type-caption font-bold text-slate-600 mb-1">Total</span>
+                <span className="type-h2 font-black text-[#2563EB]">{totalCount}</span>
               </div>
 
               {/* Card 2: Present */}
               <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-xs font-bold text-slate-600 mb-1">Present</span>
-                <span className="text-2xl sm:text-3xl font-black text-[#16A34A]">{presentCount}</span>
+                <span className="type-caption font-bold text-slate-600 mb-1">Present</span>
+                <span className="type-h2 font-black text-[#16A34A]">{presentCount}</span>
               </div>
 
               {/* Card 3: Absent */}
               <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-xs font-bold text-slate-600 mb-1">Absent</span>
-                <span className="text-2xl sm:text-3xl font-black text-[#DC2626]">{absentCount}</span>
+                <span className="type-caption font-bold text-slate-600 mb-1">Absent</span>
+                <span className="type-h2 font-black text-[#DC2626]">{absentCount}</span>
               </div>
 
               {/* Card 4: Attendance % */}
               <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-xs font-bold text-slate-600 mb-1">Attendance</span>
-                <span className="text-2xl sm:text-3xl font-black text-[#9333EA]">{attendancePct}%</span>
+                <span className="type-caption font-bold text-slate-600 mb-1">Attendance</span>
+                <span className="type-h2 font-black text-[#9333EA]">{attendancePct}%</span>
               </div>
             </div>
 
@@ -649,7 +649,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by student or reg no..."
-                    className="w-full pl-9 pr-8 py-2 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-800 font-medium"
+                    className="w-full pl-9 pr-8 py-2 type-body-sm bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-800 font-medium"
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -658,7 +658,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                   )}
                 </div>
 
-                <div className="flex bg-slate-200/70 p-1 rounded-xl w-full sm:w-auto text-xs font-bold">
+                <div className="flex bg-slate-200/70 p-1 rounded-xl w-full sm:w-auto type-caption font-bold">
                   <button
                     onClick={() => setActiveTab('all')}
                     className={`flex-1 sm:px-4 py-1.5 rounded-lg transition-all ${
@@ -690,7 +690,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-[#1E293B] text-[11px] font-bold text-white uppercase tracking-wider">
+                    <tr className="border-b border-slate-200 bg-[#1E293B] type-table-head font-bold text-white uppercase tracking-wider">
                       <th className="py-3 px-3 w-12 text-center">#</th>
                       <th className="py-3 px-3">Reg. No</th>
                       <th className="py-3 px-4">Student Name</th>
@@ -710,10 +710,10 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <tbody className="divide-y divide-slate-100 type-table-cell">
                     {processedStudents.length === 0 ? (
                       <tr>
-                        <td colSpan={period ? 4 : 11} className="py-10 text-center text-slate-400 text-xs font-medium">
+                        <td colSpan={period ? 4 : 11} className="py-10 text-center text-slate-400 type-caption">
                           No attendance records found matching filters.
                         </td>
                       </tr>
@@ -733,7 +733,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                           else if (status === 'L') bg = 'bg-amber-100 text-amber-800 border-amber-200 font-bold';
 
                           return (
-                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-xs border ${bg}`}>
+                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md type-fine border ${bg}`}>
                               {status === 'PRESENT' ? 'P' : (status === 'ABSENT' ? 'A' : status)}
                             </span>
                           );
@@ -741,13 +741,13 @@ export default function AdminAttendanceTab({ onBack }: Props) {
 
                         return (
                           <tr key={st.studentId || st.id || idx} className={idx % 2 === 0 ? 'bg-white hover:bg-slate-50/80 transition-colors' : 'bg-slate-50/40 hover:bg-slate-50/80 transition-colors'}>
-                            <td className="py-3 px-3 text-center font-medium text-slate-500 text-xs">
+                            <td className="py-3 px-3 text-center font-medium text-slate-500 type-table-cell">
                               {idx + 1}
                             </td>
-                            <td className="py-3 px-3 font-mono font-semibold text-slate-700 text-xs">
+                            <td className="py-3 px-3 font-mono font-semibold text-slate-700 type-table-cell">
                               {regNo}
                             </td>
-                            <td className="py-3 px-4 font-semibold text-slate-900 text-xs sm:text-sm">
+                            <td className="py-3 px-4 font-semibold text-slate-900 type-table-cell sm:type-table-cell">
                               {name}
                             </td>
                             {period ? (
@@ -780,7 +780,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
             <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <p className="text-sm font-semibold text-slate-600">
+            <p className="type-body-sm font-semibold text-slate-600">
               Select department and filters above, then click <span className="text-red-600 font-bold">Load Dashboard</span> to view report.
             </p>
           </div>

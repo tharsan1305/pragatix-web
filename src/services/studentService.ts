@@ -66,20 +66,15 @@ export const studentService = {
   getDepartmentPerformance: () =>
     apiClient.get('/api/v1/students/department-performance'),
 
-  // Get student badges
-  // GET /api/v1/students/{id}/badges
-  getBadges: (id: string | number) =>
-    apiClient.get(`/api/v1/students/${id}/badges`),
+  // Get student activity streaks (Authoritative backend endpoint)
+  // GET /api/v1/students/me/activity-streaks
+  getActivityStreaks: () =>
+    apiClient.get('/api/v1/students/me/activity-streaks'),
 
-  // Get student streak
-  // GET /api/v1/students/{id}/streak
-  getStreak: (id: string | number) =>
-    apiClient.get(`/api/v1/students/${id}/streak`),
-
-  // Update student streak
-  // POST /api/v1/students/{id}/streak/update
-  updateStreak: (id: string | number) =>
-    apiClient.post(`/api/v1/students/${id}/streak/update`),
+  // Get student level progression
+  // GET /api/v1/student-level/progression
+  getLevelProgression: () =>
+    apiClient.get('/api/v1/student-level/progression'),
 };
 
 export default studentService;

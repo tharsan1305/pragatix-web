@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pencil, Trash2, UserPlus, BookOpen, MinusCircle } from 'lucide-react';
 import type { ActivityModel } from '../types/ActivityTypes';
 
@@ -26,6 +27,24 @@ export default function ActivityCard({
 
   const assignments = Array.isArray(activity.assignmentSummary) ? activity.assignmentSummary : [];
   
+  // Deduplicate repeated assignments matching Flutter activity_card.dart (e.g. repeated 'Any Faculty')
+  const uniqueAssignments = useMemo(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const assign of assignments) {
+      const secName = assign.section;
+      const teachName = assign.teacher || assign.teacherName || 'Any Faculty';
+      const text = secName 
+        ? `Section ${secName} → ${teachName}`
+        : `Assigned to → ${teachName}`;
+      if (!seen.has(text)) {
+        seen.add(text);
+        result.push(text);
+      }
+    }
+    return result;
+  }, [assignments]);
+  
   const evidenceText = Array.isArray(activity.evidence) 
     ? activity.evidence.join(', ') 
     : (typeof activity.evidence === 'string' ? activity.evidence : '');
@@ -41,34 +60,34 @@ export default function ActivityCard({
       onClick={onTap}
       className={`bg-white shadow-sm border border-slate-200 rounded-2xl mb-4 p-5 ${onTap ? 'cursor-pointer hover:border-slate-300 transition-colors' : ''}`}
     >
-      <div className="flex justify-between items-start">
-        <h3 className="font-bold text-[16px] text-[#1E293B] flex-1 mr-4">{activity.name}</h3>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
+        <h3 className="font-bold type-h5 text-slate-800 flex-1 leading-snug">{activity.name}</h3>
         {!isReadOnly && (
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {onAssign && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onAssign(); }}
-                className="flex items-center gap-1 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
+                className="flex items-center gap-1 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl type-caption font-bold transition-colors shadow-xs cursor-pointer"
                 title="Assign Faculty"
               >
-                <UserPlus className="w-4 h-4" />
+                <UserPlus className="w-3.5 h-3.5" />
                 <span>Assign Faculty</span>
               </button>
             )}
             {onEdit && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
+                className="flex items-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl type-caption font-bold transition-colors shadow-xs cursor-pointer"
                 title="Edit Activity"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3.5 h-3.5" />
                 <span>Edit</span>
               </button>
             )}
             {onUnmap && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onUnmap(); }}
-                className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors border border-amber-200"
+                className="p-1 sm:p-1.5 text-amber-600 hover:bg-amber-50 rounded-xl transition-colors border border-amber-200 cursor-pointer"
                 title="Remove from Stage"
               >
                 <MinusCircle className="w-4 h-4" />
@@ -77,10 +96,10 @@ export default function ActivityCard({
             {onDelete && !isCc && (
               <button 
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="flex items-center gap-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-sm"
+                className="flex items-center gap-1 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl type-caption font-bold transition-colors shadow-xs cursor-pointer"
                 title="Delete Activity"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>
               </button>
             )}
@@ -116,10 +135,10 @@ export default function ActivityCard({
         </span>
       </div>
 
-      {assignments.length === 0 ? (
+      {uniqueAssignments.length === 0 ? (
         <div className="flex items-start gap-2 mb-2">
           <UserPlus className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-          <span className="text-xs text-gray-700 font-medium">
+          <span className="type-caption text-gray-700 font-medium">
             Department: {activity.ownerDepartment || "Unassigned"} (No assignments yet)
           </span>
         </div>
@@ -127,23 +146,18 @@ export default function ActivityCard({
         <div className="mb-2">
           <div className="flex items-start gap-2 mb-1">
             <UserPlus className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-            <span className="text-xs text-gray-800 font-bold">
+            <span className="type-caption text-gray-800 font-bold">
               {activity.assignmentMode === 'GLOBAL'
                 ? 'Assignment Mode: Global (All Departments)'
                 : `Assignments (${activity.ownerDepartment || 'Dept'}):`}
             </span>
           </div>
           <div className="pl-6 flex flex-col gap-1">
-            {assignments.map((assign: any, idx: number) => {
-              const text = assign.section
-                ? `Section ${assign.section} → ${assign.teacher || assign.teacherName || 'Unknown Teacher'}`
-                : `Assigned to → ${assign.teacher || assign.teacherName || 'Unknown Teacher'}`;
-              return (
-                <span key={idx} className="text-xs text-gray-600">
-                  • {text}
-                </span>
-              );
-            })}
+            {uniqueAssignments.map((text: string, idx: number) => (
+              <span key={idx} className="type-caption text-gray-600">
+                • {text}
+              </span>
+            ))}
           </div>
         </div>
       )}
@@ -151,7 +165,7 @@ export default function ActivityCard({
       {evidenceText && (
         <div className="flex items-start gap-2 mt-2 pt-2 border-t border-slate-50">
           <BookOpen className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-          <span className="text-xs text-gray-600 italic">
+          <span className="type-caption text-gray-600 italic">
             Evidence: {evidenceText}
           </span>
         </div>
@@ -160,7 +174,7 @@ export default function ActivityCard({
       {activity.justification && (
         <div className="flex items-start gap-2 mt-1.5">
           <div className="w-4 h-4 mt-0.5 shrink-0" />
-          <span className="text-xs text-gray-500 italic">
+          <span className="type-caption text-gray-500 italic">
             Justification: {activity.justification}
           </span>
         </div>

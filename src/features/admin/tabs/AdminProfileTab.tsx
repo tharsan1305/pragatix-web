@@ -88,10 +88,10 @@ export default function AdminProfileTab() {
         
         {/* Profile Header matching Flutter SharedProfileHeader */}
         <div className="text-center mb-6">
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">
+          <h1 className="type-h2 text-[#1E293B] tracking-tight">
             {profile?.fullName || (isSuper ? 'System Administrator' : 'Administrator')}
           </h1>
-          <p className="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
+          <p className="type-body-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
             {profile?.role || (isSuper ? 'SUPER_ADMIN' : 'ADMIN')}
           </p>
         </div>
@@ -99,38 +99,38 @@ export default function AdminProfileTab() {
         <div className="w-full max-w-md space-y-4">
           {/* 1. Personal Information Card */}
           <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-            <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+            <h3 className="type-h5 text-slate-900 border-b border-slate-100 pb-3">
               Personal Information
             </h3>
             
-            <div className="flex justify-between items-center text-xs sm:text-sm">
+            <div className="flex justify-between items-center type-caption">
               <span className="text-slate-500 font-medium">Username</span>
               <span className="font-bold text-[#1E293B]">{profile?.username || 'Not Available'}</span>
             </div>
 
-            <div className="flex justify-between items-center text-xs sm:text-sm">
+            <div className="flex justify-between items-center type-caption">
               <span className="text-slate-500 font-medium">Email</span>
               <span className="font-bold text-[#1E293B] truncate max-w-[220px]">{profile?.email || 'Not Available'}</span>
             </div>
 
-            <div className="flex justify-between items-center text-xs sm:text-sm">
+            <div className="flex justify-between items-center type-caption">
               <span className="text-slate-500 font-medium">Phone</span>
               <span className="font-bold text-[#1E293B]">{profile?.phone || 'Not Available'}</span>
             </div>
 
             {isAdmin ? (
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Assigned Year</span>
                 <span className="font-bold text-[#1E293B]">{adminStats?.academicYear || 'Not Available'}</span>
               </div>
             ) : (
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Department</span>
                 <span className="font-bold text-[#1E293B]">{profile?.department || 'N/A'}</span>
               </div>
             )}
 
-            <div className="flex justify-between items-center text-xs sm:text-sm">
+            <div className="flex justify-between items-center type-caption">
               <span className="text-slate-500 font-medium">Status</span>
               <span className="font-bold text-emerald-600">
                 {profile?.accountStatus || 'Active'}
@@ -141,21 +141,21 @@ export default function AdminProfileTab() {
           {/* 2. System Statistics Card (Super Admin) matching Flutter */}
           {isSuper && superAdminStats && (
             <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <h3 className="type-h5 text-slate-900 border-b border-slate-100 pb-3">
                 System Statistics
               </h3>
               
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Total Departments</span>
                 <span className="font-bold text-[#1E293B]">{superAdminStats.totalDepartments}</span>
               </div>
 
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Total Students</span>
                 <span className="font-bold text-[#1E293B]">{superAdminStats.totalStudents}</span>
               </div>
 
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Total Teachers</span>
                 <span className="font-bold text-[#1E293B]">{superAdminStats.totalTeachers}</span>
               </div>
@@ -165,21 +165,21 @@ export default function AdminProfileTab() {
           {/* 3. Academic Statistics Card (Year Admin) matching Flutter */}
           {isAdmin && !isSuper && adminStats && (
             <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 space-y-4">
-              <h3 className="font-heading text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <h3 className="type-h5 text-slate-900 border-b border-slate-100 pb-3">
                 Academic Statistics
               </h3>
               
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Assigned Year</span>
                 <span className="font-bold text-[#1E293B]">{adminStats.academicYear || 'All Years'}</span>
               </div>
 
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Total Students</span>
                 <span className="font-bold text-[#1E293B]">{adminStats.totalStudentsInYear ?? 0}</span>
               </div>
 
-              <div className="flex justify-between items-center text-xs sm:text-sm">
+              <div className="flex justify-between items-center type-caption">
                 <span className="text-slate-500 font-medium">Total Groups</span>
                 <span className="font-bold text-[#1E293B]">{adminStats.totalGroups ?? 0}</span>
               </div>
@@ -193,7 +193,7 @@ export default function AdminProfileTab() {
               <button
                 onClick={() => setShowCacheConfirm(true)}
                 disabled={isRefreshingCache}
-                className="w-full py-3.5 px-4 bg-[#3B5998] hover:bg-[#2d4373] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 bg-[#3B5998] hover:bg-[#2d4373] text-white rounded-2xl type-btn flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshingCache ? 'animate-spin' : ''}`} />
                 <span>Refresh System Cache</span>
@@ -203,7 +203,7 @@ export default function AdminProfileTab() {
             {/* Logout Button matching Flutter Red Logout */}
             <button
               onClick={() => setIsLogoutModalOpen(true)}
-              className="w-full py-3.5 px-4 bg-[#E53E3E] hover:bg-[#C53030] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+              className="w-full py-3.5 px-4 bg-[#E53E3E] hover:bg-[#C53030] text-white rounded-2xl type-btn flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -211,7 +211,7 @@ export default function AdminProfileTab() {
 
             {/* Footer */}
             <div className="text-center pt-6 pb-2">
-              <p className="text-xs font-semibold text-slate-400 tracking-wide">
+              <p className="type-caption text-slate-400 tracking-wide">
                 JJCET © 2026 All rights reserved
               </p>
             </div>
@@ -223,12 +223,12 @@ export default function AdminProfileTab() {
       {showCacheConfirm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-heading font-bold text-base text-slate-900">Refresh System Cache?</h3>
-            <p className="text-sm text-slate-600">This will refresh the database cache for all users system-wide. This action is safe but affects performance temporarily. Continue?</p>
+            <h3 className="type-h5 text-slate-900">Refresh System Cache?</h3>
+            <p className="type-body-sm text-slate-600">This will refresh the database cache for all users system-wide. This action is safe but affects performance temporarily. Continue?</p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowCacheConfirm(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -238,7 +238,7 @@ export default function AdminProfileTab() {
                   handleRefreshCache();
                 }}
                 disabled={isRefreshingCache}
-                className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-1"
+                className="px-4 py-2 type-caption font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-1"
               >
                 {isRefreshingCache ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
                 Refresh

@@ -186,7 +186,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
     <div className="bg-slate-50 min-h-screen pb-32">
       {/* Header */}
       <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
-        <h1 className="font-heading text-xl font-bold">Student Dashboard</h1>
+        <h1 className="type-h4">Student Dashboard</h1>
         <div className="flex items-center gap-3">
           <FireStreakIcon streakCount={displayStreak} onClick={onOpenStreaks} />
 
@@ -204,8 +204,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Welcome Banner */}
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-slate-500 text-sm">Welcome back,</div>
-            <h2 className="font-heading text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+            <div className="type-body-sm text-slate-500">Welcome back,</div>
+            <h2 className="type-h3 text-slate-900 flex items-center gap-2">
               {profile.studentName}
               {(profile.isCaptain || profile.isViceCaptain) && (
                 <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-500 text-slate-950 uppercase tracking-wider shadow-sm flex items-center gap-1">
@@ -223,17 +223,17 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
             <span className="text-indigo-100 font-medium">Discipline Score</span>
             <Shield className="w-6 h-6 text-white/90" />
           </div>
-          <div className="text-4xl font-bold mb-5">{displayXp} Points</div>
+          <div className="type-h1 mb-5">{displayXp} Points</div>
 
           <div className="h-px bg-white/20 mb-4" />
 
-          <div className="flex justify-between items-center text-sm">
+          <div className="flex justify-between items-center type-body-sm">
             <div>
-              <div className="text-indigo-200 text-xs mb-1">Department</div>
+              <div className="text-indigo-200 type-caption mb-1">Department</div>
               <div className="font-semibold">{profile.department}</div>
             </div>
             <div className="text-right">
-              <div className="text-indigo-200 text-xs mb-1">Section & Year</div>
+              <div className="text-indigo-200 type-caption mb-1">Section & Year</div>
               <div className="font-semibold">{profile.year} Year - Sec {profile.section}</div>
             </div>
           </div>
@@ -242,7 +242,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Level Progress */}
         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-heading font-bold text-slate-800">Level {levelNum} — {levelTitle}</h3>
+            <h3 className="type-h5 text-slate-800">Level {levelNum} — {levelTitle}</h3>
             <Stars className="w-6 h-6 text-indigo-500" />
           </div>
           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
@@ -251,7 +251,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
               style={{ width: `${progress * 100}%` }}
             />
           </div>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="type-caption text-slate-500 font-medium">
             {displayXp} / {levelMaxXp} XP to next level
           </p>
         </div>
@@ -260,8 +260,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {!hasActiveStage ? (
           <div className="bg-red-50 rounded-2xl p-5 border border-red-200 text-center space-y-2">
             <LockKeyhole className="w-8 h-8 mx-auto text-red-500" />
-            <h3 className="font-heading font-bold text-red-600 text-base">No Active Stage</h3>
-            <p className="text-xs text-red-500">No active stage is currently available. Activities are locked.</p>
+            <h3 className="type-h5 text-red-600">No Active Stage</h3>
+            <p className="type-caption text-red-500">No active stage is currently available. Activities are locked.</p>
           </div>
         ) : (() => {
           const currentStage = Math.max(1, profile.currentStage || 1);
@@ -271,8 +271,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
           return (
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-heading font-bold text-slate-800 text-base">Stage {currentStage} Progress</h3>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                <h3 className="type-h5 text-slate-800">Stage {currentStage} Progress</h3>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full type-caption font-bold bg-amber-100 text-amber-800 border border-amber-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                   Active
                 </span>
@@ -285,7 +285,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                 />
               </div>
 
-              <div className="flex justify-between items-center text-sm font-bold">
+              <div className="flex justify-between items-center type-body-sm font-bold">
                 <span className="text-slate-700">{displayXp} / {activeStageExpectedXp} XP</span>
                 <span className={stagePct >= 100 ? 'text-emerald-600' : 'text-indigo-600'}>{stagePct}%</span>
               </div>
@@ -300,8 +300,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
               <Trophy className="w-6 h-6 text-amber-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 font-medium mb-1">Leaderboard Rank</div>
-              <div className="text-lg font-bold text-slate-800">#{profile.rank}</div>
+              <div className="type-caption text-slate-500 font-medium mb-1">Leaderboard Rank</div>
+              <div className="type-h4 text-slate-800 font-bold">#{profile.rank}</div>
             </div>
           </div>
           <div className="bg-teal-50 rounded-2xl p-4 flex items-center gap-4">
@@ -309,8 +309,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
               <Shield className="w-6 h-6 text-teal-600" />
             </div>
             <div>
-              <div className="text-xs text-slate-500 font-medium mb-1">Active Stage</div>
-              <div className="text-lg font-bold text-slate-800">Stage {Math.max(1, profile.currentStage)}</div>
+              <div className="type-caption text-slate-500 font-medium mb-1">Active Stage</div>
+              <div className="type-h4 text-slate-800 font-bold">Stage {Math.max(1, profile.currentStage)}</div>
             </div>
           </div>
         </div>
@@ -318,11 +318,11 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* Active Streaks */}
         <div id="streaks-section">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-heading text-lg font-bold text-slate-800">Active Streaks</h3>
+            <h3 className="type-h4 text-slate-800">Active Streaks</h3>
             {onOpenStreaks && (
               <button
                 onClick={onOpenStreaks}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1"
+                className="type-btn text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1"
               >
                 <span>View All Records</span>
                 <span>→</span>
@@ -330,7 +330,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
             )}
           </div>
           {streaks.length === 0 ? (
-            <p className="text-slate-500 text-sm">No active streaks recorded.</p>
+            <p className="type-body-sm text-slate-500">No active streaks recorded.</p>
           ) : (
             <div className="flex overflow-x-auto gap-3 pb-2 snap-x">
               {streaks.map((s, idx) => (
@@ -339,9 +339,9 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                     <span className="text-[10px] font-bold text-slate-800 truncate w-20">
                       {s.streakType.replace('_', ' ')}
                     </span>
-                    <span className="text-xs">{s.isBroken ? "❄️" : "🔥"}</span>
+                    <span className="type-caption">{s.isBroken ? "❄️" : "🔥"}</span>
                   </div>
-                  <div className={`text-sm font-bold ${s.isBroken ? 'text-red-500' : 'text-green-500'}`}>
+                  <div className={`type-body-sm font-bold ${s.isBroken ? 'text-red-500' : 'text-green-500'}`}>
                     {s.isBroken ? "Broken" : `${s.currentStreak} Days`}
                   </div>
                 </div>
@@ -352,9 +352,9 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
         {/* Activity Streaks */}
         <div>
-          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">Activity Streaks</h3>
+          <h3 className="type-h4 text-slate-800 mb-3">Activity Streaks</h3>
           {activityStreaks.length === 0 ? (
-            <p className="text-slate-500 text-sm">No active activity streaks recorded.</p>
+            <p className="type-body-sm text-slate-500">No active activity streaks recorded.</p>
           ) : (
             <div className="flex overflow-x-auto gap-3 pb-2 snap-x">
               {activityStreaks.map((s, idx) => {
@@ -365,9 +365,9 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                   <div key={idx} className={`snap-start shrink-0 w-32 p-3 rounded-2xl border-2 bg-white ${isBroken ? 'border-red-200' : 'border-orange-200'}`}>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] font-bold text-slate-800 truncate w-20">{name}</span>
-                      <span className="text-xs">{isBroken ? "💤" : "⚡"}</span>
+                      <span className="type-caption">{isBroken ? "💤" : "⚡"}</span>
                     </div>
-                    <div className={`text-sm font-bold ${isBroken ? 'text-red-500' : 'text-orange-600'}`}>
+                    <div className={`type-body-sm font-bold ${isBroken ? 'text-red-500' : 'text-orange-600'}`}>
                       {isBroken ? "No Streak" : `${count} Times`}
                     </div>
                   </div>
@@ -381,48 +381,48 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-heading font-bold text-slate-800">XP Summary</h3>
+            <h3 className="type-h5 text-slate-800">XP Summary</h3>
           </div>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex items-center p-2.5 rounded-xl border bg-purple-500/5 border-purple-500/20">
               <div className="w-1.5 self-stretch rounded-full mr-2.5 bg-purple-500" />
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-medium text-slate-500 truncate">Individual XP</div>
-                <div className="text-sm font-bold text-purple-600">{individualXp} XP</div>
+                <div className="type-body-sm font-bold text-purple-600">{individualXp} XP</div>
               </div>
             </div>
             <div className="flex items-center p-2.5 rounded-xl border bg-green-500/5 border-green-500/20">
               <div className="w-1.5 self-stretch rounded-full mr-2.5 bg-green-500" />
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-medium text-slate-500 truncate">Group XP</div>
-                <div className="text-sm font-bold text-green-600">{groupXp} XP</div>
+                <div className="type-body-sm font-bold text-green-600">{groupXp} XP</div>
               </div>
             </div>
             <div className="flex items-center p-2.5 rounded-xl border bg-amber-500/5 border-amber-500/20">
               <div className="w-1.5 self-stretch rounded-full mr-2.5 bg-amber-500" />
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-medium text-slate-500 truncate">MUST XP</div>
-                <div className="text-sm font-bold text-amber-600">{mustXp} XP</div>
+                <div className="type-body-sm font-bold text-amber-600">{mustXp} XP</div>
               </div>
             </div>
             <div className="flex items-center p-2.5 rounded-xl border bg-blue-500/5 border-blue-500/20">
               <div className="w-1.5 self-stretch rounded-full mr-2.5 bg-blue-500" />
               <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-medium text-slate-500 truncate">Total XP</div>
-                <div className="text-sm font-bold text-blue-600">{displayXp} XP</div>
+                <div className="type-fine font-medium text-slate-500 truncate">Total XP</div>
+                <div className="type-body-sm font-bold text-blue-600">{displayXp} XP</div>
               </div>
             </div>
           </div>
           <div className="h-px bg-slate-100 mb-4" />
           <div className="flex justify-between items-center">
-            <span className="font-bold text-slate-800 text-sm">Total XP</span>
-            <span className="font-bold text-indigo-600 text-lg">{displayXp} XP</span>
+            <span className="font-bold text-slate-800 type-body-sm">Total XP</span>
+            <span className="type-h5 font-bold text-indigo-600">{displayXp} XP</span>
           </div>
         </div>
 
         {/* Category Bar Chart */}
         <div>
-          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">XP by Category</h3>
+          <h3 className="type-h4 text-slate-800 mb-3">XP by Category</h3>
           <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -450,11 +450,11 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
         {/* My Group Card */}
         <div id="my-group-section">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-heading text-lg font-bold text-slate-800">My Group</h3>
+            <h3 className="type-h4 text-slate-800">My Group</h3>
             {onSelectTab && (
               <button
                 onClick={() => onSelectTab(3)}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                className="type-btn text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
               >
                 View Details →
               </button>
@@ -469,14 +469,14 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-indigo-600" />
-                    <h4 className="font-bold text-slate-800 text-base">{teamDetails.teamName || 'Unnamed Team'}</h4>
+                    <h4 className="font-bold text-slate-800 type-h4">{teamDetails.teamName || 'Unnamed Team'}</h4>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase">
+                  <span className="px-2.5 py-1 rounded-full type-caption font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase">
                     {teamDetails.stage || 'STAGE 1'}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                <div className="flex flex-wrap gap-2 type-caption">
                   <span className="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700">
                     🏢 {teamDetails.department || profile.department || 'N/A'}
                   </span>
@@ -490,7 +490,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
                 <div className="h-px bg-slate-100" />
 
-                <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="grid grid-cols-2 gap-4 type-caption">
                   <div>
                     <div className="text-slate-400 font-semibold mb-0.5">Captain</div>
                     <div className="font-bold text-slate-800 truncate">{teamDetails.captainName || 'Not Assigned'}</div>
@@ -501,15 +501,15 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                   </div>
                 </div>
 
-                <div className="pt-2 flex justify-between items-center text-xs font-bold bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <div className="pt-2 flex justify-between items-center type-caption font-bold bg-slate-50 p-3 rounded-2xl border border-slate-100">
                   <span className="text-slate-600">Total Group XP</span>
-                  <span className="text-emerald-600 text-sm font-black">
+                  <span className="text-emerald-600 type-body-sm font-black">
                     {teamDetails.totalTeamXp ?? teamDetails.teamXp ?? 0} XP
                   </span>
                 </div>
               </>
             ) : (
-              <div className="text-center py-6 text-slate-400 font-medium text-sm">
+              <div className="text-center py-6 text-slate-400 font-medium type-body-sm">
                 <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
                 <div>No Team Assigned</div>
               </div>
@@ -519,7 +519,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
 
         {/* Recent Activities */}
         <div>
-          <h3 className="font-heading text-lg font-bold text-slate-800 mb-3">Recent Point Actions</h3>
+          <h3 className="type-h4 text-slate-800 mb-3">Recent Point Actions</h3>
           {history.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center text-slate-500 border border-slate-100 shadow-sm">
               No recent activities recorded.
@@ -534,10 +534,10 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks }: DashboardTa
                       <TrendingUp className={`w-5 h-5 ${isPositive ? 'text-green-500' : 'text-red-500'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-800 truncate text-sm">
+                      <div className="font-semibold text-slate-800 truncate type-body-sm">
                         {log.activityName || log.category}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="type-caption text-slate-500">
                         {new Date(log.submittedAt).toLocaleDateString()} • {log.status}
                       </div>
                     </div>

@@ -453,7 +453,7 @@ export default function AttendanceTab() {
   return (
     <div className="flex flex-col h-full bg-slate-50">
       <div className="bg-slate-900 md:bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="font-heading text-xl font-bold flex items-center gap-2">
+        <h1 className="type-h4 flex items-center gap-2">
           <CalendarCheck className="w-6 h-6" /> Mark Attendance
         </h1>
       </div>
@@ -462,11 +462,11 @@ export default function AttendanceTab() {
         {/* Form Section */}
         <div className="w-full md:w-1/3 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4 overflow-y-auto">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Year</label>
+            <label className="type-form-label block text-slate-500 uppercase mb-1">Year</label>
             <select
               value={yearId}
               onChange={(e) => handleYearChange(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 type-body-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
               <option value="">Select Year</option>
               {years.map(y => <option key={y.id} value={y.id}>{y.name}</option>)}
@@ -474,11 +474,11 @@ export default function AttendanceTab() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Department</label>
+            <label className="type-form-label block text-slate-500 uppercase mb-1">Department</label>
             <select
               value={departmentId}
               onChange={(e) => handleDepartmentChange(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 type-body-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
               <option value="">Select Department</option>
               {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -486,11 +486,11 @@ export default function AttendanceTab() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Section (Optional)</label>
+            <label className="type-form-label block text-slate-500 uppercase mb-1">Section (Optional)</label>
             <select
               value={sectionId}
               onChange={(e) => setSectionId(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 type-body-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
               <option value="">Any Section</option>
               {sections.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -498,21 +498,21 @@ export default function AttendanceTab() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Date</label>
+            <label className="type-form-label block text-slate-500 uppercase mb-1">Date</label>
             <input
               type="date"
               value={date}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 type-body-sm focus:outline-none focus:border-indigo-500 font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Period</label>
+            <label className="type-form-label block text-slate-500 uppercase mb-1">Period</label>
             <select
               value={period}
               onChange={(e) => setPeriod(Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 type-body-sm focus:outline-none focus:border-indigo-500 font-medium"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8].map(p => (
                 <option key={p} value={p}>Period {p}</option>
@@ -523,7 +523,7 @@ export default function AttendanceTab() {
           <button
             onClick={loadStudents}
             disabled={loading}
-            className="w-full mt-4 bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-lg font-bold shadow-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full mt-4 type-btn bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-lg font-bold shadow-md transition-colors disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : null}
             {loading ? 'Loading...' : 'Load Students'}
@@ -551,26 +551,26 @@ export default function AttendanceTab() {
           ) : isHoliday ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-rose-50/50 rounded-xl border border-rose-200">
               <CalendarX className="w-16 h-16 text-rose-500 mb-4" />
-              <h3 className="font-heading font-bold text-rose-800 text-xl mb-2">Holiday Configured</h3>
-              <p className="text-sm font-semibold text-rose-600 max-w-md">
+              <h3 className="type-h5 text-rose-800 mb-2">Holiday Configured</h3>
+              <p className="type-body-sm font-semibold text-rose-600 max-w-md">
                 Attendance cannot be marked. Today is configured as a Holiday in the academic calendar.
               </p>
             </div>
           ) : !hasSearched ? (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
               <UsersRound className="w-16 h-16 mb-4 opacity-30" />
-              <p className="font-medium">Select filters and click "Load Students"</p>
+              <p className="type-body-sm font-medium">Select filters and click "Load Students"</p>
             </div>
           ) : students.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-500">
               <AlertCircle className="w-12 h-12 text-amber-500 mb-3" />
-              <h3 className="font-heading font-bold text-slate-800 text-lg mb-1">No Students Found</h3>
-              <p className="text-sm text-slate-500 max-w-sm">
+              <h3 className="type-h5 text-slate-800 mb-1">No Students Found</h3>
+              <p className="type-body-sm text-slate-500 max-w-sm">
                 {errorMsg || 'No students were found in the database matching your selected Year, Department, and Section.'}
               </p>
               <button
                 onClick={loadStudents}
-                className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold text-sm rounded-lg hover:bg-indigo-100 transition cursor-pointer"
+                className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold type-btn rounded-lg hover:bg-indigo-100 transition cursor-pointer"
               >
                 Try Again
               </button>
@@ -596,8 +596,8 @@ export default function AttendanceTab() {
                 <>
                   {/* Top Stats & Title */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                    <h2 className="font-heading font-bold text-slate-800 text-lg">Student List</h2>
-                    <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                    <h2 className="type-h5 text-slate-800">Student List</h2>
+                    <div className="type-caption text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
                       Total: <span className="text-slate-800 font-bold">{students.length}</span> • Present: <span className="text-emerald-700 font-bold">{presentCount}</span> • Absent: <span className="text-rose-700 font-bold">{absentCount}</span>
                     </div>
                   </div>
@@ -611,7 +611,7 @@ export default function AttendanceTab() {
                         value={searchFilter}
                         onChange={(e) => setSearchFilter(e.target.value)}
                         placeholder="Search student or reg no..."
-                        className="w-full pl-3 pr-8 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-medium"
+                        className="w-full pl-3 pr-8 py-1.5 type-body-sm bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 font-medium"
                       />
                       {searchFilter && (
                         <button
@@ -625,7 +625,7 @@ export default function AttendanceTab() {
                     </div>
 
                     {/* Filter Tabs */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold w-full sm:w-auto">
+                    <div className="flex bg-slate-100 p-1 rounded-xl type-caption font-bold w-full sm:w-auto">
                       <button
                         type="button"
                         onClick={() => setStatusFilter('all')}
@@ -663,7 +663,7 @@ export default function AttendanceTab() {
                   </div>
 
                   {/* Quick Mark All Action Links - Matching Flutter 1:1 */}
-                  <div className="flex items-center justify-between text-xs font-semibold text-rose-500 mb-3 px-1">
+                  <div className="flex items-center justify-between type-caption text-rose-500 mb-3 px-1">
                     <div className="flex items-center gap-4">
                       <button 
                         type="button" 
@@ -688,15 +688,15 @@ export default function AttendanceTab() {
                   {/* Student List Scrollable */}
                   <div className="flex-1 overflow-y-auto pr-2 space-y-2.5">
                     {visibleStudents.length === 0 ? (
-                      <div className="py-12 text-center text-slate-400 text-xs font-medium">
+                      <div className="py-12 text-center text-slate-400 type-caption">
                         No students match the selected filter.
                       </div>
                     ) : (
                       visibleStudents.map((student) => (
                         <div key={student.studentId} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200 shadow-xs">
                           <div>
-                            <div className="font-bold text-slate-800 text-sm">{student.studentName}</div>
-                            <div className="text-xs text-slate-500 mt-0.5 font-mono">{student.registerNumber}</div>
+                            <div className="font-bold text-slate-800 type-body-sm">{student.studentName}</div>
+                            <div className="type-caption text-slate-500 mt-0.5 font-mono">{student.registerNumber}</div>
                           </div>
 
                           {/* Segmented [ P | A ] Control - Matching Flutter 1:1 */}
@@ -704,7 +704,7 @@ export default function AttendanceTab() {
                             <button
                               type="button"
                               onClick={() => setStudentStatus(student.studentId, 'PRESENT')}
-                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full type-caption font-bold transition-all cursor-pointer ${
                                 student.status === 'PRESENT'
                                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs'
                                   : 'text-slate-500 hover:text-slate-800'
@@ -716,7 +716,7 @@ export default function AttendanceTab() {
                             <button
                               type="button"
                               onClick={() => setStudentStatus(student.studentId, 'ABSENT')}
-                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                              className={`flex items-center gap-1 px-4 py-1.5 rounded-full type-caption font-bold transition-all cursor-pointer ${
                                 student.status === 'ABSENT'
                                   ? 'bg-rose-500 text-white shadow-xs'
                                   : 'text-slate-500 hover:text-slate-800'
@@ -736,7 +736,7 @@ export default function AttendanceTab() {
                     <button
                       onClick={submitAttendance}
                       disabled={submitting}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                      className="type-btn bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                     >
                       <Save className="w-5 h-5" />
                       <span>{submitting ? 'Saving...' : 'Save Attendance'}</span>

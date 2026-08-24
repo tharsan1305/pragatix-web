@@ -11,7 +11,7 @@ export const FireStreakIcon: React.FC<FireStreakIconProps> = ({ streakCount, onC
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-black transition-all shadow-sm ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border type-fine font-black transition-all shadow-sm ${
         hasStreak
           ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-orange-400/60 text-orange-600 hover:scale-105 active:scale-95 shadow-orange-500/10'
           : 'bg-slate-100 border-slate-200 text-slate-400 hover:bg-slate-200'

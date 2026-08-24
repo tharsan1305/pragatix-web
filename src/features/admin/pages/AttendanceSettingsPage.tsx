@@ -181,11 +181,11 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
     <div className="flex flex-col min-h-full bg-slate-50 pb-20">
       {/* Header Bar */}
       <div className="bg-[#1E293B] px-6 pt-10 pb-5 shadow-md text-white flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="font-heading text-xl font-bold text-white">Attendance Settings</h1>
+          <h1 className="type-h4 text-white">Attendance Settings</h1>
         </div>
       </div>
 
@@ -200,8 +200,8 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
               <Calendar className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-slate-900 text-base">Academic Calendar Configuration</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Configure Months, Weeks, and Holidays</p>
+              <h3 className="type-h5 text-slate-900">Academic Calendar Configuration</h3>
+              <p className="type-caption text-slate-500 mt-0.5">Configure Months, Weeks, and Holidays</p>
             </div>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
@@ -210,16 +210,16 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
         <form onSubmit={handleSave} className="space-y-4">
           {/* Engine Configuration Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Engine Configuration</h2>
+            <h2 className="type-h4 text-slate-900 border-b border-slate-100 pb-3">Engine Configuration</h2>
 
             {/* Daily Attendance Engine Toggle */}
             <div className="flex items-start justify-between pt-1">
               <div>
-                <h4 className="font-bold text-slate-800 text-sm">Daily Attendance Engine</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Process daily attendance XP at the configured time</p>
+                <h4 className="type-h5 text-slate-800">Daily Attendance Engine</h4>
+                <p className="type-caption text-slate-500 mt-0.5">Process daily attendance XP at the configured time</p>
               </div>
 
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer type-form-label">
                 <input
                   type="checkbox"
                   checked={settings.dailyEngineEnabled}
@@ -233,15 +233,15 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
             {/* Daily Processing Time */}
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center justify-between">
               <div>
-                <span className="block text-xs font-bold text-slate-700">Daily Processing Time</span>
-                <span className="text-xs text-slate-500 font-semibold">{formatTime12Hr(settings.dailyProcessingTime)}</span>
+                <span className="block type-caption font-bold text-slate-700">Daily Processing Time</span>
+                <span className="type-caption text-slate-500 font-semibold">{formatTime12Hr(settings.dailyProcessingTime)}</span>
               </div>
               <div className="relative flex items-center">
                 <input
                   type="time"
                   value={toInputTimeFormat(settings.dailyProcessingTime)}
                   onChange={(e) => setSettings({ ...settings, dailyProcessingTime: `${e.target.value}:00` })}
-                  className="bg-white border border-slate-300 text-slate-800 text-xs font-bold rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-slate-400 outline-none"
+                  className="bg-white border border-slate-300 text-slate-800 type-caption font-bold rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-slate-400 outline-none"
                 />
                 <Clock className="w-4 h-4 text-slate-400 ml-2" />
               </div>
@@ -252,11 +252,11 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
             {/* Weekly Attendance Engine Toggle */}
             <div className="flex items-start justify-between pt-1">
               <div>
-                <h4 className="font-bold text-slate-800 text-sm">Weekly Attendance Engine</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Process weekly perfect attendance rewards</p>
+                <h4 className="type-h5 text-slate-800">Weekly Attendance Engine</h4>
+                <p className="type-caption text-slate-500 mt-0.5">Process weekly perfect attendance rewards</p>
               </div>
 
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center cursor-pointer type-form-label">
                 <input
                   type="checkbox"
                   checked={settings.weeklyEngineEnabled}
@@ -270,15 +270,15 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
             {/* Weekly Processing Time */}
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center justify-between">
               <div>
-                <span className="block text-xs font-bold text-slate-700">Weekly Processing Time</span>
-                <span className="text-xs text-slate-500 font-semibold">{formatTime12Hr(settings.weeklyProcessingTime)}</span>
+                <span className="block type-caption font-bold text-slate-700">Weekly Processing Time</span>
+                <span className="type-caption text-slate-500 font-semibold">{formatTime12Hr(settings.weeklyProcessingTime)}</span>
               </div>
               <div className="relative flex items-center">
                 <input
                   type="time"
                   value={toInputTimeFormat(settings.weeklyProcessingTime)}
                   onChange={(e) => setSettings({ ...settings, weeklyProcessingTime: `${e.target.value}:00` })}
-                  className="bg-white border border-slate-300 text-slate-800 text-xs font-bold rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-slate-400 outline-none"
+                  className="bg-white border border-slate-300 text-slate-800 type-caption font-bold rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-slate-400 outline-none"
                 />
                 <Clock className="w-4 h-4 text-slate-400 ml-2" />
               </div>
@@ -287,46 +287,46 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
 
           {/* Attendance XP Rules Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Attendance XP Rules</h2>
+            <h2 className="type-h4 text-slate-900 border-b border-slate-100 pb-3">Attendance XP Rules</h2>
 
             {/* Partial Day Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Partial Day Penalty (e.g. -5)</label>
+              <label className="type-form-label block font-bold text-slate-700">Partial Day Penalty (e.g. -5)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.partialDayPenalty}
                 onChange={(e) => setSettings({ ...settings, partialDayPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
               <p className="text-[11px] text-slate-500">Applied when student misses at least one period</p>
             </div>
 
             {/* Full Day Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Full Day Penalty (e.g. -10)</label>
+              <label className="type-form-label block font-bold text-slate-700">Full Day Penalty (e.g. -10)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.fullDayPenalty}
                 onChange={(e) => setSettings({ ...settings, fullDayPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
               <p className="text-[11px] text-slate-500">Applied when student is absent for all periods</p>
             </div>
 
             {/* Perfect Weekly Reward */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Perfect Weekly Reward (e.g. 30)</label>
+              <label className="type-form-label block font-bold text-slate-700">Perfect Weekly Reward (e.g. 30)</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={settings.perfectWeekReward}
                 onChange={(e) => setSettings({ ...settings, perfectWeekReward: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
               <p className="text-[11px] text-slate-500">Awarded when student has zero absences for the full week</p>
             </div>
@@ -334,57 +334,57 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
 
           {/* Week Boundary Penalties Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
-            <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Week Boundary Penalties</h2>
+            <h2 className="type-h4 text-slate-900 border-b border-slate-100 pb-3">Week Boundary Penalties</h2>
 
             {/* Week Start Full Day Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Week Start Full Day Penalty (e.g. -40)</label>
+              <label className="type-form-label block font-bold text-slate-700">Week Start Full Day Penalty (e.g. -40)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.weekStartFullPenalty}
                 onChange={(e) => setSettings({ ...settings, weekStartFullPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
             </div>
 
             {/* Week Start Partial Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Week Start Partial Penalty (e.g. -10)</label>
+              <label className="type-form-label block font-bold text-slate-700">Week Start Partial Penalty (e.g. -10)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.weekStartPartialPenalty}
                 onChange={(e) => setSettings({ ...settings, weekStartPartialPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
             </div>
 
             {/* Week End Full Day Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Week End Full Day Penalty (e.g. -40)</label>
+              <label className="type-form-label block font-bold text-slate-700">Week End Full Day Penalty (e.g. -40)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.weekEndFullPenalty}
                 onChange={(e) => setSettings({ ...settings, weekEndFullPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
             </div>
 
             {/* Week End Partial Penalty */}
             <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Week End Partial Penalty (e.g. -10)</label>
+              <label className="type-form-label block font-bold text-slate-700">Week End Partial Penalty (e.g. -10)</label>
               <input
                 type="number"
                 required
                 max="0"
                 value={settings.weekEndPartialPenalty}
                 onChange={(e) => setSettings({ ...settings, weekEndPartialPenalty: parseInt(e.target.value) || 0 })}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 text-sm font-semibold text-slate-800"
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-400 type-body-sm font-semibold text-slate-800"
               />
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full py-4 bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl font-bold text-base transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center space-x-2"
+              className="w-full py-4 bg-[#1E293B] hover:bg-slate-800 text-white rounded-xl font-bold type-btn transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center space-x-2"
             >
               <Save className="w-5 h-5" />
               <span>{isSaving ? 'Saving...' : 'Save All Settings'}</span>
@@ -404,7 +404,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
 
         {/* Engine Control Card */}
         <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4 mt-4">
-          <h2 className="font-heading text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Engine Control Panel</h2>
+          <h2 className="type-h4 text-slate-900 border-b border-slate-100 pb-3">Engine Control Panel</h2>
 
           {isLoadingEngine ? (
             <div className="flex justify-center py-8">
@@ -421,10 +421,10 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                     ) : (
                       <AlertCircle className="w-4 h-4 text-slate-400" />
                     )}
-                    <span className="text-xs font-semibold text-slate-700">Daily Engine: {engineStatus.dailyEngineStatus ? 'Active' : 'Inactive'}</span>
+                    <span className="type-caption text-slate-700">Daily Engine: {engineStatus.dailyEngineStatus ? 'Active' : 'Inactive'}</span>
                   </div>
                   {engineStatus.lastDailyRun && (
-                    <span className="text-xs text-slate-500 ml-6">Last run: {engineStatus.lastDailyRun}</span>
+                    <span className="type-caption text-slate-500 ml-6">Last run: {engineStatus.lastDailyRun}</span>
                   )}
                   <div className="flex items-center gap-2 mt-2">
                     {engineStatus.weeklyEngineStatus ? (
@@ -432,10 +432,10 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                     ) : (
                       <AlertCircle className="w-4 h-4 text-slate-400" />
                     )}
-                    <span className="text-xs font-semibold text-slate-700">Weekly Engine: {engineStatus.weeklyEngineStatus ? 'Active' : 'Inactive'}</span>
+                    <span className="type-caption text-slate-700">Weekly Engine: {engineStatus.weeklyEngineStatus ? 'Active' : 'Inactive'}</span>
                   </div>
                   {engineStatus.lastWeeklyRun && (
-                    <span className="text-xs text-slate-500 ml-6">Last run: {engineStatus.lastWeeklyRun}</span>
+                    <span className="type-caption text-slate-500 ml-6">Last run: {engineStatus.lastWeeklyRun}</span>
                   )}
                 </div>
               )}
@@ -446,7 +446,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                   type="button"
                   onClick={() => runEngine('daily')}
                   disabled={isRunningEngine}
-                  className="py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg border border-blue-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 type-caption font-bold rounded-lg border border-blue-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
                 >
                   {isRunningEngine ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
                   Run Daily
@@ -455,7 +455,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                   type="button"
                   onClick={() => runEngine('weekly')}
                   disabled={isRunningEngine}
-                  className="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 type-caption font-bold rounded-lg border border-indigo-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
                 >
                   {isRunningEngine ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
                   Run Weekly
@@ -464,7 +464,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                   type="button"
                   onClick={() => runEngine('both')}
                   disabled={isRunningEngine}
-                  className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 type-caption font-bold rounded-lg border border-emerald-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
                 >
                   {isRunningEngine ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
                   Run Both
@@ -473,7 +473,7 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
                   type="button"
                   onClick={() => setShowResetConfirm(true)}
                   disabled={isRunningEngine}
-                  className="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-lg border border-rose-200 transition-colors disabled:opacity-50"
+                  className="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 type-caption font-bold rounded-lg border border-rose-200 transition-colors disabled:opacity-50"
                 >
                   Reset
                 </button>
@@ -487,19 +487,19 @@ export default function AttendanceSettingsPage({ academicYear = 'FIRST_YEAR', on
       {showResetConfirm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="font-heading font-bold text-base text-slate-900">Reset Attendance Engine?</h3>
-            <p className="text-sm text-slate-600">This will reset all engine runs and schedules. This action cannot be easily undone. Are you sure?</p>
+            <h3 className="type-h5 text-slate-900">Reset Attendance Engine?</h3>
+            <p className="type-body-sm text-slate-600">This will reset all engine runs and schedules. This action cannot be easily undone. Are you sure?</p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={resetEngine}
                 disabled={isRunningEngine}
-                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-colors disabled:opacity-50"
+                className="px-4 py-2 type-btn text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isRunningEngine ? 'Resetting...' : 'Reset'}
               </button>

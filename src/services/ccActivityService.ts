@@ -277,7 +277,7 @@ export const ccActivityService = {
       if (status) {
         params.status = status;
       }
-      const response = await apiClient.get<any>('/api/v1/cc/badge-requests', {
+      const response = await apiClient.get<any>('/api/cc/badge-requests', {
         params
       });
       return response.data;
@@ -289,7 +289,7 @@ export const ccActivityService = {
 
   /**
    * Approve a badge request
-   * PUT /api/v1/cc/badge-requests/{id}/approve
+   * PUT /api/cc/badge-requests/{id}/approve
    * @param badgeRequestId - ID of the badge request
    * @param approvalData - Approval details (approvedBy, etc.)
    * @returns Promise with approval result
@@ -297,7 +297,7 @@ export const ccActivityService = {
   approveBadgeRequest: async (badgeRequestId: number, approvalData?: BadgeRequestAction) => {
     try {
       const response = await apiClient.put<any>(
-        `/api/v1/cc/badge-requests/${badgeRequestId}/approve`,
+        `/api/cc/badge-requests/${badgeRequestId}/approve`,
         approvalData || {}
       );
       return response.data;
@@ -309,7 +309,7 @@ export const ccActivityService = {
 
   /**
    * Reject a badge request
-   * PUT /api/v1/cc/badge-requests/{id}/reject
+   * PUT /api/cc/badge-requests/{id}/reject
    * @param badgeRequestId - ID of the badge request
    * @param rejectionData - Rejection details (rejectionReason, etc.)
    * @returns Promise with rejection result
@@ -323,7 +323,7 @@ export const ccActivityService = {
           }
         : {};
       const response = await apiClient.put<any>(
-        `/api/v1/cc/badge-requests/${badgeRequestId}/reject`,
+        `/api/cc/badge-requests/${badgeRequestId}/reject`,
         payload
       );
       return response.data;

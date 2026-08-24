@@ -45,16 +45,16 @@ export const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onClick })
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="font-bold text-sm text-slate-800 truncate">
+        <div className="font-bold type-body-sm text-slate-800 truncate">
           {activity.activityName}
         </div>
         {activity.description && (
-          <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
+          <p className="type-caption text-slate-500 line-clamp-1 mt-0.5">
             {activity.description}
           </p>
         )}
         <div
-          className={`text-xs font-medium mt-1 ${
+          className={`type-caption mt-1 ${
             isCompleted ? 'text-emerald-700' : 'text-slate-500'
           }`}
         >

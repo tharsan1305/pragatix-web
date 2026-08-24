@@ -29,7 +29,7 @@ interface XpState {
   fetchStreaks: (studentId: string) => Promise<void>;
   fetchActivityStreaks: () => Promise<void>;
   fetchProgression: () => Promise<void>;
-  submitXpClaim: (category: string, activityName: string, xpPoints: number, evidenceUrl: string) => Promise<boolean>;
+  submitXpClaim: (category: string, activityName: string, xpPoints: number, evidenceUrl: string, activityId?: number) => Promise<boolean>;
 }
 
 export const useXpStore = create<XpState>((set) => ({
@@ -130,17 +130,18 @@ export const useXpStore = create<XpState>((set) => ({
     }
   },
 
-  submitXpClaim: async (category, activityName, xpPoints, evidenceUrl) => {
+  submitXpClaim: async (category, activityName, xpPoints, evidenceUrl, activityId) => {
     try {
-      const response = await apiClient.post('/api/v1/xp/submit', {
-        category,
-        activityName,
-        xpPoints,
-        evidenceUrl,
-      });
-      return response.data.success === true;
+      // Authoritative backend endpoint for student activity completion requests
+      const payload: any = {
+        activityId: activityId || 1,
+        proofUrl: evidenceUrl,
+        reason: `${category} - ${activityName} (${xpPoints} XP)`
+      };
+      const response = await apiClient.post('/api/activity-requests', payload);
+      return response.data?.success === true || response.status === 200 || response.status === 201;
     } catch (error) {
-      logger.error('Failed to submit XP claim:', error);
+      logger.error('Failed to submit activity request:', error);
       return false;
     }
   }

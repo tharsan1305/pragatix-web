@@ -58,20 +58,20 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
       <div className="bg-[#EA4335] text-white px-6 pt-6 pb-4 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {onBack && (
-            <button onClick={onBack} className="p-2 bg-red-600/60 rounded-full text-white hover:bg-red-700 transition-colors">
+            <button onClick={onBack} className="p-2 type-btn bg-red-600/60 rounded-full text-white hover:bg-red-700 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="font-heading text-xl font-bold">Activity &amp; Thresholds</h1>
-            <p className="text-xs text-red-100 mt-0.5">Select an academic year to manage stages &amp; activities</p>
+            <h1 className="type-h4">Activity &amp; Thresholds</h1>
+            <p className="type-caption text-red-100 mt-0.5">Select an academic year to manage stages &amp; activities</p>
           </div>
         </div>
 
         <button
           onClick={fetchYears}
           disabled={isLoading}
-          className="p-2 bg-red-600/60 rounded-full text-white hover:bg-red-700 transition-colors"
+          className="p-2 type-btn bg-red-600/60 rounded-full text-white hover:bg-red-700 transition-colors"
           title="Refresh"
         >
           <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -80,8 +80,8 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
 
       <div className="flex-1 p-6 max-w-xl mx-auto w-full space-y-6 pt-8">
         <div className="text-center space-y-2">
-          <h2 className="font-heading text-2xl font-extrabold text-slate-900">Select Academic Year</h2>
-          <p className="text-sm font-medium text-slate-500 max-w-md mx-auto">
+          <h2 className="type-h3 text-slate-900">Select Academic Year</h2>
+          <p className="type-body-sm font-medium text-slate-500 max-w-md mx-auto">
             Please select an academic year to manage its stages and activities.
           </p>
         </div>
@@ -90,22 +90,22 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
             <RefreshCw className="w-8 h-8 animate-spin text-red-500" />
-            <p className="text-xs font-semibold text-slate-500">Loading academic years...</p>
+            <p className="type-caption text-slate-500">Loading academic years...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
             <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-            <p className="text-sm font-bold text-slate-800">{error}</p>
+            <p className="type-body-sm font-bold text-slate-800">{error}</p>
             <button
               onClick={fetchYears}
-              className="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-bold hover:bg-red-600"
+              className="px-4 py-2 bg-red-500 text-white rounded-xl type-caption font-bold hover:bg-red-600"
             >
               Retry
             </button>
           </div>
         ) : yearsList.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
-            <p className="text-sm font-bold text-slate-700">No configured academic years found.</p>
+            <p className="type-body-sm font-bold text-slate-700">No configured academic years found.</p>
           </div>
         ) : (
           <div className="space-y-4 pt-2">
@@ -116,14 +116,14 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
                 className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md hover:border-red-400 transition-all cursor-pointer flex items-center justify-between group"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-extrabold text-sm shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-extrabold type-body-sm shadow-xs">
                     {y.yearNo || idx + 1}
                   </div>
                   <div className="flex items-center space-x-2.5">
                     <GraduationCap className="w-5 h-5 text-slate-700" />
                     <div>
-                      <h3 className="font-heading font-bold text-slate-900 text-base">{y.yearName}</h3>
-                      <p className="text-xs text-slate-400 font-medium">Manage Stage {y.yearNo || idx + 1} activities</p>
+                      <h3 className="type-h5 text-slate-900">{y.yearName}</h3>
+                      <p className="type-caption text-slate-400 font-medium">Manage Stage {y.yearNo || idx + 1} activities</p>
                     </div>
                   </div>
                 </div>
