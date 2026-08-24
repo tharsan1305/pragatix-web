@@ -8,6 +8,7 @@ import apiClient from '../../../services/apiClient';
 import { ActivityService } from '../services/activityService';
 
 interface ClaimableActivity {
+  id?: number;
   name: string;
   xp: number;
   category: string;
@@ -64,6 +65,7 @@ export default function PointReviewTab() {
           for (const sub of stage.subgroups) {
             for (const act of sub.activities) {
               flattened.push({
+                id: act.id || act.activityId,
                 name: act.activityName,
                 xp: act.rewardXp,
                 category: act.category || 'OTHER',
