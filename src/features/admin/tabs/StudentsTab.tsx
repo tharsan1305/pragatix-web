@@ -124,15 +124,14 @@ export default function StudentsTab({ onBack }: Props) {
 
   const fetchLookups = async () => {
     try {
-      const [deptRes, ayRes, yearRes, semRes, genRes, secRes, teamRes, guardianRes] = await Promise.all([
+      const [deptRes, ayRes, yearRes, semRes, genRes, secRes, teamRes] = await Promise.all([
         apiClient.get('/api/v1/admin/departments').catch(() => null),
         apiClient.get('/api/v1/admin/academic-years').catch(() => null),
         apiClient.get('/api/v1/admin/years').catch(() => null),
         apiClient.get('/api/v1/admin/semesters').catch(() => null),
         apiClient.get('/api/v1/admin/genders').catch(() => null),
         apiClient.get('/api/v1/admin/sections').catch(() => null),
-        apiClient.get('/api/v1/teams').catch(() => null),
-        apiClient.get('/api/v1/admin/guardian-relations').catch(() => null)
+        apiClient.get('/api/v1/teams').catch(() => null)
       ]);
 
       const deduplicate = (list: any[]) => {
@@ -148,8 +147,7 @@ export default function StudentsTab({ onBack }: Props) {
 
       const depts = deduplicate(deptRes?.data?.data || []);
       const secs = deduplicate(secRes?.data?.data || []);
-      const guardianData = guardianRes?.data?.data || ['Father', 'Mother', 'Guardian', 'Parent'];
-      const guardianRelations = Array.isArray(guardianData) ? guardianData : ['Father', 'Mother', 'Guardian', 'Parent'];
+      const guardianRelations = ['Father', 'Mother', 'Guardian', 'Parent'];
 
       setLookups({
         departments: depts,
@@ -285,15 +283,34 @@ export default function StudentsTab({ onBack }: Props) {
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     const toastId = toast.loading('Downloading template...');
     try {
-      downloadStudentTemplate();
+      const response = await apiClient.get('/api/v1/students/bulk-upload/template', {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'SPDMS_Student_Bulk_Upload_Template.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
       toast.dismiss(toastId);
-      toast.success('Template downloaded to your downloads folder!');
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      toast.error('Failed to download student upload template');
+      toast.success('Official Excel template downloaded!');
+    } catch {
+      try {
+        downloadStudentTemplate();
+        toast.dismiss(toastId);
+        toast.success('Template downloaded to your downloads folder!');
+      } catch (err: any) {
+        toast.dismiss(toastId);
+        toast.error('Failed to download student upload template');
+      }
     }
   };
 
@@ -325,15 +342,19 @@ export default function StudentsTab({ onBack }: Props) {
 
         if (validRows.length > 0) {
           toast.success(`Parsed ${validRows.length} valid student rows.`);
+        } else if (rejectedRows.length > 0) {
+          toast.error(`${rejectedRows.length} rows have validation errors. Check the error details below.`);
         } else {
           toast.error('No valid student records found in the Excel file.');
         }
       } else {
-        toast.error(res.data?.message || 'Failed to parse Excel file');
+        const msg = res.data?.message || 'Failed to parse Excel file';
+        toast.error(msg, { duration: 6000 });
       }
     } catch (err: any) {
       toast.dismiss(toastId);
-      toast.error(err.response?.data?.message || 'Failed to parse Excel file');
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to parse Excel file';
+      toast.error(msg, { duration: 7000 });
     } finally {
       setIsBulkParsing(false);
       e.target.value = '';

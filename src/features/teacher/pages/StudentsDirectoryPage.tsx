@@ -168,15 +168,34 @@ export default function StudentsDirectoryPage() {
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     const toastId = toast.loading('Downloading template...');
     try {
-      downloadStudentTemplate();
+      const response = await apiClient.get('/api/v1/students/bulk-upload/template', {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'SPDMS_Student_Bulk_Upload_Template.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
       toast.dismiss(toastId);
-      toast.success('Template downloaded to your downloads folder!');
-    } catch (e: any) {
-      toast.dismiss(toastId);
-      toast.error('Failed to download student upload template');
+      toast.success('Official Excel template downloaded!');
+    } catch {
+      try {
+        downloadStudentTemplate();
+        toast.dismiss(toastId);
+        toast.success('Template downloaded to your downloads folder!');
+      } catch (err: any) {
+        toast.dismiss(toastId);
+        toast.error('Failed to download student upload template');
+      }
     }
   };
 
