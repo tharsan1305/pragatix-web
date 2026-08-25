@@ -1327,12 +1327,20 @@ export default function TeacherGroupManagementTab({ onPushView, onBack }: Teache
                             Stage {level}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap text-text-secondary type-caption font-medium mt-1">
-                          <span>Captain: <strong className="text-text-primary">{captainName}</strong></span>
+                        <div className="flex items-center gap-2 flex-wrap text-text-secondary type-caption font-medium mt-1.5">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span>Captain: {captainName}</span>
+                          </span>
+
                           {viceCaptainName !== '—' && viceCaptainName !== 'Unassigned' && (
-                            <span>• Vice: <strong className="text-text-primary">{viceCaptainName}</strong></span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                              <span>Vice: {viceCaptainName}</span>
+                            </span>
                           )}
-                          <span className="px-2 py-0.5 rounded bg-bg text-text-secondary border border-border font-bold text-[10px]">
+
+                          <span className="px-2.5 py-0.5 rounded-full bg-bg text-text-secondary border border-border font-extrabold text-[10px]">
                             {memberCount}/{size} members
                           </span>
                         </div>

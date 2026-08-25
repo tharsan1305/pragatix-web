@@ -916,19 +916,44 @@ export default function StudentsTab({ onBack }: Props) {
               const semester = student.semesterId ? `Sem: ${student.semesterId}` : (student.semester ? `Sem: ${student.semester}` : '');
 
               return (
-                <div key={student.id} className="bg-card rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border p-4 flex flex-col md:flex-row md:items-center justify-between hover:border-accent/40 transition-all gap-3">
+                <div key={student.id} className="bg-card rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-border p-4 flex flex-col md:flex-row md:items-center justify-between hover:border-accent/40 transition-all gap-3">
                   <div className="flex items-center space-x-3.5 pl-1 min-w-0">
-                    <div className="w-11 h-11 bg-bg border border-border rounded-xl flex items-center justify-center text-accent font-black type-h5 shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center font-black type-h5 shrink-0 shadow-sm">
                       {name ? name[0].toUpperCase() : 'S'}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center space-x-2 flex-wrap">
+                      <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                         <h3 className="type-h5 font-bold text-text-primary truncate">{name}</h3>
-                        <span className="type-fine font-extrabold text-accent bg-accent-tint px-2 py-0.5 rounded-md border border-accent/20 shrink-0">
+                        
+                        {/* Live Active Status Pill Badge */}
+                        <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1.5 border shrink-0 ${
+                          student.active !== false
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                            : 'bg-rose-50 text-rose-700 border-rose-200'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${student.active !== false ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          <span>{student.active !== false ? 'ACTIVE' : 'INACTIVE'}</span>
+                        </span>
+
+                        {/* Captain / Vice Captain Badges */}
+                        {student.isCaptain && (
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 uppercase flex items-center gap-1.5 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            <span>CAPTAIN</span>
+                          </span>
+                        )}
+                        {student.isViceCaptain && (
+                          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 uppercase flex items-center gap-1.5 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                            <span>VICE CAPTAIN</span>
+                          </span>
+                        )}
+
+                        <span className="type-fine font-extrabold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
                           {student.score ?? student.xp ?? student.points ?? 0} XP
                         </span>
                       </div>
-                      <p className="type-caption text-text-secondary font-medium truncate mt-0.5">
+                      <p className="type-caption text-text-secondary font-medium truncate mt-1">
                         {regNo} • {deptName} {semester ? `• ${semester}` : ''} • Year: {year} • Section: {section}
                       </p>
                       <p className="type-fine font-semibold text-text-muted mt-0.5 uppercase tracking-wider">

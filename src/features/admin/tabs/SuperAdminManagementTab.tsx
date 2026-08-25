@@ -435,8 +435,8 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 </div>
 
                 <div className="pt-3 border-t border-border flex items-center justify-between">
-                  <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold text-[10px] tracking-wide shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span>ACTIVE YEAR ADMIN</span>
                   </span>
                   <span className="text-[11px] text-text-muted font-bold">ID: #{admin.id}</span>
