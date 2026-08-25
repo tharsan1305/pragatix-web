@@ -35,6 +35,128 @@ import { useAuth } from '../../store/authContext';
 import apiClient from '../../services/apiClient';
 import { ROLE_ACCESS, getEffectiveRole } from '../../config/roleAccess';
 
+const TAB_COLOR_SYSTEM: Record<string, { 
+  activeBg: string; 
+  activeText: string; 
+  activeBorder: string; 
+  iconBg: string; 
+  iconText: string;
+  badgeBg: string;
+  badgeText: string;
+  inactiveIcon: string;
+}> = {
+  overview: {
+    activeBg: 'bg-blue-50/90',
+    activeText: 'text-blue-700 font-extrabold',
+    activeBorder: 'border-blue-200/80',
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+    badgeBg: 'bg-blue-100',
+    badgeText: 'text-blue-700',
+    inactiveIcon: 'text-blue-500'
+  },
+  activity: {
+    activeBg: 'bg-emerald-50/90',
+    activeText: 'text-emerald-700 font-extrabold',
+    activeBorder: 'border-emerald-200/80',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-700',
+    inactiveIcon: 'text-emerald-500'
+  },
+  attendance: {
+    activeBg: 'bg-sky-50/90',
+    activeText: 'text-sky-700 font-extrabold',
+    activeBorder: 'border-sky-200/80',
+    iconBg: 'bg-sky-100',
+    iconText: 'text-sky-600',
+    badgeBg: 'bg-sky-100',
+    badgeText: 'text-sky-700',
+    inactiveIcon: 'text-sky-500'
+  },
+  groups: {
+    activeBg: 'bg-indigo-50/90',
+    activeText: 'text-indigo-700 font-extrabold',
+    activeBorder: 'border-indigo-200/80',
+    iconBg: 'bg-indigo-100',
+    iconText: 'text-indigo-600',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+    inactiveIcon: 'text-indigo-500'
+  },
+  requests: {
+    activeBg: 'bg-amber-50/90',
+    activeText: 'text-amber-700 font-extrabold',
+    activeBorder: 'border-amber-200/80',
+    iconBg: 'bg-amber-100',
+    iconText: 'text-amber-600',
+    badgeBg: 'bg-amber-100',
+    badgeText: 'text-amber-700',
+    inactiveIcon: 'text-amber-500'
+  },
+  admins: {
+    activeBg: 'bg-rose-50/90',
+    activeText: 'text-rose-700 font-extrabold',
+    activeBorder: 'border-rose-200/80',
+    iconBg: 'bg-rose-100',
+    iconText: 'text-rose-600',
+    badgeBg: 'bg-rose-100',
+    badgeText: 'text-rose-700',
+    inactiveIcon: 'text-rose-500'
+  },
+  leaderboard: {
+    activeBg: 'bg-purple-50/90',
+    activeText: 'text-purple-700 font-extrabold',
+    activeBorder: 'border-purple-200/80',
+    iconBg: 'bg-purple-100',
+    iconText: 'text-purple-600',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
+    inactiveIcon: 'text-purple-500'
+  },
+  profile: {
+    activeBg: 'bg-violet-50/90',
+    activeText: 'text-violet-700 font-extrabold',
+    activeBorder: 'border-violet-200/80',
+    iconBg: 'bg-violet-100',
+    iconText: 'text-violet-600',
+    badgeBg: 'bg-violet-100',
+    badgeText: 'text-violet-700',
+    inactiveIcon: 'text-violet-500'
+  },
+  students: {
+    activeBg: 'bg-teal-50/90',
+    activeText: 'text-teal-700 font-extrabold',
+    activeBorder: 'border-teal-200/80',
+    iconBg: 'bg-teal-100',
+    iconText: 'text-teal-600',
+    badgeBg: 'bg-teal-100',
+    badgeText: 'text-teal-700',
+    inactiveIcon: 'text-teal-500'
+  },
+  teachers: {
+    activeBg: 'bg-emerald-50/90',
+    activeText: 'text-emerald-700 font-extrabold',
+    activeBorder: 'border-emerald-200/80',
+    iconBg: 'bg-emerald-100',
+    iconText: 'text-emerald-600',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-700',
+    inactiveIcon: 'text-emerald-500'
+  },
+  departments: {
+    activeBg: 'bg-cyan-50/90',
+    activeText: 'text-cyan-700 font-extrabold',
+    activeBorder: 'border-cyan-200/80',
+    iconBg: 'bg-cyan-100',
+    iconText: 'text-cyan-600',
+    badgeBg: 'bg-cyan-100',
+    badgeText: 'text-cyan-700',
+    inactiveIcon: 'text-cyan-500'
+  }
+};
+
 export default function AdminDashboard() {
   const auth = useAuth();
   const { user, isSuperAdmin, isHOD, isAdmin, role, subRoles } = auth;
@@ -412,31 +534,37 @@ export default function AdminDashboard() {
               {section.items.map((item) => {
                 const isActive = currentTabSlug === item.slug && !currentViewName;
                 const Icon = item.icon;
+                const colors = TAB_COLOR_SYSTEM[item.slug] || TAB_COLOR_SYSTEM.overview;
+
                 return (
                   <div key={item.slug} className="relative group/navitem">
                     <button
                       onClick={() => handleTabClick(item.slug)}
-                      className={`w-full flex items-center type-nav transition-all cursor-pointer rounded-lg ${
+                      className={`w-full flex items-center transition-all duration-200 cursor-pointer rounded-xl border ${
                         isSidebarCollapsed 
-                          ? 'justify-center p-3' 
+                          ? 'justify-center p-2.5' 
                           : 'justify-between px-3.5 py-2.5'
                       } ${
                         isActive 
-                          ? 'bg-accent-tint text-text-primary font-bold shadow-[inset_2px_0_0_var(--accent)]' 
-                          : 'text-text-secondary hover:bg-bg hover:text-text-primary'
+                          ? `${colors.activeBg} ${colors.activeText} ${colors.activeBorder} shadow-sm` 
+                          : 'border-transparent text-text-secondary hover:bg-bg hover:text-text-primary'
                       }`}
                       title={isSidebarCollapsed ? item.name : undefined}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-accent' : 'text-text-secondary group-hover/navitem:text-text-primary'}`} />
-                        {!isSidebarCollapsed && <span className="truncate">{item.name}</span>}
+                        <div className={`p-1.5 rounded-lg shrink-0 transition-colors ${
+                          isActive ? `${colors.iconBg} ${colors.iconText}` : `bg-bg/80 ${colors.inactiveIcon} group-hover/navitem:scale-110 transition-transform`
+                        }`}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        {!isSidebarCollapsed && <span className="truncate text-sm font-bold">{item.name}</span>}
                       </div>
 
                       {/* Pill Badge (e.g. Requests Count) */}
                       {!isSidebarCollapsed && item.badge !== undefined && (
-                        <span className={`px-2 py-0.5 rounded-full type-fine font-bold ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-black transition-colors ${
                           isActive 
-                            ? 'bg-accent-tint text-accent' 
+                            ? `${colors.badgeBg} ${colors.badgeText}` 
                             : 'bg-bg text-text-secondary border border-border'
                         }`}>
                           {item.badge}
@@ -501,6 +629,8 @@ export default function AdminDashboard() {
                   {section.items.map((item) => {
                     const isActive = currentTabSlug === item.slug && !currentViewName;
                     const Icon = item.icon;
+                    const colors = TAB_COLOR_SYSTEM[item.slug] || TAB_COLOR_SYSTEM.overview;
+
                     return (
                       <button
                         key={item.slug}
@@ -508,19 +638,23 @@ export default function AdminDashboard() {
                           handleTabClick(item.slug);
                           setIsMobileDrawerOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-4 py-3 type-nav rounded-lg transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
                           isActive 
-                            ? 'bg-accent-tint text-text-primary font-bold shadow-[inset_2px_0_0_var(--accent)]' 
-                            : 'text-text-secondary hover:bg-bg hover:text-text-primary'
+                            ? `${colors.activeBg} ${colors.activeText} ${colors.activeBorder} shadow-sm` 
+                            : 'border-transparent text-text-secondary hover:bg-bg hover:text-text-primary'
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <Icon className={`w-5 h-5 ${isActive ? 'text-accent' : 'text-text-secondary'}`} />
-                          <span>{item.name}</span>
+                          <div className={`p-1.5 rounded-lg shrink-0 transition-colors ${
+                            isActive ? `${colors.iconBg} ${colors.iconText}` : `bg-bg/80 ${colors.inactiveIcon}`
+                          }`}>
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-bold">{item.name}</span>
                         </div>
                         {item.badge !== undefined && item.badge > 0 && (
-                          <span className={`px-2 py-0.5 rounded-full type-fine font-bold ${
-                            isActive ? 'bg-accent-tint text-accent' : 'bg-bg text-text-secondary border border-border'
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-black transition-colors ${
+                            isActive ? `${colors.badgeBg} ${colors.badgeText}` : 'bg-bg text-text-secondary border border-border'
                           }`}>
                             {item.badge}
                           </span>
