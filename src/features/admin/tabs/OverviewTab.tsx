@@ -102,13 +102,13 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-bg pb-16">
-      {/* Clean White/Grey Header Bar */}
-      <div className="bg-card px-6 py-5 border-b border-border text-text-primary sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+    <div className="flex flex-col min-h-full bg-[#F8FAFC] text-slate-900 pb-16">
+      {/* Explicit Clean White/Grey Header Bar */}
+      <div className="bg-white px-6 py-5 border-b border-slate-200 text-slate-900 sticky top-0 z-20 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div className="flex items-center space-x-3">
-            <h1 className="type-h3 font-bold text-text-primary tracking-tight">{overviewTitle}</h1>
-            <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-secondary border border-border tracking-wider">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">{overviewTitle}</h1>
+            <span className="px-2.5 py-0.5 rounded-md text-xs font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200 tracking-wider">
               {scopeLabel}
             </span>
           </div>
@@ -116,7 +116,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => onPushView('recycle_bin')}
-              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
+              className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
               title="Recycle Bin"
             >
               <Trash2 className="w-4 h-4" />
@@ -124,19 +124,19 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
             <button
               onClick={fetchStats}
               disabled={isLoading}
-              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer disabled:opacity-50"
+              className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh Stats"
             >
-              <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-slate-900 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
 
         <div>
-          <h2 className="type-h4 font-bold text-text-primary">
+          <h2 className="text-base font-bold text-slate-900">
             Welcome back, {user?.name ? user.name : roleConfig.roleDisplayName}
           </h2>
-          <p className="type-caption text-text-secondary font-medium mt-0.5">
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
             {overviewSubtitle}
           </p>
         </div>
@@ -146,35 +146,35 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
       <div className="px-5 lg:px-8 py-6 max-w-[1400px] mx-auto w-full space-y-6">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-3">
-            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
-            <p className="type-body-sm text-text-secondary font-medium">Loading executive dashboard metrics...</p>
+            <RefreshCw className="w-8 h-8 animate-spin text-slate-900" />
+            <p className="type-body-sm text-slate-500 font-medium">Loading executive dashboard metrics...</p>
           </div>
         ) : (
           <>
-            {/* Quick Launch Analytics Banner (Clean White/Grey Card) */}
+            {/* Quick Launch Analytics Banner (Pure Clean White Card) */}
             <div
               onClick={() => onPushView('analytics')}
-              className="bg-card text-text-primary rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] cursor-pointer hover:border-accent/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-border group relative overflow-hidden"
+              className="bg-white text-slate-900 rounded-2xl p-6 shadow-xs cursor-pointer hover:border-slate-400 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-slate-200 group relative overflow-hidden"
             >
-              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-accent rounded-l-2xl" />
+              <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-slate-900 rounded-l-2xl" />
               <div className="flex items-start sm:items-center space-x-4 pl-2">
-                <div className="w-13 h-13 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent shrink-0 group-hover:scale-105 transition-transform">
+                <div className="w-13 h-13 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-900 shrink-0 group-hover:scale-105 transition-transform">
                   <BarChart3 className="w-7 h-7" />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="type-h4 font-black text-text-primary tracking-tight">Executive Analytics & Reporting</h3>
-                    <span className="px-2.5 py-0.5 rounded-md type-fine font-extrabold bg-bg text-text-secondary border border-border tracking-wider uppercase">
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">Executive Analytics & Reporting</h3>
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wider uppercase">
                       Live Reports
                     </span>
                   </div>
-                  <p className="type-caption text-text-secondary font-medium mt-1 max-w-xl">
+                  <p className="text-xs text-slate-600 font-medium mt-1 max-w-xl">
                     Live student engagement statistics, departmental point comparisons, penalty analytics & downloadable PDF audit reports.
                   </p>
                 </div>
               </div>
 
-              <button className="flex items-center space-x-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-card font-extrabold type-btn rounded-xl transition-colors shrink-0 shadow-none cursor-pointer self-start sm:self-auto">
+              <button className="flex items-center space-x-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors shrink-0 shadow-none cursor-pointer self-start sm:self-auto">
                 <span>View Analytics</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
