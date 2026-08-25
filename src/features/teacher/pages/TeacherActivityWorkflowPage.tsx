@@ -56,8 +56,6 @@ export default function TeacherActivityWorkflowPage({
   // Flutter: xpAmount = isPenalty ? penaltyXp : awardXp
   const xpAmount = isPenalty ? (activity?.penaltyXp ?? 0) : (activity?.awardXp ?? 0);
   const xpLabel = isPenalty ? 'Penalty' : 'Award';
-  const themeColor = isPenalty ? '#EF4444' : '#10B981';
-  const themeColorLight = isPenalty ? '#FEF2F2' : '#F0FDF4';
 
   // ── Init: exactly matches Flutter initState ──
   useEffect(() => {
@@ -344,17 +342,19 @@ export default function TeacherActivityWorkflowPage({
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
-      {/* AppBar — matches Flutter gradient colors exactly */}
-      <div className="bg-gradient-to-r from-[#1E293B] to-[#334155] text-white px-6 py-4 shadow-md flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center space-x-3">
+    <div className="flex flex-col min-h-screen bg-bg text-text-primary">
+      {/* AppBar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-3.5">
           <button
             onClick={handleBackNavigation}
-            className="p-1.5 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+            className="px-3.5 py-2 bg-card hover:bg-bg border border-border rounded-lg text-text-primary transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
           </button>
-          <h1 className="type-h4 tracking-wide">{getAppBarTitle()}</h1>
+          <h1 className="type-h4 tracking-tight font-bold text-text-primary">{getAppBarTitle()}</h1>
         </div>
 
         <button
@@ -364,9 +364,9 @@ export default function TeacherActivityWorkflowPage({
             else if (currentFlowStep === 3) fetchSectionsForDept(selectedDept, selectedYear);
             else fetchStudentsFinal(selectedSection, selectedDept, selectedYear);
           }}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+          className="p-2 bg-card hover:bg-bg border border-border text-text-secondary hover:text-text-primary rounded-lg transition-colors cursor-pointer"
         >
-          <RefreshCw className={`w-4 h-4 text-white ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
@@ -375,15 +375,15 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 1: SELECT ACADEMIC YEAR */}
         {currentFlowStep === 1 && (
           <div className="space-y-4">
-            <h2 className="type-h5 text-[#1E293B]">Select Academic Year</h2>
+            <h2 className="type-h5 text-text-primary font-bold">Select Academic Year</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
+                <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
               </div>
             ) : availableYearsList.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <School className="w-14 h-14 text-slate-300 mb-3" />
-                <p className="type-body-sm font-medium text-slate-500">No available years found for this activity</p>
+                <School className="w-14 h-14 text-text-muted mb-3" />
+                <p className="type-body-sm font-medium text-text-secondary">No available years found for this activity</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -391,15 +391,15 @@ export default function TeacherActivityWorkflowPage({
                   <div
                     key={yr.yearNo}
                     onClick={() => handleYearSelected(yr)}
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+                    className="bg-card p-5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border hover:border-text-muted transition-all cursor-pointer flex items-center justify-between"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-lg bg-bg text-text-primary border border-border flex items-center justify-center font-bold">
                         <School className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 type-body-sm">{yr.yearName}</span>
+                      <span className="font-bold text-text-primary type-body-sm">{yr.yearName}</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-text-muted" />
                   </div>
                 ))}
               </div>
@@ -410,27 +410,27 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 2: SELECT DEPARTMENT */}
         {currentFlowStep === 2 && (
           <div className="space-y-4">
-            <h2 className="type-h5 text-[#1E293B]">Select Department</h2>
+            <h2 className="type-h5 text-text-primary font-bold">Select Department</h2>
 
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search Department…"
                 value={deptSearchQuery}
                 onChange={(e) => setDeptSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#E2E8F0] rounded-xl type-body-sm outline-none focus:border-[#11998E]"
+                className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-lg type-body-sm outline-none focus:border-text-primary text-text-primary placeholder-text-muted"
               />
             </div>
 
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
+                <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
               </div>
             ) : filteredDepts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Building2 className="w-14 h-14 text-slate-300 mb-3" />
-                <p className="type-body-sm font-medium text-slate-500">No departments found</p>
+                <Building2 className="w-14 h-14 text-text-muted mb-3" />
+                <p className="type-body-sm font-medium text-text-secondary">No departments found</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -438,15 +438,15 @@ export default function TeacherActivityWorkflowPage({
                   <div
                     key={dept.id}
                     onClick={() => handleDeptSelected(dept)}
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+                    className="bg-card p-5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border hover:border-text-muted transition-all cursor-pointer flex items-center justify-between"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-bg text-text-primary border border-border flex items-center justify-center">
                         <Building2 className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 type-body-sm">{dept.name}</span>
+                      <span className="font-bold text-text-primary type-body-sm">{dept.name}</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-text-muted" />
                   </div>
                 ))}
               </div>
@@ -457,10 +457,10 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 3: SELECT SECTION */}
         {currentFlowStep === 3 && (
           <div className="space-y-4">
-            <h2 className="type-h5 text-[#1E293B]">Select Section</h2>
+            <h2 className="type-h5 text-text-primary font-bold">Select Section</h2>
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
+                <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
               </div>
             ) : (
               <div className="space-y-3">
@@ -468,17 +468,17 @@ export default function TeacherActivityWorkflowPage({
                   <div
                     key={sec.id || sec.sectionName}
                     onClick={() => handleSectionSelected(sec)}
-                    className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+                    className="bg-card p-5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border hover:border-text-muted transition-all cursor-pointer flex items-center justify-between"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-bg text-text-primary border border-border flex items-center justify-center">
                         <Layers className="w-5 h-5" />
                       </div>
-                      <span className="font-bold text-slate-800 type-body-sm">
+                      <span className="font-bold text-text-primary type-body-sm">
                         Section {sec.sectionName || sec.name}
                       </span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-4 h-4 text-text-muted" />
                   </div>
                 ))}
               </div>
@@ -489,55 +489,51 @@ export default function TeacherActivityWorkflowPage({
         {/* STEP 4: STUDENT ROSTER & AWARD XP */}
         {currentFlowStep === 4 && (
           <div className="space-y-4 pb-24">
-            {/* Header — shows penalty vs award mode with correct color */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            {/* Header — shows penalty vs award mode */}
+            <div className="bg-card p-4 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
               <div className="flex items-center justify-between">
-                <span className="type-body-sm font-bold text-slate-800">Select Students</span>
+                <span className="type-body-sm font-bold text-text-primary">Select Students</span>
                 <span
-                  className="type-caption font-bold px-3 py-1 rounded-xl border"
-                  style={{ color: themeColor, backgroundColor: themeColorLight, borderColor: themeColor + '50' }}
+                  className={`type-caption font-bold px-3 py-1 rounded-md border ${
+                    isPenalty ? 'bg-accent-tint text-accent border-accent/30' : 'bg-success-tint text-success border-success/30'
+                  }`}
                 >
                   {xpLabel}: {xpAmount} XP
                 </span>
               </div>
-              <p className="type-caption text-slate-500 mt-1">
+              <p className="type-caption text-text-secondary mt-1">
                 {activity?.name} · Cap: {activity?.cap ?? 1}
               </p>
             </div>
 
-            {/* Search + Select All Bar — matches Flutter */}
-            <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+            {/* Search + Select All Bar */}
+            <div className="bg-card p-3 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
               <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search Student by Name/ID…"
                   value={studentSearchQuery}
                   onChange={(e) => setStudentSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl type-body-sm outline-none focus:border-[#11998E]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-lg type-body-sm outline-none focus:border-text-primary text-text-primary placeholder-text-muted"
                 />
               </div>
 
-              {/* Select All checkbox — matches Flutter CheckboxListTile */}
+              {/* Select All checkbox */}
               <div
                 onClick={handleToggleSelectAll}
-                className={`flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors ${selectAll ? 'bg-slate-50' : 'hover:bg-slate-50'}`}
+                className={`flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer transition-colors ${selectAll ? 'bg-bg' : 'hover:bg-bg'}`}
               >
                 <div
-                  className="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
-                  style={{
-                    backgroundColor: selectAll ? themeColor : 'white',
-                    borderColor: selectAll ? themeColor : '#CBD5E1'
-                  }}
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                    selectAll ? 'bg-text-primary border-text-primary text-card' : 'bg-card border-border'
+                  }`}
                 >
-                  {selectAll && <CheckCircle className="w-3 h-3 text-white" />}
+                  {selectAll && <CheckCircle className="w-3.5 h-3.5" />}
                 </div>
-                <span className="type-body-sm font-bold text-slate-700">Select All Students</span>
+                <span className="type-body-sm font-bold text-text-primary">Select All Students</span>
                 {selectedStudentIds.size > 0 && (
-                  <span
-                    className="ml-auto type-caption font-bold px-2 py-0.5 rounded-full"
-                    style={{ color: themeColor, backgroundColor: themeColorLight }}
-                  >
+                  <span className="ml-auto type-caption font-bold px-2 py-0.5 rounded-md bg-accent-tint text-accent border border-accent/30">
                     {selectedStudentIds.size} selected
                   </span>
                 )}
@@ -547,12 +543,12 @@ export default function TeacherActivityWorkflowPage({
             {/* Student List */}
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 animate-spin text-[#11998E]" />
+                <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
               </div>
             ) : filteredStudents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-slate-100 p-8">
-                <AlertCircle className="w-12 h-12 text-slate-300 mb-2" />
-                <p className="type-body-sm font-medium text-slate-500">
+              <div className="flex flex-col items-center justify-center py-20 text-center bg-card rounded-lg border border-border p-8">
+                <AlertCircle className="w-12 h-12 text-text-muted mb-2" />
+                <p className="type-body-sm font-medium text-text-secondary">
                   {eligibleStudents.length === 0
                     ? 'No eligible students found for this activity'
                     : 'No students match search criteria'}
@@ -569,36 +565,31 @@ export default function TeacherActivityWorkflowPage({
                     <div
                       key={student.id}
                       onClick={() => handleToggleStudent(studentId)}
-                      className="bg-white p-4 rounded-2xl border transition-all flex items-center justify-between cursor-pointer"
-                      style={{
-                        borderColor: isSelected ? themeColor + '80' : '#F1F5F9',
-                        backgroundColor: isSelected ? themeColorLight : 'white',
-                      }}
+                      className={`p-4 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
+                        isSelected ? 'bg-accent-tint/40 border-accent' : 'bg-card border-border hover:border-text-muted'
+                      }`}
                     >
                       <div className="flex items-center space-x-3">
-                        {/* Checkbox — matches Flutter CheckboxListTile */}
                         <div
-                          className="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
-                          style={{
-                            backgroundColor: isSelected ? themeColor : 'white',
-                            borderColor: isSelected ? themeColor : '#CBD5E1'
-                          }}
+                          className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isSelected ? 'bg-accent border-accent text-card' : 'bg-card border-border'
+                          }`}
                         >
                           {isSelected && (isPenalty
-                            ? <Minus className="w-3 h-3 text-white stroke-[3]" />
-                            : <CheckCircle className="w-3 h-3 text-white" />
+                            ? <Minus className="w-3 h-3 stroke-[3]" />
+                            : <CheckCircle className="w-3.5 h-3.5" />
                           )}
                         </div>
                         <div>
-                          <h4 className="font-semibold type-body-sm text-slate-800">{student.fullName}</h4>
-                          <p className="type-caption text-slate-500 font-mono mt-0.5">
+                          <h4 className="font-semibold type-body-sm text-text-primary">{student.fullName}</h4>
+                          <p className="type-caption text-text-secondary font-mono mt-0.5">
                             {student.regNo || student.studentId}
                           </p>
                         </div>
                       </div>
 
                       {isAwarded && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full type-caption font-bold bg-green-100 text-green-700">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md type-caption font-bold bg-success-tint text-success border border-success/30">
                           <CheckCircle className="w-3.5 h-3.5" /> PASSED
                         </span>
                       )}
@@ -608,23 +599,19 @@ export default function TeacherActivityWorkflowPage({
               </div>
             )}
 
-            {/* Bottom Sticky Award Bar — matches Flutter Container at bottom */}
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-lg space-y-3 sticky bottom-4">
+            {/* Bottom Sticky Award Bar */}
+            <div className="bg-card p-4 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3 sticky bottom-4">
               <input
                 type="text"
                 placeholder="Add optional description/remarks…"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl type-body-sm outline-none focus:border-[#11998E]"
+                className="w-full px-4 py-2 border border-border bg-card rounded-lg type-body-sm outline-none focus:border-text-primary text-text-primary placeholder-text-muted"
               />
               <button
                 onClick={handleBatchAward}
                 disabled={isAwarding || selectedStudentIds.size === 0}
-                className="w-full py-3 font-bold rounded-xl type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                style={{
-                  backgroundColor: isAwarding || selectedStudentIds.size === 0 ? '#94A3B8' : themeColor,
-                  color: 'white',
-                }}
+                className="w-full py-3 font-bold rounded-lg type-btn shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer bg-accent hover:bg-accent-hover text-card disabled:opacity-50"
               >
                 <Award className="w-5 h-5" />
                 <span>

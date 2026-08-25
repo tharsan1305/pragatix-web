@@ -14,23 +14,23 @@ export const TeamScoreCard: React.FC<TeamScoreCardProps> = ({
   memberCount,
 }) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition">
+    <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:bg-bg transition">
       <div className="flex items-center space-x-3">
         {rank && (
-          <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center type-caption font-bold">
+          <div className="w-8 h-8 rounded-full bg-bg border border-border text-text-primary flex items-center justify-center type-caption font-bold">
             #{rank}
           </div>
         )}
         <div>
-          <h4 className="type-h5 text-gray-900">{teamName}</h4>
+          <h4 className="type-h5 font-bold text-text-primary">{teamName}</h4>
           {memberCount !== undefined && (
-            <p className="type-caption text-gray-500">{memberCount} Members</p>
+            <p className="type-caption text-text-muted font-medium">{memberCount} Members</p>
           )}
         </div>
       </div>
       <div className="text-right">
-        <span className="type-h4 text-indigo-600 font-bold">{totalScore}</span>
-        <span className="type-fine text-gray-400 block">Total Points</span>
+        <span className="type-h4 text-accent font-bold">{totalScore}</span>
+        <span className="type-fine text-text-muted font-medium block">Total Points</span>
       </div>
     </div>
   );

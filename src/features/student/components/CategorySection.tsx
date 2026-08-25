@@ -21,15 +21,15 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   return (
     <div className="space-y-3">
       {/* Category Header */}
-      <div className="flex justify-between items-center">
-        <h3 className="type-h5 text-slate-800">
+      <div className="flex justify-between items-center px-1">
+        <h3 className="type-h4 font-bold text-text-primary tracking-tight">
           {toTitleCase(subgroup.name)}
         </h3>
         <div
-          className={`px-3 py-1 rounded-full type-caption font-bold ${
+          className={`px-3 py-1 rounded-lg type-caption font-bold border ${
             isPassed
-              ? 'bg-emerald-100 text-emerald-700'
-              : 'bg-blue-100 text-blue-700'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-accent-tint text-accent border-accent/20'
           }`}
         >
           {subgroup.categoryXp} / {subgroup.threshold} XP
@@ -37,7 +37,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       </div>
 
       {/* Activity Cards List */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {subgroup.activities.map((activity) => (
           <ActivityCard
             key={activity.id}

@@ -99,148 +99,161 @@ export default function EditStagePage({ onBack, stage, stageId }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50">
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="type-h3 text-white flex-1">Edit Stage</h1>
+    <div className="flex flex-col min-h-full bg-bg text-text-primary">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back to Stages"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Stages</span>
+          </button>
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Edit Stage</h1>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+              Modify progression thresholds, caps, and parameters for this stage
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
+      <div className="flex-1 p-6 max-w-4xl mx-auto w-full space-y-6">
         {isLoading ? (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 flex flex-col items-center justify-center space-y-4">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="type-body-sm font-medium text-slate-600">Loading Stage details...</p>
+          <div className="bg-card rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border p-12 flex flex-col items-center justify-center space-y-3">
+            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+            <p className="type-body-sm font-medium text-text-secondary">Loading Stage details...</p>
           </div>
         ) : (
-          <form onSubmit={handleSave} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+          <form onSubmit={handleSave} className="bg-card rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border p-6 space-y-6">
             <div>
-              <h2 className="type-h4 text-slate-800">Stage Configuration</h2>
-              <p className="type-body-sm text-slate-500 mt-1">Define a new progression stage for the Student Development Program.</p>
+              <h2 className="type-h4 font-bold text-text-primary">Stage Configuration</h2>
+              <p className="type-body-sm text-text-secondary font-medium mt-0.5">Modify parameters and XP limits for this cohort stage.</p>
             </div>
 
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="type-form-label type-body-sm font-medium text-slate-700">Stage Name *</label>
-              <input 
-                required 
-                type="text" 
-                value={formData.name} 
-                onChange={e => setFormData({...formData, name: e.target.value})} 
-                placeholder="e.g. Stage 1"
-                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-              />
-            </div>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Stage Name *</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={formData.name} 
+                  onChange={e => setFormData({...formData, name: e.target.value})} 
+                  placeholder="e.g. Stage 1"
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                />
+              </div>
 
-            <div className="space-y-1">
-              <label className="type-form-label type-body-sm font-medium text-slate-700">Academic Year *</label>
-              <select
-                value={formData.academicYear}
-                onChange={e => setFormData({...formData, academicYear: e.target.value})}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Academic Year *</label>
+                <select
+                  value={formData.academicYear}
+                  onChange={e => setFormData({...formData, academicYear: e.target.value})}
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary cursor-pointer"
+                >
+                  <option value="FIRST_YEAR">First Year</option>
+                  <option value="SECOND_YEAR">Second Year</option>
+                  <option value="THIRD_YEAR">Third Year</option>
+                  <option value="FINAL_YEAR">Fourth Year</option>
+                </select>
+              </div>
+              
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Description</label>
+                <textarea 
+                  value={formData.description} 
+                  onChange={e => setFormData({...formData, description: e.target.value})} 
+                  placeholder="Describe targets or rules for this stage..."
+                  rows={3}
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-medium text-text-primary resize-none"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="type-form-label text-text-primary font-bold">Expected XP Cap *</label>
+                  <input 
+                    required
+                    type="number" 
+                    value={formData.expectedXp} 
+                    onChange={e => setFormData({...formData, expectedXp: e.target.value})} 
+                    placeholder="e.g. 500"
+                    className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="type-form-label text-text-primary font-bold">Display Order</label>
+                  <input 
+                    type="number" 
+                    value={formData.displayOrder} 
+                    onChange={e => setFormData({...formData, displayOrder: e.target.value})} 
+                    placeholder="e.g. 1"
+                    className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="border border-border rounded-lg p-5 bg-bg space-y-4">
+                <div>
+                  <h3 className="type-h5 font-bold text-text-primary">Subgroup Progression Thresholds</h3>
+                  <p className="type-caption text-text-secondary mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="type-form-label text-text-primary font-bold">Must Threshold (XP)</label>
+                    <input 
+                      type="number" 
+                      value={formData.mustThreshold} 
+                      onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
+                      placeholder="e.g. 50"
+                      className="w-full p-2.5 bg-card border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="type-form-label text-text-primary font-bold">Individual Threshold (XP)</label>
+                    <input 
+                      type="number" 
+                      value={formData.individualThreshold} 
+                      onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
+                      placeholder="e.g. 100"
+                      className="w-full p-2.5 bg-card border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="type-form-label text-text-primary font-bold">Group Threshold (XP)</label>
+                    <input 
+                      type="number" 
+                      value={formData.groupThreshold} 
+                      onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
+                      placeholder="e.g. 150"
+                      className="w-full p-2.5 bg-card border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="pt-6 border-t border-border flex justify-end space-x-4">
+              <button 
+                type="button" 
+                onClick={onBack} 
+                className="type-btn px-5 py-2.5 text-text-secondary hover:bg-bg border border-border rounded-lg font-bold transition-colors cursor-pointer"
               >
-                <option value="FIRST_YEAR">First Year</option>
-                <option value="SECOND_YEAR">Second Year</option>
-                <option value="THIRD_YEAR">Third Year</option>
-                <option value="FINAL_YEAR">Fourth Year</option>
-              </select>
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                disabled={isSaving}
+                className="type-btn px-6 py-2.5 bg-accent text-card font-bold rounded-lg hover:bg-accent-hover transition-colors shadow-none disabled:opacity-70 flex items-center cursor-pointer"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? 'Updating Stage...' : 'Update Stage'}
+              </button>
             </div>
-            
-            <div className="space-y-1">
-              <label className="type-form-label type-body-sm font-medium text-slate-700">Description</label>
-              <textarea 
-                value={formData.description} 
-                onChange={e => setFormData({...formData, description: e.target.value})} 
-                placeholder="Describe targets or rules for this stage..."
-                rows={3}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow resize-none"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="type-form-label type-body-sm font-medium text-slate-700">Expected XP *</label>
-                <input 
-                  required
-                  type="number" 
-                  value={formData.expectedXp} 
-                  onChange={e => setFormData({...formData, expectedXp: e.target.value})} 
-                  placeholder="e.g. 500"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="type-form-label type-body-sm font-medium text-slate-700">Display Order</label>
-                <input 
-                  type="number" 
-                  value={formData.displayOrder} 
-                  onChange={e => setFormData({...formData, displayOrder: e.target.value})} 
-                  placeholder="e.g. 1"
-                  className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                />
-              </div>
-            </div>
-
-            <div className="border border-slate-200 rounded-xl p-5 bg-slate-50/50 space-y-4">
-              <div>
-                <h3 className="type-h5 text-slate-800">Subgroup Thresholds</h3>
-                <p className="type-caption text-slate-500 mt-0.5">Students must complete all required subgroup thresholds before promoting to the next stage.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="type-form-label type-body-sm font-medium text-slate-700">Must Threshold</label>
-                  <input 
-                    type="number" 
-                    value={formData.mustThreshold} 
-                    onChange={e => setFormData({...formData, mustThreshold: e.target.value})} 
-                    placeholder="e.g. 50"
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="type-form-label type-body-sm font-medium text-slate-700">Individual Threshold</label>
-                  <input 
-                    type="number" 
-                    value={formData.individualThreshold} 
-                    onChange={e => setFormData({...formData, individualThreshold: e.target.value})} 
-                    placeholder="e.g. 100"
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="type-form-label type-body-sm font-medium text-slate-700">Group Threshold</label>
-                  <input 
-                    type="number" 
-                    value={formData.groupThreshold} 
-                    onChange={e => setFormData({...formData, groupThreshold: e.target.value})} 
-                    placeholder="e.g. 150"
-                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="pt-6 border-t border-slate-100 flex justify-end space-x-4">
-            <button 
-              type="button" 
-              onClick={onBack} 
-              className="type-btn px-6 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              disabled={isSaving}
-              className="type-btn px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 flex items-center"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSaving ? 'Saving...' : 'Update Stage'}
-            </button>
-          </div>
-        </form>
+          </form>
         )}
       </div>
     </div>

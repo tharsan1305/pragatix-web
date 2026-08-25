@@ -240,28 +240,28 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* Top Header matching Admin Theme */}
-      <div className="bg-[#1E293B] text-white px-4 sm:px-6 py-4 shadow-md flex items-center justify-between">
+      <div className="bg-card text-text-primary px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {onBack && (
-            <button onClick={onBack} className="p-2 rounded-full hover:bg-slate-700 transition-colors text-white">
+            <button onClick={onBack} className="p-2 rounded-lg border border-border hover:bg-bg transition-colors text-text-secondary hover:text-text-primary">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="type-h3 tracking-tight text-white flex items-center space-x-2">
-              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            <h1 className="type-h3 tracking-tight text-text-primary flex items-center space-x-2">
+              <ShieldCheck className="w-6 h-6 text-text-primary" />
               <span>Super Admin Management</span>
             </h1>
-            <p className="type-caption text-slate-400 font-medium hidden sm:block">Manage Year Admins, assignments, and permissions</p>
+            <p className="type-caption text-text-secondary font-medium hidden sm:block">Manage Year Admins, assignments, and permissions</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={handleRefreshCache}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors type-caption flex items-center space-x-1.5 cursor-pointer"
+            className="p-2.5 rounded-lg bg-card border border-border hover:bg-bg text-text-secondary hover:text-text-primary transition-colors type-caption flex items-center space-x-1.5 cursor-pointer"
             title="Refresh Database Cache"
           >
             <RefreshCw className="w-4 h-4" />
@@ -269,7 +269,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
           </button>
           <button
             onClick={() => { resetForm(); setShowAddModal(true); }}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white type-btn shadow-lg shadow-red-500/20 transition-all flex items-center space-x-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-lg bg-accent hover:bg-accent-hover text-card type-btn shadow-none transition-all flex items-center space-x-2 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Add Year Admin</span>
@@ -279,50 +279,50 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
       <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
         {/* Metric Banner Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
+        <div className="bg-card rounded-xl p-6 text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-center justify-between gap-6 border border-border">
           <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 type-caption font-bold">
+            <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-accent-tint border border-accent/20 text-accent type-caption font-bold">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Super Admin Privileges Active</span>
             </div>
-            <h2 className="type-h3 tracking-tight text-white">Year Administrators</h2>
-            <p className="type-body-sm text-slate-300 max-w-xl">
-              Assign dedicated Year Admins to manage academic years and their departments.
+            <h2 className="type-h3 font-bold tracking-tight text-text-primary">Year Administrators</h2>
+            <p className="type-body-sm text-text-secondary font-medium max-w-xl">
+              Assign dedicated Year Admins to oversee academic years, cohorts, and their respective departments.
             </p>
           </div>
 
-          <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10">
-            <div className="text-center px-4 border-r border-white/10">
-              <span className="block type-h3 font-black text-white">{admins.length}</span>
-              <span className="type-caption text-slate-300 uppercase tracking-wider">Total Admins</span>
+          <div className="flex items-center bg-bg p-3.5 rounded-xl border border-border divide-x divide-border">
+            <div className="text-center px-5">
+              <span className="block type-h2 font-black text-text-primary">{admins.length}</span>
+              <span className="type-fine text-text-secondary font-bold uppercase tracking-wider">Total Admins</span>
             </div>
-            <div className="text-center px-4">
-              <span className="block type-h3 font-black text-emerald-400">
+            <div className="text-center px-5">
+              <span className="block type-h2 font-black text-accent">
                 {admins.filter(a => a.assignedYearId != null || !!a.academicYear).length} / {yearsList.length || 4}
               </span>
-              <span className="type-caption text-slate-300 uppercase tracking-wider">Assigned Years</span>
+              <span className="type-fine text-text-secondary font-bold uppercase tracking-wider">Assigned Years</span>
             </div>
           </div>
         </div>
 
         {/* Admin Cards Grid */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <RefreshCw className="w-10 h-10 animate-spin text-red-500" />
-            <p className="type-body font-semibold text-slate-600">Loading Year Admins...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
+            <RefreshCw className="w-10 h-10 animate-spin text-accent" />
+            <p className="type-body font-semibold text-text-secondary">Loading Year Admins...</p>
           </div>
         ) : admins.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
-            <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-8 h-8" />
+          <div className="bg-card rounded-lg p-12 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center flex flex-col items-center justify-center space-y-4">
+            <div className="w-16 h-16 bg-bg border border-border text-text-muted rounded-lg flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-accent" />
             </div>
             <div>
-              <h3 className="type-h3 type-h5 text-slate-800">No Year Admins Configured</h3>
-              <p className="type-body text-slate-500 mt-1">Click "Add Year Admin" to assign administrators to academic years.</p>
+              <h3 className="type-h4 font-bold text-text-primary">No Year Admins Configured</h3>
+              <p className="type-body-sm text-text-secondary mt-1">Click "Add Year Admin" to assign administrators to academic years.</p>
             </div>
             <button
               onClick={() => { resetForm(); setShowAddModal(true); }}
-              className="type-btn px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer"
+              className="type-btn px-5 py-2.5 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg shadow-none transition-all cursor-pointer"
             >
               Add First Year Admin
             </button>
@@ -332,31 +332,31 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
             {admins.map((admin) => (
               <div
                 key={admin.id}
-                className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all p-6 flex flex-col justify-between space-y-5"
+                className="bg-card rounded-xl border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-accent/40 transition-all p-6 flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-black type-h5 flex items-center justify-center shadow-md">
+                    <div className="flex items-center space-x-3.5">
+                      <div className="w-12 h-12 rounded-xl bg-bg border border-border text-accent font-black type-h4 flex items-center justify-center">
                         {admin.fullName ? admin.fullName.charAt(0).toUpperCase() : 'A'}
                       </div>
                       <div>
-                        <h3 className="type-h5 text-slate-900">{admin.fullName || admin.username}</h3>
-                        <span className="type-caption font-mono font-semibold text-slate-500">@{admin.username}</span>
+                        <h3 className="type-h5 font-bold text-text-primary">{admin.fullName || admin.username}</h3>
+                        <span className="type-caption font-mono font-bold text-text-secondary">@{admin.username}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleEditClick(admin)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
                         title="Edit Year Admin"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteAdmin(admin.id, admin.fullName || admin.username)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-2 rounded-lg text-text-secondary hover:text-accent hover:bg-accent-tint transition-colors cursor-pointer"
                         title="Remove Year Admin"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -364,40 +364,41 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                     </div>
                   </div>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100 type-caption text-slate-600">
+                  <div className="space-y-2 pt-3 border-t border-border type-caption text-text-secondary font-medium">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Assigned Year: <strong className="text-slate-800 font-bold">{formatAcademicYear(admin)}</strong></span>
+                      <Calendar className="w-4 h-4 text-text-muted" />
+                      <span>Assigned Year: <strong className="text-text-primary font-bold">{formatAcademicYear(admin)}</strong></span>
                     </div>
 
                     {admin.departmentName && (
                       <div className="flex items-center space-x-2">
-                        <Building className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Dept: <strong className="text-slate-800 font-bold">{admin.departmentName}</strong></span>
+                        <Building className="w-4 h-4 text-text-muted" />
+                        <span>Dept: <strong className="text-text-primary font-bold">{admin.departmentName}</strong></span>
                       </div>
                     )}
 
                     {admin.email && (
                       <div className="flex items-center space-x-2">
-                        <Mail className="w-3.5 h-3.5 text-slate-400" />
+                        <Mail className="w-4 h-4 text-text-muted" />
                         <span className="truncate">{admin.email}</span>
                       </div>
                     )}
 
                     {admin.phone && (
                       <div className="flex items-center space-x-2">
-                        <Phone className="w-3.5 h-3.5 text-slate-400" />
+                        <Phone className="w-4 h-4 text-text-muted" />
                         <span>{admin.phone}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
-                    ACTIVE YEAR ADMIN
+                <div className="pt-3 border-t border-border flex items-center justify-between">
+                  <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                    <span>ACTIVE YEAR ADMIN</span>
                   </span>
-                  <span className="text-[11px] text-slate-400 font-semibold">ID: #{admin.id}</span>
+                  <span className="text-[11px] text-text-muted font-bold">ID: #{admin.id}</span>
                 </div>
               </div>
             ))}
@@ -407,16 +408,16 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
       {/* Add/Edit Year Admin Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg max-w-md w-full p-6 shadow-xl border border-border space-y-5 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-4">
               <div className="flex items-center space-x-2">
-                <UserPlus className="w-5 h-5 text-red-500" />
-                <h3 className="type-h5 text-slate-900">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
+                <UserPlus className="w-5 h-5 text-text-primary" />
+                <h3 className="type-h5 text-text-primary">{editingAdminId ? 'Edit Year Admin' : 'Add New Year Admin'}</h3>
               </div>
               <button
                 onClick={() => { setShowAddModal(false); resetForm(); }}
-                className="text-slate-400 hover:text-slate-600 type-h5 p-1 cursor-pointer"
+                className="text-text-muted hover:text-text-primary type-h5 p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -424,32 +425,32 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Full Name *</label>
+                <label className="type-form-label block font-bold text-text-primary uppercase mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Dr. Rajesh Kumar"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-card border border-border rounded-lg type-body-sm font-semibold outline-none focus:border-text-primary text-text-primary"
                 />
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Username / Admin ID *</label>
+                <label className="type-form-label block font-bold text-text-primary uppercase mb-1">Username / Admin ID *</label>
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. year1_admin"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-card border border-border rounded-lg type-body-sm font-semibold outline-none focus:border-text-primary text-text-primary"
                 />
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">
-                  Email Address * <span className="type-fine lowercase text-slate-400 font-normal">(Primary for OTP & Login)</span>
+                <label className="type-form-label block font-bold text-text-primary uppercase mb-1">
+                  Email Address * <span className="type-fine lowercase text-text-muted font-normal">(Primary for OTP & Login)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -458,19 +459,19 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@jjcet.ac.in"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-card border border-border rounded-lg type-body-sm font-semibold outline-none focus:border-text-primary text-text-primary"
                   />
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Mail className="w-4 h-4 text-text-muted absolute left-3 top-3" />
                 </div>
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Assigned Academic Year *</label>
+                <label className="type-form-label block font-bold text-text-primary uppercase mb-1">Assigned Academic Year *</label>
                 <select
                   required
                   value={selectedYearId ?? ''}
                   onChange={(e) => setSelectedYearId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                  className="w-full px-3.5 py-2.5 bg-card border border-border rounded-lg type-body-sm font-semibold outline-none focus:border-text-primary text-text-primary"
                 >
                   <option value="">-- Select Academic Year --</option>
                   {yearsList.map(y => (
@@ -482,16 +483,16 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-600 uppercase mb-1">Phone Number (Optional)</label>
+                <label className="type-form-label block font-bold text-text-primary uppercase mb-1">Phone Number (Optional)</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 9876543210"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm font-semibold outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-card border border-border rounded-lg type-body-sm font-semibold outline-none focus:border-text-primary text-text-primary"
                   />
-                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Phone className="w-4 h-4 text-text-muted absolute left-3 top-3" />
                 </div>
               </div>
 
@@ -499,14 +500,14 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 <button
                   type="button"
                   onClick={() => { setShowAddModal(false); resetForm(); }}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
+                  className="px-4 py-2.5 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold type-btn shadow-md disabled:opacity-50 flex items-center space-x-2"
+                  className="px-5 py-2.5 rounded-lg bg-text-primary hover:bg-text-secondary text-card font-bold type-btn shadow-none disabled:opacity-50 flex items-center space-x-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -525,29 +526,29 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
       {/* Custom Replace Assignment Modal */}
       {replaceConfirmData && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center space-x-3 text-amber-600">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-amber-600" />
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg max-w-sm w-full p-6 shadow-xl border border-border space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center space-x-3 text-warning">
+              <div className="w-10 h-10 rounded-lg bg-warning-tint flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-warning" />
               </div>
-              <h3 className="type-h5 text-slate-900">Replace Assignment?</h3>
+              <h3 className="type-h5 text-text-primary">Replace Assignment?</h3>
             </div>
-            <p className="type-body-sm text-slate-600 leading-relaxed">
-              <strong className="text-slate-900 font-bold">"{replaceConfirmData.existingAdminName}"</strong> is already assigned to <span className="font-semibold text-slate-800">{replaceConfirmData.yearName}</span>. Do you want to replace them?
+            <p className="type-body-sm text-text-secondary leading-relaxed">
+              <strong className="text-text-primary font-bold">"{replaceConfirmData.existingAdminName}"</strong> is already assigned to <span className="font-semibold text-text-primary">{replaceConfirmData.yearName}</span>. Do you want to replace them?
             </p>
             <div className="pt-2 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setReplaceConfirmData(null)}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeSave}
-                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold type-btn shadow-md"
+                className="px-4 py-2 rounded-lg bg-text-primary hover:bg-text-secondary text-card font-bold type-btn shadow-none"
               >
                 Replace
               </button>
@@ -558,29 +559,29 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
 
       {/* Custom Delete Confirmation Modal */}
       {deleteConfirmData && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center space-x-3 text-red-600">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                <Trash2 className="w-5 h-5 text-red-600" />
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg max-w-sm w-full p-6 shadow-xl border border-border space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center space-x-3 text-accent">
+              <div className="w-10 h-10 rounded-lg bg-accent-tint flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5 text-accent" />
               </div>
-              <h3 className="type-h5 text-slate-900">Confirm Delete</h3>
+              <h3 className="type-h5 text-text-primary">Confirm Delete</h3>
             </div>
-            <p className="type-body-sm text-slate-600 leading-relaxed">
-              Are you sure you want to remove Year Admin <strong className="text-slate-900 font-bold">"{deleteConfirmData.adminName}"</strong>?
+            <p className="type-body-sm text-text-secondary leading-relaxed">
+              Are you sure you want to remove Year Admin <strong className="text-text-primary font-bold">"{deleteConfirmData.adminName}"</strong>?
             </p>
             <div className="pt-2 flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmData(null)}
-                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 type-btn cursor-pointer"
+                className="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeDelete}
-                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold type-btn shadow-md"
+                className="px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-card font-bold type-btn shadow-none"
               >
                 Delete
               </button>

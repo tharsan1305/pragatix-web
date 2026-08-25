@@ -121,17 +121,22 @@ export default function GroupActivityExecutionPage({ activityId: propActivityId,
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
-      {/* Header Bar */}
-      <div className="bg-[#1E293B] px-6 pt-10 pb-5 shadow-md text-white">
-        <div className="flex items-center space-x-4">
-          <button onClick={handleBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-white" />
+    <div className="flex flex-col min-h-full bg-bg text-text-primary relative pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={handleBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
           </button>
           <div>
-            <h1 className="type-h3">Group Activity Execution</h1>
-            <p className="type-caption text-slate-400 mt-0.5">
-              Evaluate groups, award XP points
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Group Activity Execution</h1>
+            <p className="type-caption text-text-secondary mt-0.5 font-medium">
+              Evaluate teams, award XP points
               {year?.yearName ? ` • ${year.yearName}` : ''}
               {dept?.deptName || dept?.name ? ` • ${dept.deptName || dept.name}` : ''}
               {section?.sectionName || section?.name ? ` • Sec ${section.sectionName || section.name}` : ''}

@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import React, { useState, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowLeft, Sparkles } from 'lucide-react';
 import type { Stage, Activity } from '../types/activity';
 import { ActivityService } from '../services/activityService';
 import { StageCard } from '../components/StageCard';
@@ -9,7 +9,11 @@ import { ActivityDetailsModal } from '../components/ActivityDetailsModal';
 import { FireStreakIcon } from '../components/FireStreakIcon';
 import { useXpStore } from '../../../store/xpStore';
 
-export const ActivitiesTab: React.FC = () => {
+interface ActivitiesTabProps {
+  onBack?: () => void;
+}
+
+export const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [stages, setStages] = useState<Stage[]>([]);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
@@ -55,47 +59,65 @@ export const ActivitiesTab: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="flex h-screen items-center justify-center bg-bg text-text-primary">
+        <RefreshCw className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-32">
-      {/* Top App Header matching Flutter AppBar */}
-      <div className="bg-slate-900 text-white px-6 py-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
-        <h1 className="type-h4">Activities & Stages</h1>
+    <div className="bg-bg text-text-primary min-h-screen pb-32">
+      {/* Top App Header */}
+      <div className="bg-card text-text-primary px-6 lg:px-8 py-4 sticky top-0 z-10 border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex justify-between items-center">
+        <div className="flex items-center space-x-3.5">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition-colors cursor-pointer text-text-secondary hover:text-text-primary"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <h1 className="text-lg font-black text-text-primary tracking-tight">Activities & Stages</h1>
+            <p className="text-xs text-text-muted font-medium mt-0.5">Explore milestone stages, tasks, and reward thresholds</p>
+          </div>
+        </div>
+
         <div className="flex items-center gap-3">
           <FireStreakIcon streakCount={maxStreak} />
           <button
             onClick={loadData}
-            className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors cursor-pointer"
+            className="p-2 bg-bg hover:bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
             title="Refresh Stages"
           >
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
-      <div className="p-5 max-w-3xl mx-auto space-y-6">
-        {/* Journey Header */}
-        <div>
-          <h2 className="type-h2 text-slate-900 tracking-tight">
-            Your Journey
-          </h2>
-          <p className="type-caption text-slate-500 mt-1">
-            Complete subgroups to unlock the next stages.
-          </p>
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto">
+        {/* Journey Header Card */}
+        <div className="bg-card rounded-2xl border border-border p-5 lg:p-6 mb-6 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-accent" />
+          </div>
+          <div>
+            <h2 className="text-base font-black text-text-primary tracking-tight">Your Stage Progression</h2>
+            <p className="text-xs text-text-muted font-medium mt-0.5">
+              Complete mandatory and individual subgroups within active stages to unlock next tier milestones.
+            </p>
+          </div>
         </div>
 
-        {/* Stage Cards List matching Flutter */}
+        {/* Stage Cards — 2-col on XL */}
         {stages.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 text-slate-500 font-medium">
-            No stages found.
+          <div className="bg-card rounded-2xl p-16 text-center border border-border text-text-muted font-medium">
+            No stages found in your academic curriculum.
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {stages.map((stage) => (
               <StageCard
                 key={stage.id}

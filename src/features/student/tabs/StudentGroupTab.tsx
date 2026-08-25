@@ -36,27 +36,27 @@ export default function StudentGroupTab() {
 
   if (loading) {
     return (
-      <div className="p-8 max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[400px]">
-        <RefreshCw className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
-        <p className="text-slate-600 font-medium">Loading team details...</p>
+      <div className="p-8 max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[400px] text-text-primary">
+        <RefreshCw className="w-8 h-8 text-text-primary animate-spin mb-4" />
+        <p className="text-text-secondary font-medium type-body-sm">Loading team details...</p>
       </div>
     );
   }
 
   if (!teamData) {
     return (
-      <div className="p-8 max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl p-10 text-center border border-slate-200 shadow-sm flex flex-col items-center">
-          <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
-            <UserX className="w-10 h-10" />
+      <div className="p-8 max-w-4xl mx-auto text-text-primary">
+        <div className="bg-card rounded-lg p-10 text-center border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col items-center">
+          <div className="w-16 h-16 bg-bg border border-border text-text-muted rounded-full flex items-center justify-center mb-6">
+            <UserX className="w-8 h-8" />
           </div>
-          <h2 className="type-h3 text-slate-800 mb-2">No Team Assigned</h2>
-          <p className="text-slate-500 max-w-md mb-6">
+          <h2 className="type-h3 font-bold text-text-primary mb-2">No Team Assigned</h2>
+          <p className="text-text-secondary max-w-md mb-6 type-body-sm">
             You are not assigned to any group yet. Please contact your Class Coordinator for team placement.
           </p>
           <button
             onClick={fetchMyTeam}
-            className="inline-flex items-center type-btn px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-md hover:bg-indigo-700 transition"
+            className="inline-flex items-center type-btn px-5 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg font-semibold shadow-none transition cursor-pointer"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
@@ -80,149 +80,158 @@ export default function StudentGroupTab() {
   const viceCaptainName = teamData.viceCaptainName || teamData.viceCaptain?.fullName || 'N/A';
 
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 pb-32">
-      {/* Header Bar */}
-      <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-md flex justify-between items-center">
-        <h1 className="type-h4">My Team</h1>
-        <button
-          onClick={fetchMyTeam}
-          className="p-2 type-btn bg-slate-800 hover:bg-slate-700 rounded-full text-white transition-colors"
-          title="Refresh Team"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Header Card - READ-ONLY */}
-      <div className="bg-gradient-to-br from-blue-800 to-blue-600 rounded-2xl p-6 text-white shadow-xl space-y-5">
-        <div className="flex justify-between items-start">
-          <h2 className="type-h2 tracking-tight">{teamName}</h2>
-          <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full type-caption font-bold">
-            {stageLabel}
-          </span>
-        </div>
-
-        {/* Info Chips */}
-        <div className="flex flex-wrap gap-2 type-caption">
-          <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md">
-            <BookOpen className="w-3.5 h-3.5 text-white/80" />
-            {department}
-          </span>
-          <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md">
-            <Shield className="w-3.5 h-3.5 text-white/80" />
-            Sec: {section}
-          </span>
-          <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md">
-            <Calendar className="w-3.5 h-3.5 text-white/80" />
-            {academicYear}
-          </span>
-          <span className="inline-flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-md">
-            🚪 {semester}
-          </span>
-        </div>
-
-        {/* Metrics Row */}
-        <div className="flex justify-around items-center pt-2">
-          <div className="flex flex-col items-center">
-            <Star className="w-6 h-6 text-white/80 mb-1 fill-amber-300" />
-            <span className="type-h4">{totalTeamXp} XP</span>
-            <span className="text-[11px] text-white/70">Total Team XP</span>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <Users className="w-6 h-6 text-white/80 mb-1" />
-            <span className="type-h4">{currentMembers} / {maxMembers}</span>
-            <span className="text-[11px] text-white/70">Members</span>
-          </div>
-        </div>
-
-        <div className="h-px bg-white/20" />
-
-        {/* Captain / Vice Captain Info - READ-ONLY */}
-        <div className="grid grid-cols-2 gap-4 type-caption">
+    <div className="bg-bg min-h-screen pb-24 text-text-primary">
+      {/* Sticky Page Header */}
+      <div className="bg-card text-text-primary sticky top-0 z-10 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="px-6 py-5 flex items-center justify-between">
           <div>
-            <div className="text-white/70">Captain</div>
-            <div className="font-semibold type-body-sm truncate">{captainName}</div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">My Group</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">View your team details and member standings</p>
           </div>
-          <div>
-            <div className="text-white/70">Vice Captain</div>
-            <div className="font-semibold type-body-sm truncate">{viceCaptainName}</div>
-          </div>
+          <button
+            onClick={fetchMyTeam}
+            className="p-2 bg-bg hover:bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            title="Refresh Team"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Team Leaderboard Roster Section - READ-ONLY */}
-      <div className="space-y-3">
-        <h2 className="type-h4 text-slate-800">Team Leaderboard</h2>
-
-        {teamMembers.length === 0 ? (
-          <div className="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-100 shadow-sm">
-            No members found in this group.
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto space-y-6">
+        {/* Team Overview Card */}
+        <div className="bg-card border border-border rounded-2xl p-6 text-text-primary shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-5">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Squad Overview</span>
+              <h2 className="type-h2 font-black text-text-primary tracking-tight mt-0.5">{teamName}</h2>
+            </div>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg type-caption font-bold uppercase tracking-wider">
+              {stageLabel}
+            </span>
           </div>
-        ) : (
-          <div className="space-y-2.5">
-            {teamMembers.map((member: any, idx: number) => {
-              const rankInTeam = member.rankInsideTeam ?? (idx + 1);
-              const isCaptain = member.teamRole === 'CAPTAIN';
-              const isViceCaptain = member.teamRole === 'VICE_CAPTAIN';
-              const name = member.studentName || 'Student';
-              const memberXp = member.totalXp ?? 0;
-              const memberStage = `${member.currentStage ?? 'Stage 1'} - ${member.currentLevel ?? 'Explorer'}`;
 
-              return (
-                <div
-                  key={idx}
-                  className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 flex items-center justify-between shadow-sm"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Rank Badge */}
-                    <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                      {rankInTeam === 1 ? (
-                        <Trophy className="w-6 h-6 text-amber-500 fill-amber-400" />
-                      ) : rankInTeam === 2 ? (
-                        <Award className="w-6 h-6 text-slate-400" />
-                      ) : (
-                        <span className="font-extrabold text-slate-400 type-body-sm">{rankInTeam}</span>
-                      )}
-                    </div>
+          {/* Info Chips */}
+          <div className="flex flex-wrap gap-2 type-caption">
+            <span className="inline-flex items-center gap-1.5 bg-bg border border-border text-text-secondary px-3 py-1 rounded-lg font-bold">
+              <BookOpen className="w-3.5 h-3.5 text-accent" />
+              <span>{department}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-bg border border-border text-text-secondary px-3 py-1 rounded-lg font-bold">
+              <Shield className="w-3.5 h-3.5 text-accent" />
+              Sec: {section}
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-bg border border-border text-text-secondary px-3 py-1 rounded-lg font-bold">
+              <Calendar className="w-3.5 h-3.5 text-accent" />
+              {academicYear}
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-bg border border-border text-text-secondary px-3 py-1 rounded-lg font-bold">
+              🚪 {semester}
+            </span>
+          </div>
 
-                    {/* Member Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-blue-200/80 text-blue-900 font-extrabold flex items-center justify-center type-body-sm shrink-0">
-                      {name[0]?.toUpperCase() || 'S'}
-                    </div>
+          {/* Metrics Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-bg border border-border rounded-xl p-4 flex flex-col items-center">
+              <Star className="w-5 h-5 text-accent mb-1.5" />
+              <span className="text-2xl font-black text-text-primary">{totalTeamXp} XP</span>
+              <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider mt-0.5">TOTAL TEAM XP</span>
+            </div>
+            <div className="bg-bg border border-border rounded-xl p-4 flex flex-col items-center">
+              <Users className="w-5 h-5 text-text-secondary mb-1.5" />
+              <span className="text-2xl font-black text-text-primary">{currentMembers} / {maxMembers}</span>
+              <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider mt-0.5">TEAM CAPACITY</span>
+            </div>
+          </div>
 
-                    {/* Member Details */}
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 type-body-sm truncate">{name}</span>
-                        {isCaptain && (
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 uppercase tracking-wider">
-                            👑 CAPTAIN
-                          </span>
-                        )}
-                        {isViceCaptain && (
-                          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-300 text-slate-900 uppercase tracking-wider">
-                            🥈 VICE CAPTAIN
-                          </span>
+          <div className="h-px bg-border" />
+
+          {/* Captain / Vice Captain Info */}
+          <div className="grid grid-cols-2 gap-4 type-caption">
+            <div className="bg-bg border border-border rounded-xl p-3">
+              <div className="text-text-muted font-bold uppercase tracking-wider text-[11px] mb-1">CAPTAIN</div>
+              <div className="font-bold type-body-sm truncate text-text-primary">{captainName}</div>
+            </div>
+            <div className="bg-bg border border-border rounded-xl p-3">
+              <div className="text-text-muted font-bold uppercase tracking-wider text-[11px] mb-1">VICE CAPTAIN</div>
+              <div className="font-bold type-body-sm truncate text-accent">{viceCaptainName}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Team Leaderboard Roster Section */}
+        <div className="space-y-3">
+          <h2 className="type-h4 font-bold text-text-primary">Team Leaderboard</h2>
+
+          {teamMembers.length === 0 ? (
+            <div className="bg-card p-8 rounded-2xl text-center text-text-muted border border-border shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              No members found in this group.
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {teamMembers.map((member: any, idx: number) => {
+                const rankInTeam = member.rankInsideTeam ?? (idx + 1);
+                const isCaptain = member.teamRole === 'CAPTAIN';
+                const isViceCaptain = member.teamRole === 'VICE_CAPTAIN';
+                const name = member.studentName || 'Student';
+                const memberXp = member.totalXp ?? 0;
+                const memberStage = `${member.currentStage ?? 'Stage 1'} - ${member.currentLevel ?? 'Explorer'}`;
+
+                return (
+                  <div
+                    key={idx}
+                    className="bg-card border border-border rounded-xl p-4 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Rank Badge */}
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                        {rankInTeam === 1 ? (
+                          <Trophy className="w-5 h-5 text-accent" />
+                        ) : rankInTeam === 2 ? (
+                          <Award className="w-5 h-5 text-text-secondary" />
+                        ) : (
+                          <span className="font-bold text-text-muted type-body-sm">{rankInTeam}</span>
                         )}
                       </div>
 
-                      <div className="type-caption text-slate-500 font-medium mt-0.5">
-                        {memberStage}
+                      {/* Member Avatar */}
+                      <div className="w-10 h-10 rounded-full bg-accent-tint border border-accent/20 text-accent font-black flex items-center justify-center type-body-sm shrink-0">
+                        {name[0]?.toUpperCase() || 'S'}
+                      </div>
+
+                      {/* Member Details */}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-text-primary type-body-sm truncate">{name}</span>
+                          {isCaptain && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-accent-tint text-accent border border-accent/30 uppercase tracking-wider">
+                              👑 CAPTAIN
+                            </span>
+                          )}
+                          {isViceCaptain && (
+                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-bg text-text-secondary border border-border uppercase tracking-wider">
+                              🥈 VICE CAPTAIN
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="type-caption text-text-muted font-medium mt-0.5">
+                          {memberStage}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Score - READ-ONLY */}
-                  <div className="flex items-center gap-1 type-body-sm font-extrabold text-amber-600 shrink-0 ml-3">
-                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span>{memberXp}</span>
+                    {/* Score */}
+                    <div className="flex items-center gap-1 type-body-sm font-bold text-text-secondary shrink-0 ml-3">
+                      <Star className="w-4 h-4 text-accent" />
+                      <span>{memberXp} XP</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

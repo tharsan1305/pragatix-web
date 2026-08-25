@@ -7,14 +7,11 @@ interface PageLoaderProps {
 
 export default function PageLoader({ message = 'Loading...', fullScreen = true }: PageLoaderProps) {
   const content = (
-    <div className="flex flex-col items-center justify-center p-6 text-center animate-fadeIn">
-      {/* Logo with pulsing glow & spinner ring */}
+    <div className="flex flex-col items-center justify-center p-6 text-center animate-fadeIn text-text-primary">
+      {/* Logo with spinner ring */}
       <div className="relative mb-5">
-        {/* Glow backdrop */}
-        <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-amber-500/30 to-red-500/30 blur-lg animate-pulse" />
-        
         {/* Logo Card */}
-        <div className="relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white shadow-xl p-3 border border-orange-100 flex items-center justify-center overflow-hidden">
+        <div className="relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-card shadow-sm p-3 border border-border flex items-center justify-center overflow-hidden">
           <img 
             src={logoImg} 
             alt="PragatiX Logo" 
@@ -23,14 +20,14 @@ export default function PageLoader({ message = 'Loading...', fullScreen = true }
         </div>
 
         {/* Orbiting spinner ring */}
-        <div className="absolute -inset-2 rounded-2xl border-2 border-transparent border-t-orange-500 border-r-indigo-600 animate-spin" />
+        <div className="absolute -inset-2 rounded-xl border-2 border-transparent border-t-accent border-r-text-primary/20 animate-spin" />
       </div>
 
       {/* Loading Title & Message */}
-      <h3 className="type-h4 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-1">
+      <h3 className="type-h4 font-bold text-text-primary mb-1">
         PragatiX
       </h3>
-      <p className="type-body-sm font-medium text-slate-500 animate-pulse">
+      <p className="type-body-sm font-medium text-text-secondary animate-pulse">
         {message}
       </p>
     </div>
@@ -38,8 +35,8 @@ export default function PageLoader({ message = 'Loading...', fullScreen = true }
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md transition-opacity duration-300">
-        <div className="bg-white/95 rounded-3xl p-6 shadow-2xl border border-white/20 max-w-xs w-full mx-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-text-primary/40 backdrop-blur-xs transition-opacity duration-300">
+        <div className="bg-card text-text-primary rounded-lg p-6 shadow-2xl border border-border max-w-xs w-full mx-4">
           {content}
         </div>
       </div>

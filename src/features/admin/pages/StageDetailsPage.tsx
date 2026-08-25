@@ -276,83 +276,110 @@ export default function StageDetailsPage({
   const groupXP = stageDetails?.groupThreshold ?? 150;
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50">
-      {/* Top Bar */}
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <h1 className="type-h3 text-white">{displayName}</h1>
+    <div className="flex flex-col min-h-full bg-bg text-text-primary">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back to Stages"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Stages</span>
+          </button>
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="type-h3 font-bold text-text-primary tracking-tight">{displayName}</h1>
+              <span className="px-2.5 py-0.5 rounded-md type-caption font-bold bg-bg text-text-primary border border-border">
+                STAGE MILESTONE
+              </span>
+            </div>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+              {displayDesc || 'Stage configuration, progression thresholds, and category activities'}
+            </p>
+          </div>
         </div>
-        <button onClick={fetchSubgroups} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+
+        <button 
+          onClick={fetchSubgroups} 
+          disabled={isLoading}
+          className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer disabled:opacity-50"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+          <span className="type-caption font-bold">Refresh</span>
         </button>
       </div>
 
-      <div className="flex-1 p-6 space-y-6 max-w-4xl mx-auto w-full">
-        {/* Stage Overview & Threshold Card */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-5">
+      <div className="flex-1 p-6 space-y-6 max-w-6xl mx-auto w-full">
+        {/* Stage Progression Thresholds */}
+        <div className="bg-card p-6 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-4">
           <div>
-            <h2 className="type-h3 text-slate-900">{displayName}</h2>
-            <p className="type-body-sm text-slate-500 mt-1">{displayDesc || 'Stage configuration & thresholds'}</p>
+            <h2 className="type-h4 font-bold text-text-primary">Stage Progression Thresholds</h2>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+              Minimum XP requirements required from each activity subgroup to unlock next stage.
+            </p>
           </div>
 
-          <div className="h-px bg-slate-100" />
-
-          <div>
-            <h3 className="type-h5 text-slate-700 mb-3">
-              Stage Progression Thresholds
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-              <div className="bg-rose-50/70 border border-rose-100 rounded-2xl p-4 flex items-center space-x-3">
-                <div className="p-2 bg-rose-500 text-white rounded-xl">
-                  <Star className="w-5 h-5 fill-white" />
-                </div>
-                <div>
-                  <p className="type-caption font-bold text-rose-600">Must</p>
-                  <p className="type-h4 text-slate-900">{mustXP} XP</p>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            {/* Must Requirement */}
+            <div className="bg-bg border border-border rounded-lg p-4 flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-accent shrink-0">
+                <Star className="w-5 h-5 fill-accent" />
               </div>
-
-              <div className="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 flex items-center space-x-3">
-                <div className="p-2 bg-blue-500 text-white rounded-xl">
-                  <User className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="type-caption font-bold text-blue-600">Individual</p>
-                  <p className="type-h4 text-slate-900">{individualXP} XP</p>
-                </div>
+              <div>
+                <p className="type-fine font-bold text-text-muted uppercase tracking-wider">Must Pass</p>
+                <h3 className="type-h3 font-bold text-text-primary">{mustXP} XP</h3>
+                <p className="type-fine text-text-secondary">Mandatory baseline</p>
               </div>
             </div>
 
-            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-4 flex items-center space-x-3">
-              <div className="p-2 bg-emerald-500 text-white rounded-xl">
-                <Users className="w-5 h-5" />
+            {/* Individual Requirement */}
+            <div className="bg-bg border border-border rounded-lg p-4 flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-text-primary shrink-0">
+                <User className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <p className="type-caption font-bold text-emerald-600">Group</p>
-                <p className="type-h4 text-slate-900">{groupXP} XP</p>
+                <p className="type-fine font-bold text-text-muted uppercase tracking-wider">Individual Cap</p>
+                <h3 className="type-h3 font-bold text-text-primary">{individualXP} XP</h3>
+                <p className="type-fine text-text-secondary">Personal tasks</p>
+              </div>
+            </div>
+
+            {/* Group Requirement */}
+            <div className="bg-bg border border-border rounded-lg p-4 flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-text-primary shrink-0">
+                <Users className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <p className="type-fine font-bold text-text-muted uppercase tracking-wider">Group Cap</p>
+                <h3 className="type-h3 font-bold text-text-primary">{groupXP} XP</h3>
+                <p className="type-fine text-text-secondary">Team &amp; squad tasks</p>
               </div>
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex items-center space-x-3">
+          <div className="bg-accent-tint border border-accent/20 text-accent p-4 rounded-lg flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span className="type-body-sm font-medium">{error}</span>
           </div>
         )}
 
         {/* Activity Categories / Subgroups Roster */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="type-h4 text-slate-900">Activity Categories</h3>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="type-h4 font-bold text-text-primary">Activity Categories</h3>
+              <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+                Manage activity tasks and assign staff evaluators for this stage
+              </p>
+            </div>
             {!isTeacherView && (
               <button 
                 onClick={() => openModal()}
-                className="flex items-center space-x-1.5 bg-[#EA4335] hover:bg-red-600 text-white px-3.5 py-2 rounded-xl type-caption font-bold shadow-sm transition-transform active:scale-95 cursor-pointer"
+                className="flex items-center space-x-2 bg-accent hover:bg-accent-hover text-card px-4 py-2.5 rounded-lg type-body-sm font-bold shadow-none transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Subgroup</span>
@@ -361,8 +388,9 @@ export default function StageDetailsPage({
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-16">
-              <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+            <div className="flex flex-col items-center justify-center py-16 bg-card rounded-lg border border-border space-y-3">
+              <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+              <p className="type-body-sm text-text-secondary font-medium">Loading category tasks...</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -376,20 +404,20 @@ export default function StageDetailsPage({
                 const isActLoading = !!subgroupLoading[subId];
 
                 return (
-                  <div key={subId} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all">
-                    {/* Subgroup Header Card - ONLY displays subgroup info & chevron (NO Assign/Edit/Delete on card!) */}
+                  <div key={subId} className="bg-card rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border overflow-hidden transition-all">
+                    {/* Subgroup Header Card */}
                     <div 
                       onClick={() => toggleSubgroupExpand(sub)}
-                      className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
+                      className="p-5 flex items-center justify-between cursor-pointer hover:bg-bg transition-colors"
                     >
                       <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700">
-                          <IconComponent className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-lg bg-bg border border-border flex items-center justify-center text-text-primary">
+                          <IconComponent className="w-5 h-5 text-accent" />
                         </div>
                         <div>
-                          <h4 className="font-bold type-h4 text-slate-900">{subName}</h4>
-                          <p className="type-caption text-slate-500 mt-0.5 font-medium">
-                            Threshold: {sub.threshold || 150} XP
+                          <h4 className="font-bold type-h4 text-text-primary">{subName}</h4>
+                          <p className="type-caption text-text-secondary mt-0.5 font-medium">
+                            Threshold: <span className="font-bold text-text-primary">{sub.threshold || 150} XP</span>
                           </p>
                         </div>
                       </div>
@@ -405,30 +433,30 @@ export default function StageDetailsPage({
                               subgroupName: subName 
                             });
                           }}
-                          className="type-caption font-bold px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors"
+                          className="type-caption font-bold px-3.5 py-1.5 bg-bg hover:bg-card border border-border text-text-primary rounded-lg transition-colors cursor-pointer"
                         >
                           View Full List
                         </button>
-                        <div className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
-                          {isExpanded ? <ChevronDown className="w-5 h-5 text-slate-600" /> : <ChevronRight className="w-5 h-5 text-slate-400" />}
+                        <div className="p-1 text-text-muted hover:text-text-primary rounded-lg">
+                          {isExpanded ? <ChevronDown className="w-5 h-5 text-text-primary" /> : <ChevronRight className="w-5 h-5 text-text-muted" />}
                         </div>
                       </div>
                     </div>
 
                     {/* Expanded Content: Activities belonging to this Subgroup */}
                     {isExpanded && (
-                      <div className="border-t border-slate-100 bg-slate-50/50 p-4 space-y-3">
+                      <div className="border-t border-border bg-bg/50 p-5 space-y-4">
                         {isActLoading ? (
                           <div className="flex justify-center py-6">
-                            <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
+                            <RefreshCw className="w-6 h-6 animate-spin text-accent" />
                           </div>
                         ) : acts.length === 0 ? (
-                          <div className="text-center py-6 text-slate-500 type-body-sm">
-                            <p className="font-medium text-slate-700 mb-1">No activities in this category yet.</p>
+                          <div className="text-center py-8 text-text-secondary type-body-sm space-y-2">
+                            <p className="font-medium text-text-primary">No activities in this category yet.</p>
                             {!isTeacherView && (
                               <button
                                 onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                                className="type-caption font-bold text-blue-600 hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                                className="type-caption font-bold text-accent hover:underline inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <Plus className="w-3.5 h-3.5" /> Add First Activity
                               </button>
@@ -437,11 +465,13 @@ export default function StageDetailsPage({
                         ) : (
                           <div className="space-y-3">
                             <div className="flex justify-between items-center px-1 mb-2">
-                              <span className="type-caption font-bold uppercase tracking-wider text-slate-500">Activities in {subName}</span>
+                              <span className="type-caption font-bold uppercase tracking-wider text-text-muted">
+                                Activities in {subName} ({acts.length})
+                              </span>
                               {!isTeacherView && (
                                 <button
                                   onClick={() => onPushView('create_activity', { subgroupId: subId, stageId, subgroupName: subName })}
-                                  className="flex items-center gap-1 bg-[#EA4335] text-white hover:bg-red-600 px-3 py-1 rounded-lg type-caption font-bold transition-colors cursor-pointer"
+                                  className="flex items-center gap-1 bg-accent text-card hover:bg-accent-hover px-3 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                                 >
                                   <Plus className="w-3.5 h-3.5" /> Add Activity
                                 </button>
@@ -474,59 +504,59 @@ export default function StageDetailsPage({
 
       {/* Add / Edit Subgroup Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h2 className="type-h4 text-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md overflow-hidden flex flex-col shadow-2xl border border-border">
+            <div className="p-5 border-b border-border flex justify-between items-center bg-card">
+              <h2 className="type-h4 font-bold text-text-primary">
                 {editingSubgroup ? 'Edit Subgroup' : 'Add New Subgroup'}
               </h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:bg-slate-200 rounded-full">
+              <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-text-muted hover:bg-bg rounded-lg cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <form onSubmit={handleSave} className="p-6 space-y-4">
-              <div className="space-y-1">
-                <label className="type-form-label text-slate-700">Subgroup Name *</label>
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Subgroup Name *</label>
                 <input 
                   required 
                   type="text" 
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})} 
                   placeholder="e.g. Must, Individual, Group"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none type-body-sm" 
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary" 
                 />
               </div>
-              <div className="space-y-1">
-                <label className="type-form-label text-slate-700">Category Type *</label>
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Category Type *</label>
                 <select 
                   value={formData.category} 
                   onChange={e => setFormData({...formData, category: e.target.value})} 
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white type-body-sm"
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary cursor-pointer"
                 >
                   <option value="must">Must-Do Activity (must)</option>
                   <option value="individual">Individual Activity (individual)</option>
                   <option value="group">Group Activity (group)</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="type-form-label text-slate-700">Threshold (XP) *</label>
+              <div className="space-y-1.5">
+                <label className="type-form-label text-text-primary font-bold">Threshold (XP) *</label>
                 <input 
                   required 
                   type="number" 
                   value={formData.threshold} 
                   onChange={e => setFormData({...formData, threshold: e.target.value})} 
                   placeholder="e.g. 150"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none type-body-sm" 
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary" 
                 />
               </div>
               
-              <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-slate-100">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">
+              <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-border">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 type-btn text-text-secondary hover:bg-bg border border-border rounded-lg cursor-pointer font-bold">
                   Cancel
                 </button>
-                <button type="submit" className="px-5 py-2 bg-blue-600 text-white type-btn rounded-xl hover:bg-blue-700 shadow-md cursor-pointer">
-                  {editingSubgroup ? 'Update' : 'Save Subgroup'}
+                <button type="submit" className="px-5 py-2 bg-accent text-card type-btn rounded-lg hover:bg-accent-hover font-bold shadow-none cursor-pointer">
+                  {editingSubgroup ? 'Update Subgroup' : 'Save Subgroup'}
                 </button>
               </div>
             </form>

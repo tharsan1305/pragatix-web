@@ -89,46 +89,55 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50">
+    <div className="flex flex-col min-h-full bg-bg">
       {/* Header Bar */}
-      <div className="bg-slate-900 px-6 py-4 flex justify-between items-center">
+      <div className="bg-card px-6 py-4 border-b border-border flex justify-between items-center text-text-primary">
         <div className="flex items-center space-x-3">
           {onBackToYearSelection && (
             <button
               onClick={onBackToYearSelection}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl type-caption flex items-center space-x-1.5 transition-colors cursor-pointer"
+              className="p-2 bg-card border border-border hover:bg-bg text-text-primary rounded-lg type-caption flex items-center space-x-1.5 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Switch Year</span>
             </button>
           )}
-          <h1 className="type-h4 text-white">Activity & Thresholds</h1>
+          <h1 className="type-h4 text-text-primary">Activity & Thresholds</h1>
           {academicYear && (
-            <span className="type-caption font-bold px-2.5 py-1 rounded-full bg-red-600/30 text-red-200 border border-red-500/30">
+            <span className="type-caption font-bold px-2.5 py-0.5 rounded-md bg-warning-tint text-warning border border-warning/20">
               {academicYear.replace('_', ' ')}
             </span>
           )}
         </div>
-        <button onClick={() => fetchStages()} className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+        <button
+          onClick={() => fetchStages()}
+          className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
+          title="Refresh"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      <div className="flex-1 p-6 space-y-6">
+      <div className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
         {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="type-h4 text-slate-800">Configure Stages & Thresholds</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div>
+            <h2 className="type-h4 font-bold text-text-primary">Stage Progression Pipeline</h2>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+              Students must satisfy each stage's threshold requirements before advancing to the next milestone.
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <button 
               onClick={() => onPushView('all_activities')}
-              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl type-body-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
+              className="flex items-center space-x-2 bg-card hover:bg-bg text-text-primary border border-border px-4 py-2.5 rounded-lg type-body-sm font-bold transition-colors cursor-pointer"
             >
               <ListFilter className="w-4 h-4" />
-              <span>All Activities</span>
+              <span>Activity Catalog</span>
             </button>
             <button 
               onClick={() => onPushView('create_stage')}
-              className="flex items-center space-x-2 bg-[#EA4335] hover:bg-red-600 text-white px-4 py-2 rounded-xl type-body-sm font-semibold shadow-sm transition-transform active:scale-95 cursor-pointer"
+              className="flex items-center space-x-2 bg-accent hover:bg-accent-hover text-card px-4 py-2.5 rounded-lg type-body-sm font-bold shadow-none transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Stage</span>
@@ -137,20 +146,26 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-red-500" />
+          <div className="flex flex-col items-center justify-center py-20 bg-card rounded-lg border border-border space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading stage progression map...</p>
           </div>
         ) : stages.length === 0 ? (
-          <div className="text-center py-12 text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-200">
-            <p className="type-h5 text-slate-700">No stages configured yet.</p>
-            <p className="type-body-sm text-slate-400 mt-1">Click Add Stage above to create one.</p>
+          <div className="text-center py-16 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-8 space-y-3 flex flex-col items-center">
+            <div className="w-12 h-12 rounded-lg bg-bg border border-border flex items-center justify-center text-text-muted mb-1">
+              <ListFilter className="w-6 h-6" />
+            </div>
+            <p className="type-h5 font-bold text-text-primary">No stages configured yet.</p>
+            <p className="type-body-sm text-text-secondary max-w-sm">
+              Click &quot;Add Stage&quot; above to create milestone stages for this academic year.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {stages.map((stage: any) => {
+            {stages.map((stage: any, idx: number) => {
               const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE');
               const statusText = stage.status || (active ? 'ACTIVE' : 'UPCOMING');
-              const displayOrder = stage.displayOrder ?? stage.order ?? 0;
+              const displayOrder = stage.displayOrder ?? stage.order ?? (idx + 1);
               const expectedXp = stage.expectedXp ?? stage.totalXp ?? 0;
               const mThresh = stage.mustThreshold ?? stage.mThreshold ?? 0;
               const iThresh = stage.individualThreshold ?? stage.iThreshold ?? 0;
@@ -159,7 +174,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
               return (
                 <div 
                   key={stage.id} 
-                  className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 cursor-pointer hover:border-red-300 transition-all flex items-center justify-between group"
+                  className="bg-card p-6 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border cursor-pointer hover:border-accent/40 hover:shadow-md transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-6 group relative overflow-hidden"
                   onClick={() => onPushView('stage_details', { 
                     stageId: stage.id, 
                     stageName: stage.name, 
@@ -168,56 +183,70 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                     selectedYear: academicYear 
                   })}
                 >
-                  <div className="flex-1 pr-4 space-y-3">
-                    {/* Header line */}
-                    <div className="flex items-center space-x-3">
-                      <h3 className="type-h5 text-slate-900">{stage.name}</h3>
-                      <span className={`type-fine font-bold px-2.5 py-0.5 rounded-md uppercase border tracking-wider ${
+                  <div className="absolute top-0 left-0 bottom-0 w-1 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  {/* Left: Stage Title & Milestones */}
+                  <div className="space-y-3 flex-1">
+                    <div className="flex items-center space-x-3 flex-wrap gap-y-1">
+                      <div className="w-8 h-8 rounded-lg bg-text-primary text-card font-bold type-body-sm flex items-center justify-center">
+                        {String(displayOrder).padStart(2, '0')}
+                      </div>
+                      <h3 className="type-h4 font-bold text-text-primary group-hover:text-accent transition-colors">
+                        {stage.name}
+                      </h3>
+                      <span className={`type-fine font-bold px-2.5 py-0.5 rounded-md uppercase flex items-center gap-1.5 ${
                         statusText === 'ACTIVE' 
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
-                          : statusText === 'UPCOMING'
-                          ? 'bg-blue-50 text-blue-800 border-blue-300'
-                          : 'bg-slate-100 text-slate-700 border-slate-300'
+                          ? 'bg-success-tint text-success border border-success/20' 
+                          : 'bg-warning-tint text-warning border border-warning/20'
                       }`}>
-                        {statusText}
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusText === 'ACTIVE' ? 'bg-success' : 'bg-warning'}`} />
+                        <span>{statusText}</span>
                       </span>
                     </div>
 
-                    {/* Metrics Row (Order, XP, M, I, G) */}
-                    <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
-                      <span className="text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-md">
-                        Order: {displayOrder}
+                    {stage.description && (
+                      <p className="type-body-sm text-text-secondary font-medium line-clamp-1">
+                        {stage.description}
+                      </p>
+                    )}
+
+                    {/* Structured Threshold Metrics Row */}
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="type-fine font-bold text-text-primary bg-bg border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                        🎯 Total Target: <span className="font-extrabold text-accent">{expectedXp} XP</span>
                       </span>
-                      <span className="text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
-                        XP: {expectedXp}
+                      <span className="type-fine font-bold text-text-secondary bg-bg border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                        ⭐ Must Pass: <span className="font-extrabold text-text-primary">{mThresh} XP</span>
                       </span>
-                      <span className="text-red-800 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md">
-                        M: {mThresh}
+                      <span className="type-fine font-bold text-text-secondary bg-bg border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                        👤 Individual: <span className="font-extrabold text-text-primary">{iThresh} XP</span>
                       </span>
-                      <span className="text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
-                        I: {iThresh}
-                      </span>
-                      <span className="text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-                        G: {gThresh}
+                      <span className="type-fine font-bold text-text-secondary bg-bg border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                        👥 Group: <span className="font-extrabold text-text-primary">{gThresh} XP</span>
                       </span>
                     </div>
                   </div>
                   
-                  {/* Action Icons */}
-                  <div className="flex items-center space-x-2">
+                  {/* Right Action Icons & View Button */}
+                  <div className="flex items-center space-x-2 shrink-0 border-t lg:border-t-0 pt-3 lg:pt-0 border-border">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onPushView('edit_stage', { stage }); }} 
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                      className="p-2.5 text-text-secondary hover:text-text-primary hover:bg-bg border border-border rounded-lg transition-colors cursor-pointer"
+                      title="Edit Stage"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); triggerDelete(stage.id, stage.name); }} 
-                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
+                      className="p-2.5 text-text-secondary hover:text-accent hover:bg-accent-tint border border-border rounded-lg transition-colors cursor-pointer"
+                      title="Delete Stage"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors ml-1" />
+                    <div className="pl-2 flex items-center text-text-secondary group-hover:text-accent font-bold type-caption transition-colors">
+                      <span>Manage Stage</span>
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </div>
                   </div>
                 </div>
               );

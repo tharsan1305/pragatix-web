@@ -18,7 +18,34 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <AuthProvider>
         <App />
-        <Toaster position="top-right" reverseOrder={false} />
+        <Toaster 
+          position="top-right" 
+          reverseOrder={false} 
+          toastOptions={{
+            duration: 3500,
+            style: {
+              background: 'var(--card)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+              borderRadius: '8px',
+              fontWeight: 500,
+              fontSize: '0.875rem',
+            },
+            success: {
+              iconTheme: {
+                primary: 'var(--green, #166534)',
+                secondary: 'var(--card, #ffffff)',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: 'var(--accent, #E50914)',
+                secondary: 'var(--card, #ffffff)',
+              },
+            },
+          }}
+        />
       </AuthProvider>
     </ErrorBoundary>
   </React.StrictMode>,

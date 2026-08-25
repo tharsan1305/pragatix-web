@@ -179,65 +179,117 @@ export default function DepartmentsTab({ onBack }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
-      <div className="bg-slate-900 px-6 pt-12 pb-4 shadow-md z-10">
-        <div className="flex items-center space-x-4 mb-2">
+    <div className="flex flex-col min-h-full bg-bg relative pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-4 sm:px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center space-x-3.5">
           {onBack && (
-            <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+            <button onClick={onBack} className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="type-h3 text-white flex-1">Academic Departments</h1>
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Academic Departments</h1>
+            {!isLoading && (
+              <p className="type-caption text-text-secondary font-medium">
+                {searchQuery
+                  ? `Showing ${filteredDepartments.length} of ${departments.length} departments`
+                  : `Showing ${departments.length} academic departments`}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={fetchDepartments}
+            className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            title="Refresh Departments"
+          >
+            <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-4xl mx-auto w-full">
-        {departments.length > 0 && (
-          <div className="mb-6 relative">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
+        {/* Search Bar */}
+        <div className="flex gap-2.5 items-center">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
             <input 
               type="text" 
-              placeholder="Search departments..." 
+              placeholder="Search departments by name or code..." 
               value={searchQuery}
               onChange={handleSearch}
-              className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  fetchDepartments();
+                }
+              }}
+              className="w-full pl-10 pr-10 py-2.5 bg-bg text-text-primary placeholder:text-text-muted border border-border rounded-lg focus:border-text-primary outline-none shadow-none type-body-sm font-semibold"
             />
             {searchQuery && (
               <button 
                 onClick={() => { setSearchQuery(''); setFilteredDepartments(departments); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
-        )}
+          <button
+            onClick={() => fetchDepartments()}
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg type-caption font-bold flex items-center space-x-1.5 shadow-none transition-colors cursor-pointer shrink-0"
+            title="Search & Refresh from database"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Search</span>
+          </button>
+        </div>
+
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+          <div className="flex flex-col items-center justify-center py-20 space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading departments...</p>
           </div>
         ) : filteredDepartments.length === 0 ? (
-          <div className="text-center py-10 text-slate-500 bg-white rounded-xl shadow-sm border border-slate-200">
-            No departments found.
+          <div className="text-center py-16 text-text-secondary bg-card rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-border space-y-2 p-8 flex flex-col items-center">
+            <p className="font-bold type-h5 text-text-primary">No departments found.</p>
+            <p className="type-caption text-text-secondary">Try adjusting your search query or add a new academic department.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filteredDepartments.map(dept => (
-              <div key={dept.id} className="bg-white rounded-xl shadow-sm border border-slate-100 p-2 flex items-center justify-between hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-4 pl-2">
-                  <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
-                    <Building2 className="w-5 h-5" />
+              <div key={dept.id} className="bg-card rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border p-4 flex items-center justify-between hover:border-accent/40 transition-all gap-3">
+                <div className="flex items-center space-x-3.5 pl-1 min-w-0">
+                  <div className="w-11 h-11 bg-bg border border-border rounded-xl flex items-center justify-center text-accent shrink-0">
+                    <Building2 className="w-5 h-5 text-accent" />
                   </div>
-                  <div>
-                    <h3 className="type-h5 text-slate-900 text-[15px]">{dept.name}</h3>
-                    <p className="type-caption text-slate-500">{dept.code}</p>
+                  <div className="min-w-0">
+                    <div className="flex items-center space-x-2 flex-wrap">
+                      <h3 className="type-h5 font-bold text-text-primary truncate">{dept.name}</h3>
+                      <span className="px-2 py-0.5 rounded-md type-fine font-extrabold bg-accent-tint text-accent border border-accent/20">
+                        {dept.code}
+                      </span>
+                    </div>
+                    <p className="type-caption text-text-secondary font-medium mt-0.5">
+                      Academic Department • Department ID: #{dept.id}
+                    </p>
                   </div>
                 </div>
-                <div className="flex space-x-1 pr-2">
-                  <button onClick={() => openModal(dept)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                <div className="flex items-center space-x-1 pr-1 shrink-0">
+                  <button 
+                    onClick={() => openModal(dept)} 
+                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
+                    title="Edit Department"
+                  >
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setDeletingDeptId(dept.id)} className="p-2.5 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                  <button 
+                    onClick={() => setDeletingDeptId(dept.id)} 
+                    className="p-2 text-text-secondary hover:text-accent hover:bg-accent-tint rounded-lg transition-colors cursor-pointer"
+                    title="Delete Department"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -251,7 +303,8 @@ export default function DepartmentsTab({ onBack }: Props) {
       <div className="fixed bottom-6 right-6 z-40">
         <button 
           onClick={() => openModal()}
-          className="w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-indigo-700 hover:scale-105 transition-all"
+          className="w-14 h-14 bg-accent hover:bg-accent-hover text-card rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all cursor-pointer"
+          title="Add New Department"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -259,31 +312,36 @@ export default function DepartmentsTab({ onBack }: Props) {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
-            <div className="p-6 pb-4">
-              <h2 className="font-heading text-[17px] font-bold text-slate-900 mb-1">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-6 pb-4 border-b border-border flex items-center justify-between">
+              <h2 className="type-h4 font-bold text-text-primary">
                 {editingDept ? `Edit Department: ${editingDept.code}` : 'Add New Department'}
               </h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-text-muted hover:text-text-primary p-1.5 rounded-lg hover:bg-bg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
-            <form onSubmit={handleSave} className="px-6 pb-6 space-y-6">
-              
+            <form onSubmit={handleSave} className="p-6 space-y-6 bg-bg">
               <div>
-                <p className="type-fine font-bold text-slate-500 tracking-wider mb-3">DEPARTMENT DETAILS</p>
+                <p className="type-fine font-bold text-text-muted tracking-wider mb-3 uppercase">DEPARTMENT DETAILS</p>
                 <div className="space-y-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Department Name *</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Department Name <span className="text-accent">*</span></label>
                     <div className="relative">
-                      <Building2 className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                      <Building2 className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                      <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                     </div>
                   </div>
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Department Code *</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Department Code <span className="text-accent">*</span></label>
                     <div className="relative">
-                      <div className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 font-mono type-body-sm">{'</>'}</div>
-                      <input required type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none uppercase type-body-sm" />
+                      <div className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-text-muted font-mono type-caption font-bold">{'</>'}</div>
+                      <input required type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary uppercase type-body-sm font-semibold bg-card text-text-primary" />
                     </div>
                   </div>
                 </div>
@@ -291,44 +349,44 @@ export default function DepartmentsTab({ onBack }: Props) {
 
               {editingDept && (
                 <>
-                  <div className="h-px bg-slate-200"></div>
+                  <div className="h-px bg-border"></div>
                   <div>
-                    <p className="type-fine font-bold text-slate-500 tracking-wider mb-3">SECTIONS MANAGEMENT</p>
+                    <p className="type-fine font-bold text-text-muted tracking-wider mb-3 uppercase">SECTIONS MANAGEMENT</p>
                     <div className="flex gap-2 mb-4">
                       <input 
                         type="text" 
                         value={newSectionName} 
                         onChange={e => setNewSectionName(e.target.value)} 
                         placeholder="Add Section (e.g. A, B)" 
-                        className="flex-1 px-3 py-2.5 border border-slate-300 rounded-lg outline-none focus:border-slate-400 type-body-sm" 
+                        className="flex-1 px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                       />
                       <button 
                         type="button" 
                         onClick={handleAddSection} 
-                        className="type-btn bg-slate-900 text-white px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
+                        className="type-btn bg-accent hover:bg-accent-hover text-card px-4 py-2.5 rounded-lg transition-colors cursor-pointer"
                       >
                         <Plus className="w-5 h-5" />
                       </button>
                     </div>
 
                     {isLoadingSections ? (
-                      <div className="text-center py-4 text-slate-400 type-caption flex items-center justify-center">
-                        <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                      <div className="text-center py-4 text-text-secondary type-caption flex items-center justify-center">
+                        <RefreshCw className="w-4 h-4 animate-spin text-accent mr-2" />
                         Loading sections...
                       </div>
                     ) : deptSections.length === 0 ? (
-                      <div className="text-center py-4 bg-slate-50 border border-slate-100 rounded-xl">
-                        <p className="type-body-sm text-slate-450">No sections added yet.</p>
+                      <div className="text-center py-4 bg-card border border-border rounded-xl">
+                        <p className="type-body-sm text-text-muted">No sections added yet.</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                         {deptSections.map((sec: any) => (
-                          <div key={sec.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl type-caption">
-                            <span className="font-semibold text-slate-800">Section {sec.sectionName || sec.name}</span>
+                          <div key={sec.id} className="flex items-center justify-between p-2.5 bg-card border border-border rounded-lg type-caption">
+                            <span className="font-bold text-text-primary">Section {sec.sectionName || sec.name}</span>
                             <button
                               type="button"
                               onClick={() => handleDeleteSection(sec.id)}
-                              className="text-rose-600 hover:text-rose-800 p-1 rounded-md"
+                              className="text-text-secondary hover:text-accent p-1 rounded-md transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -340,11 +398,11 @@ export default function DepartmentsTab({ onBack }: Props) {
                 </>
               )}
               
-              <div className="flex justify-end space-x-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-slate-500 type-btn hover:bg-slate-100 rounded-lg transition-colors cursor-pointer">
+              <div className="flex justify-end space-x-2.5 pt-2 border-t border-border">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-text-secondary font-bold hover:bg-bg border border-border rounded-lg transition-colors cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="type-btn px-6 py-2 bg-slate-900 text-white font-semibold rounded-lg hover:bg-slate-800 transition-colors cursor-pointer">
+                <button type="submit" className="type-btn px-6 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none cursor-pointer">
                   Save
                 </button>
               </div>
@@ -355,22 +413,22 @@ export default function DepartmentsTab({ onBack }: Props) {
 
       {/* Delete Confirmation Modal */}
       {deletingDeptId !== null && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
-            <h3 className="type-h4 text-slate-900">Delete Department</h3>
-            <p className="type-caption text-slate-500">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-border space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="type-h4 font-bold text-text-primary">Delete Department</h3>
+            <p className="type-caption text-text-secondary">
               Are you sure you want to delete this department? This action cannot be undone.
             </p>
-            <div className="flex justify-end space-x-3 pt-2">
+            <div className="flex justify-end space-x-2.5 pt-2 border-t border-border">
               <button
                 onClick={() => setDeletingDeptId(null)}
-                className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-text-secondary font-bold hover:bg-bg border border-border rounded-lg cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deletingDeptId)}
-                className="px-5 py-2 bg-rose-600 text-white type-btn hover:bg-rose-700 rounded-lg shadow-xs cursor-pointer"
+                className="px-5 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg shadow-none cursor-pointer transition-colors"
               >
                 Confirm Delete
               </button>

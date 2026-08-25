@@ -1,43 +1,72 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { RefreshCw, Users, School, Building2, Trophy, Trash2, BarChart3, ArrowRight } from 'lucide-react';
+import { 
+  RefreshCw, Users, School, Building2, Trophy, Trash2, BarChart3, 
+  ArrowRight, Activity, CalendarCheck, Award, ShieldCheck, 
+  ChevronRight
+} from 'lucide-react';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
+import { ROLE_ACCESS, getEffectiveRole } from '../../../config/roleAccess';
 
 interface Props {
   onPushView: (name: string, props?: any) => void;
+  onNavigateTab?: (slug: string) => void;
 }
 
 interface Stats {
   students: number;
   teachers: number;
   departments: number;
+  pendingRequests: number;
 }
 
-export default function OverviewTab({ onPushView }: Props) {
-  const { isSuperAdmin, user } = useAuth();
+export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
+  const auth = useAuth();
+  const { user, isSuperAdmin, isHOD, isAdmin, role, subRoles } = auth;
+  const effectiveRole = getEffectiveRole(user, { isSuperAdmin, isHOD, isAdmin, role, subRoles });
+  const roleConfig = ROLE_ACCESS[effectiveRole];
+
+  const userYear = user?.academicYear || user?.assignedYear || user?.year || (user?.adminDetails?.academicYear);
+  const userDept = user?.department || user?.departmentName || user?.dept || (user?.superAdminDetails?.department);
+
+  const scopeLabel = roleConfig.dataScope === 'institution'
+    ? 'INSTITUTION SCOPE'
+    : roleConfig.dataScope === 'year'
+    ? `ADMIN SCOPE: ${userYear || 'ASSIGNED YEAR'}`
+    : `HOD SCOPE: ${userDept || 'YOUR DEPARTMENT'}`;
+
   const [stats, setStats] = useState<Stats>({
     students: 0,
     teachers: 0,
     departments: 0,
+    pendingRequests: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchStats = async () => {
     setIsLoading(true);
     try {
+      const queryParams = {
+        scope: roleConfig.dataScope,
+        year: userYear,
+        department: userDept,
+        departmentId: user?.departmentId,
+      };
+
       let response;
       try {
-        response = await apiClient.get('/api/v1/admin/stats');
+        response = await apiClient.get('/api/v1/admin/stats', { params: queryParams });
       } catch {
-        response = await apiClient.get('/api/admin/dashboard/stats');
+        response = await apiClient.get('/api/admin/dashboard/stats', { params: queryParams });
       }
       if (response && response.data) {
         const data = response.data.data || response.data;
         setStats({
-          students: Number(data.totalStudents ?? data.students ?? data.studentCount ?? 0),
+          students: Number(data.totalStudents ?? data.students ?? data.studentCount ?? (user?.adminDetails?.totalStudentsInYear ?? 0)),
           teachers: Number(data.teachersCount ?? data.totalTeachers ?? data.teachers ?? data.teacherCount ?? data.totalFaculty ?? data.facultyCount ?? 0),
-          departments: Number(data.totalDepartments ?? data.departments ?? data.departmentCount ?? 0),
+          departments: Number(data.totalDepartments ?? data.departments ?? data.departmentCount ?? (effectiveRole === 'HOD' ? 1 : 0)),
+          pendingRequests: Number(data.pendingBadgeRequests ?? data.pendingRequests ?? data.pending ?? 0),
         });
       }
     } catch (error) {
@@ -49,123 +78,276 @@ export default function OverviewTab({ onPushView }: Props) {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roleConfig.dataScope, userYear, userDept]);
+
+  const overviewTitle = effectiveRole === 'SUPER_ADMIN' 
+    ? 'Super Admin Overview' 
+    : effectiveRole === 'HOD' 
+    ? 'HOD Overview' 
+    : 'Admin Overview';
+
+  const overviewSubtitle = roleConfig.dataScope === 'institution'
+    ? 'Executive summary of institution engagement, discipline metrics, and student achievements.'
+    : roleConfig.dataScope === 'year'
+    ? `Discipline system metrics and student progress for ${userYear ? String(userYear).replace('_', ' ') : 'your assigned year'}.`
+    : `Discipline system metrics for ${userDept || 'your department'}.`;
+
+  const handleActionNavigate = (slug: string, fallbackView?: string) => {
+    if (onNavigateTab) {
+      onNavigateTab(slug);
+    } else if (fallbackView) {
+      onPushView(fallbackView);
+    }
+  };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50">
-      {/* Header */}
-      <div className="bg-slate-900 px-6 pt-10 pb-6 text-white shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="type-h3">{isSuperAdmin ? 'Super Admin Overview' : 'Admin Overview'}</h1>
+    <div className="flex flex-col min-h-full bg-bg pb-16">
+      {/* Header Bar */}
+      <div className="bg-card px-6 py-5 border-b border-border text-text-primary sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <div className="flex items-center space-x-3">
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">{overviewTitle}</h1>
+            <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-secondary border border-border tracking-wider">
+              {scopeLabel}
+            </span>
+          </div>
+          
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => onPushView('analytics')}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white type-caption rounded-xl transition-all shadow-sm cursor-pointer"
-              title="Analytics Dashboard"
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Analytics</span>
-            </button>
-            <button
               onClick={() => onPushView('recycle_bin')}
-              className="p-2 bg-slate-800 rounded-full text-rose-400 hover:bg-slate-700 hover:text-rose-300 transition-colors cursor-pointer"
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
               title="Recycle Bin"
             >
-              <Trash2 className="w-5 h-5" />
+              <Trash2 className="w-4 h-4" />
             </button>
             <button
               onClick={fetchStats}
-              className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
+              disabled={isLoading}
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer disabled:opacity-50"
               title="Refresh Stats"
             >
-              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
+
         <div>
-          <h2 className="type-h4 text-white mb-0.5">
-            Welcome back, {user?.name ? user.name : (isSuperAdmin ? 'Super Admin' : 'System Admin')}
+          <h2 className="type-h4 font-bold text-text-primary">
+            Welcome back, {user?.name ? user.name : roleConfig.roleDisplayName}
           </h2>
-          <p className="type-caption text-slate-300">
-            {isSuperAdmin 
-              ? 'Here is an executive summary of the entire institution discipline metrics.' 
-              : 'Here is a summary of the discipline system metrics.'}
+          <p className="type-caption text-text-secondary font-medium mt-0.5">
+            {overviewSubtitle}
           </p>
         </div>
       </div>
 
-      <div className="px-6 py-6 max-w-5xl mx-auto w-full space-y-6">
+      {/* Main Content Area */}
+      <div className="px-4 sm:px-6 py-6 max-w-6xl mx-auto w-full space-y-6">
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-indigo-500" />
+          <div className="flex flex-col items-center justify-center py-20 space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading executive dashboard metrics...</p>
           </div>
         ) : (
           <>
-            {/* Quick Launch Analytics Banner */}
+            {/* Quick Launch Analytics Banner (Precision Light) */}
             <div
               onClick={() => onPushView('analytics')}
-              className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-5 text-white shadow-md cursor-pointer hover:shadow-lg hover:border-indigo-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-800 group"
+              className="bg-card text-text-primary rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] cursor-pointer hover:border-accent/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-border group"
             >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-105 transition-transform">
-                  <BarChart3 className="w-6 h-6" />
+              <div className="flex items-start sm:items-center space-x-4">
+                <div className="w-13 h-13 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent shrink-0 group-hover:scale-105 transition-transform">
+                  <BarChart3 className="w-7 h-7" />
                 </div>
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="type-h5 text-white">Analytics & Executive Reporting</h3>
-                    <span className="px-2 py-0.5 rounded-full type-fine font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 tracking-wider">
-                      INSTITUTION SCOPE
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="type-h4 font-bold text-text-primary">Executive Analytics & Reporting</h3>
+                    <span className="px-2.5 py-0.5 rounded-md type-fine font-bold bg-bg text-text-secondary border border-border tracking-wider uppercase">
+                      Live Reports
                     </span>
                   </div>
-                  <p className="type-caption text-slate-400 mt-0.5">
-                    Live student engagement, department award vs penalty comparisons & PDF reports
+                  <p className="type-caption text-text-secondary font-medium mt-1 max-w-xl">
+                    Live student engagement statistics, departmental point comparisons, penalty analytics & downloadable PDF audit reports.
                   </p>
                 </div>
               </div>
-              <button className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 group-hover:bg-indigo-500 text-white font-semibold type-btn rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer self-start sm:self-auto">
+
+              <button className="flex items-center space-x-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-card font-bold type-btn rounded-xl transition-colors shrink-0 shadow-none cursor-pointer self-start sm:self-auto">
                 <span>View Analytics</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Admin Overview Stat Cards (Matching Flutter overview_tab.dart 1:1) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* 4 Primary Metric Stat Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
-                title="Students"
+                title="Enrolled Students"
                 count={stats.students.toString()}
+                subtitle="Live directory"
                 icon={Users}
-                color="text-blue-600"
-                bgColor="bg-blue-50"
-                borderColor="border-blue-100"
                 onClick={() => onPushView('students')}
               />
               <StatCard
-                title="Teachers"
+                title="Faculty & Mentors"
                 count={stats.teachers.toString()}
+                subtitle="Teaching faculty"
                 icon={School}
-                color="text-emerald-600"
-                bgColor="bg-emerald-50"
-                borderColor="border-emerald-100"
                 onClick={() => onPushView('teachers')}
               />
               <StatCard
                 title="Departments"
                 count={stats.departments.toString()}
+                subtitle="Academic branches"
                 icon={Building2}
-                color="text-amber-600"
-                bgColor="bg-amber-50"
-                borderColor="border-amber-100"
                 onClick={() => onPushView('departments')}
               />
               <StatCard
-                title="Leaderboard"
+                title="Rankings"
                 count="Live"
+                subtitle="Top performers"
                 icon={Trophy}
-                color="text-rose-600"
-                bgColor="bg-rose-50"
-                borderColor="border-rose-100"
-                onClick={() => onPushView('leaderboard')}
+                onClick={() => handleActionNavigate('leaderboard', 'leaderboard')}
               />
+            </div>
+
+            {/* Core Operations & Quick Navigation Grid */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <h3 className="type-h4 font-bold text-text-primary">Governance & Administrative Modules</h3>
+                <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Quick Navigation</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. Activity & Thresholds */}
+                <div
+                  onClick={() => handleActionNavigate('activity')}
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/40 transition-all cursor-pointer flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="type-h5 font-bold text-text-primary group-hover:text-accent transition-colors">
+                        Activity & Thresholds
+                      </h4>
+                      <p className="type-fine text-text-secondary mt-1">
+                        Configure stages, point quotas, and graduation thresholds across 4 academic years.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-border-subtle flex items-center justify-between type-caption font-bold text-accent">
+                    <span>Manage Activities</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+
+                {/* 2. Attendance Engine */}
+                <div
+                  onClick={() => handleActionNavigate('attendance')}
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/40 transition-all cursor-pointer flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-text-primary">
+                      <CalendarCheck className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <h4 className="type-h5 font-bold text-text-primary group-hover:text-accent transition-colors">
+                        Attendance Engine & AWD
+                      </h4>
+                      <p className="type-fine text-text-secondary mt-1">
+                        Manage monthly AWD multipliers, academic working days, and attendance logging rules.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-border-subtle flex items-center justify-between type-caption font-bold text-accent">
+                    <span>Attendance Settings</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+
+                {/* 3. Group Management & Captain Rewards */}
+                <div
+                  onClick={() => handleActionNavigate('groups')}
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/40 transition-all cursor-pointer flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-text-primary">
+                      <Users className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <h4 className="type-h5 font-bold text-text-primary group-hover:text-accent transition-colors">
+                        Peer Groups & Teams
+                      </h4>
+                      <p className="type-fine text-text-secondary mt-1">
+                        Form student cohorts, assign captains, and configure leadership point bonuses.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-border-subtle flex items-center justify-between type-caption font-bold text-accent">
+                    <span>Manage Groups</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+
+                {/* 4. Requests & Badge Approval */}
+                <div
+                  onClick={() => handleActionNavigate('requests')}
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/40 transition-all cursor-pointer flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h4 className="type-h5 font-bold text-text-primary group-hover:text-accent transition-colors">
+                          Badge Approvals
+                        </h4>
+                        {stats.pendingRequests > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-accent text-card">
+                            {stats.pendingRequests} New
+                          </span>
+                        )}
+                      </div>
+                      <p className="type-fine text-text-secondary mt-1">
+                        Verify student badge proof submissions and approve or reject claims with remarks.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-border-subtle flex items-center justify-between type-caption font-bold text-accent">
+                    <span>Review Requests</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Operational Health Footer Card */}
+            <div className="bg-card rounded-2xl border border-border p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-accent shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="type-caption font-bold text-text-primary">System Integrity & Synchronization</h4>
+                  <p className="type-fine text-text-secondary font-medium">
+                    PragatiX Enterprise Discipline System • Connected to Active Institution Database
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 type-fine font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                  <span>All Services Nominal</span>
+                </span>
+              </div>
             </div>
           </>
         )}
@@ -174,20 +356,22 @@ export default function OverviewTab({ onPushView }: Props) {
   );
 }
 
-function StatCard({ title, count, icon: Icon, color, bgColor, borderColor, onClick }: any) {
+function StatCard({ title, count, subtitle, icon: Icon, onClick }: any) {
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl border ${borderColor} shadow-sm p-5 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between`}
+      className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/40 transition-all cursor-pointer flex flex-col justify-between group"
     >
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-2.5 rounded-xl ${bgColor}`}>
-          <Icon className={`w-6 h-6 ${color}`} />
+      <div className="flex justify-between items-start mb-3">
+        <div className="p-2.5 rounded-xl bg-bg border border-border text-text-primary group-hover:border-accent/30 transition-colors">
+          <Icon className="w-5 h-5 text-accent" />
         </div>
+        <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent group-hover:translate-x-1 transition-all" />
       </div>
       <div>
-        <h4 className="type-h2 text-slate-900">{count}</h4>
-        <p className="type-caption text-slate-500 mt-1">{title}</p>
+        <h4 className="type-h2 font-black text-text-primary">{count}</h4>
+        <p className="type-caption font-bold text-text-secondary mt-0.5">{title}</p>
+        {subtitle && <p className="type-fine text-text-muted mt-0.5">{subtitle}</p>}
       </div>
     </div>
   );

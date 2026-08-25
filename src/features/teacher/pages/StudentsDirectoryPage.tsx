@@ -281,32 +281,32 @@ export default function StudentsDirectoryPage() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 relative">
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center shadow-md">
-        <button onClick={() => navigate(-1)} className="mr-4 p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+    <div className="flex flex-col min-h-screen bg-bg relative text-text-primary">
+      <div className="bg-card px-6 py-4 flex items-center border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] sticky top-0 z-30">
+        <button onClick={() => navigate(-1)} className="mr-4 p-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="type-h4 text-white flex-1 truncate">Students Directory</h1>
+        <h1 className="type-h4 text-text-primary flex-1 truncate font-bold">Students Directory</h1>
         
-        {/* Header Icons to match Flutter 1:1 */}
-        <div className="flex items-center space-x-2 text-white">
+        {/* Header Icons */}
+        <div className="flex items-center space-x-2 text-text-secondary">
           <button 
             onClick={() => setIsModalOpen(true)} 
-            className="p-2 hover:bg-slate-800 rounded-full transition-colors cursor-pointer" 
+            className="p-2 hover:bg-bg border border-border rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer" 
             title="Add Student"
           >
             <UserPlus className="w-5 h-5" />
           </button>
           <button 
             onClick={() => setIsReportMonitorOpen(true)} 
-            className="p-2 hover:bg-slate-800 rounded-full transition-colors cursor-pointer text-amber-300 hover:text-amber-200" 
+            className="p-2 hover:bg-bg border border-border rounded-lg text-accent hover:text-accent-hover transition-colors cursor-pointer" 
             title="Discipline Report Monitor"
           >
             <Sparkles className="w-5 h-5" />
           </button>
           <button 
             onClick={fetchStudents} 
-            className="p-2 type-btn hover:bg-slate-800 rounded-full transition-colors cursor-pointer" 
+            className="p-2 type-btn hover:bg-bg border border-border rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer" 
             title="Refresh List"
           >
             <RefreshCw className="w-5 h-5" />
@@ -315,20 +315,20 @@ export default function StudentsDirectoryPage() {
       </div>
 
       <div className="p-4 max-w-5xl mx-auto w-full flex-1 flex flex-col relative pb-24">
-        {/* Search Bar matching Flutter */}
+        {/* Search Bar */}
         <div className="relative mb-6 mx-2">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
           <input 
             type="text"
-            placeholder="Search by student name or reg n..."
+            placeholder="Search by student name or reg no..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-12 py-3 bg-white border border-slate-300 rounded-2xl shadow-sm focus:ring-2 focus:ring-teal-500 outline-none type-body-sm"
+            className="w-full pl-12 pr-12 py-3 bg-card border border-border rounded-lg shadow-none focus:border-text-primary outline-none type-body-sm text-text-primary placeholder-text-muted"
           />
           {searchQuery && (
             <button 
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
             >
               <X className="w-5 h-5" />
             </button>
@@ -336,23 +336,23 @@ export default function StudentsDirectoryPage() {
         </div>
 
         {loading ? (
-          <div className="flex-1 flex items-center justify-center text-slate-500">Loading students...</div>
+          <div className="flex-1 flex items-center justify-center text-text-muted">Loading students...</div>
         ) : filteredStudents.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-slate-500 type-body-sm">No students found.</div>
+          <div className="flex-1 flex items-center justify-center text-text-muted type-body-sm">No students found.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredStudents.map(student => (
               <div 
                 key={student.id} 
                 onClick={() => navigate(`/students/${student.id}`)}
-                className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer"
+                className="bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-text-muted transition-all cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold type-h4">
+                  <div className="w-12 h-12 rounded-full bg-accent-tint text-accent border border-accent/20 flex items-center justify-center font-bold type-h4">
                     {student.fullName?.charAt(0) || 'S'}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="type-caption font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 mr-1">
+                    <span className="type-caption font-bold text-accent bg-accent-tint px-2.5 py-1 rounded-md border border-accent/30 mr-1">
                       {student.score ?? student.xp ?? student.points ?? 0} pts
                     </span>
                     <button 
@@ -361,32 +361,32 @@ export default function StudentsDirectoryPage() {
                         setEditingStudent(student);
                         setIsEditModalOpen(true);
                       }} 
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                      className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-bg rounded-md transition-colors cursor-pointer"
                       title="Edit Student"
                     >
-                      <Pencil className="w-4 h-4 text-indigo-600" />
+                      <Pencil className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={(e) => { 
                         e.stopPropagation(); 
                         setDeleteConfirmStudent({ id: student.id, name: student.fullName }); 
                       }} 
-                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      className="p-1.5 text-text-muted hover:text-accent hover:bg-accent-tint rounded-md transition-colors cursor-pointer"
                       title="Delete Student"
                     >
-                      <Trash2 className="w-4 h-4 text-rose-500" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <h3 className="type-h5 text-slate-800 truncate">{student.fullName}</h3>
-                <div className="type-caption text-slate-500 space-y-0.5 mt-1">
-                  <p><span className="font-medium text-slate-700">Reg No:</span> {student.studentId || student.regNo || student.registerNumber || 'N/A'}</p>
+                <h3 className="type-h5 text-text-primary truncate font-bold">{student.fullName}</h3>
+                <div className="type-caption text-text-secondary space-y-0.5 mt-1">
+                  <p><span className="font-medium text-text-primary">Reg No:</span> {student.studentId || student.regNo || student.registerNumber || 'N/A'}</p>
                   {(student.sprNo || student.spr_no) && (
-                    <p><span className="font-medium text-slate-700">SPR:</span> {student.sprNo || student.spr_no}</p>
+                    <p><span className="font-medium text-text-primary">SPR:</span> {student.sprNo || student.spr_no}</p>
                   )}
                   <p>Year: {student.year || 'N/A'} • Section: {student.section || 'N/A'}</p>
                   <p>Dept: {student.departmentName || 'N/A'}</p>
-                  {student.email && <p className="truncate text-slate-400 mt-1">Email: {student.email}</p>}
+                  {student.email && <p className="truncate text-text-muted mt-1">Email: {student.email}</p>}
                 </div>
               </div>
             ))}
@@ -394,26 +394,26 @@ export default function StudentsDirectoryPage() {
         )}
       </div>
 
-      {/* Floating Action Button for Add Students (Teal pill) */}
+      {/* Floating Action Button for Add Students */}
       <div className="fixed bottom-6 right-6 z-40">
         <button 
           onClick={() => setIsOptionsModalOpen(true)}
-          className="bg-[#0D9488] hover:bg-[#0F766E] text-white px-5 py-3 rounded-full font-semibold flex items-center gap-2 shadow-lg transition-transform hover:scale-105"
+          className="bg-accent hover:bg-accent-hover text-card px-5 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-none transition-all cursor-pointer"
         >
           <Plus className="w-5 h-5" /> Add Students
         </button>
       </div>
 
-      {/* Options Modal (matches Flutter + Template Reference) */}
+      {/* Options Modal */}
       {isOptionsModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 bg-text-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md overflow-hidden shadow-lg border border-border">
             <div className="p-6">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h2 className="type-h4 text-slate-800">Add Students</h2>
+              <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+                <h2 className="type-h4 text-text-primary font-bold">Add Students</h2>
                 <button 
                   onClick={() => setIsOptionsModalOpen(false)}
-                  className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+                  className="p-1 hover:bg-bg rounded-lg transition-colors text-text-secondary cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -421,55 +421,55 @@ export default function StudentsDirectoryPage() {
               
               <div className="space-y-3">
                 <div 
-                  className="flex items-start gap-4 p-4 hover:bg-teal-50/50 border border-slate-100 hover:border-teal-200 cursor-pointer rounded-2xl transition-all"
+                  className="flex items-start gap-4 p-4 hover:bg-bg border border-border hover:border-text-muted cursor-pointer rounded-lg transition-all"
                   onClick={() => {
                     setIsOptionsModalOpen(false);
                     setIsModalOpen(true);
                   }}
                 >
-                  <div className="p-2.5 bg-teal-50 text-teal-600 rounded-xl">
+                  <div className="p-2.5 bg-bg text-text-primary border border-border rounded-lg">
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="type-h5 text-slate-800">Register Single Student</h3>
-                    <p className="type-caption text-slate-500 mt-0.5">Enter Name, Reg No, DOB, and details manually</p>
+                    <h3 className="type-h5 text-text-primary font-bold">Register Single Student</h3>
+                    <p className="type-caption text-text-secondary mt-0.5">Enter Name, Reg No, DOB, and details manually</p>
                   </div>
                 </div>
 
                 <div 
-                  className="flex items-start gap-4 p-4 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-200 cursor-pointer rounded-2xl transition-all"
+                  className="flex items-start gap-4 p-4 hover:bg-bg border border-border hover:border-text-muted cursor-pointer rounded-lg transition-all"
                   onClick={() => {
                     setIsOptionsModalOpen(false);
                     setIsBulkUploadModalOpen(true);
                   }}
                 >
-                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <div className="p-2.5 bg-bg text-text-primary border border-border rounded-lg">
                     <Upload className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="type-h5 text-slate-800">Excel Bulk Upload</h3>
-                    <p className="type-caption text-slate-500 mt-0.5">Upload spreadsheet with student records</p>
+                    <h3 className="type-h5 text-text-primary font-bold">Excel Bulk Upload</h3>
+                    <p className="type-caption text-text-secondary mt-0.5">Upload spreadsheet with student records</p>
                   </div>
                 </div>
 
                 <div 
-                  className="flex items-start gap-4 p-4 hover:bg-indigo-50/50 border border-slate-100 hover:border-indigo-200 cursor-pointer rounded-2xl transition-all"
+                  className="flex items-start gap-4 p-4 hover:bg-bg border border-border hover:border-text-muted cursor-pointer rounded-lg transition-all"
                   onClick={handleDownloadTemplate}
                 >
-                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <div className="p-2.5 bg-bg text-text-primary border border-border rounded-lg">
                     <Download className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="type-h5 text-slate-800">Download Excel Template</h3>
-                    <p className="type-caption text-slate-500 mt-0.5">Get reference template (.xlsx) with proper columns</p>
+                    <h3 className="type-h5 text-text-primary font-bold">Download Excel Template</h3>
+                    <p className="type-caption text-text-secondary mt-0.5">Get reference template (.xlsx) with proper columns</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+            <div className="px-6 py-3 bg-bg border-t border-border flex justify-end">
               <button 
                 onClick={() => setIsOptionsModalOpen(false)} 
-                className="px-4 py-2 font-bold text-slate-600 hover:text-slate-800 transition-colors type-btn cursor-pointer"
+                className="px-4 py-2 font-bold text-text-secondary hover:text-text-primary transition-colors type-btn cursor-pointer"
               >
                 Cancel
               </button>
@@ -1475,7 +1475,7 @@ export default function StudentsDirectoryPage() {
                   }
                 }}
                 disabled={isImporting}
-                className="px-6 py-2.5 font-bold text-white bg-[#11998e] hover:bg-[#0f7d74] rounded-xl shadow-md transition-colors disabled:opacity-50 type-btn flex items-center gap-1.5 cursor-pointer"
+                className="px-6 py-2.5 font-bold text-card bg-accent hover:bg-accent-hover rounded-lg shadow-none transition-colors disabled:opacity-50 type-btn flex items-center gap-1.5 cursor-pointer"
               >
                 {isImporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 <span>Proceed Import</span>

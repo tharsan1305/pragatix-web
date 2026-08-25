@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, Check, Award, Plus, ShieldAlert } from 'lucide-react';
+import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, Check, Award, Plus, ShieldAlert, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
@@ -107,9 +107,10 @@ const getTeamLevel = (g: GroupData) => {
 
 interface TeacherGroupManagementTabProps {
   onPushView?: (name: string, props?: Record<string, any>) => void;
+  onBack?: () => void;
 }
 
-export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupManagementTabProps = {}) {
+export default function TeacherGroupManagementTab({ onPushView, onBack }: TeacherGroupManagementTabProps = {}) {
   const { user, subRoles } = useAuth();
   const isSuperAdmin = user?.roles?.some((r: any) => {
     const name = typeof r === 'string' ? r : (r?.name || '');
@@ -147,6 +148,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
   const [selectedYear, setSelectedYear] = useState("All");
   const [selectedSection, setSelectedSection] = useState("All");
   const [selectedStage, setSelectedStage] = useState("All");
+  const [groupSearchQuery, setGroupSearchQuery] = useState('');
 
   const [expandedGroupId, setExpandedGroupId] = useState<number | null>(null);
 
@@ -658,6 +660,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
       const sec = g.sectionName || (typeof g.section === 'string' ? g.section : g.section?.sectionName);
       const members = g.teamMembers || g.members || g.students || [];
 
+      // 0. Search Query Filter
+      if (groupSearchQuery.trim()) {
+        const q = groupSearchQuery.toLowerCase().trim();
+        const teamName = (g.teamName || g.name || g.groupName || '').toLowerCase();
+        const captain = (g.captainName || g.captain?.fullName || g.captain?.username || '').toLowerCase();
+        const vice = (g.viceCaptainName || g.viceCaptain?.fullName || g.viceCaptain?.username || '').toLowerCase();
+        const memberMatch = members.some((m: any) => {
+          const mName = (m.fullName || m.name || '').toLowerCase();
+          const mReg = (m.regNo || m.studentId || '').toLowerCase();
+          return mName.includes(q) || mReg.includes(q);
+        });
+
+        const matchedSearch = teamName.includes(q) || captain.includes(q) || vice.includes(q) || memberMatch;
+        if (!matchedSearch) return false;
+      }
+
       // 1. Department Filter
       if (selectedDept && selectedDept !== "All" && selectedDept !== "ALL") {
         const matchDept = isMatchingDept(dept, selectedDept) || members.some((m: any) =>
@@ -1071,10 +1089,32 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
   const filteredGroups = getFilteredGroups();
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 relative">
-      <div className="bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="type-h4">View Groups</h1>
-        <div className="flex items-center space-x-2">
+    <div className="flex flex-col h-full bg-bg text-text-primary relative">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 sticky top-0 z-20 border-b border-border flex flex-wrap gap-3 justify-between items-center">
+        <div className="flex items-center space-x-3.5">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="type-h3 font-bold text-text-primary tracking-tight">Group Management</h1>
+              <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-secondary border border-border">
+                {filteredGroups.length} Teams
+              </span>
+            </div>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">
+              Organize students into peer groups, assign leadership, and track stage progressions
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2.5">
           {canCreateTeam && (
             <button
               onClick={() => {
@@ -1085,7 +1125,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 setCreateCaptainSearchResults([]);
                 setIsCreateTeamModalOpen(true);
               }}
-              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl type-btn shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-card rounded-lg type-btn font-bold shadow-none transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create Team</span>
@@ -1094,26 +1134,73 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
           {(isAdmin || isSuperAdmin) && onPushView && (
             <button
               onClick={() => onPushView('captain_reward_year_selection')}
-              className="p-2 hover:bg-white/10 rounded-full text-amber-300 transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-card border border-border hover:bg-bg rounded-lg text-text-primary transition-colors cursor-pointer font-bold type-caption"
               title="Captain Rewards Settings"
             >
-              <Award className="w-5 h-5 fill-amber-300" />
+              <Award className="w-4 h-4 text-accent" />
+              <span className="hidden sm:inline">Captain Rewards</span>
             </button>
           )}
           <button
             onClick={fetchGroups}
-            className="p-2 type-btn hover:bg-white/10 rounded-full transition-colors"
+            disabled={isLoading}
+            className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
           </button>
         </div>
       </div>
 
-      <div className="bg-indigo-50/80 p-3 flex flex-wrap sm:flex-nowrap gap-2 border-b border-indigo-100 z-10 sticky top-[60px] shadow-xs">
+      {/* Squad Allocation Overview KPI Summary */}
+      <div className="bg-card px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Groups</span>
+            <div className="text-xl font-black text-text-primary">{groups.length} Squads</div>
+          </div>
+          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Members</span>
+            <div className="text-xl font-black text-accent">
+              {groups.reduce((acc, g) => acc + (g.currentMemberCount || (g.teamMembers || g.members || []).length || 0), 0)} Assigned
+            </div>
+          </div>
+          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Filtered View</span>
+            <div className="text-xl font-black text-text-primary">{filteredGroups.length} Active</div>
+          </div>
+          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Role Authority</span>
+            <div className="text-xl font-black text-text-secondary">{canCreateTeam ? 'Full Access' : 'Read Only'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter & Search Toolbar */}
+      <div className="bg-card p-4 flex flex-wrap items-center gap-3 border-b border-border z-10 sticky top-[68px] shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        {/* Search Box */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={groupSearchQuery}
+            onChange={(e) => setGroupSearchQuery(e.target.value)}
+            placeholder="Search team, captain, or member..."
+            className="w-full pl-9 pr-8 py-2 bg-bg border border-border rounded-lg type-body-sm font-semibold text-text-primary placeholder:text-text-muted focus:border-text-primary outline-none"
+          />
+          {groupSearchQuery && (
+            <button
+              onClick={() => setGroupSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
         {/* Year Filter */}
         <select
-          className={`flex-1 min-w-[120px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 type-caption focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
+          className={`min-w-[130px] bg-bg border border-border rounded-lg px-3 py-2 type-caption font-bold focus:border-text-primary cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'cursor-not-allowed opacity-80 text-text-secondary' : 'text-text-primary'}`}
           value={selectedYear}
           disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => handleYearChange(e.target.value)}
@@ -1124,7 +1211,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
         {/* Dept Filter */}
         <select
-          className={`flex-1 min-w-[140px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 type-caption focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
+          className={`min-w-[160px] bg-bg border border-border rounded-lg px-3 py-2 type-caption font-bold focus:border-text-primary cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'cursor-not-allowed opacity-80 text-text-secondary' : 'text-text-primary'}`}
           value={selectedDept}
           disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => handleDeptChange(e.target.value)}
@@ -1135,7 +1222,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
         {/* Section Filter */}
         <select
-          className={`flex-1 min-w-[110px] bg-white border border-slate-300 rounded-lg px-2.5 py-2 type-caption focus:outline-none focus:border-indigo-500 cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700 font-semibold' : 'text-slate-800'}`}
+          className={`min-w-[120px] bg-bg border border-border rounded-lg px-3 py-2 type-caption font-bold focus:border-text-primary cursor-pointer ${isCC && !isAdmin && !isSuperAdmin ? 'cursor-not-allowed opacity-80 text-text-secondary' : 'text-text-primary'}`}
           value={selectedSection}
           disabled={isCC && !isAdmin && !isSuperAdmin}
           onChange={e => setSelectedSection(e.target.value)}
@@ -1146,7 +1233,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
         {/* Stage Filter */}
         <select
-          className="flex-1 min-w-[110px] bg-white border border-indigo-200 rounded-lg px-2.5 py-2 type-caption font-bold text-indigo-700 focus:outline-none focus:border-indigo-500 cursor-pointer"
+          className="min-w-[120px] bg-bg border border-border rounded-lg px-3 py-2 type-caption font-bold text-text-primary focus:border-text-primary cursor-pointer"
           value={selectedStage}
           onChange={e => setSelectedStage(e.target.value)}
         >
@@ -1155,15 +1242,21 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         </select>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-4">
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="flex flex-col h-64 items-center justify-center space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading teams and members...</p>
           </div>
         ) : filteredGroups.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-            <UsersRound className="w-16 h-16 mb-4 opacity-30" />
-            <p className="type-body-sm font-medium">No groups found</p>
+          <div className="text-center py-16 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-8 space-y-3 flex flex-col items-center">
+            <div className="w-14 h-14 rounded-lg bg-bg border border-border flex items-center justify-center text-text-muted mb-1">
+              <UsersRound className="w-7 h-7" />
+            </div>
+            <p className="type-h4 font-bold text-text-primary">No groups found</p>
+            <p className="type-body-sm text-text-secondary font-medium max-w-md">
+              {groupSearchQuery ? `No teams match "${groupSearchQuery}". Try clearing search keywords or adjusting your filters.` : 'Create a new peer group or adjust your class filters above.'}
+            </p>
             {canCreateTeam && (
               <button
                 onClick={() => {
@@ -1174,7 +1267,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   setCreateCaptainSearchResults([]);
                   setIsCreateTeamModalOpen(true);
                 }}
-                className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white type-btn rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                className="mt-3 px-5 py-2.5 bg-accent hover:bg-accent-hover text-card type-btn font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer shadow-none"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create New Team</span>
@@ -1182,7 +1275,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {filteredGroups.map(g => {
               const tId = g.teamId || g.id || 0;
               const isExpanded = expandedGroupId === tId;
@@ -1195,39 +1288,46 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
               const level = getTeamLevel(g);
 
               return (
-                <div key={tId} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
-                  <div className="p-4 flex items-center justify-between hover:bg-slate-50">
+                <div key={tId} className="bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-accent/40 overflow-hidden transition-all duration-200">
+                  <div className="p-4 sm:p-5 flex items-center justify-between hover:bg-bg/50">
                     <div
                       className="flex items-center gap-4 min-w-0 flex-1 cursor-pointer"
                       onClick={() => setExpandedGroupId(isExpanded ? null : tId)}
                     >
-                      <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center shrink-0 border border-indigo-100">
-                        <UsersRound className="w-5 h-5 text-indigo-600" />
+                      <div className="w-11 h-11 rounded-lg bg-bg border border-border flex items-center justify-center shrink-0 text-text-primary">
+                        <UsersRound className="w-5 h-5 text-accent" />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-[15px] text-slate-800 truncate">{groupName}</h3>
-                          <span className="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <h3 className="type-h4 font-bold text-text-primary truncate">{groupName}</h3>
+                          <span className="bg-accent-tint text-accent border border-accent/20 text-[10px] font-extrabold px-2 py-0.5 rounded-md shrink-0 uppercase">
                             Stage {level}
                           </span>
                         </div>
-                        <p className="type-caption text-slate-500 mt-0.5 truncate">
-                          Captain: {captainName} {viceCaptainName !== '—' && viceCaptainName !== 'Unassigned' ? `• Vice: ${viceCaptainName}` : ''} • {memberCount}/{size} members
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap text-text-secondary type-caption font-medium mt-1">
+                          <span>Captain: <strong className="text-text-primary">{captainName}</strong></span>
+                          {viceCaptainName !== '—' && viceCaptainName !== 'Unassigned' && (
+                            <span>• Vice: <strong className="text-text-primary">{viceCaptainName}</strong></span>
+                          )}
+                          <span className="px-2 py-0.5 rounded bg-bg text-text-secondary border border-border font-bold text-[10px]">
+                            {memberCount}/{size} members
+                          </span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => openTeamDetails(g)}
-                        className="flex items-center gap-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                        className="flex items-center gap-1.5 bg-card border border-border text-text-primary hover:bg-bg px-3 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                         title="View Full Team Details"
                       >
-                        <Eye className="w-3.5 h-3.5" /> Details
+                        <Eye className="w-3.5 h-3.5 text-accent" />
+                        <span>Details</span>
                       </button>
                       <button
                         onClick={() => setExpandedGroupId(isExpanded ? null : tId)}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+                        className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg cursor-pointer"
                       >
                         {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                       </button>
@@ -1235,37 +1335,37 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-slate-100 bg-slate-50/50">
+                    <div className="border-t border-border bg-card">
                       {/* Management Action Bar inside Accordion */}
-                      <div className="p-3 flex flex-wrap justify-end gap-2 border-b border-slate-100 bg-white">
+                      <div className="p-3.5 flex flex-wrap justify-end gap-2 border-b border-border bg-bg/40">
                         <button
                           onClick={() => openAddMemberModal(tId)}
-                          className="flex items-center gap-1.5 bg-green-50 text-green-700 hover:bg-green-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-accent hover:bg-accent-hover text-card px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors shadow-none cursor-pointer"
                         >
                           <UserPlus className="w-3.5 h-3.5" /> Add Member
                         </button>
                         <button
                           onClick={() => openEditTeamModal(g)}
-                          className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-card border border-border text-text-primary hover:bg-bg px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" /> Edit Team
                         </button>
                         <button
                           onClick={() => openChangeCaptainModal(g)}
-                          className="flex items-center gap-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-card border border-border text-text-primary hover:bg-bg px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                         >
-                          <Crown className="w-3.5 h-3.5" /> Change Captain
+                          <Crown className="w-3.5 h-3.5 text-accent" /> Change Captain
                         </button>
                         <button
                           onClick={() => openChangeViceCaptainModal(g)}
-                          className="flex items-center gap-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-card border border-border text-text-primary hover:bg-bg px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                         >
-                          <Shield className="w-3.5 h-3.5" /> Change Vice Captain
+                          <Shield className="w-3.5 h-3.5 text-text-secondary" /> Change Vice Captain
                         </button>
                         {viceCaptainName && viceCaptainName !== 'Unassigned' && viceCaptainName !== '—' && (
                           <button
                             onClick={() => handleRemoveViceCaptain(g)}
-                            className="flex items-center gap-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                            className="flex items-center gap-1.5 bg-accent-tint text-accent border border-accent/20 hover:bg-accent/20 px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                             title="Remove Vice Captain role"
                           >
                             <ShieldAlert className="w-3.5 h-3.5" /> Remove Vice Captain
@@ -1273,46 +1373,58 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                         )}
                         <button
                           onClick={() => openDeleteTeamModal(g)}
-                          className="flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-lg type-caption font-bold transition-colors"
+                          className="flex items-center gap-1.5 bg-accent-tint text-accent border border-accent/20 hover:bg-accent/20 px-3.5 py-1.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Delete Team
                         </button>
                       </div>
 
                       {/* Team Details Summary Bar */}
-                      <div className="p-3 bg-indigo-50/40 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 type-caption text-slate-600">
-                        <div><span className="font-semibold text-slate-500">Dept:</span> {g.departmentName || (typeof g.department === 'string' ? g.department : g.department?.name) || '—'}</div>
-                        <div><span className="font-semibold text-slate-500">Acad Year:</span> {g.academicYearName || g.academicYear || '2024-2025'}</div>
-                        <div><span className="font-semibold text-slate-500">Year / Sec:</span> {formatYearDisplay(g.yearName || g.year)} - {formatSectionDisplay(g.sectionName || g.section)}</div>
-                        <div><span className="font-semibold text-slate-500">Vice Capt:</span> {viceCaptainName}</div>
+                      <div className="p-4 bg-bg border-b border-border grid grid-cols-2 sm:grid-cols-4 gap-3 type-caption text-text-secondary font-medium">
+                        <div className="bg-card p-3 rounded-lg border border-border">
+                          <span className="block text-[11px] font-bold uppercase text-text-muted">Department</span>
+                          <span className="font-bold text-text-primary mt-0.5 block truncate">{g.departmentName || (typeof g.department === 'string' ? g.department : g.department?.name) || '—'}</span>
+                        </div>
+                        <div className="bg-card p-3 rounded-lg border border-border">
+                          <span className="block text-[11px] font-bold uppercase text-text-muted">Academic Year</span>
+                          <span className="font-bold text-text-primary mt-0.5 block truncate">{g.academicYearName || g.academicYear || '2024-2025'}</span>
+                        </div>
+                        <div className="bg-card p-3 rounded-lg border border-border">
+                          <span className="block text-[11px] font-bold uppercase text-text-muted">Year / Section</span>
+                          <span className="font-bold text-text-primary mt-0.5 block truncate">{formatYearDisplay(g.yearName || g.year)} - {formatSectionDisplay(g.sectionName || g.section)}</span>
+                        </div>
+                        <div className="bg-card p-3 rounded-lg border border-border">
+                          <span className="block text-[11px] font-bold uppercase text-text-muted">Vice Captain</span>
+                          <span className="font-bold text-text-primary mt-0.5 block truncate">{viceCaptainName}</span>
+                        </div>
                       </div>
 
-                      <div className="flex flex-col">
+                      <div className="flex flex-col divide-y divide-border">
                         {members.map((m: any, i: number) => {
                           const mRegNo = m.regNo || m.studentId || '';
                           const isCaptain = mRegNo === (g.captainRegNo || g.captainId) || m.isCaptain;
                           const isViceCaptain = mRegNo === (g.viceCaptainRegNo || g.viceCaptainId) || m.isViceCaptain;
 
                           return (
-                            <div key={i} className="p-3 border-b border-slate-100 last:border-0 flex items-center justify-between hover:bg-slate-50">
+                            <div key={i} className="p-4 flex items-center justify-between hover:bg-bg/50 transition-colors">
                               <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center type-caption font-bold ${isCaptain ? 'bg-amber-500 text-white' : isViceCaptain ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center type-caption font-bold ${isCaptain ? 'bg-accent-tint text-accent border border-accent/30' : isViceCaptain ? 'bg-bg text-text-primary border border-border' : 'bg-bg text-text-secondary border border-border'}`}>
                                   {isCaptain ? <Crown className="w-4 h-4" /> : isViceCaptain ? <Shield className="w-4 h-4" /> : (m.fullName || m.name || "S")?.charAt(0)}
                                 </div>
                                 <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-bold type-caption text-slate-800">{m.fullName || m.name || "Student"}</span>
-                                    {isCaptain && <span className="bg-amber-100 text-amber-800 text-[9px] font-black px-1.5 py-0.5 rounded-full">CAPTAIN</span>}
-                                    {isViceCaptain && !isCaptain && <span className="bg-indigo-100 text-indigo-800 text-[9px] font-black px-1.5 py-0.5 rounded-full">VICE CAPTAIN</span>}
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold type-body-sm text-text-primary">{m.fullName || m.name || "Student"}</span>
+                                    {isCaptain && <span className="bg-accent-tint text-accent border border-accent/20 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">CAPTAIN</span>}
+                                    {isViceCaptain && !isCaptain && <span className="bg-bg text-text-secondary border border-border text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">VICE CAPTAIN</span>}
                                   </div>
-                                  <span className="text-[11px] text-slate-400">{mRegNo}</span>
+                                  <span className="type-fine text-text-secondary font-medium">{mRegNo}</span>
                                 </div>
                               </div>
 
                               {!isCaptain && (
                                 <button
                                   onClick={() => removeMember(tId, mRegNo.toString(), m.fullName || m.name || "Student")}
-                                  className="p-1 text-slate-400 hover:text-red-600 rounded transition-colors"
+                                  className="p-1.5 text-text-muted hover:text-accent hover:bg-accent-tint rounded-lg transition-colors cursor-pointer"
                                   title="Remove Member"
                                 >
                                   <UserMinus className="w-4 h-4" />
@@ -1331,7 +1443,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         )}
       </div>
 
-      {/* FULL TEAM DETAILS MODAL (Matching Flutter's Team Details Screen 1:1) */}
+      {/* FULL TEAM DETAILS MODAL */}
       {selectedTeamDetails && (() => {
         const g = selectedTeamDetails;
         const tId = g.teamId || g.id || 0;
@@ -1360,17 +1472,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         const level = getTeamLevel(g);
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl my-auto flex flex-col max-h-[90vh]">
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-card text-text-primary rounded-xl w-full max-w-xl overflow-hidden shadow-2xl border border-border my-auto flex flex-col max-h-[90vh]">
               {/* Modal Top Header Bar */}
-              <div className="bg-indigo-600 text-white px-6 py-4 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                  <UsersRound className="w-6 h-6" />
-                  <h2 className="type-h4">Team Details</h2>
+              <div className="bg-card border-b border-border px-6 py-4 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-bg border border-border flex items-center justify-center text-accent">
+                    <UsersRound className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="type-h4 font-bold text-text-primary">Team Details</h2>
+                    <p className="type-fine text-text-secondary font-medium">Full roster and leadership assignments</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setSelectedTeamDetails(null)}
-                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-1.5 hover:bg-bg rounded-lg text-text-muted hover:text-text-primary transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1378,93 +1495,94 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
               <div className="p-6 overflow-y-auto space-y-6">
                 {/* Team Card Banner */}
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl p-5 shadow-sm">
+                <div className="bg-bg border border-border rounded-lg p-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h1 className="font-heading type-h1 text-indigo-950">{groupName}</h1>
+                      <h1 className="type-h2 font-bold text-text-primary">{groupName}</h1>
+                      <p className="type-caption text-text-secondary font-medium mt-0.5">Team ID: #{tId}</p>
                     </div>
-                    <span className="bg-amber-400 text-amber-950 type-caption font-black px-3 py-1 rounded-full shadow-sm">
+                    <span className="bg-accent-tint text-accent border border-accent/20 type-caption font-bold px-3 py-1 rounded-md uppercase">
                       Stage {level}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-indigo-100 type-body-sm">
+                  <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border type-body-sm">
                     <div>
-                      <p className="type-caption text-slate-500 font-medium">Captain</p>
-                      <p className="font-bold text-slate-800 truncate">{captainName}</p>
+                      <p className="type-fine text-text-muted font-bold uppercase">Captain</p>
+                      <p className="font-bold text-text-primary truncate mt-0.5">{captainName}</p>
                     </div>
                     <div>
-                      <p className="type-caption text-slate-500 font-medium">Vice Captain</p>
-                      <p className="font-bold text-slate-800 truncate">{viceCaptainName}</p>
+                      <p className="type-fine text-text-muted font-bold uppercase">Vice Captain</p>
+                      <p className="font-bold text-text-primary truncate mt-0.5">{viceCaptainName}</p>
                     </div>
                     <div>
-                      <p className="type-caption text-slate-500 font-medium">Members</p>
-                      <p className="font-bold text-indigo-700">{members.length} / {size}</p>
+                      <p className="type-fine text-text-muted font-bold uppercase">Members</p>
+                      <p className="font-bold text-accent mt-0.5">{members.length} / {size}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Metadata Grid */}
                 <div className="grid grid-cols-2 gap-3 type-body-sm">
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p className="type-caption text-slate-400 font-medium">Department</p>
-                    <p className="font-bold text-slate-800 mt-0.5">{dept}</p>
+                  <div className="bg-bg p-3 rounded-lg border border-border">
+                    <p className="type-fine text-text-muted font-bold uppercase">Department</p>
+                    <p className="font-bold text-text-primary mt-0.5 truncate">{dept}</p>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p className="type-caption text-slate-400 font-medium">Academic Year</p>
-                    <p className="font-bold text-slate-800 mt-0.5">{acadYear}</p>
+                  <div className="bg-bg p-3 rounded-lg border border-border">
+                    <p className="type-fine text-text-muted font-bold uppercase">Academic Year</p>
+                    <p className="font-bold text-text-primary mt-0.5 truncate">{acadYear}</p>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p className="type-caption text-slate-400 font-medium">Year</p>
-                    <p className="font-bold text-slate-800 mt-0.5">{formatYearDisplay(year)}</p>
+                  <div className="bg-bg p-3 rounded-lg border border-border">
+                    <p className="type-fine text-text-muted font-bold uppercase">Year</p>
+                    <p className="font-bold text-text-primary mt-0.5 truncate">{formatYearDisplay(year)}</p>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p className="type-caption text-slate-400 font-medium">Section</p>
-                    <p className="font-bold text-slate-800 mt-0.5">{formatSectionDisplay(sec)}</p>
+                  <div className="bg-bg p-3 rounded-lg border border-border">
+                    <p className="type-fine text-text-muted font-bold uppercase">Section</p>
+                    <p className="font-bold text-text-primary mt-0.5 truncate">{formatSectionDisplay(sec)}</p>
                   </div>
                 </div>
 
                 {/* Management Actions Grid */}
                 <div>
-                  <h3 className="type-h5 text-slate-700 mb-3">Management Actions</h3>
+                  <h3 className="type-h5 font-bold text-text-primary mb-3">Management Actions</h3>
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       onClick={() => openAddMemberModal(tId)}
-                      className="flex items-center justify-center gap-2 bg-green-50 text-green-700 hover:bg-green-100 p-3 rounded-xl type-caption font-bold transition-colors border border-green-200 shadow-2xs"
+                      className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-card p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                     >
                       <UserPlus className="w-4 h-4" /> Add Member
                     </button>
                     <button
                       onClick={() => openEditTeamModal(g)}
-                      className="flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 p-3 rounded-xl type-caption font-bold transition-colors border border-indigo-200 shadow-2xs cursor-pointer"
+                      className="flex items-center justify-center gap-2 bg-card hover:bg-bg border border-border text-text-primary p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                       title="Edit team details"
                     >
                       <Edit2 className="w-4 h-4" /> Edit Team
                     </button>
                     <button
                       onClick={() => openChangeCaptainModal(g)}
-                      className="flex items-center justify-center gap-2 bg-amber-50 text-amber-800 hover:bg-amber-100 p-3 rounded-xl type-caption font-bold transition-colors border border-amber-200 shadow-2xs cursor-pointer"
+                      className="flex items-center justify-center gap-2 bg-card hover:bg-bg border border-border text-text-primary p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                     >
-                      <Crown className="w-4 h-4" /> Change Captain
+                      <Crown className="w-4 h-4 text-accent" /> Change Captain
                     </button>
                     <button
                       onClick={() => openChangeViceCaptainModal(g)}
-                      className="flex items-center justify-center gap-2 bg-slate-100 text-slate-800 hover:bg-slate-200 p-3 rounded-xl type-caption font-bold transition-colors border border-slate-200 shadow-2xs cursor-pointer"
+                      className="flex items-center justify-center gap-2 bg-card hover:bg-bg border border-border text-text-primary p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                     >
-                      <Shield className="w-4 h-4" /> Change Vice Captain
+                      <Shield className="w-4 h-4 text-text-secondary" /> Change Vice Captain
                     </button>
                     {viceCaptainName && viceCaptainName !== 'Unassigned' && viceCaptainName !== '—' ? (
                       <>
                         <button
                           onClick={() => handleRemoveViceCaptain(g)}
-                          className="flex items-center justify-center gap-2 bg-rose-50 text-rose-800 hover:bg-rose-100 p-3 rounded-xl type-caption font-bold transition-colors border border-rose-200 shadow-2xs cursor-pointer"
+                          className="flex items-center justify-center gap-2 bg-accent-tint text-accent hover:bg-accent/20 border border-accent/20 p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                           title="Remove Vice Captain role"
                         >
                           <ShieldAlert className="w-4 h-4" /> Remove Vice Captain
                         </button>
                         <button
                           onClick={() => openDeleteTeamModal(g)}
-                          className="flex items-center justify-center gap-2 bg-red-50 text-red-700 hover:bg-red-100 p-3 rounded-xl type-caption font-bold transition-colors border border-red-200 shadow-2xs cursor-pointer"
+                          className="flex items-center justify-center gap-2 bg-accent-tint text-accent hover:bg-accent/20 border border-accent/20 p-2.5 rounded-lg type-caption font-bold transition-colors cursor-pointer"
                           title="Delete team"
                         >
                           <Trash2 className="w-4 h-4" /> Delete Team
@@ -1473,7 +1591,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                     ) : (
                       <button
                         onClick={() => openDeleteTeamModal(g)}
-                        className="flex items-center justify-center gap-2 bg-red-50 text-red-700 hover:bg-red-100 p-3 rounded-xl type-caption font-bold transition-colors border border-red-200 shadow-2xs col-span-1 cursor-pointer"
+                        className="flex items-center justify-center gap-2 bg-accent-tint text-accent hover:bg-accent/20 border border-accent/20 p-2.5 rounded-lg type-caption font-bold transition-colors col-span-1 cursor-pointer"
                         title="Delete team"
                       >
                         <Trash2 className="w-4 h-4" /> Delete Team
@@ -1485,7 +1603,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 {/* Team Members List */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="type-h5 text-slate-700">Team Members ({members.length}/{size})</h3>
+                    <h3 className="type-h5 font-bold text-text-primary">Team Members ({members.length}/{size})</h3>
                   </div>
 
                   <div className="space-y-2">
@@ -1519,26 +1637,26 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                         const isViceCaptain = (mRegNo && mRegNo === viceCaptainRegNo) || m.isViceCaptain || m.teamRole === 'VICE_CAPTAIN' || (viceCaptainName && (m.fullName === viceCaptainName || m.name === viceCaptainName));
 
                         return (
-                          <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+                          <div key={idx} className="bg-bg border border-border rounded-lg p-3.5 flex items-center justify-between">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isCaptain ? 'bg-amber-500 text-white shadow-md' : isViceCaptain ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-200 text-slate-600'}`}>
-                                {isCaptain ? <Crown className="w-5 h-5" /> : isViceCaptain ? <Shield className="w-5 h-5" /> : <div className="font-bold type-body-sm">{(m.fullName || m.name || "S")?.charAt(0)}</div>}
+                              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 type-caption font-bold ${isCaptain ? 'bg-accent-tint text-accent border border-accent/30' : isViceCaptain ? 'bg-card text-text-primary border border-border' : 'bg-card text-text-secondary border border-border'}`}>
+                                {isCaptain ? <Crown className="w-4 h-4" /> : isViceCaptain ? <Shield className="w-4 h-4" /> : (m.fullName || m.name || "S")?.charAt(0)}
                               </div>
                               <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-bold type-body-sm text-slate-800 truncate">{m.fullName || m.name || "Student"}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-bold type-body-sm text-text-primary truncate">{m.fullName || m.name || "Student"}</p>
                                   {isCaptain && (
-                                    <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                                    <span className="bg-accent-tint text-accent border border-accent/20 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
                                       CAPTAIN
                                     </span>
                                   )}
                                   {isViceCaptain && !isCaptain && (
-                                    <span className="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
+                                    <span className="bg-card text-text-secondary border border-border text-[9px] font-bold px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
                                       <Shield className="w-3 h-3" /> VICE CAPTAIN
                                     </span>
                                   )}
                                 </div>
-                                <p className="type-caption text-slate-500 mt-0.5 truncate">
+                                <p className="type-fine text-text-secondary mt-0.5 truncate">
                                   {mRegNo} • Level {m.stageLevel || m.currentStage || level} - {getStageName(m.stageLevel || m.currentStage || level)}
                                 </p>
                               </div>
@@ -1547,7 +1665,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                             {!isCaptain && (
                               <button
                                 onClick={() => removeMember(tId, mRegNo.toString(), m.fullName || m.name || "Student")}
-                                className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-1.5 text-text-muted hover:text-accent hover:bg-accent-tint rounded-lg transition-colors cursor-pointer"
                                 title="Remove Member"
                               >
                                 <UserMinus className="w-4 h-4" />
@@ -1564,30 +1682,30 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         );
       })()}
 
-      {/* Edit Team Modal matching Flutter _showEditTeamDialog 1:1 */}
+      {/* Edit Team Modal */}
       {activeEditTeam && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 pb-2">
-              <h2 className="type-h4 text-slate-800">Edit Team</h2>
-              <p className="type-caption text-slate-500 mt-1">Update team name and maximum capacity limit.</p>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card text-text-primary rounded-xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl border border-border">
+            <div className="p-5 border-b border-border">
+              <h2 className="type-h4 font-bold text-text-primary">Edit Team</h2>
+              <p className="type-fine text-text-secondary mt-0.5 font-medium">Update team name and maximum capacity limit.</p>
             </div>
 
-            <form onSubmit={handleUpdateTeam} className="p-6 space-y-4">
+            <form onSubmit={handleUpdateTeam} className="p-5 space-y-4">
               <div>
-                <label className="type-form-label text-slate-600 mb-1 block">Team Name *</label>
+                <label className="type-form-label text-text-secondary mb-1.5 block font-bold">Team Name *</label>
                 <input
                   required
                   type="text"
                   value={editTeamNameInput}
                   onChange={e => setEditTeamNameInput(e.target.value)}
                   placeholder="e.g. Test Team"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none type-body-sm font-semibold"
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
                 />
               </div>
 
               <div>
-                <label className="type-form-label text-slate-600 mb-1 block">Max Member Limit *</label>
+                <label className="type-form-label text-text-secondary mb-1.5 block font-bold">Max Member Limit *</label>
                 <input
                   required
                   type="number"
@@ -1595,22 +1713,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   value={editTeamSizeInput}
                   onChange={e => setEditTeamSizeInput(e.target.value)}
                   placeholder="e.g. 10"
-                  className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none type-body-sm font-semibold"
+                  className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary"
                 />
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
+              <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setActiveEditTeam(null)}
-                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70 type-btn"
+                  className="px-5 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 type-btn cursor-pointer"
                 >
                   {isSubmitting ? 'Updating...' : 'Update Team'}
                 </button>
@@ -1620,7 +1738,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         </div>
       )}
 
-      {/* Add Member Modal matching Flutter StudentSearchDialog 1:1 with Multi-Select */}
+      {/* Add Member Modal */}
       {activeAddTeamId && (() => {
         const currentTeam = groups.find((g: any) => (g.teamId || g.id) === activeAddTeamId) ||
           (selectedTeamDetails && (selectedTeamDetails.teamId === activeAddTeamId || selectedTeamDetails.id === activeAddTeamId) ? selectedTeamDetails : null);
@@ -1636,38 +1754,38 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         });
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl max-h-[88vh]">
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-card text-text-primary rounded-xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl border border-border max-h-[88vh]">
               {/* Modal Header */}
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="p-5 border-b border-border flex items-center justify-between bg-card">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-xs">
+                  <div className="w-9 h-9 rounded-lg bg-bg border border-border text-accent flex items-center justify-center">
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="type-h4 text-slate-800">Add Team Members</h2>
-                      <span className="bg-indigo-100 text-indigo-800 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                      <h2 className="type-h4 font-bold text-text-primary">Add Team Members</h2>
+                      <span className="bg-bg border border-border text-text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                         {currentTeam?.teamName || currentTeam?.name || `Team #${activeAddTeamId}`}
                       </span>
                     </div>
-                    <p className="type-caption text-slate-500 font-medium">Search & select multiple students to add to group</p>
+                    <p className="type-fine text-text-secondary font-medium">Search and select students to assign</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setActiveAddTeamId(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                  className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Team Capacity Banner */}
-              <div className="px-5 py-2.5 bg-indigo-50/50 border-b border-indigo-100/60 flex items-center justify-between type-caption">
-                <div className="flex items-center gap-1.5 text-indigo-900 font-semibold">
-                  <span>Current: {currentCount}/{maxCapacity} members</span>
+              <div className="px-5 py-2.5 bg-bg border-b border-border flex items-center justify-between type-caption">
+                <div className="flex items-center gap-1.5 text-text-primary font-semibold">
+                  <span>Current: <strong>{currentCount}/{maxCapacity}</strong> members</span>
                 </div>
-                <div className={`font-bold px-2 py-0.5 rounded-full text-[11px] ${availableSlots > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                <div className={`font-bold px-2.5 py-0.5 rounded-md text-[10px] uppercase border ${availableSlots > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-accent-tint text-accent border-accent/20'}`}>
                   {availableSlots > 0 ? `${availableSlots} slot${availableSlots > 1 ? 's' : ''} available` : 'Team is full'}
                 </div>
               </div>
@@ -1675,7 +1793,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
               <form onSubmit={handleAddMembers} className="p-5 flex-1 flex flex-col overflow-hidden space-y-3.5">
                 {/* Search Box */}
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                  <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={memberSearchQuery}
@@ -1684,7 +1802,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                       setStudentIdInput(e.target.value);
                     }}
                     placeholder="Search by Name, Reg No, or SPR No..."
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none type-body-sm font-semibold transition-all"
+                    className="w-full pl-9 pr-8 py-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary transition-all"
                     autoFocus
                   />
                   {memberSearchQuery && (
@@ -1694,7 +1812,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                         setMemberSearchQuery('');
                         setStudentIdInput('');
                       }}
-                      className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -1703,18 +1821,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
                 {/* Multi-Select Toolbar */}
                 {!isSearchingMembers && memberSearchResults.length > 0 && (
-                  <div className="flex items-center justify-between px-1 py-1 type-caption border-b border-slate-100 pb-2">
+                  <div className="flex items-center justify-between px-1 py-1 type-caption border-b border-border pb-2">
                     <button
                       type="button"
                       onClick={() => toggleSelectAll(selectableStudents, availableSlots)}
-                      className="flex items-center gap-2 text-slate-700 font-bold hover:text-indigo-600 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 text-text-primary font-bold hover:text-accent transition-colors cursor-pointer"
                     >
-                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${allSelectableSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'}`}>
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors ${allSelectableSelected ? 'bg-accent border-accent text-card' : 'border-border bg-card'}`}>
                         {allSelectableSelected && <Check className="w-3 h-3 stroke-[3]" />}
                       </div>
                       <span>Select All ({selectableStudents.length} eligible)</span>
                     </button>
-                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full">
+                    <span className="font-bold text-accent bg-accent-tint border border-accent/20 px-2.5 py-0.5 rounded text-[11px]">
                       {selectedMembersToAssign.length} Selected
                     </span>
                   </div>
@@ -1723,15 +1841,15 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 {/* Live Search Results Container */}
                 <div className="flex-1 overflow-y-auto min-h-[200px] max-h-[300px] pr-1 space-y-2">
                   {isSearchingMembers ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-2">
-                      <RefreshCw className="w-6 h-6 animate-spin text-indigo-600" />
-                      <span className="type-caption">Searching eligible students...</span>
+                    <div className="flex flex-col items-center justify-center py-12 text-text-muted space-y-2">
+                      <RefreshCw className="w-6 h-6 animate-spin text-accent" />
+                      <span className="type-caption font-medium">Searching eligible students...</span>
                     </div>
                   ) : memberSearchQuery.trim() && memberSearchResults.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-center">
-                      <UsersRound className="w-8 h-8 text-slate-300 mb-2" />
-                      <p className="type-body-sm font-semibold text-slate-600">No eligible students found</p>
-                      <p className="type-caption text-slate-400 mt-1">Check the search keywords or ensure students belong to this team's department & stage</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-text-muted text-center">
+                      <UsersRound className="w-8 h-8 text-text-muted mb-2 opacity-50" />
+                      <p className="type-body-sm font-semibold text-text-primary">No eligible students found</p>
+                      <p className="type-fine text-text-secondary mt-1">Check the search keywords or ensure students belong to this team's department & stage</p>
                     </div>
                   ) : memberSearchResults.length > 0 ? (
                     memberSearchResults.map((s: any) => {
@@ -1746,20 +1864,20 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                             if (isAlreadyInThisTeam) return;
                             toggleStudentSelection(s, availableSlots);
                           }}
-                          className={`p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${isAlreadyInThisTeam
-                              ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed'
+                          className={`p-3 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${isAlreadyInThisTeam
+                              ? 'bg-bg border-border opacity-60 cursor-not-allowed'
                               : isSelected
-                                ? 'bg-indigo-50/70 border-indigo-600 ring-2 ring-indigo-600/20 shadow-xs'
-                                : 'bg-white border-slate-200/90 hover:border-indigo-300 hover:bg-slate-50/60'
+                                ? 'bg-accent-tint border-accent/40 shadow-xs'
+                                : 'bg-card border-border hover:border-text-primary hover:bg-bg/40'
                             }`}
                         >
                           <div className="flex items-center space-x-3 min-w-0">
                             {/* Checkbox */}
-                            <div className={`w-5 h-5 rounded-lg flex items-center justify-center border transition-all shrink-0 ${isAlreadyInThisTeam
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all shrink-0 ${isAlreadyInThisTeam
                                 ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
                                 : isSelected
-                                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
-                                  : 'border-slate-300 bg-white hover:border-indigo-400'
+                                  ? 'bg-accent border-accent text-card shadow-xs'
+                                  : 'border-border bg-card'
                               }`}>
                               {isAlreadyInThisTeam ? (
                                 <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -1768,22 +1886,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                               ) : null}
                             </div>
 
-                            <div className={`w-9 h-9 rounded-full flex items-center justify-center type-caption font-bold shrink-0 ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center type-caption font-bold shrink-0 ${isSelected ? 'bg-accent text-card' : 'bg-bg text-text-secondary border border-border'
                               }`}>
                               {s.fullName ? s.fullName.charAt(0).toUpperCase() : 'S'}
                             </div>
 
                             <div className="min-w-0">
-                              <h4 className="type-body-sm font-bold text-slate-800 truncate">{s.fullName}</h4>
-                              <p className="type-caption text-slate-500 font-medium mt-0.5 truncate">
-                                Reg: <span className="font-semibold text-slate-700">{s.regNo || s.registerNumber}</span>
-                                {s.sprNo && <> • SPR: <span className="font-semibold text-slate-700">{s.sprNo}</span></>}
+                              <h4 className="type-body-sm font-bold text-text-primary truncate">{s.fullName}</h4>
+                              <p className="type-fine text-text-secondary font-medium mt-0.5 truncate">
+                                Reg: <span className="font-bold text-text-primary">{s.regNo || s.registerNumber}</span>
+                                {s.sprNo && <> • SPR: <span className="font-bold text-text-primary">{s.sprNo}</span></>}
                               </p>
-                              <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                              <p className="type-fine text-text-muted mt-0.5 truncate">
                                 {s.departmentName || s.department || ''} • Year {s.year || 1} • Sec {s.section || 'A'}
                               </p>
                               {s.teamName && (
-                                <p className={`text-[11px] font-semibold mt-0.5 ${isAlreadyInThisTeam ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                <p className={`type-fine font-bold mt-0.5 ${isAlreadyInThisTeam ? 'text-emerald-600' : 'text-accent'}`}>
                                   Current Team: {s.teamName}
                                 </p>
                               )}
@@ -1792,38 +1910,38 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
                           <div className="shrink-0 ml-2">
                             {isAlreadyInThisTeam ? (
-                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase">
                                 <Check className="w-3 h-3" />
                                 <span>Added</span>
                               </span>
                             ) : isSelected ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-700">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-accent-tint text-accent border border-accent/20 uppercase">
                                 Selected
                               </span>
                             ) : (
-                              <span className="type-caption text-slate-400 hover:text-indigo-600 font-medium">Select</span>
+                              <span className="type-fine text-text-muted hover:text-text-primary font-bold">Select</span>
                             )}
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="py-6 px-4 bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 text-center">
-                      <p className="type-caption text-slate-600">Type above to search live student directory</p>
-                      <p className="text-[11px] text-slate-400 mt-1">Only eligible students in this team's class & stage will appear</p>
+                    <div className="py-6 px-4 bg-bg rounded-lg border border-dashed border-border text-center">
+                      <p className="type-caption text-text-secondary font-medium">Type above to search live student directory</p>
+                      <p className="type-fine text-text-muted mt-1">Only eligible students in this team's class & stage will appear</p>
                     </div>
                   )}
                 </div>
 
                 {/* Selected Students Preview Chips */}
                 {selectedMembersToAssign.length > 0 && (
-                  <div className="p-2.5 bg-indigo-50/40 rounded-2xl border border-indigo-100/80">
-                    <div className="text-[11px] font-bold text-indigo-900 mb-1.5 flex items-center justify-between">
+                  <div className="p-3 bg-bg rounded-lg border border-border">
+                    <div className="type-fine font-bold text-text-primary mb-2 flex items-center justify-between">
                       <span>Selected to Add ({selectedMembersToAssign.length})</span>
                       <button
                         type="button"
                         onClick={() => setSelectedMembersToAssign([])}
-                        className="text-indigo-600 hover:underline text-[10px]"
+                        className="text-accent hover:underline type-fine font-bold cursor-pointer"
                       >
                         Clear All
                       </button>
@@ -1834,7 +1952,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                         return (
                           <span
                             key={s.id || sReg}
-                            className="inline-flex items-center gap-1 bg-white border border-indigo-200 text-indigo-900 type-caption px-2 py-0.5 rounded-lg shadow-2xs font-semibold"
+                            className="inline-flex items-center gap-1.5 bg-card border border-border text-text-primary type-fine px-2 py-0.5 rounded font-bold"
                           >
                             <span className="truncate max-w-[120px]">{s.fullName || sReg}</span>
                             <button
@@ -1843,7 +1961,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                                 e.stopPropagation();
                                 setSelectedMembersToAssign(prev => prev.filter((m: any) => !((m.id && m.id === s.id) || (sReg && (m.regNo === sReg || m.registerNumber === sReg)))));
                               }}
-                              className="text-slate-400 hover:text-rose-600"
+                              className="text-text-muted hover:text-accent cursor-pointer"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -1855,18 +1973,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 )}
 
                 {/* Footer Buttons */}
-                <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setActiveAddTeamId(null)}
-                    className="px-4 py-2.5 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || (selectedMembersToAssign.length === 0 && !studentIdInput.trim())}
-                    className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed type-btn flex items-center space-x-1.5"
+                    className="px-6 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 disabled:cursor-not-allowed type-btn flex items-center space-x-1.5 cursor-pointer"
                   >
                     {isSubmitting ? (
                       <>
@@ -1896,23 +2014,23 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         const members = activeChangeCaptainTeam.teamMembers || activeChangeCaptainTeam.members || activeChangeCaptainTeam.students || [];
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-6 pb-2">
-                <h2 className="type-h4 text-slate-800">Change Team Captain</h2>
-                <p className="type-caption text-slate-500 mt-1">Select a member to assign as the new Team Captain.</p>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-card text-text-primary rounded-xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl border border-border">
+              <div className="p-5 border-b border-border">
+                <h2 className="type-h4 font-bold text-text-primary">Change Team Captain</h2>
+                <p className="type-fine text-text-secondary mt-0.5 font-medium">Select a member to assign as the new Team Captain.</p>
               </div>
 
-              <form onSubmit={handleChangeCaptain} className="p-6 space-y-4">
+              <form onSubmit={handleChangeCaptain} className="p-5 space-y-4">
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Select New Captain *</label>
+                  <label className="type-form-label text-text-secondary mb-1.5 block font-bold">Select New Captain *</label>
                   {members.length === 0 ? (
-                    <p className="type-caption text-slate-400">No members in team to promote.</p>
+                    <p className="type-caption text-text-muted">No members in team to promote.</p>
                   ) : (
                     <select
                       value={selectedNewCaptainRegNo}
                       onChange={e => setSelectedNewCaptainRegNo(e.target.value)}
-                      className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none type-body-sm font-semibold bg-white"
+                      className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary cursor-pointer"
                     >
                       {members.map((m: any) => {
                         const mRegNo = (m.regNo || m.studentId || m.registerNumber || m.studentRegNo || m.id || '').toString();
@@ -1926,18 +2044,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   )}
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setActiveChangeCaptainTeam(null)}
-                    className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || members.length === 0}
-                    className="px-5 py-2 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-70 type-btn"
+                    className="px-5 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 type-btn cursor-pointer"
                   >
                     {isSubmitting ? 'Updating...' : 'Assign Captain'}
                   </button>
@@ -1953,23 +2071,23 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
         const members = activeChangeViceCaptainTeam.teamMembers || activeChangeViceCaptainTeam.members || activeChangeViceCaptainTeam.students || [];
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-6 pb-2">
-                <h2 className="type-h4 text-slate-800">Change Team Vice Captain</h2>
-                <p className="type-caption text-slate-500 mt-1">Select a member to assign as the new Team Vice Captain.</p>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-card text-text-primary rounded-xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl border border-border">
+              <div className="p-5 border-b border-border">
+                <h2 className="type-h4 font-bold text-text-primary">Change Team Vice Captain</h2>
+                <p className="type-fine text-text-secondary mt-0.5 font-medium">Select a member to assign as the new Team Vice Captain.</p>
               </div>
 
-              <form onSubmit={handleChangeViceCaptain} className="p-6 space-y-4">
+              <form onSubmit={handleChangeViceCaptain} className="p-5 space-y-4">
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Select New Vice Captain *</label>
+                  <label className="type-form-label text-text-secondary mb-1.5 block font-bold">Select New Vice Captain *</label>
                   {members.length === 0 ? (
-                    <p className="type-caption text-slate-400">No members in team to promote.</p>
+                    <p className="type-caption text-text-muted">No members in team to promote.</p>
                   ) : (
                     <select
                       value={selectedNewViceCaptainRegNo}
                       onChange={e => setSelectedNewViceCaptainRegNo(e.target.value)}
-                      className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none type-body-sm font-semibold bg-white"
+                      className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary cursor-pointer"
                     >
                       {members.map((m: any) => {
                         const mRegNo = (m.regNo || m.studentId || m.registerNumber || m.studentRegNo || m.id || '').toString();
@@ -1983,18 +2101,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   )}
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setActiveChangeViceCaptainTeam(null)}
-                    className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting || members.length === 0}
-                    className="px-5 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70 type-btn"
+                    className="px-5 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 type-btn cursor-pointer"
                   >
                     {isSubmitting ? 'Updating...' : 'Assign Vice Captain'}
                   </button>
@@ -2007,21 +2125,21 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
       {/* Delete Team Modal */}
       {activeDeleteTeam && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl p-6 text-center">
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card text-text-primary rounded-xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl border border-border p-6 text-center">
+            <div className="w-12 h-12 bg-accent-tint text-accent border border-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h2 className="type-h4 text-slate-800 mb-1">Delete Group?</h2>
-            <p className="type-caption text-slate-500 mb-6">
-              Are you sure you want to delete <span className="font-bold text-slate-800">{activeDeleteTeam.teamName || activeDeleteTeam.name || activeDeleteTeam.groupName}</span>? This action cannot be undone.
+            <h2 className="type-h4 font-bold text-text-primary mb-1">Delete Group?</h2>
+            <p className="type-caption text-text-secondary font-medium mb-6">
+              Are you sure you want to delete <span className="font-bold text-text-primary">{activeDeleteTeam.teamName || activeDeleteTeam.name || activeDeleteTeam.groupName}</span>? This action cannot be undone.
             </p>
 
-            <div className="flex justify-center space-x-3">
+            <div className="flex justify-center space-x-2.5">
               <button
                 type="button"
                 onClick={() => setActiveDeleteTeam(null)}
-                className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -2029,7 +2147,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                 type="button"
                 onClick={handleDeleteTeam}
                 disabled={isSubmitting}
-                className="px-5 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-sm disabled:opacity-70 type-btn"
+                className="px-5 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 type-btn cursor-pointer"
               >
                 {isSubmitting ? 'Deleting...' : 'Delete Group'}
               </button>
@@ -2040,22 +2158,22 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
       {/* Create Team Modal */}
       {isCreateTeamModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl max-h-[90vh]">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card text-text-primary rounded-xl w-full max-w-lg overflow-hidden flex flex-col shadow-2xl border border-border max-h-[90vh]">
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="p-5 border-b border-border flex items-center justify-between bg-card">
               <div className="flex items-center space-x-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <div className="w-9 h-9 rounded-lg bg-bg border border-border text-accent flex items-center justify-center">
                   <Plus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="type-h4 text-slate-800">Create New Team</h2>
-                  <p className="type-caption text-slate-500 font-medium">Configure team details and appoint an initial captain</p>
+                  <h2 className="type-h4 font-bold text-text-primary">Create New Team</h2>
+                  <p className="type-fine text-text-secondary font-medium">Configure team details and appoint an initial captain</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsCreateTeamModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2065,18 +2183,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
               {/* Team Name and Size Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="type-form-label block font-bold text-slate-600 mb-1">Team Name *</label>
+                  <label className="type-form-label block font-bold text-text-secondary mb-1.5">Team Name *</label>
                   <input
                     type="text"
                     required
                     value={createTeamName}
                     onChange={e => setCreateTeamName(e.target.value)}
                     placeholder="e.g. Cyber Knights, Team Alpha"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none type-body-sm font-semibold transition-all"
+                    className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary transition-all"
                   />
                 </div>
                 <div>
-                  <label className="type-form-label block font-bold text-slate-600 mb-1">Capacity *</label>
+                  <label className="type-form-label block font-bold text-text-secondary mb-1.5">Capacity *</label>
                   <input
                     type="number"
                     min="1"
@@ -2084,27 +2202,27 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                     required
                     value={createTeamSize}
                     onChange={e => setCreateTeamSize(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none type-body-sm font-semibold text-center transition-all"
+                    className="w-full p-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary text-center transition-all"
                   />
                 </div>
               </div>
 
               {/* Selected Captain Card (if selected) */}
               <div>
-                <label className="type-form-label block font-bold text-slate-600 mb-1">
-                  Team Captain * {selectedCreateCaptain ? <span className="text-emerald-600 font-semibold">(Selected)</span> : <span className="text-rose-500">(Required)</span>}
+                <label className="type-form-label block font-bold text-text-secondary mb-1.5">
+                  Team Captain * {selectedCreateCaptain ? <span className="text-emerald-600 font-semibold">(Selected)</span> : <span className="text-accent">(Required)</span>}
                 </label>
 
                 {selectedCreateCaptain ? (
-                  <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-center justify-between">
+                  <div className="p-3.5 bg-accent-tint border border-accent/30 rounded-lg flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold type-body-sm">
-                        <Crown className="w-5 h-5 text-amber-300" />
+                      <div className="w-9 h-9 rounded-lg bg-accent text-card flex items-center justify-center font-bold type-body-sm">
+                        <Crown className="w-5 h-5 text-card" />
                       </div>
                       <div>
-                        <h4 className="type-body-sm font-bold text-slate-900">{selectedCreateCaptain.fullName}</h4>
-                        <p className="type-caption text-slate-600 font-medium">
-                          Reg: <span className="font-semibold text-slate-800">{selectedCreateCaptain.regNo || selectedCreateCaptain.registerNumber}</span>
+                        <h4 className="type-body-sm font-bold text-text-primary">{selectedCreateCaptain.fullName}</h4>
+                        <p className="type-fine text-text-secondary font-medium mt-0.5">
+                          Reg: <span className="font-bold text-text-primary">{selectedCreateCaptain.regNo || selectedCreateCaptain.registerNumber}</span>
                           {selectedCreateCaptain.departmentName && <> • {selectedCreateCaptain.departmentName}</>}
                           {selectedCreateCaptain.year && <> • Year {selectedCreateCaptain.year}</>}
                           {selectedCreateCaptain.section && <> • Sec {selectedCreateCaptain.section}</>}
@@ -2114,7 +2232,7 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                     <button
                       type="button"
                       onClick={() => setSelectedCreateCaptain(null)}
-                      className="px-3 py-1.5 type-caption font-bold text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
+                      className="px-3 py-1.5 type-fine font-bold text-accent hover:bg-accent/20 rounded-md transition-colors cursor-pointer"
                     >
                       Change
                     </button>
@@ -2123,28 +2241,37 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                   <div className="space-y-2">
                     {/* Search Field */}
                     <div className="relative">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                      <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={createCaptainSearchQuery}
                         onChange={e => setCreateCaptainSearchQuery(e.target.value)}
                         placeholder="Search student by Name, Reg No, or SPR No to appoint as Captain..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none type-body-sm font-semibold transition-all"
+                        className="w-full pl-9 pr-8 py-2.5 bg-bg border border-border rounded-lg focus:border-text-primary outline-none type-body-sm font-semibold text-text-primary transition-all"
                       />
+                      {createCaptainSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setCreateCaptainSearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Live Student List */}
                     <div className="overflow-y-auto max-h-[220px] min-h-[160px] pr-1 space-y-2">
                       {isSearchingCaptain ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-slate-400 space-y-1.5">
-                          <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
-                          <span className="type-caption">Searching students...</span>
+                        <div className="flex flex-col items-center justify-center py-8 text-text-muted space-y-1.5">
+                          <RefreshCw className="w-5 h-5 animate-spin text-accent" />
+                          <span className="type-caption font-medium">Searching students...</span>
                         </div>
                       ) : createCaptainSearchQuery.trim() && createCaptainSearchResults.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-center">
-                          <UsersRound className="w-7 h-7 text-slate-300 mb-1" />
-                          <p className="type-caption text-slate-600">No students found</p>
-                          <p className="text-[11px] text-slate-400">Try searching by registration number or full name</p>
+                        <div className="flex flex-col items-center justify-center py-8 text-text-muted text-center">
+                          <UsersRound className="w-7 h-7 text-text-muted mb-1 opacity-50" />
+                          <p className="type-caption font-semibold text-text-primary">No students found</p>
+                          <p className="type-fine text-text-secondary mt-0.5">Try searching by registration number or full name</p>
                         </div>
                       ) : createCaptainSearchResults.length > 0 ? (
                         createCaptainSearchResults.map((s: any) => {
@@ -2159,26 +2286,26 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                                 }
                                 setSelectedCreateCaptain(s);
                               }}
-                              className={`p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                              className={`p-3 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
                                 isAlreadyInTeam
-                                  ? 'bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed'
-                                  : 'bg-white border-slate-200/90 hover:border-emerald-400 hover:bg-emerald-50/40'
+                                  ? 'bg-bg border-border opacity-60 cursor-not-allowed'
+                                  : 'bg-card border-border hover:border-accent hover:bg-bg/40'
                               }`}
                             >
                               <div className="flex items-center space-x-3">
-                                <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center type-caption font-bold">
+                                <div className="w-8 h-8 rounded-lg bg-bg border border-border text-text-secondary flex items-center justify-center type-caption font-bold">
                                   {s.fullName ? s.fullName.charAt(0).toUpperCase() : 'S'}
                                 </div>
                                 <div>
-                                  <h4 className="type-caption font-bold text-slate-800">{s.fullName}</h4>
-                                  <p className="text-[11px] text-slate-500 font-medium">
-                                    Reg: <span className="font-semibold text-slate-700">{s.regNo || s.registerNumber}</span>
+                                  <h4 className="type-caption font-bold text-text-primary">{s.fullName}</h4>
+                                  <p className="type-fine text-text-secondary font-medium">
+                                    Reg: <span className="font-bold text-text-primary">{s.regNo || s.registerNumber}</span>
                                     {s.departmentName && <> • {s.departmentName}</>}
                                     {s.year && <> • Year {s.year}</>}
                                     {s.section && <> • Sec {s.section}</>}
                                   </p>
                                   {s.teamName && (
-                                    <p className="text-[10px] font-semibold text-amber-600">
+                                    <p className="type-fine font-bold text-accent mt-0.5">
                                       Already in Team: {s.teamName}
                                     </p>
                                   )}
@@ -2187,11 +2314,11 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
 
                               <div>
                                 {isAlreadyInTeam ? (
-                                  <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 bg-slate-100 rounded-md">
+                                  <span className="type-fine font-bold text-text-muted px-2 py-0.5 bg-bg border border-border rounded">
                                     Assigned
                                   </span>
                                 ) : (
-                                  <span className="type-caption text-emerald-600 font-bold hover:underline">
+                                  <span className="type-fine text-accent font-bold hover:underline">
                                     Select Captain
                                   </span>
                                 )}
@@ -2200,9 +2327,9 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
                           );
                         })
                       ) : (
-                        <div className="py-6 px-4 bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 text-center">
-                          <p className="type-caption text-slate-600">Type above to search live student directory</p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">Select an unassigned student to appoint as team captain</p>
+                        <div className="py-6 px-4 bg-bg rounded-lg border border-dashed border-border text-center">
+                          <p className="type-caption text-text-secondary font-medium">Type above to search live student directory</p>
+                          <p className="type-fine text-text-muted mt-0.5">Select an unassigned student to appoint as team captain</p>
                         </div>
                       )}
                     </div>
@@ -2211,18 +2338,18 @@ export default function TeacherGroupManagementTab({ onPushView }: TeacherGroupMa
               </div>
 
               {/* Footer Buttons */}
-              <div className="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsCreateTeamModalOpen(false)}
-                  className="px-4 py-2.5 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-card border border-border text-text-secondary hover:text-text-primary hover:bg-bg type-btn font-bold rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || !createTeamName.trim() || !selectedCreateCaptain}
-                  className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed type-btn flex items-center space-x-1.5 cursor-pointer"
+                  className="px-6 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none disabled:opacity-50 disabled:cursor-not-allowed type-btn flex items-center space-x-1.5 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>

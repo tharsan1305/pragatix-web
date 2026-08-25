@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect, useRef } from 'react';
-import { Plus, X, Upload, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Plus, X, Upload, CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import { useXpStore } from '../../../store/xpStore';
@@ -16,8 +16,6 @@ interface ClaimableActivity {
   cap: string;
 }
 
-const DEFAULT_CATEGORY_CONFIG = { color: "#9e9e9e", priority: "MEDIUM", decay: "Permanent" };
-
 const CATEGORY_CONFIG: Record<string, any> = {
   "ACADEMIC": { color: "#3b82f6", bg: "bg-blue-500", text: "text-blue-500", border: "border-blue-500", priority: "HIGH", decay: "Streak decays if broken ↺" },
   "SKILL": { color: "#a855f7", bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", priority: "HIGH", decay: "Permanent ✓" },
@@ -31,7 +29,11 @@ const CATEGORY_CONFIG: Record<string, any> = {
   "CULTURAL": { color: "#06b6d4", bg: "bg-cyan-500", text: "text-cyan-500", border: "border-cyan-500", priority: "MEDIUM", decay: "Permanent ✓" },
 };
 
-export default function PointReviewTab() {
+interface PointReviewTabProps {
+  onBack?: () => void;
+}
+
+export default function PointReviewTab({ onBack }: PointReviewTabProps) {
   const { user } = useAuth();
   const { xpByCategory, history, streaks, submitXpClaim, fetchSummary, fetchHistory, fetchStreaks } = useXpStore();
 
@@ -62,22 +64,22 @@ export default function PointReviewTab() {
         const stages = await ActivityService.fetchStudentStages();
         const flattened: ClaimableActivity[] = [];
         for (const stage of stages) {
-          for (const sub of stage.subgroups) {
-            for (const act of sub.activities) {
+          for (const subgroup of stage.subgroups) {
+            for (const act of subgroup.activities) {
               flattened.push({
-                id: act.id || act.activityId,
+                id: act.id,
                 name: act.activityName,
                 xp: act.rewardXp,
-                category: act.category || 'OTHER',
-                stage: stage.displayOrder || 1,
-                cap: act.frequency || 'Once',
+                category: subgroup.name.toUpperCase().replace(/\s+/g, '_'),
+                stage: stage.id,
+                cap: "Per Event",
               });
             }
           }
         }
         setAllActivities(flattened);
       } catch (e) {
-        logger.error("Failed to load activities for claim wizard", e);
+        logger.error("Failed to fetch activities in PointReviewTab", e);
       }
     };
 
@@ -93,8 +95,7 @@ export default function PointReviewTab() {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const codingStreak = streaks.find((s: any) => s.streakType === "C_CODING");
-  const hasCodingBonus = codingStreak && (codingStreak.currentStreak >= 7) && !codingStreak.isBroken;
+  const hasCodingBonus = streaks.some(s => s.streakType === "CODING" && s.currentStreak >= 7 && !s.isBroken);
 
   const openModal = () => {
     setCurrentStep(1);
@@ -114,34 +115,41 @@ export default function PointReviewTab() {
       toast.error("Please select an activity");
       return;
     }
-    if (currentStep === 3 && !evidenceDesc.trim()) {
-      toast.error("Please describe your evidence");
+    if (currentStep === 3 && !evidenceDesc.trim() && !selectedFileName) {
+      toast.error("Please enter evidence notes or attach a document");
       return;
     }
 
     if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
     } else if (selectedActivity) {
-      setIsSubmitting(true);
-      const toastId = toast.loading("Submitting XP claim...");
-      const url = evidenceDesc.trim();
-      const success = await submitXpClaim(
-        selectedCategory,
-        selectedActivity.name,
-        selectedActivity.xp,
-        url || "Link uploaded",
-        selectedActivity.id
-      );
-      
-      toast.dismiss(toastId);
-      setIsSubmitting(false);
-      setIsModalOpen(false);
-      
-      if (success) {
-        toast.success("XP claim submitted for approval!");
-      } else {
-        toast.error("Failed to submit claim.");
-      }
+      await handleSubmitClaim();
+    }
+  };
+
+  const handleSubmitClaim = async () => {
+    if (!selectedActivity) return;
+    setIsSubmitting(true);
+    const toastId = toast.loading("Submitting activity claim...");
+
+    const url = evidenceDesc.trim() || (selectedFileName ? `File: ${selectedFileName}` : "Proof attached");
+
+    const success = await submitXpClaim(
+      selectedActivity.category,
+      selectedActivity.name,
+      selectedActivity.xp,
+      url,
+      selectedActivity.id
+    );
+    
+    toast.dismiss(toastId);
+    setIsSubmitting(false);
+    setIsModalOpen(false);
+    
+    if (success) {
+      toast.success("XP claim submitted for approval!");
+    } else {
+      toast.error("Failed to submit claim.");
     }
   };
 
@@ -151,37 +159,61 @@ export default function PointReviewTab() {
   );
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
+    <div className="bg-bg min-h-screen pb-24 text-text-primary">
       {/* Header */}
-      <div className="bg-slate-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md">
-        <h1 className="type-h4">XP Tracker</h1>
+      <div className="bg-card text-text-primary px-6 py-5 sticky top-0 z-10 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex justify-between items-center">
+        <div className="flex items-center space-x-3.5">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition-colors cursor-pointer text-text-secondary hover:text-text-primary"
+              title="Back to Dashboard"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Point Review & History</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">Review awarded XP records and submit new activity evidence claims</p>
+          </div>
+        </div>
       </div>
 
       {hasCodingBonus && (
-        <div className="bg-indigo-600 p-3 text-white flex items-center gap-2">
+        <div className="bg-accent-tint border-b border-accent/20 px-6 py-3 text-accent flex items-center gap-2">
           <span className="text-xl">🔥</span>
-          <span className="type-body-sm font-bold">7-Day Coding Streak Active — 2x XP all coding this week!</span>
+          <span className="type-caption font-bold">7-Day Coding Streak Active — 2x XP boost on all coding submissions this week!</span>
         </div>
       )}
 
-      <div className="p-4 max-w-3xl mx-auto space-y-6">
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto space-y-6">
         
         {/* Category Cards */}
-        <section>
-          <h2 className="type-h4 text-slate-800 mb-3">XP Category Summary</h2>
-          <div className="flex overflow-x-auto gap-3 pb-4 snap-x">
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="type-h4 font-bold text-text-primary">XP Category Summary</h2>
+            <span className="type-fine text-text-muted font-bold">Tracked activity categories</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {Object.entries(xpByCategory).map(([cat, val], idx) => {
-              const conf = CATEGORY_CONFIG[cat] || DEFAULT_CATEGORY_CONFIG;
+              const formattedName = cat
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .replace(/_/g, ' ')
+                .trim();
+
               return (
-                <div key={idx} className="snap-start shrink-0 w-[180px] bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col justify-between h-[120px]">
+                <div key={idx} className="bg-card rounded-2xl p-4 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[140px] hover:border-accent/30 transition-all">
                   <div className="flex justify-between items-start">
-                    <span className={`text-[11px] font-bold ${conf.text} truncate max-w-[90px]`}>{cat}</span>
-                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded opacity-80" style={{ backgroundColor: conf.color + '20', color: conf.color }}>
-                      {conf.priority}
+                    <span className="type-caption font-bold text-text-primary truncate max-w-[120px]" title={formattedName}>
+                      {formattedName}
+                    </span>
+                    <span className="type-fine font-bold px-2 py-0.5 rounded-md bg-accent-tint text-accent border border-accent/20 uppercase tracking-wider text-[10px]">
+                      TRACKED
                     </span>
                   </div>
-                  <div className="type-h3 text-slate-800 my-1">{val as number} XP</div>
-                  <div className="text-[8px] italic text-slate-400 truncate">{conf.decay}</div>
+                  <div className="type-h2 text-text-primary font-black my-1">{val as number} <span className="type-caption text-text-muted font-normal">XP</span></div>
+                  <div className="type-fine font-medium text-text-muted truncate">Category Points</div>
                 </div>
               );
             })}
@@ -189,40 +221,58 @@ export default function PointReviewTab() {
         </section>
 
         {/* History List */}
-        <section>
-          <h2 className="type-h4 text-slate-800 mb-3">XP Submission History</h2>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="type-h4 font-bold text-text-primary">XP Submission History</h2>
+            <span className="type-fine font-bold text-text-muted">{history.length} Entries</span>
+          </div>
           
           {history.length === 0 ? (
-            <div className="text-center py-10 text-slate-500">
-              No XP logs found. Submit your first activity claim!
+            <div className="bg-card rounded-2xl border border-border p-10 text-center text-text-muted font-medium shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-2">
+              <div className="w-12 h-12 bg-accent-tint text-accent rounded-2xl flex items-center justify-center mx-auto mb-3 border border-accent/20">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <p className="type-body-sm font-bold text-text-primary">No XP submissions recorded yet</p>
+              <p className="type-caption text-text-secondary max-w-sm mx-auto">
+                Submit your activity certificates, project proofs, or participation links using the button below to earn stage XP!
+              </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {history.map((log: any, idx: number) => {
-                const cat = log.category || "SKILL";
                 const isPositive = log.xpPoints > 0;
-                const conf = CATEGORY_CONFIG[cat] || DEFAULT_CATEGORY_CONFIG;
-                const status = log.status || "APPROVED";
+                const status = (log.status || "APPROVED").toUpperCase();
                 
                 return (
-                  <div key={idx} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-4 shrink-0" style={{ backgroundColor: conf.color }} />
-                    <div className="flex-1 min-w-0 mr-3">
-                      <div className="font-bold text-slate-800 type-body-sm truncate">{log.activityName || ""}</div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="type-caption text-slate-500">
-                          {log.submittedAt ? new Date(log.submittedAt).toISOString().split('T')[0] : ''}
-                        </span>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                          status === 'APPROVED' ? 'bg-green-100 text-green-700' :
-                          status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                          'bg-amber-100 text-amber-700'
-                        }`}>
-                          {status}
-                        </span>
+                  <div key={idx} className="bg-card rounded-xl p-4 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between hover:border-accent/30 transition-all">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                        status === 'APPROVED' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                        status === 'REJECTED' ? 'bg-accent-tint text-accent border-accent/20' :
+                        'bg-amber-50 text-amber-800 border-amber-200'
+                      }`}>
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-text-primary type-body-sm truncate">{log.activityName || "Activity Claim"}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="type-fine text-text-muted font-medium">
+                            {log.submittedAt ? new Date(log.submittedAt).toISOString().split('T')[0] : 'Recent'}
+                          </span>
+                          <span className={`type-fine font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                            status === 'APPROVED' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                            status === 'REJECTED' ? 'bg-accent-tint text-accent border-accent/20' :
+                            'bg-amber-50 text-amber-800 border-amber-200'
+                          }`}>
+                            {status}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className={`font-bold ${isPositive ? 'text-green-500' : 'text-red-500'} ${status === 'REJECTED' ? 'line-through' : ''}`}>
+
+                    <div className={`font-black type-body-sm shrink-0 ml-3 ${
+                      isPositive ? 'text-emerald-800' : 'text-accent'
+                    } ${status === 'REJECTED' ? 'line-through opacity-50' : ''}`}>
                       {isPositive ? '+' : ''}{log.xpPoints} XP
                     </div>
                   </div>
@@ -234,34 +284,36 @@ export default function PointReviewTab() {
 
       </div>
 
-      {/* FAB */}
+      {/* Modern Elevated Floating Action Button */}
       <button 
         onClick={openModal}
-        className="fixed bottom-20 right-6 w-14 h-14 type-btn bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-500/40 hover:bg-indigo-700 transition-colors z-20"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-accent hover:bg-accent-hover text-card px-5 py-3.5 rounded-2xl shadow-2xl transition-all z-20 cursor-pointer flex items-center gap-2 font-bold type-body-sm active:scale-95"
+        title="Submit New Activity Evidence"
       >
-        <Plus className="w-8 h-8" />
+        <Plus className="w-5 h-5 stroke-[2.5]" />
+        <span>Claim XP</span>
       </button>
 
       {/* Submission Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center">
-          <div className="bg-white w-full sm:w-[480px] rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-text-primary/40 backdrop-blur-xs sm:items-center p-4">
+          <div className="bg-card text-text-primary border border-border w-full sm:w-[480px] rounded-lg p-6 shadow-2xl animate-in slide-in-from-bottom-10 max-h-[90vh] overflow-y-auto">
             
             <div className="flex justify-between items-center mb-4">
-              <h2 className="type-h4 text-slate-800">Submit Activity Evidence</h2>
-              <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full">
+              <h2 className="type-h4 font-bold text-text-primary">Submit Activity Evidence</h2>
+              <button onClick={() => setIsModalOpen(false)} className="p-1 text-text-secondary hover:text-text-primary bg-bg rounded-lg cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="type-caption font-bold text-slate-400 mb-6 tracking-wider uppercase">Step {currentStep} of 4</div>
+            <div className="type-caption font-bold text-text-muted mb-6 tracking-wider uppercase">Step {currentStep} of 4</div>
 
             <div className="space-y-4">
               {currentStep === 1 && (
                 <div>
-                  <label className="type-form-label block type-body-sm font-bold text-slate-700 mb-2">Select Category</label>
+                  <label className="type-form-label block type-body-sm font-bold text-text-primary mb-2">Select Category</label>
                   <select 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent appearance-none cursor-pointer"
                     value={selectedCategory}
                     onChange={(e) => {
                       setSelectedCategory(e.target.value);
@@ -278,9 +330,9 @@ export default function PointReviewTab() {
 
               {currentStep === 2 && (
                 <div>
-                  <label className="type-form-label block type-body-sm font-bold text-slate-700 mb-2">Select Activity</label>
+                  <label className="type-form-label block type-body-sm font-bold text-text-primary mb-2">Select Activity</label>
                   <select 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent appearance-none cursor-pointer"
                     value={selectedActivity?.name || ""}
                     onChange={(e) => {
                       const act = filteredActivities.find(a => a.name === e.target.value);
@@ -299,15 +351,15 @@ export default function PointReviewTab() {
 
               {currentStep === 3 && (
                 <div>
-                  <label className="type-form-label block type-body-sm font-bold text-slate-700 mb-2">Evidence Description / URL</label>
+                  <label className="type-form-label block type-body-sm font-bold text-text-primary mb-2">Evidence Description / URL</label>
                   <textarea 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none h-24 mb-4"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent resize-none h-24 mb-4"
                     placeholder="Enter evidence links or verification notes..."
                     value={evidenceDesc}
                     onChange={(e) => setEvidenceDesc(e.target.value)}
                   />
 
-                  <label className="type-form-label block type-body-sm font-bold text-slate-700 mb-2">Upload File Document (Optional)</label>
+                  <label className="type-form-label block type-body-sm font-bold text-text-primary mb-2">Upload File Document (Optional)</label>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -320,7 +372,7 @@ export default function PointReviewTab() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl transition-colors type-btn border border-slate-200 border-dashed cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 bg-bg hover:bg-border text-text-primary px-4 py-3 rounded-lg transition-colors type-btn border border-border border-dashed cursor-pointer"
                   >
                     <Upload className="w-4 h-4" />
                     {selectedFileName || "Select PDF/Photo Document"}
@@ -330,24 +382,24 @@ export default function PointReviewTab() {
 
               {currentStep === 4 && (
                 <div>
-                  <h3 className="type-h5 text-slate-800 mb-3">Claim Preview</h3>
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 type-body-sm text-slate-600 space-y-2">
-                    <div><span className="font-medium text-slate-800">Activity:</span> {selectedActivity?.name}</div>
-                    <div><span className="font-medium text-slate-800">Category:</span> {selectedCategory}</div>
-                    <div className="text-green-600 font-bold">Points to Earn: +{selectedActivity?.xp} XP</div>
-                    <div><span className="font-medium text-slate-800">Evidence:</span> {evidenceDesc}</div>
+                  <h3 className="type-h5 font-bold text-text-primary mb-3">Claim Preview</h3>
+                  <div className="bg-bg border border-border rounded-lg p-4 type-body-sm text-text-secondary space-y-2">
+                    <div><span className="font-bold text-text-primary">Activity:</span> {selectedActivity?.name}</div>
+                    <div><span className="font-bold text-text-primary">Category:</span> {selectedCategory}</div>
+                    <div className="text-success font-bold">Points to Earn: +{selectedActivity?.xp} XP</div>
+                    <div><span className="font-bold text-text-primary">Evidence:</span> {evidenceDesc}</div>
                     {selectedFileName && (
-                      <div className="text-indigo-600"><span className="font-medium text-slate-800">Attachment:</span> {selectedFileName}</div>
+                      <div className="text-accent"><span className="font-bold text-text-primary">Attachment:</span> {selectedFileName}</div>
                     )}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-between mt-8 pt-4 border-t border-slate-100">
+            <div className="flex justify-between mt-8 pt-4 border-t border-border">
               <button 
                 onClick={() => setCurrentStep(prev => prev - 1)}
-                className={`px-4 py-2 type-body-sm font-bold text-slate-500 hover:text-slate-700 ${currentStep === 1 ? 'invisible' : ''}`}
+                className={`px-4 py-2 type-body-sm font-bold text-text-secondary hover:text-text-primary cursor-pointer ${currentStep === 1 ? 'invisible' : ''}`}
               >
                 Back
               </button>
@@ -355,7 +407,7 @@ export default function PointReviewTab() {
               <button 
                 onClick={handleNext}
                 disabled={isSubmitting}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl type-body-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-70"
+                className="bg-accent hover:bg-accent-hover text-card px-6 py-2.5 rounded-lg type-body-sm font-bold transition-colors flex items-center gap-2 disabled:opacity-70 cursor-pointer"
               >
                 {currentStep === 4 ? (
                   <>

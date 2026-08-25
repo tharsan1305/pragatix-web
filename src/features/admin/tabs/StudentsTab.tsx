@@ -682,19 +682,19 @@ export default function StudentsTab({ onBack }: Props) {
   const activeSections = deptSections.length > 0 ? deptSections : lookups.sections;
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
-      {/* Top Header matching Flutter Students Directory AppBar */}
-      <div className="bg-[#1E293B] text-white px-4 sm:px-6 py-4 shadow-md flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center space-x-3">
+    <div className="flex flex-col min-h-full bg-bg relative pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-4 sm:px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center space-x-3.5">
           {onBack && (
-            <button onClick={onBack} className="p-2 type-btn hover:bg-slate-800 rounded-full text-white transition-colors cursor-pointer">
+            <button onClick={onBack} className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="type-h4 text-white tracking-tight">Students Directory</h1>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Students Directory</h1>
             {!isLoading && (
-              <p className="type-caption text-slate-300 font-medium">
+              <p className="type-caption text-text-secondary font-medium">
                 {searchQuery || filterYear !== 'All' || filterDeptId !== 'All' || filterSectionId !== 'All'
                   ? `Showing ${filteredStudents.length} of ${totalStudentsCount || students.length} students`
                   : (totalStudentsCount > 0 && totalStudentsCount > filteredStudents.length
@@ -712,22 +712,22 @@ export default function StudentsTab({ onBack }: Props) {
               setBulkParseResult(null);
               setIsBulkUploadModalOpen(true);
             }}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl type-caption font-bold transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer"
+            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg type-caption font-bold transition-colors flex items-center space-x-1.5 shadow-none cursor-pointer"
             title="Bulk Upload Students from Excel"
           >
-            <Upload className="w-3.5 h-3.5" />
+            <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">Bulk Upload</span>
           </button>
 
           {/* Notification Bell with Badge */}
           <button
             onClick={() => setIsBadgeModalOpen(true)}
-            className="p-2 hover:bg-slate-800 rounded-full text-white transition-colors relative cursor-pointer"
+            className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors relative cursor-pointer"
             title="Badge Requests"
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-4 h-4" />
             {pendingBadgeRequests > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[10px] font-extrabold rounded-full flex items-center justify-center border-2 border-[#1E293B]">
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-accent text-card text-[10px] font-black rounded-full flex items-center justify-center border-2 border-card">
                 {pendingBadgeRequests > 99 ? '99+' : pendingBadgeRequests}
               </span>
             )}
@@ -739,47 +739,64 @@ export default function StudentsTab({ onBack }: Props) {
               fetchStudents();
               fetchPendingBadges();
             }}
-            className="p-2 hover:bg-slate-800 rounded-full text-white transition-colors cursor-pointer"
+            className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
             title="Refresh Directory"
           >
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
-        {/* Search Bar matching Flutter StudentFilterPanel */}
-        <div className="relative">
-          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search by student ID or name..." 
-            value={searchQuery}
-            onChange={handleSearch}
-            className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none shadow-xs type-body-sm"
-          />
-          {searchQuery && (
-            <button 
-              onClick={() => {
-                setSearchQuery('');
-                applyFilters(students, '', filterYear, filterDeptId, filterSectionId);
+        {/* Search Bar */}
+        <div className="flex gap-2.5 items-center">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input 
+              type="text" 
+              placeholder="Search by student ID, name, or registration number..." 
+              value={searchQuery}
+              onChange={handleSearch}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  fetchStudents();
+                }
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+              className="w-full pl-10 pr-10 py-2.5 bg-bg text-text-primary placeholder:text-text-muted border border-border rounded-lg focus:border-text-primary outline-none shadow-none type-body-sm font-semibold"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => {
+                  setSearchQuery('');
+                  applyFilters(students, '', filterYear, filterDeptId, filterSectionId);
+                }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              fetchStudents();
+            }}
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg type-caption font-bold flex items-center space-x-1.5 shadow-none transition-colors cursor-pointer shrink-0"
+            title="Search & Refresh from database"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Search</span>
+          </button>
         </div>
 
-        {/* Outline Filters Row matching Flutter StudentFilterPanel */}
+        {/* Outline Filters Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Academic Year Dropdown */}
           <div className="relative">
-            <label className="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-slate-50 px-1 z-1 type-form-label">Academic Year</label>
+            <label className="text-[10px] font-bold text-text-muted uppercase absolute -top-2 left-3 bg-bg px-1 z-1 type-form-label">Academic Year</label>
             <select
               value={filterYear}
               onChange={(e) => handleFilterYearChange(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 type-caption text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none shadow-2xs"
+              className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 type-caption font-bold text-text-primary focus:border-text-primary outline-none cursor-pointer"
             >
               <option value="All">All Years</option>
               <option value="First Year">First Year</option>
@@ -791,11 +808,11 @@ export default function StudentsTab({ onBack }: Props) {
 
           {/* Department Dropdown */}
           <div className="relative">
-            <label className="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-slate-50 px-1 z-1 type-form-label">Department</label>
+            <label className="text-[10px] font-bold text-text-muted uppercase absolute -top-2 left-3 bg-bg px-1 z-1 type-form-label">Department</label>
             <select
               value={filterDeptId}
               onChange={(e) => handleFilterDeptChange(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 type-caption text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none shadow-2xs"
+              className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 type-caption font-bold text-text-primary focus:border-text-primary outline-none cursor-pointer"
             >
               <option value="All">All Departments</option>
               {lookups.departments.map((d: any) => (
@@ -806,11 +823,11 @@ export default function StudentsTab({ onBack }: Props) {
 
           {/* Section Dropdown */}
           <div className="relative">
-            <label className="text-[10px] font-bold text-slate-500 uppercase absolute -top-2 left-3 bg-slate-50 px-1 z-1 type-form-label">Section</label>
+            <label className="text-[10px] font-bold text-text-muted uppercase absolute -top-2 left-3 bg-bg px-1 z-1 type-form-label">Section</label>
             <select
               value={filterSectionId}
               onChange={(e) => handleFilterSectionChange(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2.5 type-caption text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none shadow-2xs"
+              className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 type-caption font-bold text-text-primary focus:border-text-primary outline-none cursor-pointer"
             >
               <option value="All">All Sections</option>
               {filterSectionsList.map((s: any) => (
@@ -825,7 +842,7 @@ export default function StudentsTab({ onBack }: Props) {
           <div className="flex justify-end pt-1">
             <button
               onClick={handleResetFilters}
-              className="type-caption font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1.5 cursor-pointer"
+              className="type-caption font-bold text-accent hover:underline flex items-center gap-1.5 cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Filters</span>
@@ -835,13 +852,17 @@ export default function StudentsTab({ onBack }: Props) {
 
         {/* Students List Grid */}
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+          <div className="flex flex-col items-center justify-center py-20 space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading student roster...</p>
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="text-center py-12 text-slate-500 bg-white rounded-2xl shadow-xs border border-slate-200 space-y-2">
-            <User className="w-10 h-10 text-slate-300 mx-auto" />
-            <p className="font-semibold type-body-sm">No students found matching current filters.</p>
+          <div className="text-center py-16 text-text-secondary bg-card rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-border space-y-2 p-8 flex flex-col items-center">
+            <div className="w-12 h-12 rounded-xl bg-bg border border-border flex items-center justify-center text-text-muted mb-1">
+              <User className="w-6 h-6" />
+            </div>
+            <p className="font-bold type-h5 text-text-primary">No students found matching current filters.</p>
+            <p className="type-caption text-text-secondary">Try adjusting your search query or dropdown filters above.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -857,22 +878,22 @@ export default function StudentsTab({ onBack }: Props) {
               const semester = student.semesterId ? `Sem: ${student.semesterId}` : (student.semester ? `Sem: ${student.semester}` : '');
 
               return (
-                <div key={student.id} className="bg-white rounded-2xl shadow-xs border border-slate-200/90 p-4 flex flex-col md:flex-row md:items-center justify-between hover:shadow-md transition-shadow gap-3">
+                <div key={student.id} className="bg-card rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border p-4 flex flex-col md:flex-row md:items-center justify-between hover:border-accent/40 transition-all gap-3">
                   <div className="flex items-center space-x-3.5 pl-1 min-w-0">
-                    <div className="w-10 h-10 bg-rose-50 border border-rose-100 rounded-full flex items-center justify-center text-rose-600 font-black type-body-sm shrink-0">
+                    <div className="w-11 h-11 bg-bg border border-border rounded-xl flex items-center justify-center text-accent font-black type-h5 shrink-0">
                       {name ? name[0].toUpperCase() : 'S'}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="type-h5 text-slate-900 truncate">{name}</h3>
-                        <span className="type-fine font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                      <div className="flex items-center space-x-2 flex-wrap">
+                        <h3 className="type-h5 font-bold text-text-primary truncate">{name}</h3>
+                        <span className="type-fine font-extrabold text-accent bg-accent-tint px-2 py-0.5 rounded-md border border-accent/20 shrink-0">
                           {student.score ?? student.xp ?? student.points ?? 0} XP
                         </span>
                       </div>
-                      <p className="type-caption text-slate-500 font-medium truncate mt-0.5">
+                      <p className="type-caption text-text-secondary font-medium truncate mt-0.5">
                         {regNo} • {deptName} {semester ? `• ${semester}` : ''} • Year: {year} • Section: {section}
                       </p>
-                      <p className="type-fine font-semibold text-slate-400 mt-0.5 uppercase tracking-wider">
+                      <p className="type-fine font-semibold text-text-muted mt-0.5 uppercase tracking-wider">
                         REG: {regNo} | SPR: {sprNo}
                       </p>
                     </div>
@@ -880,14 +901,14 @@ export default function StudentsTab({ onBack }: Props) {
                   <div className="flex items-center space-x-1 pr-1 self-end md:self-center shrink-0">
                     <button 
                       onClick={() => openModal(student)} 
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer" 
+                      className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer" 
                       title="Edit Student"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => setDeleteConfirmStudent({ id: student.id, name })} 
-                      className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer" 
+                      className="p-2 text-text-secondary hover:text-accent hover:bg-accent-tint rounded-lg transition-colors cursor-pointer" 
                       title="Delete Student"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -901,11 +922,11 @@ export default function StudentsTab({ onBack }: Props) {
                 <button
                   onClick={fetchNextPage}
                   disabled={isLoadingMore}
-                  className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold rounded-xl type-btn flex items-center space-x-2 shadow-xs cursor-pointer disabled:opacity-50 transition-colors"
+                  className="px-5 py-2.5 bg-card border border-border hover:bg-bg text-text-primary font-bold rounded-lg type-btn flex items-center space-x-2 shadow-none cursor-pointer disabled:opacity-50 transition-colors"
                 >
                   {isLoadingMore ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin text-slate-500" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-accent" />
                       <span>Loading more students...</span>
                     </>
                   ) : (
@@ -918,11 +939,11 @@ export default function StudentsTab({ onBack }: Props) {
         )}
       </div>
 
-      {/* Floating Action Button (FAB) matching Flutter */}
+      {/* Floating Action Button (FAB) */}
       <div className="fixed bottom-6 right-6 z-40">
         <button 
           onClick={() => openModal()}
-          className="w-14 h-14 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all cursor-pointer"
+          className="w-14 h-14 bg-accent hover:bg-accent-hover text-card rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all cursor-pointer"
           title="Add New Student"
         >
           <Plus className="w-6 h-6" />
@@ -931,11 +952,11 @@ export default function StudentsTab({ onBack }: Props) {
 
       {/* Pending Badge Requests Modal triggered from Notification Bell */}
       {isBadgeModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="bg-[#1E293B] text-white px-6 py-4 flex items-center justify-between">
-              <h2 className="type-h4 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-amber-400" />
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card text-text-primary rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-card border-b border-border px-6 py-4 flex items-center justify-between">
+              <h2 className="type-h4 font-bold flex items-center gap-2 text-text-primary">
+                <Bell className="w-5 h-5 text-accent" />
                 <span>Pending Badge Requests</span>
               </h2>
               <button
@@ -943,12 +964,12 @@ export default function StudentsTab({ onBack }: Props) {
                   setIsBadgeModalOpen(false);
                   fetchPendingBadges();
                 }}
-                className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer type-h4"
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-bg">
               <AdminBadgeRequestsTab onBack={() => { setIsBadgeModalOpen(false); fetchPendingBadges(); }} />
             </div>
           </div>
@@ -957,16 +978,16 @@ export default function StudentsTab({ onBack }: Props) {
 
       {/* In-App Delete Confirmation Modal */}
       {deleteConfirmStudent && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mx-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-border space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="type-h5 text-slate-900">Delete Student</h3>
-              <p className="type-caption text-slate-500 leading-relaxed">
-                Move <strong className="text-slate-800 font-bold">{deleteConfirmStudent.name}</strong> to the Recycle Bin? This can be restored later.
+              <h3 className="type-h5 font-bold text-text-primary">Delete Student</h3>
+              <p className="type-caption text-text-secondary leading-relaxed">
+                Move <strong className="text-text-primary font-bold">{deleteConfirmStudent.name}</strong> to the Recycle Bin? This can be restored later.
               </p>
             </div>
 
@@ -974,14 +995,14 @@ export default function StudentsTab({ onBack }: Props) {
               <button
                 type="button"
                 onClick={() => setDeleteConfirmStudent(null)}
-                className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 type-caption font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-lg border border-border type-caption font-bold text-text-secondary hover:text-text-primary hover:bg-bg transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeDelete}
-                className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white type-caption font-bold shadow-md transition cursor-pointer"
+                className="flex-1 py-2.5 px-4 rounded-lg bg-accent hover:bg-accent-hover text-card type-caption font-bold shadow-none transition cursor-pointer"
               >
                 Delete
               </button>
@@ -990,34 +1011,34 @@ export default function StudentsTab({ onBack }: Props) {
         </div>
       )}
 
-      {/* Modal matching Flutter EditStudentDialog */}
+      {/* Modal for Add/Edit Student */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-50 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-4 md:p-6 border-b border-slate-200 flex justify-between items-center bg-white rounded-t-2xl">
-              <h2 className="type-h4 text-slate-900">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 md:p-6 border-b border-border flex justify-between items-center bg-card rounded-t-2xl">
+              <h2 className="type-h4 font-bold text-text-primary">
                 {editingStudent ? 'Edit Student Details' : 'Add New Student'}
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)} 
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                className="text-text-muted hover:text-text-primary p-1.5 rounded-lg hover:bg-bg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="overflow-y-auto p-4 md:p-6 space-y-6">
+            <form onSubmit={handleSave} className="overflow-y-auto p-4 md:p-6 space-y-6 bg-bg">
               {/* Section 1: Basic Information */}
-              <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-4">
-                <h3 className="type-body-sm font-bold text-slate-700 tracking-wide flex items-center space-x-2">
-                  <User className="w-4 h-4 text-slate-500" />
+              <div className="bg-card rounded-xl p-4 border border-border shadow-xs space-y-4">
+                <h3 className="type-body-sm font-bold text-text-primary tracking-wide flex items-center space-x-2">
+                  <User className="w-4 h-4 text-accent" />
                   <span>Basic Information</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">
-                      Register Number <span className="text-red-500">*</span>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">
+                      Register Number <span className="text-accent">*</span>
                     </label>
                     <input 
                       type="text" 
@@ -1026,13 +1047,13 @@ export default function StudentsTab({ onBack }: Props) {
                       value={formData.regNo} 
                       onChange={e => setFormData({...formData, regNo: e.target.value})} 
                       placeholder="e.g. 24CSC122"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm disabled:bg-slate-100 disabled:text-slate-500 bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold disabled:bg-bg disabled:text-text-muted bg-card text-text-primary" 
                     />
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">
-                      Full Name <span className="text-red-500">*</span>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">
+                      Full Name <span className="text-accent">*</span>
                     </label>
                     <input 
                       type="text" 
@@ -1040,15 +1061,15 @@ export default function StudentsTab({ onBack }: Props) {
                       value={formData.fullName} 
                       onChange={e => setFormData({...formData, fullName: e.target.value})} 
                       placeholder="e.g. Abishek"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">
-                      Email Address <span className="text-red-500">*</span>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">
+                      Email Address <span className="text-accent">*</span>
                     </label>
                     <input 
                       type="email" 
@@ -1056,40 +1077,40 @@ export default function StudentsTab({ onBack }: Props) {
                       value={formData.email} 
                       onChange={e => setFormData({...formData, email: e.target.value})} 
                       placeholder="student@jjcet.ac.in"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Phone Number</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Phone Number</label>
                     <input 
                       type="text" 
                       value={formData.phone} 
                       onChange={e => setFormData({...formData, phone: e.target.value})} 
                       placeholder="e.g. 9876543210"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">SPR Number</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">SPR Number</label>
                     <input 
                       type="text" 
                       value={formData.sprNo} 
                       onChange={e => setFormData({...formData, sprNo: e.target.value})} 
                       placeholder="e.g. SPR24CS022"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Gender</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Gender</label>
                     <select 
                       value={formData.genderId} 
                       onChange={e => setFormData({...formData, genderId: e.target.value})} 
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                     >
                       <option value="">-- Select Gender --</option>
                       {lookups.genders.map(g => (
@@ -1099,52 +1120,52 @@ export default function StudentsTab({ onBack }: Props) {
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Date of Birth</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Date of Birth</label>
                     <input 
                       type="date" 
                       value={formData.dob} 
                       onChange={e => setFormData({...formData, dob: e.target.value})} 
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary cursor-pointer" 
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Address</label>
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Address</label>
                   <textarea 
                     rows={2} 
                     value={formData.address} 
                     onChange={e => setFormData({...formData, address: e.target.value})} 
                     placeholder="Enter residential address"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white"
+                    className="w-full px-3 py-2 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary resize-none"
                   />
                 </div>
               </div>
 
               {/* Section 2: Guardian Information */}
-              <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-4">
-                <h3 className="type-body-sm font-bold text-slate-700 tracking-wide flex items-center space-x-2">
-                  <UserCheck className="w-4 h-4 text-slate-500" />
+              <div className="bg-card rounded-xl p-4 border border-border shadow-xs space-y-4">
+                <h3 className="type-body-sm font-bold text-text-primary tracking-wide flex items-center space-x-2">
+                  <UserCheck className="w-4 h-4 text-accent" />
                   <span>Guardian Details</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Guardian Name</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Guardian Name</label>
                     <input 
                       type="text" 
                       value={formData.guardianName} 
                       onChange={e => setFormData({...formData, guardianName: e.target.value})} 
                       placeholder="e.g. Parent Name"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Relationship</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Relationship</label>
                     <select 
                       value={formData.guardianRel} 
                       onChange={e => setFormData({...formData, guardianRel: e.target.value})}
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                     >
                       {lookups.guardianRelations.map(rel => (
                         <option key={rel} value={rel}>{rel}</option>
@@ -1155,42 +1176,42 @@ export default function StudentsTab({ onBack }: Props) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Guardian Phone</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Guardian Phone</label>
                     <input 
                       type="text" 
                       value={formData.guardianPhone} 
                       onChange={e => setFormData({...formData, guardianPhone: e.target.value})} 
                       placeholder="e.g. 9876543210"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Guardian Email</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Guardian Email</label>
                     <input 
                       type="email" 
                       value={formData.guardianEmail} 
                       onChange={e => setFormData({...formData, guardianEmail: e.target.value})} 
                       placeholder="guardian@example.com"
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm bg-white" 
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" 
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 3: Academic Details */}
-              <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-4">
-                <h3 className="type-body-sm font-bold text-slate-700 tracking-wide flex items-center space-x-2">
-                  <School className="w-4 h-4 text-slate-500" />
+              <div className="bg-card rounded-xl p-4 border border-border shadow-xs space-y-4">
+                <h3 className="type-body-sm font-bold text-text-primary tracking-wide flex items-center space-x-2">
+                  <School className="w-4 h-4 text-accent" />
                   <span>Academic Information</span>
                 </h3>
 
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Department</label>
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Department</label>
                   <select 
                     value={formData.departmentId} 
                     onChange={e => handleDepartmentChange(e.target.value)} 
-                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                    className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                   >
                     <option value="">-- Select Department --</option>
                     {lookups.departments.map(d => (
@@ -1201,11 +1222,11 @@ export default function StudentsTab({ onBack }: Props) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Academic Year</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Academic Year</label>
                     <select 
                       value={formData.academicYearId} 
                       onChange={e => setFormData({...formData, academicYearId: e.target.value})} 
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                     >
                       <option value="">-- Select Academic Year --</option>
                       {lookups.academicYears.map(ay => (
@@ -1215,11 +1236,11 @@ export default function StudentsTab({ onBack }: Props) {
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Year</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Year</label>
                     <select 
                       value={formData.yearId} 
                       onChange={e => setFormData({...formData, yearId: e.target.value})} 
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                     >
                       <option value="">-- Select Year --</option>
                       {lookups.years.map(y => (
@@ -1233,11 +1254,11 @@ export default function StudentsTab({ onBack }: Props) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Semester</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Semester</label>
                     <select 
                       value={formData.semesterId} 
                       onChange={e => setFormData({...formData, semesterId: e.target.value})} 
-                      className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                      className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                     >
                       <option value="">-- Select Semester --</option>
                       {lookups.semesters.map(s => (
@@ -1249,17 +1270,17 @@ export default function StudentsTab({ onBack }: Props) {
                   </div>
 
                   <div>
-                    <label className="type-form-label text-slate-600 mb-1 block">Section</label>
+                    <label className="type-form-label text-text-secondary font-bold mb-1 block">Section</label>
                     {isFetchingSections ? (
-                      <div className="flex items-center space-x-2 py-2 type-caption text-slate-500">
-                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      <div className="flex items-center space-x-2 py-2.5 type-caption text-text-muted">
+                        <RefreshCw className="w-4 h-4 animate-spin text-accent" />
                         <span>Loading sections...</span>
                       </div>
                     ) : (
                       <select 
                         value={formData.sectionId} 
                         onChange={e => setFormData({...formData, sectionId: e.target.value})} 
-                        className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                        className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                       >
                         <option value="">-- Select Section --</option>
                         {activeSections.map(sec => (
@@ -1274,18 +1295,18 @@ export default function StudentsTab({ onBack }: Props) {
               </div>
 
               {/* Section 4: Account & Group Details */}
-              <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-4">
-                <h3 className="type-body-sm font-bold text-slate-700 tracking-wide flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-slate-500" />
+              <div className="bg-card rounded-xl p-4 border border-border shadow-xs space-y-4">
+                <h3 className="type-body-sm font-bold text-text-primary tracking-wide flex items-center space-x-2">
+                  <Shield className="w-4 h-4 text-accent" />
                   <span>Account & Group</span>
                 </h3>
 
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Group / Team</label>
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Group / Team</label>
                   <select 
                     value={formData.groupId} 
                     onChange={e => setFormData({...formData, groupId: e.target.value})} 
-                    className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm"
+                    className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer"
                   >
                     <option value="">-- Select Group --</option>
                     {lookups.groups.map(grp => (
@@ -1297,7 +1318,7 @@ export default function StudentsTab({ onBack }: Props) {
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <span className="type-body-sm font-semibold text-slate-700">Active Account</span>
+                  <span className="type-body-sm font-bold text-text-primary">Active Account</span>
                   <label className="relative inline-flex items-center cursor-pointer type-form-label">
                     <input 
                       type="checkbox" 
@@ -1305,23 +1326,23 @@ export default function StudentsTab({ onBack }: Props) {
                       onChange={e => setFormData({...formData, active: e.target.checked})} 
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-slate-900"></div>
+                    <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-card after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                   </label>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 pt-2">
+              <div className="flex justify-end space-x-2.5 pt-3 border-t border-border">
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="px-5 py-2.5 text-slate-600 type-btn hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+                  className="px-5 py-2.5 text-text-secondary hover:text-text-primary type-btn font-bold hover:bg-bg border border-border rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-6 py-2.5 bg-[#1E293B] text-white font-semibold rounded-xl hover:bg-slate-800 transition-all type-btn shadow-xs cursor-pointer"
+                  className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-all type-btn shadow-none cursor-pointer"
                 >
                   {editingStudent ? 'Update Student' : 'Save Student'}
                 </button>
@@ -1331,44 +1352,44 @@ export default function StudentsTab({ onBack }: Props) {
         </div>
       )}
 
-      {/* Bulk Upload Modal matching Flutter students_tab_dialogs.dart 1:1 */}
+      {/* Bulk Upload Modal */}
       {isBulkUploadModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="bg-[#1E293B] text-white px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
-                <h3 className="type-h5">Bulk Student Upload</h3>
+            <div className="bg-card border-b border-border px-6 py-4 flex items-center justify-between text-text-primary">
+              <div className="flex items-center space-x-2.5">
+                <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
+                <h3 className="type-h4 font-bold text-text-primary">Bulk Student Upload</h3>
               </div>
               <button
                 onClick={() => {
                   setIsBulkUploadModalOpen(false);
                   setBulkParseResult(null);
                 }}
-                className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer type-h4"
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50">
+            <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-bg">
               {/* Step 1: Download Template */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+              <div className="bg-card p-5 rounded-xl border border-border shadow-xs space-y-3">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 font-extrabold type-caption flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-accent-tint border border-accent/20 text-accent font-black type-caption flex items-center justify-center">
                     1
                   </div>
-                  <h4 className="font-bold type-body-sm text-slate-800">Download Excel Template</h4>
+                  <h4 className="font-bold type-body-sm text-text-primary">Download Excel Template</h4>
                 </div>
-                <p className="type-caption text-slate-500 leading-relaxed">
+                <p className="type-caption text-text-secondary leading-relaxed font-medium">
                   Download the formatted student import template containing all required academic and guardian columns.
                 </p>
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
-                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl type-caption font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg type-caption font-bold transition-colors flex items-center justify-center space-x-2 shadow-none cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Excel Template (.xlsx)</span>
@@ -1376,17 +1397,17 @@ export default function StudentsTab({ onBack }: Props) {
               </div>
 
               {/* Step 2: Upload Excel File */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+              <div className="bg-card p-5 rounded-xl border border-border shadow-xs space-y-3">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 font-extrabold type-caption flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-accent-tint border border-accent/20 text-accent font-black type-caption flex items-center justify-center">
                     2
                   </div>
-                  <h4 className="font-bold type-body-sm text-slate-800">Choose Excel File &amp; Parse</h4>
+                  <h4 className="font-bold type-body-sm text-text-primary">Choose Excel File &amp; Parse</h4>
                 </div>
-                <p className="type-caption text-slate-500 leading-relaxed">
+                <p className="type-caption text-text-secondary leading-relaxed font-medium">
                   Fill in the student details and select the completed Excel file to validate and parse.
                 </p>
-                <label className="type-form-label w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors flex items-center justify-center space-x-2 shadow-xs cursor-pointer">
+                <label className="type-form-label w-full py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg font-bold transition-colors flex items-center justify-center space-x-2 shadow-none cursor-pointer">
                   {isBulkParsing ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -1410,10 +1431,10 @@ export default function StudentsTab({ onBack }: Props) {
 
               {/* Step 3: Parse Result Summary */}
               {bulkParseResult && (
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4 animate-in fade-in duration-200">
-                  <h4 className="font-bold type-body-sm text-slate-800 flex items-center justify-between">
+                <div className="bg-card p-5 rounded-xl border border-border shadow-xs space-y-4 animate-in fade-in duration-200">
+                  <h4 className="font-bold type-body-sm text-text-primary flex items-center justify-between">
                     <span>Validation Summary</span>
-                    <span className="type-caption font-normal text-slate-500">
+                    <span className="type-caption font-bold text-text-muted">
                       Total: {bulkParseResult.allRows.length} rows
                     </span>
                   </h4>
@@ -1447,9 +1468,9 @@ export default function StudentsTab({ onBack }: Props) {
                       </p>
                       <div className="max-h-36 overflow-y-auto space-y-1.5 p-2 bg-rose-50/50 rounded-xl border border-rose-100 type-caption">
                         {bulkParseResult.rejectedRows.map((r, idx) => (
-                          <div key={idx} className="p-2 bg-white rounded-lg border border-rose-200 text-slate-700">
-                            <span className="font-bold text-slate-900">{r.fullName || 'Unnamed'}</span>{' '}
-                            <span className="font-mono text-slate-500">({r.regNo || 'No Reg'})</span>:
+                          <div key={idx} className="p-2 bg-card rounded-lg border border-rose-200 text-text-primary">
+                            <span className="font-bold text-text-primary">{r.fullName || 'Unnamed'}</span>{' '}
+                            <span className="font-mono text-text-muted">({r.regNo || 'No Reg'})</span>:
                             <span className="text-rose-600 font-semibold block mt-0.5">{r.errorReason}</span>
                           </div>
                         ))}
@@ -1463,7 +1484,7 @@ export default function StudentsTab({ onBack }: Props) {
                       type="button"
                       onClick={handleBulkImport}
                       disabled={isBulkImporting}
-                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl type-caption font-bold transition-all shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg type-caption font-bold transition-all shadow-none flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                     >
                       {isBulkImporting ? (
                         <>
@@ -1483,14 +1504,14 @@ export default function StudentsTab({ onBack }: Props) {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-white border-t border-slate-200 flex justify-end">
+            <div className="p-4 bg-card border-t border-border flex justify-end">
               <button
                 type="button"
                 onClick={() => {
                   setIsBulkUploadModalOpen(false);
                   setBulkParseResult(null);
                 }}
-                className="px-5 py-2.5 text-slate-600 type-btn hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="px-5 py-2 text-text-secondary hover:text-text-primary type-btn font-bold hover:bg-bg border border-border rounded-lg transition-colors cursor-pointer"
               >
                 Close
               </button>

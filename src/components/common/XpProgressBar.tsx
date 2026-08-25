@@ -14,16 +14,16 @@ export const XpProgressBar: React.FC<XpProgressBarProps> = ({
   const percentage = Math.min(100, Math.max(0, (currentScore / maxScore) * 100));
 
   return (
-    <div className="w-full bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+    <div className="w-full bg-card rounded-lg p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border">
       <div className="flex justify-between items-center mb-2">
-        <span className="type-caption text-gray-700">{level}</span>
-        <span className="type-caption text-indigo-600">
+        <span className="type-caption text-text-primary font-bold">{level}</span>
+        <span className="type-caption text-accent font-bold">
           {currentScore} / {maxScore} XP ({Math.round(percentage)}%)
         </span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+      <div className="w-full bg-bg border border-border rounded-full h-2.5 overflow-hidden">
         <div
-          className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out"
+          className="bg-accent h-2.5 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${percentage}%` }}
         />
       </div>

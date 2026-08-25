@@ -19,12 +19,12 @@ const DAYS_OF_WEEK = [
 ];
 
 const WEEK_COLORS = [
-  'bg-emerald-100 text-emerald-900 border-emerald-300',
-  'bg-sky-100 text-sky-900 border-sky-300',
-  'bg-amber-100 text-amber-900 border-amber-300',
-  'bg-purple-100 text-purple-900 border-purple-300',
-  'bg-orange-100 text-orange-900 border-orange-300',
-  'bg-teal-100 text-teal-900 border-teal-300',
+  'bg-emerald-50 text-emerald-950 border-emerald-200',
+  'bg-sky-50 text-sky-950 border-sky-200',
+  'bg-amber-50 text-amber-950 border-amber-200',
+  'bg-purple-50 text-purple-950 border-purple-200',
+  'bg-orange-50 text-orange-950 border-orange-200',
+  'bg-teal-50 text-teal-950 border-teal-200',
 ];
 
 export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBack }: Props) {
@@ -305,72 +305,104 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
   );
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 pb-20">
-      {/* Header Bar */}
-      <div className="bg-[#1E293B] px-6 pt-10 pb-5 shadow-md text-white flex items-center space-x-4">
-        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="type-h4 text-white">Monthly Academic Calendar</h1>
+    <div className="flex flex-col min-h-full bg-bg text-text-primary pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </button>
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="type-h3 font-bold text-text-primary tracking-tight">Monthly Academic Calendar</h1>
+              <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-secondary border border-border">
+                {academicYear.replace('_', ' ')}
+              </span>
+            </div>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">
+              Configure academic weeks, official holidays, and alternate working days
+            </p>
+          </div>
         </div>
+
+        <button
+          onClick={loadCalendarData}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer disabled:opacity-50"
+          title="Refresh"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+          <span className="type-caption font-bold hidden sm:inline">Refresh</span>
+        </button>
       </div>
 
-      <div className="p-4 sm:p-6 max-w-2xl mx-auto w-full space-y-4">
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto w-full space-y-6">
         {/* Month & Year Selectors */}
-        <div className="flex items-center justify-center space-x-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="bg-slate-50 border border-slate-300 text-slate-800 type-body-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
-          >
-            {MONTH_NAMES.map((m, idx) => (
-              <option key={m} value={idx + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="flex items-center space-x-3">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="bg-bg border border-border text-text-primary type-body-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-text-primary cursor-pointer"
+            >
+              {MONTH_NAMES.map((m, idx) => (
+                <option key={m} value={idx + 1}>
+                  {m}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="bg-slate-50 border border-slate-300 text-slate-800 type-body-sm font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-400"
-          >
-            {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-bg border border-border text-text-primary type-body-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-text-primary cursor-pointer"
+            >
+              {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <button
-            onClick={loadCalendarData}
-            className="p-2 text-slate-500 hover:text-slate-800 type-btn hover:bg-slate-100 rounded-xl transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-accent" />
+              Holiday / Sunday
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-text-primary" />
+              AWD Working
+            </span>
+          </div>
         </div>
 
         {/* Calendar Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+        <div className="bg-card rounded-lg border border-border p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-4">
           {/* Days Header */}
-          <div className="grid grid-cols-7 text-center font-bold type-caption text-slate-800 pb-2">
-            <div>Su</div>
-            <div>Mo</div>
-            <div>Tu</div>
-            <div>We</div>
-            <div>Th</div>
-            <div>Fr</div>
-            <div>Sa</div>
+          <div className="grid grid-cols-7 text-center font-bold type-fine uppercase text-text-muted border-b border-border pb-3">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
           </div>
 
           {/* Grid Cells */}
           {isLoading ? (
-            <div className="flex justify-center py-20">
-              <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+            <div className="flex flex-col items-center justify-center py-20 space-y-3">
+              <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+              <p className="type-body-sm text-text-secondary font-medium">Loading calendar days...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-7 gap-2">
               {calendarGrid.map((item, idx) => {
                 const isSunday = item.date.getDay() === 0;
                 const holiday = getHolidayForDate(item.date);
@@ -382,36 +414,36 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                   pendingWeekStart &&
                   formatDateStr(pendingWeekStart) === formatDateStr(item.date);
 
-                let bgClasses = 'bg-white text-slate-800 border-slate-200';
+                let bgClasses = 'bg-card text-text-primary border-border hover:border-text-primary';
                 if (!item.isCurrentMonth) {
-                  bgClasses = 'bg-slate-50 text-slate-300 border-slate-100';
+                  bgClasses = 'bg-bg/60 text-text-muted/40 border-border/40';
                 } else if (isHolidayDay) {
-                  bgClasses = 'bg-red-200/80 text-red-950 font-bold border-red-300';
+                  bgClasses = 'bg-accent-tint text-accent font-bold border-accent/30';
                 } else if (week) {
                   const colorIdx = (week.weekNumber - 1) % WEEK_COLORS.length;
                   bgClasses = WEEK_COLORS[colorIdx];
                 }
 
                 if (isPendingStart) {
-                  bgClasses = 'bg-emerald-400 text-white font-bold border-emerald-600 ring-2 ring-emerald-500';
+                  bgClasses = 'bg-accent text-card font-bold border-accent ring-2 ring-accent/30';
                 }
 
                 return (
                   <div
                     key={idx}
                     onClick={() => setSelectedDateModal(item.date)}
-                    className={`relative h-12 sm:h-14 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-transform active:scale-95 type-body-sm font-semibold select-none ${bgClasses}`}
+                    className={`relative h-14 sm:h-16 rounded-lg border flex flex-col items-center justify-center cursor-pointer transition-all active:scale-95 type-body-sm font-bold select-none ${bgClasses}`}
                   >
                     <span>{item.date.getDate()}</span>
 
                     {/* Star Icon for Holidays */}
                     {isHolidayDay && item.isCurrentMonth && (
-                      <Star className="w-3 h-3 text-red-600 fill-red-600 absolute top-1 right-1" />
+                      <Star className="w-3 h-3 text-accent fill-accent absolute top-1.5 right-1.5" />
                     )}
 
                     {/* Badge for AWD */}
                     {awd && item.isCurrentMonth && (
-                      <span className="text-[9px] font-extrabold bg-blue-600 text-white px-1 rounded absolute bottom-1">
+                      <span className="text-[8px] font-extrabold bg-text-primary text-card px-1.5 py-0.5 rounded-sm absolute bottom-1.5 uppercase">
                         AWD
                       </span>
                     )}
@@ -423,23 +455,23 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
         </div>
 
         {/* Alternate Working Days Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
-          <h2 className="type-h5 text-slate-900 border-b border-slate-100 pb-2">
+        <div className="bg-card rounded-lg border border-border p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-4">
+          <h2 className="type-h4 font-bold text-text-primary border-b border-border pb-3">
             Alternate Working Days
           </h2>
           {currentMonthAwdList.length === 0 ? (
-            <p className="type-caption text-slate-500 font-medium">
+            <p className="type-body-sm text-text-secondary font-medium">
               No alternate working days configured for this month.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {currentMonthAwdList.map((a) => (
-                <div key={a.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 type-caption space-y-1">
-                  <div className="flex justify-between text-slate-800">
+                <div key={a.id} className="p-3.5 bg-bg rounded-lg border border-border type-caption space-y-1">
+                  <div className="flex justify-between text-text-primary font-bold">
                     <span>Date: {a.effectiveDate}</span>
-                    <span className="text-blue-600 font-bold">{a.workingDay} for {a.originalHolidayDay}</span>
+                    <span className="text-accent font-bold">{a.workingDay} for {a.originalHolidayDay}</span>
                   </div>
-                  <p className="text-slate-500 font-normal">Reason: {a.reason}</p>
+                  <p className="text-text-secondary font-medium">Reason: {a.reason}</p>
                 </div>
               ))}
             </div>
@@ -449,17 +481,17 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
       {/* Main Date Options Modal */}
       {selectedDateModal && !showHolidayModal && !showAwdModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4 animate-in fade-in slide-in-from-bottom-5">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-md rounded-lg p-6 shadow-2xl border border-border space-y-4 animate-in fade-in">
+            <div className="flex justify-between items-center border-b border-border pb-3">
               <div>
-                <h3 className="type-h5 text-slate-900">
-                  Selected Date: {selectedDateModal.toDateString()}
+                <h3 className="type-h4 font-bold text-text-primary">
+                  {selectedDateModal.toDateString()}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedDateModal(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -474,7 +506,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setSelectedDateModal(null);
                     toast.success('Week start date set. Click end date to finish week.');
                   }}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-emerald-50 text-emerald-700 rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between"
+                  className="w-full text-left px-4 py-3 bg-bg hover:bg-card border border-border text-text-primary rounded-lg type-body-sm font-bold transition-colors flex items-center justify-between cursor-pointer"
                 >
                   <span>Set as Week Start</span>
                 </button>
@@ -486,7 +518,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setPendingWeekStart(null);
                     setSelectedDateModal(null);
                   }}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between"
+                  className="w-full text-left px-4 py-3 bg-bg hover:bg-card border border-border text-text-secondary rounded-lg type-body-sm font-bold transition-colors flex items-center justify-between cursor-pointer"
                 >
                   <span>Cancel Week Start</span>
                 </button>
@@ -500,7 +532,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                     setSelectedDateModal(null);
                     handleCreateWeek(start, end);
                   }}
-                  className="w-full text-left px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl type-body-sm font-bold transition-colors flex items-center justify-between shadow-sm"
+                  className="w-full text-left px-4 py-3 bg-accent hover:bg-accent-hover text-card rounded-lg type-body-sm font-bold transition-colors flex items-center justify-between shadow-none cursor-pointer"
                 >
                   <span>Set as Week End</span>
                 </button>
@@ -510,7 +542,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               {!getHolidayForDate(selectedDateModal) && (
                 <button
                   onClick={() => setShowHolidayModal(true)}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-amber-50 text-amber-700 rounded-xl type-body-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-bg hover:bg-accent-tint border border-border text-text-primary hover:text-accent rounded-lg type-body-sm font-bold transition-colors cursor-pointer"
                 >
                   Mark as Holiday
                 </button>
@@ -520,7 +552,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               {!getAwdForDate(selectedDateModal) && (
                 <button
                   onClick={() => setShowAwdModal(true)}
-                  className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-blue-50 text-blue-700 rounded-xl type-body-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-bg hover:bg-card border border-border text-text-primary rounded-lg type-body-sm font-bold transition-colors cursor-pointer"
                 >
                   Set as Alternate Working Day
                 </button>
@@ -538,7 +570,7 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                       getAwdForDate(selectedDateModal)
                     )
                   }
-                  className="w-full text-left px-4 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl type-body-sm font-bold transition-colors"
+                  className="w-full text-left px-4 py-3 bg-accent-tint border border-accent/20 text-accent rounded-lg type-body-sm font-bold transition-colors cursor-pointer"
                 >
                   Remove Configuration
                 </button>
@@ -550,31 +582,31 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
       {/* Holiday Name Modal */}
       {showHolidayModal && selectedDateModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="type-h5 text-slate-900">Holiday Name</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-sm rounded-lg p-6 shadow-2xl border border-border space-y-4">
+            <h3 className="type-h4 font-bold text-text-primary">Configure Holiday</h3>
             <input
               type="text"
-              placeholder="Enter holiday name"
+              placeholder="e.g. Independence Day, Annual Sports"
               value={holidayNameInput}
               onChange={(e) => setHolidayNameInput(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl type-body-sm outline-none focus:ring-2 focus:ring-slate-400 font-medium"
+              className="w-full px-3.5 py-2.5 bg-bg border border-border rounded-lg type-body-sm outline-none focus:border-text-primary font-medium text-text-primary"
             />
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end space-x-2 pt-2">
               <button
                 onClick={() => {
                   setShowHolidayModal(false);
                   setHolidayNameInput('');
                 }}
-                className="px-4 py-2 type-btn text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+                className="px-4 py-2 type-btn text-text-secondary hover:bg-bg border border-border rounded-lg cursor-pointer font-bold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateHoliday}
-                className="px-4 py-2 type-btn text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm cursor-pointer"
+                className="px-5 py-2 type-btn text-card bg-accent hover:bg-accent-hover rounded-lg shadow-none cursor-pointer font-bold"
               >
-                Save
+                Save Holiday
               </button>
             </div>
           </div>
@@ -583,24 +615,24 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
 
       {/* Alternate Working Day Modal */}
       {showAwdModal && selectedDateModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl p-5 shadow-xl space-y-4">
-            <h3 className="type-h5 text-slate-900">Add Alternate Working Day</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card w-full max-w-md rounded-lg p-6 shadow-2xl border border-border space-y-4">
+            <h3 className="type-h4 font-bold text-text-primary">Add Alternate Working Day</h3>
             
             <div className="space-y-3">
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">Effective Date</label>
-                <div className="px-3.5 py-2 bg-slate-100 rounded-xl type-caption font-bold text-slate-700">
+                <label className="type-form-label block font-bold text-text-primary mb-1">Effective Date</label>
+                <div className="px-3.5 py-2 bg-bg border border-border rounded-lg type-caption font-bold text-text-primary">
                   {formatDateStr(selectedDateModal)}
                 </div>
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">Original Holiday Day</label>
+                <label className="type-form-label block font-bold text-text-primary mb-1">Original Holiday Day</label>
                 <select
                   value={awdForm.originalHolidayDay}
                   onChange={(e) => setAwdForm({ ...awdForm, originalHolidayDay: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption font-bold outline-none"
+                  className="w-full px-3 py-2 bg-bg border border-border rounded-lg type-caption font-bold outline-none text-text-primary cursor-pointer"
                 >
                   {DAYS_OF_WEEK.map((d) => (
                     <option key={d} value={d}>
@@ -611,11 +643,11 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">Working Day</label>
+                <label className="type-form-label block font-bold text-text-primary mb-1">Working Day</label>
                 <select
                   value={awdForm.workingDay}
                   onChange={(e) => setAwdForm({ ...awdForm, workingDay: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption font-bold outline-none"
+                  className="w-full px-3 py-2 bg-bg border border-border rounded-lg type-caption font-bold outline-none text-text-primary cursor-pointer"
                 >
                   {DAYS_OF_WEEK.map((d) => (
                     <option key={d} value={d}>
@@ -626,13 +658,13 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">Reason (e.g. Saturday Compensation)</label>
+                <label className="type-form-label block font-bold text-text-primary mb-1">Reason</label>
                 <input
                   type="text"
-                  placeholder="Enter reason"
+                  placeholder="e.g. Saturday Compensation"
                   value={awdForm.reason}
                   onChange={(e) => setAwdForm({ ...awdForm, reason: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl type-caption outline-none"
+                  className="w-full px-3.5 py-2 bg-bg border border-border rounded-lg type-caption outline-none text-text-primary font-medium"
                 />
               </div>
             </div>
@@ -643,15 +675,15 @@ export default function AcademicCalendarPage({ academicYear = 'FIRST_YEAR', onBa
                   setShowAwdModal(false);
                   setAwdForm({ originalHolidayDay: 'SATURDAY', workingDay: 'WEDNESDAY', reason: '' });
                 }}
-                className="px-4 py-2 type-caption font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 type-caption font-bold text-text-secondary hover:bg-bg border border-border rounded-lg cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreateAwd}
-                className="px-4 py-2 type-caption font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm"
+                className="px-5 py-2 type-caption font-bold text-card bg-accent hover:bg-accent-hover rounded-lg shadow-none cursor-pointer"
               >
-                Save
+                Save AWD
               </button>
             </div>
           </div>

@@ -1,21 +1,36 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { Download, Settings, Calendar, ArrowLeft, RefreshCw, AlertCircle, X, Search, CalendarOff } from 'lucide-react';
+import { Download, Settings, Calendar, ArrowLeft, RefreshCw, X, Search, CalendarOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
 import AttendanceSettingsPage from '../pages/AttendanceSettingsPage';
 import AcademicCalendarPage from '../pages/AcademicCalendarPage';
 
+import { ROLE_ACCESS, getEffectiveRole } from '../../../config/roleAccess';
+
 interface Props {
   onBack?: () => void;
 }
 
 export default function AdminAttendanceTab({ onBack }: Props) {
-  const { isSuperAdmin, isAdmin } = useAuth();
+  const auth = useAuth();
+  const { user, isSuperAdmin, isHOD, isAdmin, role, subRoles } = auth;
+  const effectiveRole = getEffectiveRole(user, { isSuperAdmin, isHOD, isAdmin, role, subRoles });
+  const roleConfig = ROLE_ACCESS[effectiveRole];
   
-  // Role Detection matching Flutter: isYearAdmin
-  const isYearAdmin = isAdmin && !isSuperAdmin;
+  // Role Detection: isYearAdmin / isHOD
+  const isYearAdmin = roleConfig.dataScope === 'year';
+  const isHodUser = !roleConfig.canViewAllDepartments;
+
+  const userYear = user?.academicYear || user?.assignedYear || user?.year || (user?.adminDetails?.academicYear);
+  const userDept = user?.department || user?.departmentName || user?.dept || (user?.superAdminDetails?.department);
+
+  const scopeLabel = roleConfig.dataScope === 'institution'
+    ? 'INSTITUTION SCOPE'
+    : roleConfig.dataScope === 'year'
+    ? `ADMIN SCOPE: ${userYear || 'ASSIGNED YEAR'}`
+    : `HOD SCOPE: ${userDept || 'YOUR DEPARTMENT'}`;
 
   // Filter States
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -39,6 +54,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'all' | 'present' | 'absent'>('all');
+  const [hasAppliedFilters, setHasAppliedFilters] = useState<boolean>(false);
 
   useEffect(() => {
     loadLookups();
@@ -62,13 +78,26 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         setYearId(fetchedYears[0].id.toString());
       }
 
-      if (fetchedDepts.length > 0 && fetchedDepts[0]?.id) {
-        if (isYearAdmin) {
+      if (fetchedDepts.length > 0) {
+        if (isHodUser && (userDept || user?.departmentId)) {
+          const matchedDept = fetchedDepts.find((d: any) => 
+            (user?.departmentId && String(d.id) === String(user.departmentId)) ||
+            (userDept && (d.name?.toLowerCase() === userDept.toLowerCase() || d.code?.toLowerCase() === userDept.toLowerCase()))
+          ) || fetchedDepts[0];
+
+          if (matchedDept?.id) {
+            const targetDeptId = matchedDept.id.toString();
+            setDepartmentId(targetDeptId);
+            loadSections(targetDeptId);
+          }
+        } else if (isYearAdmin && fetchedDepts[0]?.id) {
           const firstDeptId = fetchedDepts[0].id.toString();
           setDepartmentId(firstDeptId);
           loadSections(firstDeptId);
         }
       }
+
+      // Note: Do not auto-fetch summary on mount. Wait for user to select filters and click "Apply Filters".
     } catch (e) {
       logger.error("Error loading filters:", e);
       setYears([]);
@@ -105,8 +134,9 @@ export default function AdminAttendanceTab({ onBack }: Props) {
     }
   };
 
-  const fetchSummary = async () => {
-    const activeYearId = yearId || (years.length > 0 && years[0]?.id ? String(years[0].id) : '1');
+  const fetchSummary = async (overrideYearId?: string, overrideDeptId?: string) => {
+    const activeYearId = overrideYearId || yearId || (years.length > 0 && years[0]?.id ? String(years[0].id) : '1');
+    const activeDeptId = overrideDeptId !== undefined ? overrideDeptId : departmentId;
 
     setIsLoading(true);
     setIsHoliday(false);
@@ -118,7 +148,7 @@ export default function AdminAttendanceTab({ onBack }: Props) {
         yearId: activeYearId,
       });
 
-      if (departmentId && departmentId.trim().length > 0) params.append('departmentId', departmentId);
+      if (activeDeptId && activeDeptId.trim().length > 0) params.append('departmentId', activeDeptId);
       if (sectionId && sectionId.trim().length > 0) params.append('sectionId', sectionId);
       if (period && period.trim().length > 0) params.append('period', period);
 
@@ -423,262 +453,303 @@ export default function AdminAttendanceTab({ onBack }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
-      {/* 1. Header Bar matching Flutter 1:1 */}
-      <div className="bg-[#1E293B] text-white px-4 sm:px-6 py-4 shadow-md flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+    <div className="flex flex-col min-h-screen bg-bg text-text-primary">
+      {/* 1. Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center space-x-4">
           {onBack && (
-            <button 
-              onClick={onBack} 
-              className="p-2 rounded-full hover:bg-slate-700 transition-colors text-white"
-              title="Back"
+            <button
+              onClick={onBack}
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
+              aria-label="Back"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
           )}
           <div>
-            <h1 className="type-h3 tracking-tight text-white">Attendance Dashboard</h1>
-            <p className="type-caption text-slate-400 font-medium hidden sm:block">Monitor student daily attendance, periods, and department metrics</p>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="type-h3 font-bold tracking-tight text-text-primary">Attendance Dashboard</h1>
+              <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-primary border border-border tracking-wider">
+                {scopeLabel}
+              </span>
+            </div>
+            <p className="type-caption text-text-secondary font-medium hidden sm:block mt-0.5">
+              Monitor student daily attendance, periods, and department metrics
+            </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-3">
           <button
+            onClick={() => setShowCalendar(true)}
+            className="p-2.5 rounded-lg bg-card hover:bg-bg text-text-primary transition-colors border border-border flex items-center space-x-1.5 type-caption cursor-pointer"
+            title="Academic Calendar"
+          >
+            <Calendar className="w-4 h-4" />
+            <span className="hidden sm:inline font-bold">Calendar</span>
+          </button>
+
+          <button
             onClick={handleExport}
             disabled={isExporting}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 type-caption"
+            className="p-2.5 rounded-lg bg-card hover:bg-bg text-text-primary transition-colors border border-border flex items-center space-x-1.5 type-caption cursor-pointer"
             title="Export to Excel / CSV"
           >
-            {isExporting ? <RefreshCw className="w-4 h-4 animate-spin text-orange-400" /> : <Download className="w-4 h-4" />}
-            <span className="hidden sm:inline">Export</span>
+            {isExporting ? <RefreshCw className="w-4 h-4 animate-spin text-accent" /> : <Download className="w-4 h-4" />}
+            <span className="hidden sm:inline font-bold">Export</span>
           </button>
 
           <button
             onClick={() => setShowSettings(true)}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700/80 flex items-center space-x-1.5 type-caption"
+            className="p-2.5 rounded-lg bg-card hover:bg-bg text-text-primary transition-colors border border-border flex items-center space-x-1.5 type-caption cursor-pointer"
             title="Attendance Settings"
           >
             <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden sm:inline font-bold">Settings</span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 p-4 sm:p-6 max-w-5xl mx-auto w-full space-y-6">
-        {/* 2. Filters Card matching Flutter Screenshot 1:1 */}
-        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6">
+        {/* 2. Compact Instant Filter Toolbar */}
+        <div className="bg-card rounded-lg p-4 sm:p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
           {isLoadingLookups ? (
-            <div className="flex items-center justify-center py-8 text-slate-400 space-x-2">
-              <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
-              <span className="type-body-sm font-medium">Loading filters...</span>
+            <div className="flex items-center justify-center py-4 text-text-muted space-x-2">
+              <RefreshCw className="w-5 h-5 animate-spin text-accent" />
+              <span className="type-body-sm font-medium">Loading filter options...</span>
             </div>
           ) : (
-            <>
-              <div className="space-y-4">
-                {/* Academic Year (if not year admin) */}
-                {!isYearAdmin && (
-                  <div className="relative pt-2">
-                    <fieldset className="border border-slate-300 rounded-2xl px-3 pb-2 pt-0 focus-within:border-slate-800 transition-colors">
-                      <legend className="text-[11px] font-semibold text-slate-500 px-1.5">Academic Year</legend>
-                      <select
-                        value={yearId}
-                        onChange={(e) => setYearId(e.target.value)}
-                        className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
-                      >
-                        <option value="">Select Academic Year</option>
-                        {years.map((y) => (
-                          <option key={y.id} value={y.id}>
-                            {y.yearName || (y.yearNo !== undefined ? `Year ${y.yearNo}` : y.name)}
-                          </option>
-                        ))}
-                      </select>
-                    </fieldset>
-                  </div>
-                )}
-
-                {/* Department Dropdown */}
-                <div className="relative pt-1">
-                  <fieldset className="border border-slate-300 rounded-2xl px-3 pb-2 pt-0 focus-within:border-slate-800 transition-colors">
-                    <legend className="text-[11px] font-semibold text-slate-500 px-1.5">Department</legend>
-                    <select
-                      value={departmentId}
-                      onChange={(e) => handleDepartmentChange(e.target.value)}
-                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
-                    >
-                      <option value="">All Departments</option>
-                      {departments.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name || d.deptName || d.code}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
+              {/* 1. Academic Year */}
+              {!isYearAdmin && (
+                <div>
+                  <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                    Year
+                  </label>
+                  <select
+                    value={yearId}
+                    onChange={(e) => setYearId(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-lg px-3 py-2 type-body-sm font-semibold text-text-primary outline-none focus:border-text-primary cursor-pointer transition-colors"
+                  >
+                    <option value="">All Years</option>
+                    {years.map((y) => (
+                      <option key={y.id} value={y.id}>
+                        {y.yearName || (y.yearNo !== undefined ? `Year ${y.yearNo}` : y.name)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+              )}
 
-                {/* Section Dropdown */}
-                <div className="relative pt-1">
-                  <fieldset className="border border-slate-300 rounded-2xl px-3 pb-2 pt-0 focus-within:border-slate-800 transition-colors">
-                    <legend className="text-[11px] font-semibold text-slate-500 px-1.5">Section</legend>
-                    <select
-                      value={sectionId}
-                      onChange={(e) => setSectionId(e.target.value)}
-                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
-                    >
-                      <option value="">All Sections</option>
-                      {filteredSections.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.sectionName || s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
-                </div>
-
-                {/* Date Input */}
-                <div className="relative pt-1">
-                  <fieldset className="border border-slate-300 rounded-2xl px-3 pb-2 pt-0 focus-within:border-slate-800 transition-colors">
-                    <legend className="text-[11px] font-semibold text-slate-500 px-1.5">Date</legend>
-                    <div className="flex items-center justify-between py-1">
-                      <input
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer"
-                      />
-                      <Calendar className="w-5 h-5 text-slate-400 ml-2 pointer-events-none" />
-                    </div>
-                  </fieldset>
-                </div>
-
-                {/* Period Dropdown */}
-                <div className="relative pt-1">
-                  <fieldset className="border border-slate-300 rounded-2xl px-3 pb-2 pt-0 focus-within:border-slate-800 transition-colors">
-                    <legend className="text-[11px] font-semibold text-slate-500 px-1.5">Period</legend>
-                    <select
-                      value={period}
-                      onChange={(e) => setPeriod(e.target.value)}
-                      className="w-full bg-transparent type-body-sm font-semibold text-slate-800 outline-none cursor-pointer py-1"
-                    >
-                      <option value="">All Periods</option>
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
-                        <option key={p} value={p}>
-                          Period {p}
-                        </option>
-                      ))}
-                    </select>
-                  </fieldset>
-                </div>
+              {/* 2. Department */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                  Department {isHodUser && '(Locked)'}
+                </label>
+                <select
+                  value={departmentId}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  disabled={isHodUser}
+                  className={`w-full bg-bg border border-border rounded-lg px-3 py-2 type-body-sm font-semibold text-text-primary outline-none focus:border-text-primary transition-colors ${
+                    isHodUser ? 'opacity-80 cursor-not-allowed bg-border/40' : 'cursor-pointer'
+                  }`}
+                >
+                  {!isHodUser && <option value="">All Depts</option>}
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name || d.deptName || d.code}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Load Dashboard Action Button matching Flutter Screenshot 1:1 */}
-              <div className="pt-2 flex justify-center">
-                <button
-                  onClick={fetchSummary}
-                  disabled={isLoading}
-                  className="w-full max-w-md py-3.5 px-8 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-extrabold type-btn rounded-2xl shadow-lg shadow-red-500/25 transition-all transform active:scale-98 flex items-center justify-center space-x-2"
+              {/* 3. Section */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                  Section
+                </label>
+                <select
+                  value={sectionId}
+                  onChange={(e) => setSectionId(e.target.value)}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 type-body-sm font-semibold text-text-primary outline-none focus:border-text-primary cursor-pointer transition-colors"
                 >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      <span>Loading Dashboard...</span>
-                    </>
-                  ) : (
-                    <span>Load Dashboard</span>
-                  )}
+                  <option value="">All Sections</option>
+                  {filteredSections.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.sectionName || s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 4. Date */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 type-body-sm font-semibold text-text-primary outline-none focus:border-text-primary cursor-pointer transition-colors"
+                />
+              </div>
+
+              {/* 5. Period */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1.5">
+                  Period
+                </label>
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2 type-body-sm font-semibold text-text-primary outline-none focus:border-text-primary cursor-pointer transition-colors"
+                >
+                  <option value="">All Periods</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((p) => (
+                    <option key={p} value={p}>
+                      Period {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 6. Apply Button */}
+              <div>
+                <button
+                  onClick={() => {
+                    setHasAppliedFilters(true);
+                    fetchSummary();
+                  }}
+                  disabled={isLoading}
+                  className="w-full py-2.5 px-4 bg-accent hover:bg-accent-hover text-card font-bold type-caption rounded-lg transition-colors shadow-none flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  <span>{isLoading ? 'Loading...' : 'Apply Filters'}</span>
                 </button>
               </div>
-            </>
+            </div>
           )}
         </div>
 
         {/* 3. Dashboard Results Section */}
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <RefreshCw className="w-10 h-10 animate-spin text-red-500" />
-            <p className="type-body-sm font-semibold text-slate-600">Fetching attendance records...</p>
-          </div>
-        ) : isHoliday ? (
-          <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-4">
-            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center border border-amber-200">
-              <CalendarOff className="w-8 h-8" />
+        {!hasAppliedFilters ? (
+          <div className="bg-card rounded-lg p-12 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 bg-bg text-text-muted rounded-lg flex items-center justify-center border border-border">
+              <Search className="w-6 h-6 text-text-secondary" />
             </div>
             <div>
-              <h3 className="type-h3 text-slate-800">Holiday Configured</h3>
-              <p className="type-body-sm text-slate-500 mt-1 max-w-sm">
-                This date (<span className="font-semibold text-slate-700">{selectedDate}</span>) is configured as a Holiday in attendance settings. Attendance cannot be recorded.
+              <h3 className="type-h4 font-bold text-text-primary">Attendance Records Ready</h3>
+              <p className="type-body-sm text-text-secondary mt-1 max-w-md font-medium">
+                Select your desired Year, Department, Section, Date, or Period from the filters above and click <strong className="text-accent font-bold">Apply Filters</strong> to view attendance metrics.
+              </p>
+            </div>
+          </div>
+        ) : isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
+            <RefreshCw className="w-10 h-10 animate-spin text-accent" />
+            <p className="type-body-sm font-semibold text-text-secondary">Fetching campus attendance records...</p>
+          </div>
+        ) : isHoliday ? (
+          <div className="bg-card rounded-lg p-10 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 bg-warning-tint text-warning rounded-lg flex items-center justify-center border border-warning/20">
+              <CalendarOff className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="type-h3 font-bold text-text-primary">Holiday Configured</h3>
+              <p className="type-body-sm text-text-secondary mt-1 max-w-sm font-medium">
+                This date (<span className="font-semibold text-text-primary">{selectedDate}</span>) is configured as a Holiday in academic settings.
               </p>
             </div>
           </div>
         ) : summary ? (
           <div className="space-y-6">
-            {/* 4 Stat Cards matching Flutter Screenshot 1:1 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            {/* 4 Stat Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Card 1: Total */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="type-caption font-bold text-slate-600 mb-1">Total</span>
-                <span className="type-h2 font-black text-[#2563EB]">{totalCount}</span>
+              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Total Enrolled</span>
+                  <span className="w-2 h-2 rounded-full bg-text-muted" />
+                </div>
+                <span className="type-h3 font-bold text-text-primary">{totalCount}</span>
+                <p className="type-fine text-text-secondary mt-1">Students evaluated</p>
               </div>
 
               {/* Card 2: Present */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="type-caption font-bold text-slate-600 mb-1">Present</span>
-                <span className="type-h2 font-black text-[#16A34A]">{presentCount}</span>
+              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Present</span>
+                  <span className="w-2 h-2 rounded-full bg-success" />
+                </div>
+                <span className="type-h3 font-bold text-success">{presentCount}</span>
+                <p className="type-fine text-text-secondary mt-1">Attended today</p>
               </div>
 
               {/* Card 3: Absent */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="type-caption font-bold text-slate-600 mb-1">Absent</span>
-                <span className="type-h2 font-black text-[#DC2626]">{absentCount}</span>
+              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Absent</span>
+                  <span className="w-2 h-2 rounded-full bg-accent" />
+                </div>
+                <span className="type-h3 font-bold text-accent">{absentCount}</span>
+                <p className="type-fine text-text-secondary mt-1">Unexcused / Leave</p>
               </div>
 
               {/* Card 4: Attendance % */}
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="type-caption font-bold text-slate-600 mb-1">Attendance</span>
-                <span className="type-h2 font-black text-[#9333EA]">{attendancePct}%</span>
+              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Attendance Rate</span>
+                  <span className={`w-2 h-2 rounded-full ${Number(attendancePct) >= 85 ? 'bg-success' : Number(attendancePct) >= 75 ? 'bg-warning' : 'bg-accent'}`} />
+                </div>
+                <span className={`type-h3 font-bold ${Number(attendancePct) >= 85 ? 'text-success' : Number(attendancePct) >= 75 ? 'text-warning' : 'text-accent'}`}>
+                  {attendancePct}%
+                </span>
+                <p className="type-fine text-text-secondary mt-1">Campus Average</p>
               </div>
             </div>
 
             {/* 4. Table Controls & List Container */}
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+            <div className="bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
               {/* Search & Subtabs Header */}
-              <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="p-4 border-b border-border-subtle bg-card flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="relative w-full sm:w-72">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by student or reg no..."
-                    className="w-full pl-9 pr-8 py-2 type-body-sm bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-800 font-medium"
+                    className="w-full pl-9 pr-8 py-2 type-body-sm bg-card border border-border rounded-lg outline-none text-text-primary placeholder-text-muted font-medium"
                   />
                   {searchQuery && (
-                    <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
 
-                <div className="flex bg-slate-200/70 p-1 rounded-xl w-full sm:w-auto type-caption font-bold">
+                <div className="flex bg-bg p-1 rounded-lg border border-border w-full sm:w-auto type-caption font-bold">
                   <button
                     onClick={() => setActiveTab('all')}
-                    className={`flex-1 sm:px-4 py-1.5 rounded-lg transition-all ${
-                      activeTab === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    className={`flex-1 sm:px-4 py-1.5 rounded-md transition-all ${
+                      activeTab === 'all' ? 'bg-text-primary text-card shadow-none' : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     All ({totalCount})
                   </button>
                   <button
                     onClick={() => setActiveTab('present')}
-                    className={`flex-1 sm:px-4 py-1.5 rounded-lg transition-all ${
-                      activeTab === 'present' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    className={`flex-1 sm:px-4 py-1.5 rounded-md transition-all ${
+                      activeTab === 'present' ? 'bg-text-primary text-card shadow-none' : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     Present ({presentCount})
                   </button>
                   <button
                     onClick={() => setActiveTab('absent')}
-                    className={`flex-1 sm:px-4 py-1.5 rounded-lg transition-all ${
-                      activeTab === 'absent' ? 'bg-white text-red-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    className={`flex-1 sm:px-4 py-1.5 rounded-md transition-all ${
+                      activeTab === 'absent' ? 'bg-text-primary text-card shadow-none' : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     Absent ({absentCount})
@@ -686,11 +757,11 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                 </div>
               </div>
 
-              {/* Data Table matching Flutter admin_attendance_tab.dart 1:1 */}
+              {/* Data Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-[#1E293B] type-table-head font-bold text-white uppercase tracking-wider">
+                    <tr className="border-b border-border bg-bg type-table-head font-bold text-text-primary uppercase tracking-wider">
                       <th className="py-3 px-3 w-12 text-center">#</th>
                       <th className="py-3 px-3">Reg. No</th>
                       <th className="py-3 px-4">Student Name</th>
@@ -710,10 +781,10 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 type-table-cell">
+                  <tbody className="divide-y divide-border-subtle type-table-cell">
                     {processedStudents.length === 0 ? (
                       <tr>
-                        <td colSpan={period ? 4 : 11} className="py-10 text-center text-slate-400 type-caption">
+                        <td colSpan={period ? 4 : 11} className="py-12 text-center text-text-muted type-caption">
                           No attendance records found matching filters.
                         </td>
                       </tr>
@@ -726,11 +797,11 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                         const renderPeriodCell = (pNum: number) => {
                           const status = (periodStatuses[pNum] || periodStatuses[String(pNum)] || (st.status === 'PRESENT' ? 'P' : (st.status === 'ABSENT' ? 'A' : '—'))).toUpperCase();
                           
-                          let bg = 'bg-slate-100 text-slate-400';
-                          if (status === 'P' || status === 'PRESENT') bg = 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold';
-                          else if (status === 'A' || status === 'ABSENT') bg = 'bg-rose-100 text-rose-800 border-rose-200 font-bold';
-                          else if (status === 'OD') bg = 'bg-blue-100 text-blue-800 border-blue-200 font-bold';
-                          else if (status === 'L') bg = 'bg-amber-100 text-amber-800 border-amber-200 font-bold';
+                          let bg = 'bg-bg text-text-muted border-border';
+                          if (status === 'P' || status === 'PRESENT') bg = 'bg-success-tint text-success border-success-tint font-bold';
+                          else if (status === 'A' || status === 'ABSENT') bg = 'bg-warning-tint text-warning border-warning-tint font-bold';
+                          else if (status === 'OD') bg = 'bg-bg text-text-secondary border-border font-bold';
+                          else if (status === 'L') bg = 'bg-warning-tint text-warning border-warning-tint font-bold';
 
                           return (
                             <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md type-fine border ${bg}`}>
@@ -740,30 +811,30 @@ export default function AdminAttendanceTab({ onBack }: Props) {
                         };
 
                         return (
-                          <tr key={st.studentId || st.id || idx} className={idx % 2 === 0 ? 'bg-white hover:bg-slate-50/80 transition-colors' : 'bg-slate-50/40 hover:bg-slate-50/80 transition-colors'}>
-                            <td className="py-3 px-3 text-center font-medium text-slate-500 type-table-cell">
+                          <tr key={st.studentId || st.id || idx} className="bg-card hover:bg-bg transition-colors">
+                            <td className="py-[13px] px-3 text-center font-medium text-text-secondary type-table-cell">
                               {idx + 1}
                             </td>
-                            <td className="py-3 px-3 font-mono font-semibold text-slate-700 type-table-cell">
+                            <td className="py-[13px] px-3 font-mono font-semibold text-text-secondary type-table-cell">
                               {regNo}
                             </td>
-                            <td className="py-3 px-4 font-semibold text-slate-900 type-table-cell sm:type-table-cell">
+                            <td className="py-[13px] px-4 font-semibold text-text-primary type-table-cell sm:type-table-cell">
                               {name}
                             </td>
                             {period ? (
-                              <td className="py-3 px-3 text-center">
+                              <td className="py-[13px] px-3 text-center">
                                 {renderPeriodCell(Number(period))}
                               </td>
                             ) : (
                               <>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(1)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(2)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(3)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(4)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(5)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(6)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(7)}</td>
-                                <td className="py-2 px-1 text-center">{renderPeriodCell(8)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(1)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(2)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(3)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(4)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(5)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(6)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(7)}</td>
+                                <td className="py-[13px] px-1 text-center">{renderPeriodCell(8)}</td>
                               </>
                             )}
                           </tr>
@@ -776,12 +847,12 @@ export default function AdminAttendanceTab({ onBack }: Props) {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center space-y-3">
-            <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-6 h-6" />
+          <div className="bg-card rounded-lg p-12 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-center flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 bg-bg border border-border text-text-muted rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6" />
             </div>
-            <p className="type-body-sm font-semibold text-slate-600">
-              Select department and filters above, then click <span className="text-red-600 font-bold">Load Dashboard</span> to view report.
+            <p className="type-body-sm font-semibold text-text-secondary">
+              Select department and filters above, then click <span className="text-accent font-bold">Load Dashboard</span> to view report.
             </p>
           </div>
         )}

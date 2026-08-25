@@ -41,78 +41,87 @@ export default function CaptainRewardYearSelectionPage({ onBack, onSelectYear }:
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 pb-20">
-      <div className="bg-slate-900 px-6 pt-10 pb-5 shadow-md text-white flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+    <div className="flex flex-col min-h-full bg-bg text-text-primary pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
           </button>
           <div>
-            <h1 className="type-h4">Captain &amp; Vice Captain Rewards</h1>
-            <p className="type-caption text-slate-400 mt-0.5">Select an academic year to configure automated weekly reward rules</p>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Captain &amp; Vice Captain Rewards</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">Select an academic year to configure automated weekly leadership reward rules</p>
           </div>
         </div>
 
         <button
           onClick={fetchYears}
           disabled={isLoading}
-          className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer disabled:opacity-50"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+          <span className="type-caption font-bold hidden sm:inline">Refresh</span>
         </button>
       </div>
 
-      <div className="p-6 max-w-2xl mx-auto w-full space-y-4">
-        <div className="bg-slate-900 p-6 rounded-2xl text-white shadow-sm flex items-center space-x-4 mb-2">
-          <div className="p-3 bg-amber-500/20 rounded-xl text-amber-400">
-            <Award className="w-8 h-8" />
+      <div className="p-6 max-w-3xl mx-auto w-full space-y-6">
+        <div className="bg-card p-6 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center space-x-4">
+          <div className="p-3.5 bg-bg border border-border rounded-lg text-text-primary">
+            <Award className="w-8 h-8 text-accent" />
           </div>
           <div>
-            <h2 className="type-h5">Leadership Reward Engine</h2>
-            <p className="type-caption text-slate-300 mt-0.5">Automated weekly XP distribution for Captains and Vice Captains</p>
+            <h2 className="type-h4 font-bold text-text-primary">Leadership Reward Engine</h2>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">Automated weekly XP distribution for Captains and Vice Captains</p>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <RefreshCw className="w-8 h-8 animate-spin text-amber-500" />
-            <p className="type-caption text-slate-500">Loading academic years...</p>
+          <div className="flex flex-col items-center justify-center py-16 bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading academic cohorts...</p>
           </div>
         ) : error ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
-            <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
-            <p className="type-body-sm font-bold text-slate-800">{error}</p>
+          <div className="text-center py-12 bg-card rounded-lg border border-border p-6 space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <AlertCircle className="w-10 h-10 text-accent mx-auto" />
+            <p className="type-body-sm font-bold text-text-primary">{error}</p>
             <button
               onClick={fetchYears}
-              className="px-4 py-2 bg-amber-600 text-white rounded-xl type-btn hover:bg-amber-700 cursor-pointer"
+              className="px-4 py-2 bg-accent text-card rounded-lg type-btn hover:bg-accent-hover cursor-pointer font-bold"
             >
               Retry
             </button>
           </div>
         ) : yearsList.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
-            <p className="type-body-sm font-bold text-slate-700">No configured academic years found.</p>
+          <div className="text-center py-12 bg-card rounded-lg border border-border p-6 space-y-2 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <p className="type-body-sm font-bold text-text-secondary">No configured academic years found.</p>
           </div>
         ) : (
-          yearsList.map((y) => (
-            <div
-              key={y.id}
-              onClick={() => onSelectYear(toEnumValue(y.yearName))}
-              className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex items-center justify-between group"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                  <GraduationCap className="w-6 h-6" />
+          <div className="grid grid-cols-1 gap-3.5">
+            {yearsList.map((y) => (
+              <div
+                key={y.id}
+                onClick={() => onSelectYear(toEnumValue(y.yearName))}
+                className="bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-accent/40 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-bg border border-border rounded-lg flex items-center justify-center text-text-primary font-bold group-hover:bg-accent group-hover:text-card group-hover:border-accent transition-colors">
+                    <GraduationCap className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="type-h4 font-bold text-text-primary group-hover:text-accent transition-colors">{y.yearName}</h3>
+                    <p className="type-caption text-text-secondary font-medium mt-0.5">Configure Captain &amp; Vice Captain Rewards for {y.yearName}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="type-h5 text-slate-900">{y.yearName}</h3>
-                  <p className="type-caption text-slate-500 mt-0.5">Configure Captain &amp; Vice Captain Rewards for {y.yearName}</p>
-                </div>
+                <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-accent transition-colors" />
               </div>
-              <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

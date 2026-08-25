@@ -10,16 +10,16 @@ import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
 
 const CATEGORY_STYLES: Record<string, any> = {
-  "ACADEMIC": { color: "text-blue-600", bg: "bg-blue-100", icon: School, label: "Academic" },
-  "COMMUNICATION": { color: "text-indigo-600", bg: "bg-indigo-100", icon: MessageCircle, label: "Communication" },
-  "LEADERSHIP": { color: "text-amber-600", bg: "bg-amber-100", icon: Gavel, label: "Leadership" },
-  "INNOVATION": { color: "text-orange-600", bg: "bg-orange-100", icon: Lightbulb, label: "Innovation" },
-  "PLACEMENT": { color: "text-emerald-600", bg: "bg-emerald-100", icon: Briefcase, label: "Placement" },
-  "DISCIPLINE": { color: "text-red-600", bg: "bg-red-100", icon: ShieldCheck, label: "Discipline" },
-  "SPORTS": { color: "text-pink-600", bg: "bg-pink-100", icon: Activity, label: "Sports" },
-  "COMMUNITY": { color: "text-teal-600", bg: "bg-teal-100", icon: Users, label: "Community" },
-  "SKILL": { color: "text-purple-600", bg: "bg-purple-100", icon: BrainCircuit, label: "Skill" },
-  "CULTURAL": { color: "text-cyan-600", bg: "bg-cyan-100", icon: Music, label: "Cultural" },
+  "ACADEMIC": { color: "text-text-primary", bg: "bg-bg", icon: School, label: "Academic" },
+  "COMMUNICATION": { color: "text-text-primary", bg: "bg-bg", icon: MessageCircle, label: "Communication" },
+  "LEADERSHIP": { color: "text-text-primary", bg: "bg-bg", icon: Gavel, label: "Leadership" },
+  "INNOVATION": { color: "text-text-primary", bg: "bg-bg", icon: Lightbulb, label: "Innovation" },
+  "PLACEMENT": { color: "text-text-primary", bg: "bg-bg", icon: Briefcase, label: "Placement" },
+  "DISCIPLINE": { color: "text-accent", bg: "bg-accent-tint", icon: ShieldCheck, label: "Discipline" },
+  "SPORTS": { color: "text-text-primary", bg: "bg-bg", icon: Activity, label: "Sports" },
+  "COMMUNITY": { color: "text-text-primary", bg: "bg-bg", icon: Users, label: "Community" },
+  "SKILL": { color: "text-text-primary", bg: "bg-bg", icon: BrainCircuit, label: "Skill" },
+  "CULTURAL": { color: "text-text-primary", bg: "bg-bg", icon: Music, label: "Cultural" },
 };
 
 const FIXED_YEARS = [
@@ -96,13 +96,12 @@ export default function PerformanceActivitiesTab() {
     }
   };
 
-  const getYearAliases = (fy: any) => {
-    const no = fy.yearNo;
-    if (no === 1) return ["1", "1st year", "i", "first year", "1st", "first_year"];
-    if (no === 2) return ["2", "2nd year", "ii", "second year", "2nd", "second_year"];
-    if (no === 3) return ["3", "3rd year", "iii", "third year", "3rd", "third_year"];
-    if (no === 4) return ["4", "4th year", "iv", "fourth year", "4th", "fourth_year"];
-    return [];
+  const getYearParam = (year: any) => {
+    const no = year?.yearNo;
+    if (no === 2) return 'II';
+    if (no === 3) return 'III';
+    if (no === 4) return 'IV';
+    return 'I';
   };
 
   const onCategorySelected = (cat: string) => {
@@ -114,54 +113,26 @@ export default function PerformanceActivitiesTab() {
   const onEventSelected = async (event: any) => {
     const type = (event.type || 'individual').toLowerCase();
     
-    // Group activities are handled by dedicated pages
     if (type.includes('group')) {
       navigate(`/teacher/group-activity/${event.activityId}/year`);
       return;
     }
 
-    // Individual activities go to inline drill down
     setSelectedEvent(event);
     setSelectedYear(null);
     setSelectedDept(null);
     setSelectedSection(null);
     setCurrentFlowStep(2);
-    
-    setIsLoading(true);
-    try {
-      const res = await apiClient.get(`/api/v1/my-activities/${event.activityId}/years`);
-      if (res.data.success) {
-        const yrs = res.data.data || [];
-        const filtered = FIXED_YEARS.filter(fy => {
-          const aliases = getYearAliases(fy);
-          return yrs.some((y: any) => {
-            const raw = String(y).toLowerCase().trim();
-            const normalized = raw.replace(/_/g, ' ');
-            return aliases.includes(raw) || aliases.includes(normalized);
-          });
-        });
-        setAvailableYears(filtered.length > 0 ? filtered : FIXED_YEARS);
-      } else {
-        setAvailableYears(FIXED_YEARS);
-      }
-    } catch (e) {
-      logger.error(e);
-      setAvailableYears(FIXED_YEARS);
-    } finally {
-      setIsLoading(false);
-    }
+    setAvailableYears(FIXED_YEARS);
   };
 
   const onYearSelected = async (year: any) => {
     setSelectedYear(year);
-    setDeptSearch('');
     setCurrentFlowStep(3);
-    
     setIsLoading(true);
     try {
-      const yearMap: any = { 1: "I", 2: "II", 3: "III", 4: "IV" };
-      const yParam = yearMap[year.yearNo] || "I";
-      const res = await apiClient.get(`/api/v1/my-activities/${selectedEvent.activityId}/departments?year=${yParam}`);
+      const yearParam = getYearParam(year);
+      const res = await apiClient.get(`/api/v1/my-activities/${selectedEvent.activityId}/departments?year=${yearParam}`);
       if (res.data.success) {
         setAvailableDepts(res.data.data || []);
       }
@@ -174,60 +145,44 @@ export default function PerformanceActivitiesTab() {
 
   const onDeptSelected = async (dept: any) => {
     setSelectedDept(dept);
-    setSelectedSection(null);
-    
     setIsLoading(true);
     try {
-      const yearMap: any = { 1: "I", 2: "II", 3: "III", 4: "IV" };
-      const yParam = yearMap[selectedYear.yearNo] || "I";
-      const res = await apiClient.get(`/api/v1/my-activities/${selectedEvent.activityId}/sections?year=${yParam}&departmentId=${dept.id}`);
-      
-      if (res.data.success) {
-        const list = res.data.data || [];
-        setAvailableSections(list);
-        setHasSections(list.length > 0);
-        
-        if (list.length > 0) {
-          setCurrentFlowStep(4);
-        } else {
-          setCurrentFlowStep(5);
-          fetchStudentsFinal(null, dept);
-        }
+      const yearParam = getYearParam(selectedYear);
+      const res = await apiClient.get(`/api/v1/my-activities/${selectedEvent.activityId}/sections?year=${yearParam}&deptId=${dept.id}`);
+      if (res.data.success && res.data.data?.length > 0) {
+        setAvailableSections(res.data.data);
+        setHasSections(true);
+        setCurrentFlowStep(4);
+      } else {
+        setHasSections(false);
+        fetchStudents(null, dept);
       }
     } catch (e) {
       logger.error(e);
+      setHasSections(false);
+      fetchStudents(null, dept);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSectionSelected = (sec: any) => {
-    setSelectedSection(sec.sectionName || sec.name);
-    setCurrentFlowStep(5);
-    fetchStudentsFinal(sec, selectedDept);
+  const onSectionSelected = (section: any) => {
+    setSelectedSection(section.sectionName || section.name);
+    fetchStudents(section, selectedDept);
   };
 
-  const fetchStudentsFinal = async (sec: any, dept: any) => {
+  const fetchStudents = async (section: any, dept: any) => {
+    setCurrentFlowStep(5);
     setIsLoading(true);
-    setEligibleStudents([]);
-    setSelectedStudentIds(new Set());
-    setSelectAll(false);
-    setAssignmentId(null);
-    
     try {
-      const yearMap: any = { 1: "I", 2: "II", 3: "III", 4: "IV" };
-      const yParam = yearMap[selectedYear.yearNo] || "I";
-      let url = `/api/v1/my-activities/${selectedEvent.activityId}/students?year=${yParam}&departmentId=${dept.id}`;
-      if (sec) url += `&sectionId=${sec.id}`;
-      
-      const res = await apiClient.get(url);
-      if (res.data?.success) {
-        const rawList: any[] = res.data.data.students || [];
-        const sortedList = [...rawList].sort((a, b) => 
-          (a.fullName || '').localeCompare(b.fullName || '')
-        );
-        setEligibleStudents(sortedList);
-        setAssignmentId(res.data.data.assignment?.id || null);
+      const yearParam = getYearParam(selectedYear);
+      const secParam = section ? `&section=${section.sectionName || section.name}` : '';
+      const res = await apiClient.get(
+        `/api/v1/my-activities/${selectedEvent.activityId}/eligible-students?year=${yearParam}&deptId=${dept.id}${secParam}`
+      );
+      if (res.data.success) {
+        setEligibleStudents(res.data.data?.students || []);
+        setAssignmentId(res.data.data?.assignmentId || null);
       }
     } catch (e) {
       logger.error(e);
@@ -268,23 +223,21 @@ export default function PerformanceActivitiesTab() {
     else if (currentFlowStep > 0) setCurrentFlowStep(currentFlowStep - 1);
   };
 
-  // ----------------------------------------------------
-  // Renderers
-  // ----------------------------------------------------
-  
-  if (isLoading && currentFlowStep === 0) return <div className="p-8 text-center text-slate-500">Loading activities...</div>;
+  if (isLoading && currentFlowStep === 0) {
+    return <div className="p-8 text-center text-text-muted bg-bg min-h-screen">Loading activities...</div>;
+  }
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50">
+    <div className="flex flex-col min-h-full bg-bg text-text-primary">
       
       {/* Dynamic Header */}
-      <div className="bg-slate-900 px-6 pt-12 pb-6 flex items-center shadow-md relative">
+      <div className="bg-card px-6 py-4 flex items-center border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] sticky top-0 z-20">
         {currentFlowStep > 0 && (
-          <button onClick={handleBack} className="mr-4 p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+          <button onClick={handleBack} className="mr-4 p-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer">
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}
-        <h1 className="type-h3 text-white flex-1">
+        <h1 className="type-h4 font-bold text-text-primary flex-1">
           {currentFlowStep === 0 && "Performance Activities"}
           {currentFlowStep === 1 && `${CATEGORY_STYLES[selectedCategory || '']?.label} Events`}
           {currentFlowStep === 2 && "Select Year"}
@@ -297,13 +250,13 @@ export default function PerformanceActivitiesTab() {
         {isCC && currentFlowStep === 0 && (
           <div className="flex items-center space-x-2 ml-4">
             {pendingBadges > 0 && (
-              <span className="px-3 py-1 bg-amber-500/20 border border-amber-400/40 text-amber-300 type-caption font-bold rounded-full">
+              <span className="px-3 py-1 bg-warning-tint border border-warning/30 text-warning type-caption font-bold rounded-md">
                 {pendingBadges} Pending Request{pendingBadges > 1 ? 's' : ''}
               </span>
             )}
             <button 
               onClick={() => navigate('/teacher/students-directory')}
-              className="p-2 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors flex-shrink-0"
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors flex-shrink-0 cursor-pointer"
               title="Students Directory"
             >
               <UsersRound className="w-5 h-5" />
@@ -324,13 +277,13 @@ export default function PerformanceActivitiesTab() {
                 <button
                   key={cat}
                   onClick={() => onCategorySelected(cat)}
-                  className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-start hover:shadow-md transition-shadow text-left"
+                  className="bg-card p-6 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border flex flex-col items-start hover:border-text-muted transition-all text-left cursor-pointer"
                 >
-                  <div className={`p-3 rounded-xl ${style.bg} ${style.color} mb-4`}>
+                  <div className={`p-3 rounded-lg border border-border ${style.bg} ${style.color} mb-4`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="type-h5 text-slate-800">{style.label}</h3>
-                  <p className="type-caption text-slate-500 mt-1">{count} configured events</p>
+                  <h3 className="type-h5 font-bold text-text-primary">{style.label}</h3>
+                  <p className="type-caption text-text-secondary mt-1">{count} configured events</p>
                 </button>
               );
             })}
@@ -345,17 +298,17 @@ export default function PerformanceActivitiesTab() {
             
           return (
             <div className="space-y-5">
-              <h3 className="type-h6 text-slate-800 ml-1">
+              <h3 className="type-h5 font-bold text-text-primary ml-1">
                 Select Predefined Event ({filteredEvents.length} available)
               </h3>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
                 <input 
                   type="text"
                   placeholder="Search Event..."
                   value={eventSearch}
                   onChange={e => setEventSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none type-body-sm placeholder:text-slate-400"
+                  className="w-full pl-12 pr-4 py-3 bg-card border border-border rounded-lg focus:border-text-primary outline-none type-body-sm text-text-primary placeholder-text-muted"
                 />
               </div>
               <div className="space-y-4 pb-20">
@@ -363,16 +316,16 @@ export default function PerformanceActivitiesTab() {
                   <button
                     key={event.activityId}
                     onClick={() => onEventSelected(event)}
-                    className="w-full bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-row items-center justify-between hover:shadow-md transition-shadow"
+                    className="w-full bg-card p-5 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border flex flex-row items-center justify-between hover:border-text-muted transition-all cursor-pointer"
                   >
                     <div className="text-left flex-1 pr-4">
-                      <h4 className="type-h6 text-slate-800 leading-tight mb-1">{event.name}</h4>
-                      <p className="type-caption text-slate-500 leading-snug line-clamp-2">
+                      <h4 className="type-h5 font-bold text-text-primary leading-tight mb-1">{event.name}</h4>
+                      <p className="type-caption text-text-secondary leading-snug line-clamp-2">
                         {event.description || event.type || 'Individual'}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="type-body-sm font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100/50">
+                      <span className="type-body-sm font-bold text-accent bg-accent-tint px-3 py-1.5 rounded-md border border-accent/30">
                         {event.awardXp} XP
                       </span>
                     </div>
@@ -386,11 +339,11 @@ export default function PerformanceActivitiesTab() {
         {/* Step 2: Year */}
         {currentFlowStep === 2 && (
           <div className="space-y-3">
-            {isLoading ? <p>Loading years...</p> : availableYears.map((yr, idx) => (
+            {isLoading ? <p className="text-text-muted">Loading years...</p> : availableYears.map((yr, idx) => (
               <button
                 key={idx}
                 onClick={() => onYearSelected(yr)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
+                className="w-full bg-card p-4 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border type-h5 font-bold text-text-primary text-left hover:bg-bg cursor-pointer transition-colors"
               >
                 {yr.yearName}
               </button>
@@ -402,22 +355,22 @@ export default function PerformanceActivitiesTab() {
         {currentFlowStep === 3 && (
           <div className="space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
               <input 
                 type="text"
                 placeholder="Search departments..."
                 value={deptSearch}
                 onChange={e => setDeptSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none type-body-sm"
+                className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-lg outline-none type-body-sm text-text-primary placeholder-text-muted focus:border-text-primary"
               />
             </div>
-            {isLoading ? <p>Loading departments...</p> : availableDepts
+            {isLoading ? <p className="text-text-muted">Loading departments...</p> : availableDepts
               .filter(d => (d.name || d.departmentName || "").toLowerCase().includes(deptSearch.toLowerCase()))
               .map((d, idx) => (
               <button
                 key={idx}
                 onClick={() => onDeptSelected(d)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
+                className="w-full bg-card p-4 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border type-h5 font-bold text-text-primary text-left hover:bg-bg cursor-pointer transition-colors"
               >
                 {d.name || d.departmentName}
               </button>
@@ -428,11 +381,11 @@ export default function PerformanceActivitiesTab() {
         {/* Step 4: Section */}
         {currentFlowStep === 4 && (
           <div className="space-y-3">
-            {isLoading ? <p>Loading sections...</p> : availableSections.map((s, idx) => (
+            {isLoading ? <p className="text-text-muted">Loading sections...</p> : availableSections.map((s, idx) => (
               <button
                 key={idx}
                 onClick={() => onSectionSelected(s)}
-                className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 type-h5 text-slate-800 text-left hover:bg-slate-50 cursor-pointer"
+                className="w-full bg-card p-4 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border type-h5 font-bold text-text-primary text-left hover:bg-bg cursor-pointer transition-colors"
               >
                 {s.sectionName || s.name}
               </button>
@@ -443,23 +396,23 @@ export default function PerformanceActivitiesTab() {
         {/* Step 5: Students List */}
         {currentFlowStep === 5 && (
           <div className="space-y-4">
-            <div className="bg-white p-4 rounded-xl border border-slate-200">
-              <h3 className="type-h5 text-slate-800">{selectedEvent?.name}</h3>
-              <p className="type-body-sm text-slate-500">{selectedYear?.yearName} • {selectedDept?.name || selectedDept?.departmentName} {selectedSection ? `• ${selectedSection}` : ''}</p>
+            <div className="bg-card p-4 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+              <h3 className="type-h5 font-bold text-text-primary">{selectedEvent?.name}</h3>
+              <p className="type-body-sm text-text-secondary">{selectedYear?.yearName} • {selectedDept?.name || selectedDept?.departmentName} {selectedSection ? `• ${selectedSection}` : ''}</p>
             </div>
             
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-5 h-5" />
               <input 
                 type="text"
                 placeholder="Search students..."
                 value={studentSearch}
                 onChange={e => setStudentSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none"
+                className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-lg outline-none text-text-primary placeholder-text-muted focus:border-text-primary"
               />
             </div>
 
-            <div className="flex items-center space-x-2 bg-white p-3 rounded-lg border border-slate-200">
+            <div className="flex items-center space-x-2 bg-card p-3 rounded-lg border border-border">
               <input 
                 type="checkbox" 
                 checked={selectAll}
@@ -467,16 +420,16 @@ export default function PerformanceActivitiesTab() {
                   setSelectAll(e.target.checked);
                   setSelectedStudentIds(e.target.checked ? new Set(eligibleStudents.map(s => s.id)) : new Set());
                 }}
-                className="w-5 h-5 rounded text-blue-600"
+                className="w-5 h-5 rounded border border-border text-accent focus:ring-accent"
               />
-              <span className="font-bold text-slate-700">Select All Students ({eligibleStudents.length})</span>
+              <span className="font-bold text-text-primary">Select All Students ({eligibleStudents.length})</span>
             </div>
 
             <div className="space-y-2">
-              {isLoading ? <p>Loading students...</p> : eligibleStudents
+              {isLoading ? <p className="text-text-muted">Loading students...</p> : eligibleStudents
                 .filter(s => (s.fullName || '').toLowerCase().includes(studentSearch.toLowerCase()))
                 .map(student => (
-                <div key={student.id} className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-slate-100 space-x-4">
+                <div key={student.id} className="flex items-center p-4 bg-card rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border space-x-4">
                   <input 
                     type="checkbox" 
                     checked={selectedStudentIds.has(student.id)}
@@ -486,11 +439,11 @@ export default function PerformanceActivitiesTab() {
                       else { newSet.delete(student.id); setSelectAll(false); }
                       setSelectedStudentIds(newSet);
                     }}
-                    className="w-5 h-5 rounded text-blue-600"
+                    className="w-5 h-5 rounded border border-border text-accent focus:ring-accent"
                   />
                   <div>
-                    <h4 className="font-bold text-slate-800">{student.fullName}</h4>
-                    <p className="type-caption text-slate-500">{student.studentId} • {student.year} • {student.section}</p>
+                    <h4 className="font-bold text-text-primary">{student.fullName}</h4>
+                    <p className="type-caption text-text-secondary">{student.studentId} • {student.year} • {student.section}</p>
                   </div>
                 </div>
               ))}
@@ -501,13 +454,13 @@ export default function PerformanceActivitiesTab() {
                 placeholder="Add optional remarks..."
                 value={remarks}
                 onChange={e => setRemarks(e.target.value)}
-                className="w-full p-4 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-4 border border-border bg-card rounded-lg outline-none focus:border-text-primary text-text-primary placeholder-text-muted"
                 rows={3}
               />
               <button 
                 onClick={submitAward}
                 disabled={isAwarding || selectedStudentIds.size === 0}
-                className="w-full type-btn bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="w-full type-btn bg-accent hover:bg-accent-hover text-card font-bold py-3.5 rounded-lg shadow-none disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isAwarding ? 'Awarding...' : `Award XP to ${selectedStudentIds.size} Student(s)`}
               </button>

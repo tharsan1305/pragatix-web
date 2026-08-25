@@ -233,44 +233,99 @@ export default function CCInboxTab({ onBack }: Props) {
     : rejectedList;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-28">
+    <div className="min-h-screen bg-bg flex flex-col pb-28 text-text-primary">
       {/* Top Header Banner */}
-      <div className="bg-slate-900 text-white p-4 md:p-6 shadow-md flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="bg-card text-text-primary px-6 py-5 border-b border-border flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center space-x-3.5">
           {onBack && (
-            <button onClick={onBack} className="p-2 type-btn hover:bg-slate-800 rounded-full transition-colors cursor-pointer">
+            <button onClick={onBack} className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition-colors cursor-pointer text-text-secondary hover:text-text-primary">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
           <div>
-            <h1 className="type-h4">Class Coordinator Inbox</h1>
-            <p className="type-caption text-slate-400">Review student activity completion & penalty requests</p>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Class Coordinator Inbox</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">Review student activity completion & penalty requests</p>
           </div>
         </div>
         <button
           onClick={() => { fetchCcInbox(); fetchMyRequests(); }}
-          className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 hover:text-white transition-colors cursor-pointer"
+          className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
           title="Refresh Requests"
         >
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {/* Main Tabs (My Class Requests vs My Submitted Requests) */}
-      <div className="bg-slate-900/90 border-t border-slate-800 px-4 md:px-6 py-3 flex flex-wrap gap-4 justify-between items-center">
+      <div className="bg-card border-b border-border px-6 py-3.5 flex flex-wrap gap-3 justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+        <div className="flex bg-bg p-1 rounded-xl border border-border gap-1">
+          <button
+            onClick={() => handleMainTabChange('MY_CLASS')}
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer ${
+              mainTab === 'MY_CLASS' 
+                ? 'bg-card text-text-primary border border-border shadow-xs' 
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            My Class Inbox ({inbox.filter(r => (r.status || 'PENDING').toUpperCase() === 'PENDING').length})
+          </button>
+          <button
+            onClick={() => handleMainTabChange('MY_REQUESTS')}
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer ${
+              mainTab === 'MY_REQUESTS' 
+                ? 'bg-card text-text-primary border border-border shadow-xs' 
+                : 'text-text-secondary hover:text-text-primary'
+            }`}
+          >
+            My Submitted Requests ({myRequests.length})
+          </button>
+        </div>
+      </div>
+
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+        {/* KPI Summary Tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-card p-4.5 rounded-2xl border border-border flex flex-col gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Pending Action</span>
+            <div className="text-2xl font-black text-accent">{pendingList.length}</div>
+            <span className="text-[11px] font-medium text-text-muted">Awaiting Triage</span>
+          </div>
+
+          <div className="bg-card p-4.5 rounded-2xl border border-border flex flex-col gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Approved Requests</span>
+            <div className="text-2xl font-black text-text-primary">{approvedList.length}</div>
+            <span className="text-[11px] font-medium text-text-muted">Verified & Awarded</span>
+          </div>
+
+          <div className="bg-card p-4.5 rounded-2xl border border-border flex flex-col gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Rejected Requests</span>
+            <div className="text-2xl font-black text-text-secondary">{rejectedList.length}</div>
+            <span className="text-[11px] font-medium text-text-muted">Returned with Note</span>
+          </div>
+
+          <div className="bg-card p-4.5 rounded-2xl border border-border flex flex-col gap-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Submissions</span>
+            <div className="text-2xl font-black text-text-primary">{activeSourceList.length}</div>
+            <span className="text-[11px] font-medium text-text-muted">Processed to Date</span>
+          </div>
+        </div>
         <div className="flex space-x-2">
           <button
             onClick={() => handleMainTabChange('MY_CLASS')}
-            className={`px-4 py-2 rounded-xl type-caption font-bold transition-all cursor-pointer ${
-              mainTab === 'MY_CLASS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer border ${
+              mainTab === 'MY_CLASS' 
+                ? 'bg-accent-tint text-accent border-accent/30 shadow-none' 
+                : 'bg-bg text-text-secondary border-border hover:text-text-primary hover:bg-card'
             }`}
           >
             Class Inbox ({inbox.length})
           </button>
           <button
             onClick={() => handleMainTabChange('MY_REQUESTS')}
-            className={`px-4 py-2 rounded-xl type-caption font-bold transition-all cursor-pointer ${
-              mainTab === 'MY_REQUESTS' ? 'bg-teal-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer border ${
+              mainTab === 'MY_REQUESTS' 
+                ? 'bg-accent-tint text-accent border-accent/30 shadow-none' 
+                : 'bg-bg text-text-secondary border-border hover:text-text-primary hover:bg-card'
             }`}
           >
             My Requests ({myRequests.length})
@@ -279,15 +334,22 @@ export default function CCInboxTab({ onBack }: Props) {
 
         {/* Secondary Filter Badges */}
         <div className="flex space-x-2">
-          {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map(tab => (
+          {[
+            { id: 'ALL', label: 'All' },
+            { id: 'PENDING', label: 'Pending' },
+            { id: 'APPROVED', label: 'Approved' },
+            { id: 'REJECTED', label: 'Rejected' }
+          ].map(tab => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-3 py-1.5 rounded-full type-fine font-bold uppercase transition-all cursor-pointer ${
-                activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3.5 py-1.5 rounded-lg type-caption font-bold uppercase transition-all cursor-pointer border ${
+                activeTab === tab.id 
+                  ? 'bg-text-primary text-card border-text-primary shadow-none' 
+                  : 'bg-bg text-text-secondary border-border hover:text-text-primary hover:bg-card'
               }`}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -296,12 +358,12 @@ export default function CCInboxTab({ onBack }: Props) {
       <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+            <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
           </div>
         ) : currentList.length === 0 ? (
-          <div className="text-center py-16 text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <AlertTriangle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="type-body-sm font-semibold text-slate-700">No {activeTab.toLowerCase()} requests found.</p>
+          <div className="text-center py-16 text-text-muted bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-6">
+            <AlertTriangle className="w-12 h-12 text-text-muted mx-auto mb-3" />
+            <p className="type-body-sm font-semibold text-text-primary">No {activeTab.toLowerCase()} requests found.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -319,52 +381,50 @@ export default function CCInboxTab({ onBack }: Props) {
               const rejectedReason = req.rejectedReason || req.rejectionReason;
 
               const statusBg = 
-                status === 'AUTO_APPROVED' ? 'bg-blue-50 text-blue-600 border-blue-200' :
-                status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
-                status === 'REJECTED' ? 'bg-rose-50 text-rose-600 border-rose-200' :
-                'bg-amber-50 text-amber-600 border-amber-200';
+                status === 'AUTO_APPROVED' || status === 'APPROVED' ? 'bg-success-tint text-success border-success/30' :
+                status === 'REJECTED' ? 'bg-accent-tint text-accent border-accent/30' :
+                'bg-warning-tint text-warning border-warning/30';
 
               const isBadge = req.isBadgeRequest || req.badgeName;
               const isAct = req.isActivityRequest || req.activityName;
               const isRemoval = req.isRemovalRequest;
               const badgeLabel = isBadge ? 'Badge Request' : isAct ? 'Activity Request' : isRemoval ? 'Removal Request' : 'Penalty Request';
-              const badgeClass = isBadge ? 'bg-purple-100 text-purple-800' : isAct ? 'bg-indigo-100 text-indigo-800' : isRemoval ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800';
 
               return (
-                <div key={req.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-3">
+                <div key={req.id} className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-text-secondary transition-all space-y-3">
                   {/* Top Header Row: Student Name + Type + Status Badge */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full type-fine font-bold uppercase ${badgeClass}`}>
+                      <span className="px-2.5 py-0.5 rounded bg-bg text-text-secondary border border-border type-fine font-bold uppercase tracking-wider">
                         {badgeLabel}
                       </span>
-                      <h3 className="type-h5 text-slate-900">{studentName}</h3>
+                      <h3 className="type-h5 text-text-primary">{studentName}</h3>
                     </div>
-                    <span className={`px-3 py-1 rounded-full type-caption font-bold border uppercase tracking-wider ${statusBg}`}>
+                    <span className={`px-3 py-1 rounded-md type-caption font-bold border uppercase tracking-wider ${statusBg}`}>
                       {status}
                     </span>
                   </div>
 
                   {/* Register Number */}
-                  <p className="type-caption text-slate-600">
-                    Register No: <span className="text-slate-900 font-bold">{regNo}</span>
+                  <p className="type-caption text-text-secondary">
+                    Register No: <span className="text-text-primary font-bold">{regNo}</span>
                   </p>
 
-                  <div className="h-px bg-slate-100 my-1" />
+                  <div className="h-px bg-border my-1" />
 
                   {/* Activity Details */}
                   <div className="space-y-1">
-                    <p className="type-caption font-bold text-slate-800">
-                      Activity: <span className="text-slate-600 font-medium">{activity}</span>
+                    <p className="type-caption font-bold text-text-primary">
+                      Activity: <span className="text-text-secondary font-medium">{activity}</span>
                     </p>
                     {!isAct && penaltyXP > 0 && (
-                      <p className="type-caption font-extrabold text-rose-600">
+                      <p className="type-caption font-extrabold text-accent">
                         Penalty XP: -{penaltyXP}
                       </p>
                     )}
                     {reason && (
-                      <p className="type-caption text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 mt-1">
-                        <strong>Note / Reason:</strong> {reason}
+                      <p className="type-caption text-text-secondary bg-bg p-2.5 rounded-lg border border-border mt-1">
+                        <strong className="text-text-primary">Note / Reason:</strong> {reason}
                       </p>
                     )}
                     {proofUrl && (
@@ -373,7 +433,7 @@ export default function CCInboxTab({ onBack }: Props) {
                           href={getSafeHref(proofUrl)}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg type-caption border border-blue-200 transition"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-bg text-text-primary hover:bg-border-subtle rounded-lg type-caption border border-border transition font-semibold"
                         >
                           🔗 View Proof Link
                         </a>
@@ -382,21 +442,21 @@ export default function CCInboxTab({ onBack }: Props) {
                   </div>
 
                   {/* Requested Time & Reviewer Details */}
-                  <div className="pt-2 border-t border-slate-100 type-caption text-slate-400 space-y-1">
+                  <div className="pt-2 border-t border-border type-caption text-text-muted space-y-1">
                     <div className="flex items-center space-x-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      <Clock className="w-3.5 h-3.5 text-text-muted" />
                       <span>Submitted: {formatDate(submittedTime)}</span>
                     </div>
 
                     {status !== 'PENDING' && (
-                      <div className="flex flex-wrap items-center gap-3 text-slate-500 pt-0.5">
+                      <div className="flex flex-wrap items-center gap-3 text-text-secondary pt-0.5">
                         <span className="flex items-center space-x-1">
                           {status === 'REJECTED' ? (
-                            <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                            <XCircle className="w-3.5 h-3.5 text-accent" />
                           ) : (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                           )}
-                          <span>Reviewed By: <strong className="text-slate-700">{approvedBy || 'Class Coordinator'}</strong></span>
+                          <span>Reviewed By: <strong className="text-text-primary">{approvedBy || 'Class Coordinator'}</strong></span>
                         </span>
                         {approvalTime && (
                           <span>• Reviewed At: {formatDate(approvalTime)}</span>
@@ -404,21 +464,21 @@ export default function CCInboxTab({ onBack }: Props) {
                       </div>
                     )}
                     {rejectedReason && status === 'REJECTED' && (
-                      <p className="mt-2 type-caption text-rose-600 italic">Rejection Reason: {rejectedReason}</p>
+                      <p className="mt-2 type-caption text-accent italic">Rejection Reason: {rejectedReason}</p>
                     )}
                   </div>
 
                   {mainTab === 'MY_CLASS' && status === 'PENDING' && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end space-x-3">
+                    <div className="mt-4 pt-3 border-t border-border flex justify-end space-x-3">
                       <button
                         onClick={() => setRejectingItem(req)}
-                        className="px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl type-btn transition-colors cursor-pointer"
+                        className="px-4 py-2 text-text-secondary bg-bg hover:bg-border-subtle border border-border rounded-lg type-btn transition-colors cursor-pointer"
                       >
                         Reject
                       </button>
                       <button
                         onClick={() => handleApprove(req)}
-                        className="px-5 py-2 text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl type-btn transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                        className="px-5 py-2 text-card bg-accent hover:bg-accent-hover rounded-lg type-btn transition-colors shadow-none flex items-center space-x-1.5 cursor-pointer font-bold"
                       >
                         <Check className="w-4 h-4" />
                         <span>Approve {isAct ? 'Activity' : isRemoval ? 'Removal' : 'Penalty'}</span>
@@ -434,11 +494,11 @@ export default function CCInboxTab({ onBack }: Props) {
 
       {/* Reject Modal */}
       {rejectingItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="type-h4 text-slate-900">Reject Request</h3>
-            <p className="type-caption text-slate-500">
-              Please enter the reason for rejecting penalty request for <span className="font-semibold text-slate-700">{rejectingItem.studentName}</span>.
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-card text-text-primary border border-border rounded-lg max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 className="type-h4 text-text-primary">Reject Request</h3>
+            <p className="type-caption text-text-secondary">
+              Please enter the reason for rejecting request for <span className="font-semibold text-text-primary">{rejectingItem.studentName}</span>.
             </p>
             <form onSubmit={handleRejectSubmit} className="space-y-4">
               <textarea
@@ -447,19 +507,19 @@ export default function CCInboxTab({ onBack }: Props) {
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
                 placeholder="Enter rejection reason..."
-                className="w-full p-3 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-slate-900 type-body-sm"
+                className="w-full p-3 bg-card border border-border rounded-lg outline-none focus:border-text-primary text-text-primary type-body-sm"
               />
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setRejectingItem(null)}
-                  className="px-4 py-2 text-slate-600 type-btn hover:bg-slate-100 rounded-lg cursor-pointer"
+                  className="px-4 py-2 border border-border text-text-secondary type-btn hover:bg-bg rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-rose-600 text-white type-btn hover:bg-rose-700 rounded-lg shadow-xs cursor-pointer"
+                  className="px-5 py-2 bg-accent text-card type-btn hover:bg-accent-hover rounded-lg shadow-none cursor-pointer font-bold"
                 >
                   Confirm Reject
                 </button>

@@ -594,6 +594,22 @@ export default function AttendanceTab() {
 
               return (
                 <>
+                  {/* Attendance Performance Summary Tiles */}
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="bg-bg p-3 rounded-xl border border-border flex flex-col items-center">
+                      <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Attendance Rate</span>
+                      <div className="text-xl font-black text-text-primary">{attendanceRate}%</div>
+                    </div>
+                    <div className="bg-bg p-3 rounded-xl border border-border flex flex-col items-center">
+                      <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Present Count</span>
+                      <div className="text-xl font-black text-emerald-800">{presentCount}</div>
+                    </div>
+                    <div className="bg-bg p-3 rounded-xl border border-border flex flex-col items-center">
+                      <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Absent Count</span>
+                      <div className="text-xl font-black text-text-secondary">{absentCount}</div>
+                    </div>
+                  </div>
+
                   {/* Top Stats & Title */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <h2 className="type-h5 text-slate-800">Student List</h2>

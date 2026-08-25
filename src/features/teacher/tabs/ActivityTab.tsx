@@ -14,7 +14,12 @@ import AdminBadgeRequestsTab from '../../admin/tabs/AdminBadgeRequestsTab';
 import TeacherActivityWorkflowPage from '../pages/TeacherActivityWorkflowPage';
 import GroupActivityYearPage from '../../admin/activity/pages/GroupActivityYearPage';
 
-export default function ActivityTab() {
+interface Props {
+  onBack?: () => void;
+  onNavigateTab?: (slug: string) => void;
+}
+
+export default function ActivityTab({ onBack, onNavigateTab: _onNavigateTab }: Props = {}) {
   const navigate = useNavigate();
   const { isSuperAdmin, isAdmin, isCC } = useAuth();
 
@@ -275,31 +280,31 @@ export default function ActivityTab() {
       ];
 
       return (
-        <div className="flex flex-col min-h-full bg-slate-50 pb-20">
+        <div className="flex flex-col min-h-full bg-bg pb-20">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
+          <div className="bg-card text-text-primary px-4 md:px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={handleGoBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
-                <ArrowLeft className="w-6 h-6 text-white" />
+              <button onClick={handleGoBack} className="p-2 border border-border bg-card hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition cursor-pointer">
+                <ArrowLeft className="w-5 h-5" />
               </button>
-              <h1 className="type-h4 text-white">{stageName}</h1>
+              <h1 className="type-h4 text-text-primary">{stageName}</h1>
             </div>
           </div>
 
           <div className="p-4 md:p-6 max-w-4xl mx-auto w-full space-y-6">
             {/* Stage Summary Card */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
-              <div className="p-3 bg-teal-50 text-teal-600 rounded-xl">
-                <Star className="w-6 h-6 fill-teal-600" />
+            <div className="bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center gap-4">
+              <div className="p-3 bg-bg border border-border text-text-primary rounded-lg">
+                <Star className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="type-h5 text-slate-800">{stageName}</h2>
-                <p className="type-caption text-slate-500 mt-0.5">{stageDesc}</p>
+                <h2 className="type-h5 text-text-primary">{stageName}</h2>
+                <p className="type-caption text-text-secondary mt-0.5">{stageDesc}</p>
               </div>
             </div>
 
             {/* Categories */}
-            <h3 className="type-h5 text-slate-700">Select Activity Category</h3>
+            <h3 className="type-h5 text-text-primary">Select Activity Category</h3>
             <div className="space-y-4">
               {categories.map((cat) => (
                 <div
@@ -310,24 +315,24 @@ export default function ActivityTab() {
                     categoryTitle: cat.title,
                     subgroupFilter: cat.key,
                   })}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-teal-500 cursor-pointer transition-all flex justify-between items-center group"
+                  className="bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-text-secondary cursor-pointer transition-all flex justify-between items-center group"
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold type-caption ${cat.badgeBg}`}>
+                    <span className="w-10 h-10 rounded-lg flex items-center justify-center font-bold type-caption bg-text-primary text-card">
                       {cat.badge}
                     </span>
                     <div>
-                      <h4 className="font-bold text-slate-900 group-hover:text-teal-600 type-h4 transition-colors">
+                      <h4 className="font-bold text-text-primary group-hover:text-accent type-h4 transition-colors">
                         {cat.title}
                       </h4>
-                      <p className="type-caption text-slate-500 mt-0.5">{cat.subtitle}</p>
+                      <p className="type-caption text-text-secondary mt-0.5">{cat.subtitle}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`type-caption font-bold px-3 py-1 rounded-lg border ${cat.color}`}>
+                    <span className="type-caption font-bold px-3 py-1 rounded-md border border-border bg-bg text-text-secondary">
                       Min: {cat.threshold} XP
                     </span>
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-text-primary transition-colors" />
                   </div>
                 </div>
               ))}
@@ -361,35 +366,35 @@ export default function ActivityTab() {
       const yrName = classDetails?.yearName || classDetails?.year || '1st Year';
 
       return (
-        <div className="flex flex-col min-h-full bg-slate-50 pb-20">
-          {/* Top Header Bar matching Flutter teal gradient 1:1 */}
-          <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
+        <div className="flex flex-col min-h-full bg-bg pb-20">
+          {/* Top Header Bar */}
+          <div className="bg-card text-text-primary px-4 md:px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={handleGoBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
-                <ArrowLeft className="w-6 h-6 text-white" />
+              <button onClick={handleGoBack} className="p-2 border border-border bg-card hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition cursor-pointer">
+                <ArrowLeft className="w-5 h-5" />
               </button>
-              <h1 className="type-h4 text-white">Assign Staff</h1>
+              <h1 className="type-h4 text-text-primary">Assign Staff</h1>
             </div>
             <button
               onClick={() => fetchStages(academicYear)}
-              className="p-2 hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+              className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition text-text-secondary hover:text-text-primary cursor-pointer"
               title="Refresh"
             >
-              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Class Info Banner Card matching Flutter / Image 1:1 */}
-          <div className="bg-white px-4 md:px-6 py-3.5 border-b border-slate-200 shadow-xs flex flex-row items-center justify-between gap-3">
+          {/* Class Info Banner Card */}
+          <div className="bg-card px-4 md:px-6 py-3.5 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#11998E]/10 rounded-xl text-[#11998E]">
-                <GraduationCap className="w-6 h-6" />
+              <div className="p-2.5 bg-bg border border-border rounded-lg text-text-primary">
+                <GraduationCap className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="type-h5 text-slate-800">
+                <h2 className="type-h5 text-text-primary">
                   {deptName} • Section {secName}
                 </h2>
-                <p className="type-caption text-slate-500 font-semibold mt-0.5">
+                <p className="type-caption text-text-secondary font-semibold mt-0.5">
                   Academic Year: {yrName}
                 </p>
               </div>
@@ -397,18 +402,18 @@ export default function ActivityTab() {
 
             <button
               onClick={() => setShowQuickAssignModal(true)}
-              className="bg-[#11998E] hover:bg-[#0d7d74] text-white type-caption font-bold px-3.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="bg-accent hover:bg-accent-hover text-card type-caption font-bold px-3.5 py-2.5 rounded-lg flex items-center justify-center gap-1.5 shadow-none transition-colors cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Assign Staff</span>
             </button>
           </div>
 
-          {/* Stages List matching screenshot 1:1 */}
+          {/* Stages List */}
           <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <RefreshCw className="w-8 h-8 animate-spin text-teal-600" />
+                <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
               </div>
             ) : stagesList.map((stage, index) => {
               const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE');
@@ -423,40 +428,40 @@ export default function ActivityTab() {
                 <div 
                   key={stage.id}
                   onClick={() => handlePushView('cc_stage_details', { stage })}
-                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-teal-500 cursor-pointer transition-all flex flex-col space-y-3 group"
+                  className="bg-card p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-text-secondary cursor-pointer transition-all flex flex-col space-y-3 group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <h3 className="type-h5 text-slate-900 group-hover:text-teal-600 transition-colors">
+                      <h3 className="type-h5 text-text-primary group-hover:text-accent transition-colors">
                         {stage.name || stage.stageName || `Stage ${displayOrder}`}
                       </h3>
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded border uppercase tracking-wider ${
                         statusText === 'ACTIVE' 
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
-                          : 'bg-blue-50 text-blue-800 border-blue-300'
+                          ? 'bg-success-tint text-success border-success/30' 
+                          : 'bg-warning-tint text-warning border-warning/30'
                       }`}>
                         {statusText}
                       </span>
                     </div>
 
-                    <ChevronRight className="w-6 h-6 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-text-primary group-hover:translate-x-0.5 transition-all" />
                   </div>
 
-                  {/* Chips row (Order, XP, M, I, G) - matching screenshot 1:1 */}
+                  {/* Chips row (Order, XP, M, I, G) */}
                   <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
-                    <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
+                    <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-md border border-border">
                       Order: {displayOrder}
                     </span>
-                    <span className="text-blue-800 bg-blue-50 px-2.5 py-1 rounded-md">
+                    <span className="text-text-primary bg-bg px-2.5 py-1 rounded-md border border-border">
                       XP: {expectedXp}
                     </span>
-                    <span className="text-rose-800 bg-rose-50 px-2.5 py-1 rounded-md">
+                    <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-md border border-border">
                       M: {mThresh}
                     </span>
-                    <span className="text-sky-800 bg-sky-50 px-2.5 py-1 rounded-md">
+                    <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-md border border-border">
                       I: {iThresh}
                     </span>
-                    <span className="text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md">
+                    <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-md border border-border">
                       G: {gThresh}
                     </span>
                   </div>
@@ -496,27 +501,37 @@ export default function ActivityTab() {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 pb-20">
+    <div className="flex flex-col min-h-full bg-bg pb-20">
       {/* Top Header Bar */}
-      <div className="bg-[#1E293B] text-white px-6 pt-10 pb-6 shadow-md flex justify-between items-center">
-        <div>
-          <h1 className="type-h3">Activities</h1>
-          <p className="type-caption text-slate-400 mt-0.5">Explore configured activity stages, thresholds, and assigned tasks</p>
+      <div className="bg-card text-text-primary px-6 py-5 border-b border-border flex justify-between items-center sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center space-x-3.5">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Activities & Stages</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">Explore configured activity stages, thresholds, and assigned tasks</p>
+          </div>
         </div>
 
-        {/* Action Header Icons (Matching Flutter Header 1:1) */}
+        {/* Action Header Icons */}
         <div className="flex items-center space-x-2">
           {isCC && (
             <>
               {/* Badge Requests Notification Icon */}
               <button 
                 onClick={() => handlePushView('badge_requests')}
-                className="relative p-2.5 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
+                className="relative p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
                 title="Badge Requests"
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-4 h-4" />
                 {pendingBadgeRequests > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-accent text-card text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {pendingBadgeRequests}
                   </span>
                 )}
@@ -525,23 +540,23 @@ export default function ActivityTab() {
               {/* Students Directory Icon */}
               <button 
                 onClick={() => navigate('/teacher/students-directory')}
-                className="p-2.5 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
+                className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
                 title="Students Directory"
               >
-                <UsersRound className="w-5 h-5" />
+                <UsersRound className="w-4 h-4" />
               </button>
             </>
           )}
 
-          {/* Disciplinary Inbox Icon (Hammer / Gavel) - Visible for ALL Teachers */}
+          {/* Disciplinary Inbox Icon (Hammer / Gavel) */}
           <button 
             onClick={() => handlePushView('cc_inbox')}
-            className="relative p-2.5 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors cursor-pointer"
+            className="relative p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
             title="Penalty Requests"
           >
-            <Gavel className="w-5 h-5" />
+            <Gavel className="w-4 h-4" />
             {pendingPenaltyRequests > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-accent text-card text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {pendingPenaltyRequests}
               </span>
             )}
@@ -550,20 +565,20 @@ export default function ActivityTab() {
           {/* Refresh Button */}
           <button 
             onClick={() => fetchStages(academicYear)} 
-            className="p-2.5 bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors shadow-xs cursor-pointer"
+            className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
             title="Refresh"
           >
-            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-5">
-        {/* Academic Year Selector Card - Matching Flutter 1:1 */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div className="flex items-center space-x-3 text-slate-700 font-bold type-body-sm">
-            <div className="p-2.5 bg-slate-100 rounded-xl text-slate-600">
-              <Calendar className="w-5 h-5" />
+      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
+        {/* Academic Year Selector Card */}
+        <div className="bg-card p-4 rounded-xl border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="flex items-center space-x-3 text-text-primary font-bold type-body-sm">
+            <div className="p-2 bg-bg border border-border rounded-lg text-accent">
+              <Calendar className="w-4 h-4" />
             </div>
             <span>Academic Year:</span>
           </div>
@@ -571,8 +586,8 @@ export default function ActivityTab() {
             value={academicYear}
             disabled={isCC && !isAdmin && !isSuperAdmin}
             onChange={(e) => setAcademicYear(e.target.value)}
-            className={`w-full sm:w-auto bg-slate-50 border border-slate-300 text-slate-900 type-body-sm font-bold rounded-xl px-5 py-3 focus:ring-2 focus:ring-slate-800 outline-none ${
-              isCC && !isAdmin && !isSuperAdmin ? 'bg-slate-100 cursor-not-allowed opacity-90 text-slate-700' : 'cursor-pointer'
+            className={`w-full sm:w-auto bg-bg border border-border text-text-primary type-body-sm font-bold rounded-lg px-4 py-2 outline-none focus:border-text-primary ${
+              isCC && !isAdmin && !isSuperAdmin ? 'cursor-not-allowed opacity-90 text-text-secondary' : 'cursor-pointer'
             }`}
           >
             <option value="FIRST_YEAR">FIRST YEAR</option>
@@ -583,13 +598,13 @@ export default function ActivityTab() {
           </select>
         </div>
 
-        {/* Teal Assign Staff Button for Class Coordinator - Matching Flutter 1:1 */}
+        {/* Assign Staff Button for Class Coordinator */}
         {isCC && (
           <button
             onClick={() => handlePushView('assign_staff_stages')}
-            className="w-full bg-[#0D9488] hover:bg-[#0F766E] text-white py-3.5 px-4 rounded-2xl type-btn shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-accent hover:bg-accent-hover text-card py-3 px-4 rounded-xl type-btn shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer font-bold"
           >
-            <UserCheck className="w-5 h-5" />
+            <UserCheck className="w-4 h-4" />
             <span>Assign Staff</span>
           </button>
         )}
@@ -597,72 +612,74 @@ export default function ActivityTab() {
         {/* Stages List */}
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
           </div>
         ) : stagesList.length === 0 ? (
-          <div className="text-center py-16 text-slate-500 bg-white rounded-2xl border border-slate-200 shadow-xs">
-            <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="type-h5 text-slate-800">No activity stages configured for {academicYear.replace('_', ' ')}.</p>
-            <p className="type-caption text-slate-400 mt-1">Select another academic year or contact system admin.</p>
+          <div className="text-center py-16 text-text-secondary bg-card rounded-xl border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-6">
+            <AlertCircle className="w-10 h-10 text-text-muted mx-auto mb-2" />
+            <p className="type-h5 text-text-primary font-bold">No activity stages configured for {academicYear.replace('_', ' ')}.</p>
+            <p className="type-caption text-text-muted mt-1 font-medium">Select another academic year or contact system admin.</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {stagesList.map((stage) => {
+          <div className="space-y-3.5">
+            {stagesList.map((stage, index) => {
               const active = stage.isActive ?? stage.active ?? (stage.status === 'ACTIVE');
               const statusText = stage.status || (active ? 'ACTIVE' : 'UPCOMING');
-              const displayOrder = stage.displayOrder ?? stage.order ?? 1;
-              const expectedXp = stage.expectedXp ?? stage.totalXp ?? 200;
-              const mThresh = stage.mustThreshold ?? stage.mThreshold ?? 80;
-              const iThresh = stage.individualThreshold ?? stage.iThreshold ?? 150;
-              const gThresh = stage.groupThreshold ?? stage.gThreshold ?? 150;
+              const displayOrder = stage.displayOrder ?? stage.order ?? (index + 1);
+              const expectedXp = stage.expectedXp ?? stage.totalXp ?? (index === 0 ? 200 : index === 1 ? 200 : 100);
+              const mThresh = stage.mustThreshold ?? stage.mThreshold ?? (index === 0 ? 80 : 100);
+              const iThresh = stage.individualThreshold ?? stage.iThreshold ?? (index === 2 ? 100 : 150);
+              const gThresh = stage.groupThreshold ?? stage.gThreshold ?? (index === 2 ? 100 : 150);
 
               return (
                 <div 
                   key={stage.id} 
                   onClick={() => handleOpenStage(stage)}
-                  className="bg-white p-5 rounded-2xl shadow-xs border border-slate-200 hover:border-slate-400 cursor-pointer transition-all flex items-center justify-between group"
+                  className="bg-card p-5 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border hover:border-accent/40 cursor-pointer transition-all flex items-center justify-between group"
                 >
-                  <div className="flex-1 pr-4 space-y-3">
+                  <div className="flex-1 pr-4 space-y-2.5">
                     {/* Status Pill & Expected XP Header */}
                     <div className="flex justify-between items-center">
-                      <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider ${
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider ${
                         statusText === 'ACTIVE' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-blue-100 text-blue-800'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                          : 'bg-amber-50 text-amber-800 border border-amber-200'
                       }`}>
                         {statusText}
                       </span>
-                      <span className="type-caption font-bold text-slate-600">
+                      <span className="type-caption font-bold px-2.5 py-0.5 rounded-md bg-accent-tint text-accent border border-accent/20">
                         Expected: {expectedXp} XP
                       </span>
                     </div>
 
                     {/* Stage Name */}
-                    <h2 className="type-h4 text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <h2 className="type-h4 text-text-primary font-bold group-hover:text-accent transition-colors">
                       {stage.name || stage.stageName || `Stage ${displayOrder}`}
                     </h2>
 
-                    {/* Threshold Badges (Order, M, I, G) - 1:1 Flutter Alignment */}
+                    {/* Threshold Badges (Order, M, I, G) */}
                     <div className="flex flex-wrap items-center gap-2 type-caption font-bold">
-                      <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
+                      <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-lg border border-border">
                         Order: {displayOrder}
                       </span>
-                      <span className="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md flex items-center gap-1">
-                        <Star className="w-3 h-3 fill-rose-600" />
-                        M: {mThresh}
+                      <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-lg border border-border flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Min: {mThresh} XP</span>
                       </span>
-                      <span className="text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        I: {iThresh}
+                      <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-lg border border-border flex items-center gap-1">
+                        <User className="w-3.5 h-3.5 text-accent" />
+                        <span>Ind: {iThresh} XP</span>
                       </span>
-                      <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        G: {gThresh}
+                      <span className="text-text-secondary bg-bg px-2.5 py-1 rounded-lg border border-border flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-text-primary" />
+                        <span>Grp: {gThresh} XP</span>
                       </span>
                     </div>
                   </div>
 
-                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 transition-all" />
+                  <div className="w-8 h-8 rounded-lg bg-bg border border-border group-hover:border-accent/30 flex items-center justify-center text-text-muted group-hover:text-accent transition-all shrink-0">
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
               );
             })}
@@ -712,35 +729,35 @@ function QuickAssignModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex justify-center items-end sm:items-center p-0 sm:p-4">
-      <div className="bg-white w-full max-w-2xl rounded-t-2xl sm:rounded-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 flex justify-center items-end sm:items-center p-0 sm:p-4">
+      <div className="bg-card text-text-primary border border-border w-full max-w-2xl rounded-t-lg sm:rounded-lg max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-card">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-teal-100 text-teal-700 rounded-xl">
+            <div className="p-2 bg-bg border border-border text-text-primary rounded-lg">
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="type-h5 text-slate-800">Select Activity to Assign Staff</h3>
-              <p className="type-caption text-slate-500">Pick an activity to configure faculty assignments</p>
+              <h3 className="type-h5 text-text-primary">Select Activity to Assign Staff</h3>
+              <p className="type-caption text-text-secondary">Pick an activity to configure faculty assignments</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 type-btn hover:bg-slate-200 rounded-full transition text-slate-500 cursor-pointer">
+          <button onClick={onClose} className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition text-text-secondary hover:text-text-primary cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Stage Selector Pills */}
-        <div className="py-3 border-b border-slate-100 bg-white">
+        <div className="py-3 border-b border-border bg-card">
           <div className="flex gap-2 overflow-x-auto scrollbar-none px-6 pb-0.5">
             {stages.map((stg) => (
               <button
                 key={stg.id}
                 onClick={() => setSelectedStageId(stg.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-xl type-caption font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex-shrink-0 px-4 py-2 rounded-lg type-caption font-bold whitespace-nowrap transition-all cursor-pointer ${
                   selectedStageId === stg.id
-                    ? 'bg-[#11998E] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-text-primary text-card shadow-none'
+                    : 'bg-bg text-text-secondary border border-border hover:text-text-primary hover:bg-border-subtle'
                 }`}
               >
                 {stg.name || `Stage ${stg.displayOrder || stg.id}`}
@@ -753,24 +770,24 @@ function QuickAssignModal({
         <div className="p-6 overflow-y-auto flex-1 space-y-3">
           {loading ? (
             <div className="flex justify-center py-12">
-              <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+              <RefreshCw className="w-6 h-6 animate-spin text-text-primary" />
             </div>
           ) : activities.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <p className="font-semibold text-slate-600">No activities found in this stage.</p>
+            <div className="text-center py-12 text-text-muted">
+              <p className="font-semibold text-text-secondary">No activities found in this stage.</p>
             </div>
           ) : (
             activities.map((act) => (
               <div
                 key={act.id}
                 onClick={() => onSelectActivity(act, selectedStageId!)}
-                className="bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 hover:shadow-sm cursor-pointer transition-all flex justify-between items-center group"
+                className="bg-card p-4 rounded-lg border border-border hover:border-text-secondary shadow-[0_1px_2px_rgba(0,0,0,0.03)] cursor-pointer transition-all flex justify-between items-center group"
               >
                 <div>
-                  <h4 className="type-body-sm font-bold text-slate-800 group-hover:text-teal-600">{act.name}</h4>
-                  <p className="type-caption text-slate-500 mt-0.5">{act.description || 'Activity task'}</p>
+                  <h4 className="type-body-sm font-bold text-text-primary group-hover:text-accent">{act.name}</h4>
+                  <p className="type-caption text-text-secondary mt-0.5">{act.description || 'Activity task'}</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 transition-colors" />
+                <ChevronRight className="w-5 h-5 text-text-muted group-hover:text-text-primary transition-colors" />
               </div>
             ))
           )}
@@ -845,21 +862,21 @@ function CCActivityListPageView({
   });
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 pb-20">
-      {/* Header Bar matching Flutter teal gradient 1:1 */}
-      <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between">
+    <div className="flex flex-col min-h-full bg-bg pb-20">
+      {/* Header Bar */}
+      <div className="bg-card text-text-primary px-4 md:px-6 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
-            <ArrowLeft className="w-6 h-6 text-white" />
+          <button onClick={onBack} className="p-2 border border-border bg-card hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition cursor-pointer">
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="type-h4 text-white">{categoryTitle}</h1>
-            <p className="type-caption text-white/80">{stageName}</p>
+            <h1 className="type-h4 text-text-primary">{categoryTitle}</h1>
+            <p className="type-caption text-text-secondary">{stageName}</p>
           </div>
         </div>
         <button
           onClick={fetchActivities}
-          className="p-2 type-btn hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+          className="p-2 border border-border bg-card hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition cursor-pointer"
           title="Refresh"
         >
           <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -869,16 +886,16 @@ function CCActivityListPageView({
       <div className="p-4 md:p-6 max-w-4xl mx-auto w-full space-y-4">
         {/* Search Bar */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search activity by name or description..."
-            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2.5 type-caption text-slate-800 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-xs"
+            className="w-full bg-card border border-border rounded-lg pl-10 pr-9 py-2.5 type-caption text-text-primary outline-none focus:border-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-text-muted hover:text-text-primary">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -887,37 +904,37 @@ function CCActivityListPageView({
         {/* Activities List */}
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-teal-600" />
+            <RefreshCw className="w-8 h-8 animate-spin text-text-primary" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-6">
-            <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="font-bold text-slate-700 type-body-sm">No activities found in {categoryTitle}</p>
-            <p className="type-caption text-slate-400 mt-1">Try selecting another category or academic year.</p>
+          <div className="text-center py-16 bg-card rounded-lg border border-border p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <AlertCircle className="w-10 h-10 text-text-muted mx-auto mb-2" />
+            <p className="font-bold text-text-primary type-body-sm">No activities found in {categoryTitle}</p>
+            <p className="type-caption text-text-secondary mt-1">Try selecting another category or academic year.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filtered.map((act) => (
               <div
                 key={act.id}
-                className="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-teal-500 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-card p-4 md:p-5 rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-text-secondary transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="type-fine font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-700 border border-teal-200 uppercase tracking-wider">
+                    <span className="type-fine font-bold px-2 py-0.5 rounded bg-bg text-text-secondary border border-border uppercase tracking-wider">
                       {safeStr(act.subgroup) || safeStr(act.category) || subgroupFilter || 'Activity'}
                     </span>
-                    <span className="type-caption font-bold text-slate-600">
+                    <span className="type-caption font-bold text-text-secondary">
                       XP: {act.awardXp ?? (typeof act.xp === 'object' ? 0 : (act.xp || 0))}
                     </span>
                   </div>
-                  <h3 className="type-h5 text-slate-900">{act.name}</h3>
-                  <p className="type-caption text-slate-500">{act.description || 'Configured activity task'}</p>
+                  <h3 className="type-h5 text-text-primary">{act.name}</h3>
+                  <p className="type-caption text-text-secondary">{act.description || 'Configured activity task'}</p>
                 </div>
 
                 <button
                   onClick={() => onSelectAssign(act)}
-                  className="bg-[#11998E] hover:bg-[#0d7d74] text-white type-caption font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                  className="bg-accent hover:bg-accent-hover text-card type-caption font-bold px-4 py-2.5 rounded-lg flex items-center justify-center gap-1.5 shadow-none transition-colors cursor-pointer self-start sm:self-auto"
                 >
                   <UserCheck className="w-4 h-4" />
                   <span>Assign Staff</span>

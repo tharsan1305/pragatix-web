@@ -210,70 +210,122 @@ export default function TeachersTab({ onBack }: Props) {
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative pb-20">
-      <div className="bg-slate-900 px-6 pt-12 pb-4 shadow-md z-10">
-        <div className="flex items-center space-x-4 mb-2">
+    <div className="flex flex-col min-h-full bg-bg relative pb-20">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-4 sm:px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center space-x-3.5">
           {onBack && (
-            <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors">
+            <button onClick={onBack} className="p-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer">
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <h1 className="type-h3 text-white flex-1">Staff Management</h1>
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Staff & Faculty Management</h1>
+            {!isLoading && (
+              <p className="type-caption text-text-secondary font-medium">
+                {searchQuery
+                  ? `Showing ${filteredUsers.length} of ${users.length} staff members`
+                  : `Showing ${users.length} faculty and mentors`}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => { fetchUsers(); fetchLookups(); }}
+            className="p-2 bg-card border border-border hover:bg-bg rounded-lg text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+            title="Refresh Staff Roster"
+          >
+            <RefreshCw className={`w-4 h-4 text-accent ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full">
-        <div className="mb-6 relative">
-          <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Search staff by name, username..." 
-            value={searchQuery}
-            onChange={handleSearch}
-            className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
-          />
-          {searchQuery && (
-            <button 
-              onClick={() => { setSearchQuery(''); setFilteredUsers(users); }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
+        {/* Search Bar */}
+        <div className="flex gap-2.5 items-center">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input 
+              type="text" 
+              placeholder="Search staff by name, email, department or username..." 
+              value={searchQuery}
+              onChange={handleSearch}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  fetchUsers();
+                }
+              }}
+              className="w-full pl-10 pr-10 py-2.5 bg-bg text-text-primary placeholder:text-text-muted border border-border rounded-lg focus:border-text-primary outline-none shadow-none type-body-sm font-semibold"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => { setSearchQuery(''); setFilteredUsers(users); }}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => fetchUsers()}
+            className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg type-caption font-bold flex items-center space-x-1.5 shadow-none transition-colors cursor-pointer shrink-0"
+            title="Search & Refresh from database"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Search</span>
+          </button>
         </div>
+
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-slate-400" />
+          <div className="flex flex-col items-center justify-center py-20 space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading faculty list...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="text-center py-10 text-slate-500 bg-white rounded-xl shadow-sm border border-slate-200">
-            No staff found.
+          <div className="text-center py-16 text-text-secondary bg-card rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.03)] border border-border space-y-2 p-8 flex flex-col items-center">
+            <p className="font-bold type-h5 text-text-primary">No staff members found.</p>
+            <p className="type-caption text-text-secondary">Try adjusting your search query or add a new faculty member.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {filteredUsers.map(user => (
-              <div key={user.id} className="bg-white rounded-xl shadow-sm border border-slate-100 p-2 flex items-center justify-between hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-4 pl-2">
-                  <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-green-600 font-bold type-h5">
+              <div key={user.id} className="bg-card rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border p-4 flex items-center justify-between hover:border-accent/40 transition-all gap-3">
+                <div className="flex items-center space-x-3.5 pl-1 min-w-0">
+                  <div className="w-11 h-11 bg-bg border border-border rounded-xl flex items-center justify-center text-accent font-black type-h5 shrink-0">
                     {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
                   </div>
-                  <div>
-                    <h3 className="type-h5 text-slate-900">{user.fullName || user.username}</h3>
-                    <p className="type-caption text-slate-500">{user.email || 'No Email'} • {user.departmentName || user.department?.name || 'No Dept'}</p>
-                    <div className="mt-1.5 flex flex-wrap gap-1">
+                  <div className="min-w-0">
+                    <div className="flex items-center space-x-2 flex-wrap">
+                      <h3 className="type-h5 font-bold text-text-primary truncate">{user.fullName || user.username}</h3>
+                      <span className="type-fine font-semibold text-text-muted">@{user.username}</span>
+                    </div>
+                    <p className="type-caption text-text-secondary font-medium truncate mt-0.5">
+                      {user.email || 'No Email'} • {user.departmentName || user.department?.name || 'No Dept'}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {(user.roles || []).map((r: string) => (
-                        <span key={r} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 type-fine font-bold rounded uppercase tracking-wider">
+                        <span key={r} className="px-2 py-0.5 bg-accent-tint text-accent border border-accent/20 type-fine font-bold rounded-md uppercase tracking-wider">
                           {r.replace('ROLE_', '')}
                         </span>
                       ))}
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-1 pr-2">
-                  <button onClick={() => openModal(user)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+                <div className="flex items-center space-x-1 pr-1 shrink-0">
+                  <button 
+                    onClick={() => openModal(user)} 
+                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
+                    title="Edit User"
+                  >
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => triggerDelete(user.id, user.fullName || user.username)} className="p-2.5 text-red-500 hover:bg-red-50 rounded-full transition-colors">
+                  <button 
+                    onClick={() => triggerDelete(user.id, user.fullName || user.username)} 
+                    className="p-2 text-text-secondary hover:text-accent hover:bg-accent-tint rounded-lg transition-colors cursor-pointer"
+                    title="Delete User"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -287,7 +339,8 @@ export default function TeachersTab({ onBack }: Props) {
       <div className="fixed bottom-6 right-6 z-40">
         <button 
           onClick={() => openModal()}
-          className="w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-slate-800 hover:scale-105 transition-all"
+          className="w-14 h-14 bg-accent hover:bg-accent-hover text-card rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-all cursor-pointer"
+          title="Add New Faculty"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -295,49 +348,54 @@ export default function TeachersTab({ onBack }: Props) {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl">
-            <div className="p-6 pb-4">
-              <h2 className="type-h4 text-slate-900 mb-1">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-6 pb-4 border-b border-border flex items-center justify-between">
+              <h2 className="type-h4 font-bold text-text-primary">
                 {editingUser ? `Edit User: ${editingUser.username}` : 'Create New User'}
               </h2>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-text-muted hover:text-text-primary p-1.5 rounded-lg hover:bg-bg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
             
-            <form onSubmit={handleSave} className="px-6 pb-6 space-y-4">
-              
+            <form onSubmit={handleSave} className="p-6 space-y-4 bg-bg">
               <div className="space-y-4">
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Full Name *</label>
-                  <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Full Name <span className="text-accent">*</span></label>
+                  <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                 </div>
                 <div>
-                  <label className="type-form-label text-slate-600 mb-1 block">Email *</label>
-                  <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Email <span className="text-accent">*</span></label>
+                  <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                 </div>
                 {!editingUser && (
                   <>
                     <div>
-                      <label className="type-form-label text-slate-600 mb-1 block">Username *</label>
-                      <input required type="text" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                      <label className="type-form-label text-text-secondary font-bold mb-1 block">Username <span className="text-accent">*</span></label>
+                      <input required type="text" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                     </div>
                     <div>
-                      <label className="type-form-label text-slate-600 mb-1 block">Password *</label>
-                      <input required type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                      <label className="type-form-label text-text-secondary font-bold mb-1 block">Password <span className="text-accent">*</span></label>
+                      <input required type="password" autoComplete="new-password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                     </div>
                   </>
                 )}
                 
                 <div className="pt-2">
-                  <label className="type-form-label text-slate-600 mb-1 block">Department</label>
-                  <select value={formData.departmentId} onChange={e => setFormData({...formData, departmentId: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">Department</label>
+                  <select value={formData.departmentId} onChange={e => setFormData({...formData, departmentId: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer">
                     <option value="">-- None --</option>
                     {lookups.departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
 
                 <div className="pt-2">
-                  <label className="type-form-label text-slate-600 mb-1 block">System Role *</label>
-                  <select value={formData.mainRole} onChange={e => setFormData({...formData, mainRole: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
+                  <label className="type-form-label text-text-secondary font-bold mb-1 block">System Role <span className="text-accent">*</span></label>
+                  <select value={formData.mainRole} onChange={e => setFormData({...formData, mainRole: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer">
                     <option value="ROLE_TEACHER">Teacher</option>
                     <option value="ROLE_TRANSPORT">Transport</option>
                   </select>
@@ -346,27 +404,27 @@ export default function TeachersTab({ onBack }: Props) {
                 {formData.mainRole === 'ROLE_TEACHER' && (
                   <div className="pt-2 space-y-4">
                     <div>
-                      <label className="type-form-label type-body-sm font-bold text-slate-900 mb-2 block">Teacher Sub-Roles:</label>
+                      <label className="type-form-label type-body-sm font-bold text-text-primary mb-2 block">Teacher Sub-Roles:</label>
                       <div className="space-y-2 pl-2">
                         {['HOD', 'CC', 'Discipline Commitee', 'Lab instructor', 'PET'].map(subRole => (
-                          <label key={subRole} className="flex items-center space-x-3 type-form-label text-slate-700 cursor-pointer">
+                          <label key={subRole} className="flex items-center space-x-3 type-form-label text-text-secondary cursor-pointer">
                             <input 
                               type="checkbox" 
                               checked={formData.subRoles.includes(subRole)}
                               onChange={() => toggleSubRole(subRole)}
-                              className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 h-4 w-4"
+                              className="rounded border-border text-accent focus:ring-accent h-4 w-4"
                             />
-                            <span>{subRole}</span>
+                            <span className="font-semibold text-text-primary">{subRole}</span>
                           </label>
                         ))}
                       </div>
                     </div>
 
                     {formData.subRoles.includes('CC') && (
-                      <div className="space-y-4 pl-6 border-l-2 border-slate-200 py-2 mt-2">
+                      <div className="space-y-4 pl-4 border-l-2 border-border py-2 mt-2">
                         <div>
-                          <label className="type-form-label text-slate-600 mb-1 block">Coordinator Year *</label>
-                          <select value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none bg-white type-body-sm">
+                          <label className="type-form-label text-text-secondary font-bold mb-1 block">Coordinator Year <span className="text-accent">*</span></label>
+                          <select value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary bg-card text-text-primary type-body-sm font-semibold cursor-pointer">
                             <option value="">-- Select --</option>
                             <option value="I">I Year</option>
                             <option value="II">II Year</option>
@@ -375,27 +433,27 @@ export default function TeachersTab({ onBack }: Props) {
                           </select>
                         </div>
                         <div>
-                          <label className="type-form-label text-slate-600 mb-1 block">Coordinator Section *</label>
-                          <input type="text" placeholder="e.g. A" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none type-body-sm" />
+                          <label className="type-form-label text-text-secondary font-bold mb-1 block">Coordinator Section <span className="text-accent">*</span></label>
+                          <input type="text" placeholder="e.g. A" value={formData.section} onChange={e => setFormData({...formData, section: e.target.value})} className="w-full px-3 py-2.5 border border-border rounded-lg outline-none focus:border-text-primary type-body-sm font-semibold bg-card text-text-primary" />
                         </div>
                       </div>
                     )}
 
                     <div className="pt-2">
-                      <label className="type-form-label text-slate-500 uppercase tracking-wider mb-2 block">Subject Specialization:</label>
+                      <label className="type-form-label text-text-secondary font-bold uppercase tracking-wider mb-2 block">Subject Specialization:</label>
                       <div className="space-y-2 pl-2">
                         {lookups.subjects.length > 0 ? lookups.subjects.map(s => (
-                          <label key={s.id} className="flex items-center space-x-3 type-form-label text-slate-700 cursor-pointer">
+                          <label key={s.id} className="flex items-center space-x-3 type-form-label text-text-secondary cursor-pointer">
                             <input 
                               type="checkbox" 
                               checked={formData.subjectIds.includes(s.id)}
                               onChange={() => toggleSubject(s.id)}
-                              className="rounded border-slate-300 text-slate-900 focus:ring-slate-900 h-4 w-4"
+                              className="rounded border-border text-accent focus:ring-accent h-4 w-4"
                             />
-                            <span>{s.name}</span>
+                            <span className="font-semibold text-text-primary">{s.name}</span>
                           </label>
                         )) : (
-                          <div className="type-caption text-slate-400 italic">No subjects configured. Add subjects under 'Manage Subjects'.</div>
+                          <div className="type-caption text-text-muted italic">No subjects configured. Add subjects under 'Manage Subjects'.</div>
                         )}
                       </div>
                     </div>
@@ -403,12 +461,12 @@ export default function TeachersTab({ onBack }: Props) {
                 )}
               </div>
               
-              <div className="flex justify-end space-x-3 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-slate-500 font-semibold hover:bg-slate-100 rounded-lg transition-colors">
+              <div className="flex justify-end space-x-2.5 pt-4 border-t border-border">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-text-secondary font-bold hover:bg-bg border border-border rounded-lg transition-colors cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="type-btn px-6 py-2 bg-[#EA4335] text-white font-semibold rounded-lg hover:bg-red-600 transition-colors">
-                  {editingUser ? 'Save' : 'Create'}
+                <button type="submit" className="type-btn px-6 py-2 bg-accent hover:bg-accent-hover text-card font-bold rounded-lg transition-colors shadow-none cursor-pointer">
+                  {editingUser ? 'Save Changes' : 'Create User'}
                 </button>
               </div>
             </form>

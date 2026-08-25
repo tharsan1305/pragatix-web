@@ -6,11 +6,45 @@
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-sans: var(--font-body);
+
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-tint: var(--accent-tint);
+  --color-success: var(--green);
+  --color-success-tint: var(--green-tint);
+  --color-warning: var(--amber);
+  --color-warning-tint: var(--amber-tint);
+  --radius-default: 10px;
+}
+
+:root {
+  --bg: #F7F7F8;
+  --card: #FFFFFF;
+  --border: #E4E4E7;
+  --border-subtle: #F0F0F2;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #9CA3AF;
+  --accent: #1E293B;
+  --accent-hover: #0F172A;
+  --accent-tint: rgba(30, 41, 59, 0.07);
+  --green: #166534;
+  --green-tint: #EAF4EC;
+  --amber: #92600A;
+  --amber-tint: #FCF3E5;
 }
 
 body {
   font-family: var(--font-body);
-  color: #171717;
+  color: var(--text-primary);
+  background-color: var(--bg);
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

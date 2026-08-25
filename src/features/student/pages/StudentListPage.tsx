@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStudentStore } from '../../../store/studentStore';
-import { Search, UserPlus, Filter, MoreVertical, ShieldAlert } from 'lucide-react';
+import { Search, Filter, MoreVertical, ShieldAlert, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../../../components/common/Footer';
 
 export default function StudentListPage() {
   const { students, fetchStudents, searchStudents, isLoading, error } = useStudentStore();
@@ -22,115 +23,115 @@ export default function StudentListPage() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex flex-col min-h-screen bg-bg text-text-primary justify-between">
+      <div className="p-6 md:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="type-h3 text-slate-800">Students Directory</h1>
-          <p className="type-body-sm text-slate-500 mt-1">Manage and monitor student discipline records</p>
+          <h1 className="type-h3 font-bold text-text-primary">Students Directory</h1>
+          <p className="type-body-sm text-text-secondary mt-1 font-medium">Manage and monitor student discipline records</p>
         </div>
         <button 
           onClick={() => {/* Open add modal or navigate */}}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg type-body-sm font-medium transition-colors flex items-center gap-2"
+          className="bg-accent hover:bg-accent-hover text-card px-4 py-2 rounded-lg type-body-sm font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-none"
         >
           <UserPlus className="w-4 h-4" />
           Add Student
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="bg-card p-4 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border flex flex-col sm:flex-row gap-4 items-center justify-between">
         <form onSubmit={handleSearch} className="relative w-full sm:max-w-md">
           <input
             type="text"
             placeholder="Search by name, ID, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none"
+            className="w-full pl-10 pr-4 py-2 bg-bg border border-border rounded-lg focus:border-accent text-text-primary placeholder:text-text-muted outline-none"
           />
-          <Search className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" />
+          <Search className="w-5 h-5 text-text-muted absolute left-3 top-2.5" />
         </form>
         
-        <button className="flex items-center gap-2 type-btn px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors w-full sm:w-auto">
+        <button className="flex items-center gap-2 type-btn px-4 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors w-full sm:w-auto cursor-pointer">
           <Filter className="w-4 h-4" />
           <span className="type-body-sm font-medium">Filters</span>
         </button>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 border border-red-100">
+        <div className="p-4 bg-card border border-accent/30 text-accent rounded-lg flex items-center gap-2">
           <ShieldAlert className="w-5 h-5" />
           {error}
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 overflow-hidden flex flex-col">
+      <div className="bg-card rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.03)] border border-border flex-1 overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 type-table-head">
-                <th className="p-4 type-table-head">Student</th>
-                <th className="p-4 type-table-head">ID / Reg No</th>
-                <th className="p-4 type-table-head">Department</th>
-                <th className="p-4 type-table-head">Year/Sec</th>
-                <th className="p-4 type-table-head text-center">Score</th>
-                <th className="p-4 type-table-head">Status</th>
-                <th className="p-4 type-table-head text-right">Actions</th>
+              <tr className="bg-bg border-b border-border text-text-secondary type-table-head">
+                <th className="p-4 type-table-head font-bold">Student</th>
+                <th className="p-4 type-table-head font-bold">ID / Reg No</th>
+                <th className="p-4 type-table-head font-bold">Department</th>
+                <th className="p-4 type-table-head font-bold">Year/Sec</th>
+                <th className="p-4 type-table-head font-bold text-center">Score</th>
+                <th className="p-4 type-table-head font-bold">Status</th>
+                <th className="p-4 type-table-head font-bold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-text-muted">
                     <div className="flex justify-center items-center gap-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
                       Loading students...
                     </div>
                   </td>
                 </tr>
               ) : students.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-text-muted font-medium">
                     No students found.
                   </td>
                 </tr>
               ) : (
                 students.map((student: any) => (
-                  <tr key={student.id} className="hover:bg-slate-50 transition-colors group">
+                  <tr key={student.id} className="hover:bg-bg transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold type-body-sm">
+                        <div className="w-10 h-10 rounded-full bg-bg border border-border text-text-primary flex items-center justify-center font-bold type-body-sm">
                           {student.fullName.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium text-slate-900 flex items-center gap-1.5">
-                            {student.teamRole === 'CAPTAIN' && <span className="text-amber-600 text-[10px] font-bold bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">👑 Captain</span>}
-                            {student.teamRole === 'VICE_CAPTAIN' && <span className="text-slate-700 text-[10px] font-bold bg-slate-100 border border-slate-300 px-1.5 py-0.5 rounded">🥈 Vice Captain</span>}
+                          <p className="font-bold text-text-primary flex items-center gap-1.5">
+                            {student.teamRole === 'CAPTAIN' && <span className="text-accent text-[10px] font-bold bg-accent-tint border border-accent/30 px-1.5 py-0.5 rounded">👑 Captain</span>}
+                            {student.teamRole === 'VICE_CAPTAIN' && <span className="text-text-secondary text-[10px] font-bold bg-bg border border-border px-1.5 py-0.5 rounded">🥈 Vice Captain</span>}
                             <span>{student.fullName}</span>
                           </p>
-                          <p className="type-caption text-slate-500">{student.email}</p>
+                          <p className="type-caption text-text-muted">{student.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 text-slate-600 font-medium">{student.regNo}</td>
-                    <td className="p-4 text-slate-600">{student.departmentName || 'N/A'}</td>
-                    <td className="p-4 text-slate-600">{student.year}-{student.section}</td>
+                    <td className="p-4 text-text-primary font-medium">{student.regNo}</td>
+                    <td className="p-4 text-text-secondary">{student.departmentName || 'N/A'}</td>
+                    <td className="p-4 text-text-secondary">{student.year}-{student.section}</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2.5 py-1 rounded-full type-caption ${
-                        student.disciplineScore >= 80 ? 'bg-green-100 text-green-700' :
-                        student.disciplineScore >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
+                      <span className={`px-2.5 py-1 rounded-md type-caption font-bold border ${
+                        student.disciplineScore >= 80 ? 'bg-success-tint border-success/30 text-success' :
+                        student.disciplineScore >= 50 ? 'bg-warning-tint border-warning/30 text-warning' :
+                        'bg-accent-tint border-accent/30 text-accent'
                       }`}>
                         {student.disciplineScore}
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-full type-caption bg-slate-100 text-slate-700">
+                      <span className="px-2.5 py-1 rounded-md type-caption font-bold bg-bg border border-border text-text-secondary">
                         {student.status || 'Active'}
                       </span>
                     </td>
                     <td className="p-4 text-right">
                       <button 
                         onClick={() => navigate(`/students/${student.id}`)}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-2 text-text-muted hover:text-text-primary hover:bg-bg border border-transparent hover:border-border rounded-lg transition-colors cursor-pointer"
                       >
                         <MoreVertical className="w-5 h-5" />
                       </button>
@@ -143,5 +144,7 @@ export default function StudentListPage() {
         </div>
       </div>
     </div>
-  );
+    <Footer />
+  </div>
+);
 }

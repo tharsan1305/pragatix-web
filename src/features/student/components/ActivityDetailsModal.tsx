@@ -92,109 +92,114 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
   const awardedXp = activity.awardedXp ?? 0;
 
   return (
-    <div className="fixed inset-0 bg-white z-[100] flex flex-col overflow-y-auto animate-in slide-in-from-right duration-200">
-      {/* Top Header Bar matching Flutter AppBar */}
-      <div className="bg-white px-6 py-4 sticky top-0 z-10 flex items-center border-b border-slate-100 shadow-xs">
-        <button
-          onClick={onClose}
-          className="p-2 -ml-2 text-slate-900 type-btn hover:bg-slate-100 rounded-full transition cursor-pointer"
-          title="Back"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <span className="ml-2 font-bold text-slate-900 type-h5">Activity Details</span>
+    <div className="fixed inset-0 bg-bg text-text-primary z-[100] flex flex-col overflow-y-auto animate-in slide-in-from-right duration-200">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-5 sticky top-0 z-10 flex items-center justify-between border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center space-x-3.5">
+          <button
+            onClick={onClose}
+            className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition-colors cursor-pointer text-text-secondary hover:text-text-primary"
+            title="Back to Activities"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="type-h4 font-bold text-text-primary tracking-tight">Activity Details</h1>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">Task requirements, rewards, and evidence submission</p>
+          </div>
+        </div>
       </div>
 
-      <div className="p-6 max-w-xl mx-auto w-full space-y-6 flex-1 pb-28">
-        {/* Status Pill Badge matching Flutter */}
-        <div>
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border font-bold type-caption uppercase tracking-wider ${
-            isCompleted 
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
-              : isPending 
-                ? 'bg-amber-50 border-amber-200 text-amber-700'
-                : 'bg-slate-100 border-slate-200 text-slate-700'
-          }`}>
-            <span className={`w-2 h-2 rounded-full ${isCompleted ? 'bg-emerald-500' : isPending ? 'bg-amber-500' : 'bg-slate-400'}`}></span>
-            <span>{statusText}</span>
-          </span>
+      <div className="p-4 sm:p-6 max-w-xl mx-auto w-full space-y-5 flex-1 pb-28">
+        {/* Main Hero Card */}
+        <div className="bg-card rounded-2xl p-6 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-3">
+          {/* Status Pill Badge */}
+          <div>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border font-bold type-caption uppercase tracking-wider ${
+              isCompleted 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                : isPending 
+                  ? 'bg-amber-50 border-amber-200 text-amber-800'
+                  : 'bg-bg border-border text-text-secondary'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${isCompleted ? 'bg-emerald-600' : isPending ? 'bg-amber-500' : 'bg-text-muted'}`}></span>
+              <span>{statusText.replace('_', ' ')}</span>
+            </span>
+          </div>
+
+          {/* Title & Description */}
+          <div>
+            <h2 className="type-h2 font-black text-text-primary tracking-tight">
+              {activity.activityName}
+            </h2>
+            <p className="type-body-sm text-text-secondary mt-2 leading-relaxed whitespace-pre-line font-medium">
+              {activity.description || 'No description provided.'}
+            </p>
+          </div>
         </div>
 
-        {/* Title & Description matching Flutter */}
-        <div>
-          <h1 className="font-heading type-h1 text-slate-900 leading-tight">
-            {activity.activityName}
-          </h1>
-          <p className="type-body-sm text-slate-600 mt-2 leading-relaxed whitespace-pre-line">
-            {activity.description || 'No description provided.'}
-          </p>
-        </div>
-
-        <hr className="border-slate-100 my-4" />
-
-        {/* Information Section Card matching Flutter _InfoRow list */}
-        <div className="space-y-3">
-          <h2 className="type-h5 text-slate-900">Information</h2>
+        {/* Information Section Card */}
+        <div className="bg-card rounded-2xl p-6 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-4">
+          <h3 className="type-h4 font-bold text-text-primary flex items-center gap-2 pb-3 border-b border-border">
+            <Star className="w-4 h-4 text-accent" />
+            <span>Activity Overview</span>
+          </h3>
           
-          <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-4">
+          <div className="space-y-3.5 type-body-sm">
             {/* Reward */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
-                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                <span>Reward</span>
-              </div>
-              <span className="type-body-sm font-bold text-slate-900">
+              <span className="text-text-secondary font-medium flex items-center gap-2">
+                <Star className="w-4 h-4 text-accent" /> Reward Points
+              </span>
+              <span className="font-bold px-2.5 py-0.5 rounded-md bg-accent-tint text-accent border border-accent/20">
                 {activity.rewardXp} XP
               </span>
             </div>
 
             {/* Awarded */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
-                <Award className="w-5 h-5 text-indigo-500" />
-                <span>Awarded</span>
-              </div>
-              <span className="type-body-sm font-bold text-slate-900">
+              <span className="text-text-secondary font-medium flex items-center gap-2">
+                <Award className="w-4 h-4 text-text-muted" /> Awarded Points
+              </span>
+              <span className="font-bold text-text-primary">
                 {awardedXp} XP
               </span>
             </div>
 
             {/* Faculty / Owner */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
-                <User className="w-5 h-5 text-purple-500" />
-                <span>Faculty / Owner</span>
-              </div>
-              <span className="type-body-sm font-bold text-slate-900 truncate max-w-[200px] text-right">
+              <span className="text-text-secondary font-medium flex items-center gap-2">
+                <User className="w-4 h-4 text-text-muted" /> Faculty / Owner
+              </span>
+              <span className="font-bold text-text-primary truncate max-w-[200px] text-right">
                 {facultyName}
               </span>
             </div>
 
             {/* Frequency */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 type-body-sm font-semibold">
-                <RefreshCw className="w-5 h-5 text-emerald-500" />
-                <span>Frequency</span>
-              </div>
-              <span className="type-body-sm font-bold text-slate-900">
+              <span className="text-text-secondary font-medium flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-text-muted" /> Frequency
+              </span>
+              <span className="font-bold text-text-primary">
                 {frequency}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Required Evidence Section Card matching Flutter */}
+        {/* Required Evidence Section Card */}
         {evidenceList.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="type-h5 text-slate-900">Required Evidence</h2>
+          <div className="bg-card rounded-2xl p-6 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
+            <h3 className="type-h4 font-bold text-text-primary">Required Evidence</h3>
             
             <div className="flex flex-wrap gap-2">
               {evidenceList.map((ev, idx) => (
                 <div
                   key={idx}
-                  className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 font-semibold type-caption px-3.5 py-2 rounded-xl border border-slate-200"
+                  className="inline-flex items-center gap-2 bg-bg text-text-primary font-bold type-caption px-3.5 py-2 rounded-xl border border-border"
                 >
-                  <Eye className="w-4 h-4 text-slate-500" />
+                  <Eye className="w-4 h-4 text-accent" />
                   <span>{ev}</span>
                 </div>
               ))}
@@ -204,33 +209,33 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
 
         {/* Submission Evidence View Button */}
         {activity.evidenceUrl && (
-          <div className="pt-2">
+          <div className="pt-1">
             <a
               href={getSafeHref(activity.evidenceUrl)}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-bold type-caption transition flex items-center justify-center gap-2"
+              className="w-full py-3 bg-card hover:bg-bg text-text-primary border border-border rounded-xl font-bold type-caption transition flex items-center justify-center gap-2"
             >
-              <ExternalLink className="w-4 h-4 text-slate-500" />
-              View Submission Proof
+              <ExternalLink className="w-4 h-4 text-text-muted" />
+              <span>View Submission Proof Link</span>
             </a>
           </div>
         )}
       </div>
 
-      {/* Bottom Bar matching Flutter activity_details_screen.dart */}
+      {/* Bottom Bar */}
       {allowStudentRequest && (
-        <div className="sticky bottom-0 bg-white border-t border-slate-100 p-4 shadow-lg z-20 max-w-xl mx-auto w-full space-y-3">
+        <div className="sticky bottom-0 bg-card border-t border-border p-4 shadow-none z-20 max-w-xl mx-auto w-full space-y-3">
           {isCompleted ? (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-3.5 flex items-center gap-2 font-bold type-body-sm">
-              <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div className="bg-success-tint border border-success/30 text-success rounded-lg p-3.5 flex items-center gap-2 font-bold type-body-sm">
+              <CheckCircle className="w-5 h-5 text-success shrink-0" />
               <span>Completed ✓</span>
             </div>
           ) : (
             <>
               {isRejected && existingRequest && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl type-caption text-rose-700 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <div className="p-3 bg-accent-tint/40 border border-accent/30 rounded-lg type-caption text-accent flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                   <div>
                     <strong>Previous request rejected:</strong> {existingRequest.rejectedReason || 'No reason provided'}
                   </div>
@@ -240,10 +245,10 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
               <button
                 onClick={() => setShowDialog(true)}
                 disabled={!buttonEnabled || isLoadingRequests}
-                className={`w-full py-3.5 rounded-2xl font-bold type-body-sm transition flex items-center justify-center gap-2 shadow-sm ${
+                className={`w-full py-3.5 rounded-lg font-bold type-body-sm transition flex items-center justify-center gap-2 cursor-pointer ${
                   isPending
-                    ? 'bg-amber-100 text-amber-800 cursor-not-allowed'
-                    : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                    ? 'bg-warning-tint text-warning border border-warning/30 cursor-not-allowed'
+                    : 'bg-accent hover:bg-accent-hover text-card'
                 }`}
               >
                 {isPending ? (
@@ -263,15 +268,15 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
         </div>
       )}
 
-      {/* Flutter Completion Request Dialog Popup matching AlertDialog */}
+      {/* Completion Request Dialog Popup */}
       {showDialog && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[110] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
-            <h3 className="type-h4 text-slate-900">Request Activity</h3>
+        <div className="fixed inset-0 bg-text-primary/40 backdrop-blur-xs z-[110] flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg max-w-md w-full p-6 border border-border shadow-xl space-y-4 animate-in zoom-in-95 duration-150">
+            <h3 className="type-h4 font-bold text-text-primary">Request Activity</h3>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">
+                <label className="type-form-label block font-bold text-text-primary mb-1">
                   Reason / Remarks
                 </label>
                 <textarea
@@ -279,12 +284,12 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="Describe your completion details..."
                   rows={3}
-                  className="w-full type-caption p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full type-caption p-3 rounded-lg border border-border bg-bg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                 />
               </div>
 
               <div>
-                <label className="type-form-label block font-bold text-slate-700 mb-1">
+                <label className="type-form-label block font-bold text-text-primary mb-1">
                   Proof URL (Optional)
                 </label>
                 <input
@@ -292,7 +297,7 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                   value={proofUrl}
                   onChange={(e) => setProofUrl(e.target.value)}
                   placeholder="https://drive.google.com/..."
-                  className="w-full type-caption p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full type-caption p-3 rounded-lg border border-border bg-bg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                 />
               </div>
 
@@ -300,14 +305,14 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowDialog(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold type-caption transition cursor-pointer"
+                  className="px-4 py-2.5 bg-bg hover:bg-border border border-border text-text-primary rounded-lg font-bold type-caption transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold type-caption transition disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-lg font-bold type-caption transition disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit'}
                 </button>

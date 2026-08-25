@@ -182,51 +182,66 @@ export default function ActivityListPage({
     .filter(g => g.activities.length > 0);
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 relative overflow-x-hidden">
-      {/* Top Header */}
-      <div className="bg-slate-900 px-4 sm:px-6 pt-6 sm:pt-10 pb-4 sm:pb-6 flex items-center gap-3 sticky top-0 z-10 shadow-md">
-        <button onClick={onBack} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors shrink-0 cursor-pointer">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1 min-w-0">
-          <h1 className="type-h5 sm:type-h4 text-white truncate">{cleanTitle} – Activities</h1>
+    <div className="flex flex-col min-h-full bg-bg text-text-primary relative overflow-x-hidden">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center space-x-3.5 min-w-0">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption shrink-0"
+            title="Back to Stage"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Stage</span>
+          </button>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="type-h4 font-bold text-text-primary truncate">{cleanTitle} – Activities</h1>
+              <span className="px-2.5 py-0.5 rounded-md type-fine font-bold uppercase bg-bg text-text-secondary border border-border">
+                {categoryLabel}
+              </span>
+            </div>
+            <p className="type-caption text-text-secondary font-medium mt-0.5">
+              {activities.length} activities configured in this category
+            </p>
+          </div>
         </div>
-        <button onClick={fetchActivities} className="p-2 type-btn bg-slate-800 rounded-full text-white hover:bg-slate-700 transition-colors shrink-0 cursor-pointer">
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+
+        <button 
+          onClick={fetchActivities} 
+          disabled={isLoading}
+          className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer shrink-0 disabled:opacity-50"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+          <span className="type-caption font-bold hidden sm:inline">Refresh</span>
         </button>
       </div>
 
-      <div className="flex-1 px-3.5 sm:px-6 py-4 sm:py-6 pb-28 max-w-4xl mx-auto w-full">
-        <div className="mb-4 sm:mb-6 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="type-h4 sm:type-h3 text-slate-800 truncate">{cleanTitle}</h2>
-            <span className="type-fine sm:type-caption font-bold px-2.5 py-0.5 sm:py-1 rounded-md bg-red-50 text-red-700 border border-red-200 uppercase tracking-wide shrink-0">
-              {categoryLabel}
-            </span>
-          </div>
-          <p className="type-body-sm text-slate-600 mt-2 font-medium">
-            {activities.length} activities configured
-          </p>
-        </div>
-
+      <div className="flex-1 px-4 sm:px-6 py-6 pb-28 max-w-6xl mx-auto w-full space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6 flex items-center space-x-3">
+          <div className="bg-accent-tint border border-accent/20 text-accent p-4 rounded-lg flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span className="type-body-sm font-medium">{error}</span>
           </div>
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+          <div className="flex flex-col items-center justify-center py-20 bg-card rounded-lg border border-border space-y-3">
+            <RefreshCw className="w-8 h-8 animate-spin text-accent" />
+            <p className="type-body-sm text-text-secondary font-medium">Loading activities list...</p>
           </div>
         ) : activities.length === 0 ? (
-          <div className="text-center py-16 text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="type-h5 text-slate-700 mb-2">No Activities Found</h3>
-            <p className="type-body-sm text-slate-500">Tap the Add Activity button to create one for this category.</p>
+          <div className="text-center py-16 text-text-secondary bg-card rounded-lg border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] p-8 space-y-3 flex flex-col items-center">
+            <div className="w-12 h-12 rounded-lg bg-bg border border-border flex items-center justify-center text-text-muted">
+              <Folder className="w-6 h-6" />
+            </div>
+            <h3 className="type-h5 font-bold text-text-primary">No Activities Found</h3>
+            <p className="type-body-sm text-text-secondary max-w-sm">
+              Click the Add Activity button below to create or map an activity for this category.
+            </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {activities.map(activity => (
               <ActivityCard
                 key={activity.id}
@@ -256,10 +271,10 @@ export default function ActivityListPage({
         <div className="fixed bottom-20 right-6 z-20">
           <button
             onClick={() => setIsAddOptionsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-[#EA4335] text-white px-5 py-3.5 rounded-2xl shadow-lg hover:bg-red-600 transition-all font-semibold active:scale-95 cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-accent hover:bg-accent-hover text-card px-5 py-3.5 rounded-lg shadow-lg transition-all font-bold cursor-pointer"
           >
             <Plus className="w-5 h-5" />
-            Add Activity
+            <span>Add Activity</span>
           </button>
         </div>
       )}

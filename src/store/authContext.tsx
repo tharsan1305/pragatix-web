@@ -17,6 +17,7 @@ export interface UserData {
   score?: number;
   totalXp?: number;
   isCaptain?: boolean;
+  isViceCaptain?: boolean;
   [key: string]: any;
 }
 
@@ -32,6 +33,7 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   isTeacher: boolean;
   isCaptain: boolean;
+  isViceCaptain: boolean;
   isStudent: boolean;
   isParent: boolean;
   isHOD: boolean;
@@ -95,12 +97,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // during login (which contains all backend roles + normalized role names).
           // The backend /api/v1/auth/me response may return a simplified role set that
           // does not include ROLE_SUPERADMIN — do not overwrite with it.
+          // Also preserve isCaptain / isViceCaptain flags set during login so that
+          // Vice Captains are not incorrectly downgraded to the Student portal.
           setUser((prev) => ({
             ...prev,
             ...freshData,
             // Keep stored roles if they are richer than what the backend returns
             roles: (prev?.roles && prev.roles.length > 0) ? prev.roles : (freshData.roles || prev?.roles || []),
             isSuperAdmin: prev?.isSuperAdmin ?? freshData.isSuperAdmin ?? false,
+            // Preserve Captain / Vice Captain flags — backend /me may return isCaptain:false
+            isCaptain: prev?.isCaptain ?? freshData.isCaptain ?? false,
+            isViceCaptain: prev?.isViceCaptain ?? freshData.isViceCaptain ?? false,
           }));
         }
       } catch (error: any) {
@@ -210,6 +217,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
   const isTeacher = !!(hasRole(userRoles, 'ROLE_TEACHER', 'TEACHER') || role === 'TEACHER' || role === 'ROLE_TEACHER');
   const isCaptain = !!(hasRole(userRoles, 'ROLE_CAPTAIN') || user?.isCaptain || role === 'CAPTAIN' || subRoles.includes('CAPTAIN'));
+  const isViceCaptain = !!(user?.isViceCaptain || user?.teamRole === 'VICE_CAPTAIN' || subRoles.includes('VICE_CAPTAIN'));
   const isStudent = !!(user?.studentId || role === 'STUDENT' || role === 'ROLE_STUDENT');
   const isParent = !!(user?.sprNo || role === 'PARENT' || role === 'ROLE_PARENT');
   const isHOD = !!(subRoles.includes('HOD') || user?.subRoles?.includes('HOD'));
@@ -218,8 +226,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const contextValue = useMemo(() => ({
     token, user, role, subRoles, login, setSubRoles, logout,
-    isAdmin, isSuperAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC
-  }), [token, user, role, subRoles, login, setSubRoles, logout, isAdmin, isSuperAdmin, isTeacher, isCaptain, isStudent, isParent, isHOD, isCC, isDC]);
+    isAdmin, isSuperAdmin, isTeacher, isCaptain, isViceCaptain, isStudent, isParent, isHOD, isCC, isDC
+  }), [token, user, role, subRoles, login, setSubRoles, logout, isAdmin, isSuperAdmin, isTeacher, isCaptain, isViceCaptain, isStudent, isParent, isHOD, isCC, isDC]);
 
   return (
     <AuthContext.Provider value={contextValue}>

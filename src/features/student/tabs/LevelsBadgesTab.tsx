@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, X, Award, Link2, CheckCircle2 } from 'lucide-react';
+import { Lock, Check, Zap, ShieldCheck, HelpCircle, Clock, X, Award, Link2, CheckCircle2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../store/authContext';
 import apiClient from '../../../services/apiClient';
@@ -178,7 +178,11 @@ const DEFAULT_BADGES_BY_TIER: Record<string, any[]> = {
   ],
 };
 
-export default function LevelsBadgesTab() {
+interface LevelsBadgesTabProps {
+  onBack?: () => void;
+}
+
+export default function LevelsBadgesTab({ onBack }: LevelsBadgesTabProps = {}) {
   const { token } = useAuth();
   const [activeTab, setActiveTab] = useState<'levels' | 'badges'>('levels');
   const [isLoading, setIsLoading] = useState(true);
@@ -342,16 +346,16 @@ export default function LevelsBadgesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="flex h-screen items-center justify-center bg-bg text-text-primary">
+        <p className="type-body-sm font-semibold text-text-secondary">Loading levels & badges...</p>
       </div>
     );
   }
 
   if (activeTab === 'levels' && !progressionData) {
     return (
-      <div className="bg-slate-50 min-h-screen flex items-center justify-center p-8">
-        <p className="text-slate-500 font-medium type-body-sm">Progression data unavailable</p>
+      <div className="bg-bg min-h-screen flex items-center justify-center p-8 text-text-primary">
+        <p className="text-text-muted font-medium type-body-sm">Progression data unavailable</p>
       </div>
     );
   }
@@ -360,7 +364,7 @@ export default function LevelsBadgesTab() {
   const currentLevelTitle = progressionData?.currentLevelName ?? '';
   const displayTotalXp = progressionData?.totalXp ?? 0;
   const xpMax = progressionData?.currentLevelMaxXp ?? 0;
-  const remainingXp = progressionData?.remainingXp ?? 0;
+  const remainingXp = Math.max(0, progressionData?.remainingXp ?? 0);
   const levelProgress = (progressionData?.progressPercentage ?? 0) / 100;
   const isEligibleForPathway = currentLevelNum >= 3;
 
@@ -370,21 +374,43 @@ export default function LevelsBadgesTab() {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24">
+    <div className="bg-bg min-h-screen pb-24 text-text-primary">
       {/* Header */}
-      <div className="bg-slate-800 text-white sticky top-0 z-10 shadow-md">
-        <div className="px-6 py-4">
-          <h1 className="type-h4">Levels & Badges</h1>
+      <div className="bg-card text-text-primary sticky top-0 z-10 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+        <div className="px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center space-x-3.5">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="p-2 border border-border bg-card hover:bg-bg rounded-lg transition-colors cursor-pointer text-text-secondary hover:text-text-primary"
+                title="Back to Dashboard"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
+            <div>
+              <h1 className="type-h3 font-bold text-text-primary tracking-tight">Levels & Badges</h1>
+              <p className="type-caption text-text-secondary font-medium mt-0.5">Explore milestone progression, skill pathways, and badge collections</p>
+            </div>
+          </div>
         </div>
-        <div className="flex border-t border-slate-700">
+        <div className="flex border-t border-border px-6 py-2 gap-2 bg-card">
           <button 
-            className={`flex-1 py-3 type-body-sm font-bold border-b-2 transition-colors ${activeTab === 'levels' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer border ${
+              activeTab === 'levels' 
+                ? 'bg-accent-tint text-accent border-accent/30 shadow-none' 
+                : 'bg-bg text-text-secondary border-border hover:text-text-primary hover:bg-card'
+            }`}
             onClick={() => setActiveTab('levels')}
           >
             Level & Pathway
           </button>
           <button 
-            className={`flex-1 py-3 type-body-sm font-bold border-b-2 transition-colors ${activeTab === 'badges' ? 'border-indigo-400 text-white' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
+            className={`px-4 py-2 rounded-lg type-caption font-bold transition-all cursor-pointer border ${
+              activeTab === 'badges' 
+                ? 'bg-accent-tint text-accent border-accent/30 shadow-none' 
+                : 'bg-bg text-text-secondary border-border hover:text-text-primary hover:bg-card'
+            }`}
             onClick={() => setActiveTab('badges')}
           >
             Badge Collection
@@ -392,32 +418,32 @@ export default function LevelsBadgesTab() {
         </div>
       </div>
 
-      <div className="p-5 max-w-4xl mx-auto space-y-6">
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto space-y-6">
         {activeTab === 'levels' && (
-          <div className="space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
             
             {/* Level Progress Card */}
-            <div className="bg-gradient-to-br from-indigo-600 to-indigo-500 rounded-3xl p-6 shadow-lg shadow-indigo-500/20 text-white">
-              <div className="flex justify-between items-start mb-4">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.02)] text-text-primary space-y-4">
+              <div className="flex justify-between items-start">
                 <div>
-                  <div className="type-caption font-bold text-indigo-200 tracking-wider mb-1">CURRENT LEVEL</div>
-                  <div className="type-h3">Lvl {currentLevelNum}: {currentLevelTitle}</div>
+                  <div className="type-fine font-bold text-text-muted uppercase tracking-wider mb-0.5">CURRENT LEVEL</div>
+                  <div className="type-h2 font-black text-text-primary tracking-tight">Lvl {currentLevelNum}: {currentLevelTitle}</div>
                 </div>
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-amber-300 fill-amber-300" />
+                <div className="w-12 h-12 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent shadow-xs">
+                  <Zap className="w-6 h-6" />
                 </div>
               </div>
               
-              <div className="flex justify-between type-body-sm font-bold mb-2">
-                <span>{displayTotalXp} XP Points</span>
-                <span className="text-indigo-200">
+              <div className="flex justify-between type-caption font-bold">
+                <span className="text-text-primary">{displayTotalXp} XP Points</span>
+                <span className="text-text-secondary">
                   {progressionData?.isMaxLevel ? 'Maximum Level Achieved' : `Target: ${xpMax} XP (Remaining: ${remainingXp})`}
                 </span>
               </div>
               
-              <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+              <div className="h-2.5 w-full bg-bg border border-border rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-white transition-all duration-1000" 
+                  className="h-full bg-accent transition-all duration-1000 rounded-full" 
                   style={{ width: `${Math.min(100, Math.max(0, levelProgress * 100))}%` }}
                 />
               </div>
@@ -425,21 +451,21 @@ export default function LevelsBadgesTab() {
 
             {/* Pathways */}
             <div>
-              <h2 className="type-h4 text-slate-800">Skill Pathways</h2>
-              <p className="type-body-sm text-slate-500 mb-3">Select your focus domain starting from Level 3 (Innovator).</p>
+              <h2 className="type-h4 font-bold text-text-primary">Skill Pathways</h2>
+              <p className="type-body-sm text-text-secondary mb-3">Select your focus domain starting from Level 3 (Innovator).</p>
               
               {!isEligibleForPathway ? (
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 flex gap-3 items-center text-slate-500">
+                <div className="bg-card border border-border rounded-lg p-4 flex gap-3 items-center text-text-muted shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
                   <Lock className="w-5 h-5 shrink-0" />
                   <span className="type-body-sm font-medium">Unlocks at Level 3 (Innovator) — 501+ XP</span>
                 </div>
               ) : (
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 space-y-3">
-                  <label className="type-form-label type-body-sm font-bold text-slate-800 flex gap-2 items-center">
-                    <HelpCircle className="w-4 h-4 text-indigo-600" /> Choose Your Active Pathway
+                <div className="bg-card border border-border rounded-lg p-4 space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+                  <label className="type-form-label type-body-sm font-bold text-text-primary flex gap-2 items-center">
+                    <HelpCircle className="w-4 h-4 text-accent" /> Choose Your Active Pathway
                   </label>
                   <select 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text-primary focus:outline-none focus:border-accent appearance-none cursor-pointer"
                     value={selectedPathway}
                     onChange={e => setSelectedPathway(e.target.value)}
                   >
@@ -453,7 +479,7 @@ export default function LevelsBadgesTab() {
                     const activeP = PATHWAYS.find(p => p.name === selectedPathway);
                     if (!activeP) return null;
                     return (
-                      <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 type-body-sm text-indigo-900 mt-2 space-y-1">
+                      <div className="bg-bg border border-border rounded-lg p-3 type-body-sm text-text-primary mt-2 space-y-1">
                         <div><span className="font-bold opacity-70">Domain:</span> {activeP.domain}</div>
                         <div><span className="font-bold opacity-70">Focus XP:</span> {activeP.categories}</div>
                         <div><span className="font-bold opacity-70">Mentor:</span> {activeP.alignment}</div>
@@ -466,7 +492,7 @@ export default function LevelsBadgesTab() {
 
             {/* Progression Map */}
             <div>
-              <h2 className="type-h4 text-slate-800 mb-4">Level Progression Map</h2>
+              <h2 className="type-h4 font-bold text-text-primary mb-4">Level Progression Map</h2>
               <div className="space-y-0">
                 {dynamicLevelsList.map((lvl: any, idx: number) => {
                   const lvlNum = lvl.levelNumber ?? lvl.level;
@@ -482,37 +508,37 @@ export default function LevelsBadgesTab() {
                   return (
                     <div key={lvlNum} className="flex gap-4 group">
                       <div className="flex flex-col items-center">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
-                          isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
-                          isCurrent ? 'bg-indigo-600 border-white ring-4 ring-indigo-100 text-white' :
-                          'bg-slate-200 border-transparent text-slate-500'
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
+                          isCompleted ? 'bg-emerald-50 border-emerald-300 text-emerald-800' :
+                          isCurrent ? 'bg-accent border-accent text-card ring-4 ring-accent/15' :
+                          'bg-bg border-border text-text-muted'
                         }`}>
-                          {isCompleted ? <Check className="w-3.5 h-3.5" /> : 
-                           isCurrent ? <Zap className="w-3.5 h-3.5" /> : 
-                           <Lock className="w-3.5 h-3.5" />}
+                          {isCompleted ? <Check className="w-4 h-4 stroke-[2.5]" /> : 
+                           isCurrent ? <Zap className="w-4 h-4 stroke-[2.5]" /> : 
+                           <Lock className="w-4 h-4 stroke-[2]" />}
                         </div>
                         {idx < dynamicLevelsList.length - 1 && (
-                          <div className={`w-0.5 h-full min-h-[80px] my-1 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                          <div className={`w-0.5 h-full min-h-[80px] my-1.5 ${isCompleted ? 'bg-emerald-300' : 'bg-border'}`} />
                         )}
                       </div>
                       
                       <div className={`flex-1 pb-6 ${isLocked ? 'opacity-60' : ''}`}>
-                        <div className={`rounded-2xl p-4 border transition-all ${
-                          isCurrent ? 'bg-white border-indigo-200 shadow-sm shadow-indigo-100' : 
-                          'bg-white border-slate-200'
+                        <div className={`rounded-xl p-5 border transition-all ${
+                          isCurrent ? 'bg-card border-accent/40 shadow-[0_1px_3px_rgba(0,0,0,0.03)]' : 
+                          'bg-card border-border shadow-[0_1px_2px_rgba(0,0,0,0.02)]'
                         }`}>
-                          <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-heading font-bold text-slate-800 text-[15px]">Lvl {lvlNum}: {lvlTitle}</h3>
-                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                              isCurrent ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'
+                          <div className="flex justify-between items-start mb-1.5">
+                            <h3 className="type-h4 font-bold text-text-primary">Lvl {lvlNum}: {lvlTitle}</h3>
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border uppercase tracking-wider ${
+                              isCurrent ? 'bg-accent-tint text-accent border-accent/20' : 'bg-bg text-text-secondary border-border'
                             }`}>
                               {stageText}
                             </span>
                           </div>
-                          <div className="text-emerald-500 type-caption font-bold mb-3">XP Range: {range}</div>
-                          <div className="type-body-sm text-slate-600 mb-2"><span className="font-medium opacity-80">Objective:</span> {objective}</div>
-                          <div className="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded-lg border border-slate-100">
-                            Unlocks: {unlocks}
+                          <div className="text-emerald-800 type-caption font-bold mb-2.5">XP Range: {range}</div>
+                          <div className="type-body-sm text-text-secondary mb-2.5 font-medium"><strong className="text-text-primary">Objective:</strong> {objective}</div>
+                          <div className="type-caption text-text-muted bg-bg p-3 rounded-lg border border-border font-medium">
+                            <strong className="text-text-secondary font-bold">Unlocks:</strong> {unlocks}
                           </div>
                         </div>
                       </div>
@@ -527,11 +553,47 @@ export default function LevelsBadgesTab() {
 
         {activeTab === 'badges' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Badge Collection Progress Card */}
+            <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Badge Collection Progress</span>
+                  <h2 className="type-h3 font-black text-text-primary tracking-tight mt-0.5">
+                    {earnedBadgeIds.length} of {Object.values(badgesByTier).flat().length || 10} Badges Earned
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setIsSubmitModalOpen(true)}
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-card rounded-xl type-caption font-bold flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>Claim Badge</span>
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between type-caption font-bold">
+                  <span className="text-text-primary">Collection Progress</span>
+                  <span className="text-text-secondary">
+                    {Math.round((earnedBadgeIds.length / (Object.values(badgesByTier).flat().length || 10)) * 100)}% Completed
+                  </span>
+                </div>
+                <div className="h-2.5 w-full bg-bg border border-border rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-accent transition-all duration-1000 rounded-full"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, Math.round((earnedBadgeIds.length / (Object.values(badgesByTier).flat().length || 10)) * 100)))}%`
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
             {Object.entries(badgesByTier).map(([tierName, badges]) => (
               <div key={tierName}>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="type-h4 text-slate-800">{tierName} Tier</h2>
-                  <div className="h-px flex-1 bg-slate-200" />
+                  <h2 className="type-h4 font-bold text-text-primary">{tierName} Tier</h2>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -547,37 +609,39 @@ export default function LevelsBadgesTab() {
                           setSelectedBadgeToClaim(badge.id);
                           setIsSubmitModalOpen(true);
                         }}
-                        className={`rounded-2xl border p-4 flex flex-col justify-between relative overflow-hidden transition-all cursor-pointer hover:shadow-md ${
-                          isEarned ? 'bg-indigo-50/70 border-indigo-200 shadow-sm' :
-                          isPending ? 'bg-amber-50/70 border-amber-200 shadow-sm' :
-                          'bg-white border-slate-200 opacity-80'
+                        className={`rounded-lg border p-4 flex flex-col justify-between relative overflow-hidden transition-all cursor-pointer hover:border-text-muted shadow-[0_1px_2px_rgba(0,0,0,0.03)] ${
+                          isEarned ? 'bg-card border-border' :
+                          isPending ? 'bg-card border-border' :
+                          'bg-card border-border opacity-80'
                         }`}
                       >
                         <div>
-                          <div className="w-10 h-10 rounded-full mb-3 flex items-center justify-center bg-white shadow-sm border border-slate-100">
-                            {isEarned ? <ShieldCheck className="w-5 h-5 text-indigo-600" /> :
-                             isPending ? <Clock className="w-5 h-5 text-amber-500" /> :
-                             <Lock className="w-5 h-5 text-slate-400" />}
+                          <div className={`w-10 h-10 rounded-full mb-3 flex items-center justify-center border ${
+                            isEarned ? 'bg-success-tint border-success/30 text-success' :
+                            isPending ? 'bg-warning-tint border-warning/30 text-warning' :
+                            'bg-bg border-border text-text-muted'
+                          }`}>
+                            {isEarned ? <ShieldCheck className="w-5 h-5" /> :
+                             isPending ? <Clock className="w-5 h-5" /> :
+                             <Lock className="w-5 h-5" />}
                           </div>
                           
-                          <h3 className={`type-h6 mb-1 ${isEarned ? 'text-indigo-900' : 'text-slate-800'}`}>
+                          <h3 className="type-h6 font-bold mb-1 text-text-primary">
                             {badge.name}
                           </h3>
-                          <p className="type-caption text-slate-500 leading-relaxed mb-3">
+                          <p className="type-caption text-text-secondary leading-relaxed mb-3">
                             {badge.description}
                           </p>
                         </div>
                         
-                        <div className="mt-auto flex justify-between items-end border-t border-slate-100 pt-3">
-                          <span className={`type-fine font-bold px-2 py-0.5 rounded uppercase ${
-                            isEarned ? 'bg-indigo-200/60 text-indigo-800' : 'bg-slate-100 text-slate-500'
-                          }`}>
+                        <div className="mt-auto flex justify-between items-end border-t border-border pt-3">
+                          <span className="type-fine font-bold px-2 py-0.5 rounded uppercase bg-bg text-text-secondary border border-border">
                             {badge.rarity}
                           </span>
                           
-                          {isEarned && <span className="type-caption font-bold text-indigo-600">Earned!</span>}
-                          {isPending && <span className="type-caption font-bold text-amber-600">Pending</span>}
-                          {!isEarned && !isPending && <span className="type-caption font-bold text-slate-400">Locked</span>}
+                          {isEarned && <span className="type-caption font-bold text-success">Earned!</span>}
+                          {isPending && <span className="type-caption font-bold text-warning">Pending</span>}
+                          {!isEarned && !isPending && <span className="type-caption font-bold text-text-muted">Locked</span>}
                         </div>
                       </div>
                     );
@@ -589,104 +653,104 @@ export default function LevelsBadgesTab() {
         )}
       </div>
 
-      {/* Claim Badge Modal matching Flutter Badge Approval Workflow */}
+      {/* Claim Badge Modal */}
       {isSubmitModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4 relative animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-primary/40 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-card text-text-primary border border-border rounded-lg p-6 w-full max-w-md shadow-xl space-y-4 relative animate-in zoom-in-95 duration-150">
             {/* Header */}
             <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 shrink-0">
+              <div className="p-2.5 rounded-lg bg-accent-tint text-accent border border-accent/30 shrink-0">
                 <Award className="w-7 h-7" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="type-h4 text-slate-900 leading-tight">
+                <h3 className="type-h4 font-bold text-text-primary leading-tight">
                   {selectedBadgeObj?.name || selectedBadgeToClaim || "Badge Details"}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 uppercase">
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-bg text-text-primary border border-border uppercase">
                     {selectedBadgeObj?.rarity || "COMMON"}
                   </span>
-                  <span className="type-caption text-slate-400 font-medium">
+                  <span className="type-caption text-text-secondary font-medium">
                     Authority: {selectedBadgeObj?.authority || "Faculty"}
                   </span>
                 </div>
               </div>
               <button 
                 onClick={() => setIsSubmitModalOpen(false)} 
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition"
+                className="p-1.5 text-text-secondary hover:text-text-primary rounded-lg hover:bg-bg transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Description */}
-            <p className="type-caption text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100">
+            <p className="type-caption text-text-secondary leading-relaxed bg-bg p-3 rounded-lg border border-border">
               {selectedBadgeObj?.description || "Maintain high discipline and participation standards to earn this badge."}
             </p>
 
-            {/* 6-Step Approval Workflow matching Flutter Screen */}
+            {/* 6-Step Approval Workflow */}
             <div className="space-y-2 pt-1">
-              <h4 className="font-heading type-caption font-bold text-slate-800">Badge Approval Workflow (6 Steps)</h4>
+              <h4 className="font-heading type-caption font-bold text-text-primary">Badge Approval Workflow (6 Steps)</h4>
               
               <div className="space-y-2 type-caption">
                 <div className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                   <div>
-                    <div className="font-bold text-slate-800">Claim Submitted</div>
-                    <div className="text-[10px] text-slate-400">Student requests badge via portal</div>
+                    <div className="font-bold text-text-primary">Claim Submitted</div>
+                    <div className="text-[10px] text-text-muted">Student requests badge via portal</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</div>
+                  <div className="w-4 h-4 rounded-full bg-bg border border-border text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</div>
                   <div>
-                    <div className="font-semibold text-slate-700">Evaluator Review</div>
-                    <div className="text-[10px] text-slate-400">Verifies eligibility (1-3 days)</div>
+                    <div className="font-semibold text-text-secondary">Evaluator Review</div>
+                    <div className="text-[10px] text-text-muted">Verifies eligibility (1-3 days)</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</div>
+                  <div className="w-4 h-4 rounded-full bg-bg border border-border text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</div>
                   <div>
-                    <div className="font-semibold text-slate-700">Faculty Check</div>
-                    <div className="text-[10px] text-slate-400">Quality committee check (2-5 days)</div>
+                    <div className="font-semibold text-text-secondary">Faculty Check</div>
+                    <div className="text-[10px] text-text-muted">Quality committee check (2-5 days)</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</div>
+                  <div className="w-4 h-4 rounded-full bg-bg border border-border text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">4</div>
                   <div>
-                    <div className="font-semibold text-slate-700">Maker-Checker Sign-off</div>
-                    <div className="text-[10px] text-slate-400">Approval authority sign-off (1-2 days)</div>
+                    <div className="font-semibold text-text-secondary">Maker-Checker Sign-off</div>
+                    <div className="text-[10px] text-text-muted">Approval authority sign-off (1-2 days)</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</div>
+                  <div className="w-4 h-4 rounded-full bg-bg border border-border text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">5</div>
                   <div>
-                    <div className="font-semibold text-slate-700">Badge Issued</div>
-                    <div className="text-[10px] text-slate-400">Awarded to student profile</div>
+                    <div className="font-semibold text-text-secondary">Badge Issued</div>
+                    <div className="text-[10px] text-text-muted">Awarded to student profile</div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</div>
+                  <div className="w-4 h-4 rounded-full bg-bg border border-border text-text-secondary font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">6</div>
                   <div>
-                    <div className="font-semibold text-slate-700">Audit Logging</div>
-                    <div className="text-[10px] text-slate-400">Permanent record logged</div>
+                    <div className="font-semibold text-text-secondary">Audit Logging</div>
+                    <div className="text-[10px] text-text-muted">Permanent record logged</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Submission Form matching Flutter Proof Link Input */}
+            {/* Submission Form */}
             <form onSubmit={submitBadgeClaim} className="space-y-3 pt-2">
               <div className="relative">
-                <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Link2 className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
                 <input 
                   type="url"
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 type-body-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="w-full bg-bg border border-border rounded-lg pl-9 pr-3 py-2.5 type-body-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                   placeholder="Proof Link (Required)"
                   value={evidenceUrl}
                   onChange={e => setEvidenceUrl(e.target.value)}
@@ -696,7 +760,7 @@ export default function LevelsBadgesTab() {
               <button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-2xl type-body-sm font-bold shadow-md transition-colors disabled:opacity-50"
+                className="w-full bg-accent hover:bg-accent-hover text-card py-3 rounded-lg type-body-sm font-bold shadow-none transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Claim'}
               </button>

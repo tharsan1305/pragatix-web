@@ -28,34 +28,34 @@ export default function LogoutModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text-primary/40 backdrop-blur-xs transition-opacity"
       onClick={onCancel}
       role="dialog"
       aria-modal="true"
       aria-labelledby="logout-modal-title"
     >
       <div
-        className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 p-6 sm:p-7 transform transition-all animate-in fade-in zoom-in duration-200"
+        className="relative w-full max-w-md bg-card text-text-primary rounded-lg shadow-2xl overflow-hidden border border-border p-6 sm:p-7 transform transition-all animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onCancel}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+          className="absolute top-5 right-5 p-2 text-text-muted hover:text-text-primary hover:bg-bg rounded-lg transition-colors cursor-pointer"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mb-4 border border-rose-100 shadow-sm">
+          <div className="w-14 h-14 bg-accent-tint text-accent rounded-lg flex items-center justify-center mb-4 border border-accent/30 shadow-none">
             <LogOut className="w-7 h-7" />
           </div>
 
-          <h2 id="logout-modal-title" className="type-h4 text-slate-900">
+          <h2 id="logout-modal-title" className="type-h4 font-bold text-text-primary">
             Confirm Logout
           </h2>
 
-          <p className="type-body-sm text-slate-500 mt-2 mb-6 max-w-xs">
+          <p className="type-body-sm text-text-secondary mt-2 mb-6 max-w-xs font-medium">
             Are you sure you want to sign out? Your active session will end.
           </p>
 
@@ -63,7 +63,7 @@ export default function LogoutModal({
             <button
               type="button"
               onClick={onCancel}
-              className="type-btn w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl transition-colors cursor-pointer"
+              className="type-btn w-full py-2.5 px-4 bg-bg hover:bg-border text-text-primary border border-border rounded-lg transition-colors cursor-pointer font-bold"
             >
               Cancel
             </button>
@@ -71,7 +71,7 @@ export default function LogoutModal({
               type="button"
               onClick={onConfirm}
               disabled={isSubmitting}
-              className="type-btn w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl transition-colors shadow-md shadow-rose-600/20 disabled:opacity-50 cursor-pointer"
+              className="type-btn w-full py-2.5 px-4 bg-accent hover:bg-accent-hover text-card rounded-lg transition-colors shadow-none disabled:opacity-50 cursor-pointer font-bold"
             >
               {isSubmitting ? 'Signing Out...' : 'Sign Out'}
             </button>

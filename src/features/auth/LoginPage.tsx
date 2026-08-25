@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ShieldAlert, CheckCircle, ArrowLeft, Loader2, Timer } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Mail, Lock, ShieldAlert, CheckCircle, ArrowLeft, Loader2, Timer, Sparkles, Award, ShieldCheck, Zap, BookOpen } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
 import { authService, type AuthResponse } from './services/auth.service';
 import logoImg from '../../assets/logo.png';
-import { Link } from 'react-router-dom';
 
 type Step = 'email' | 'otp';
 
@@ -112,13 +111,17 @@ export default function LoginPage() {
       const token = data.token ?? '';
       const roles: string[] = data.roles ?? [];
       const userType: string = data.userType ?? '';
-      const isCaptain = data.isCaptain === true || data.teamRole === 'CAPTAIN' || data.teamRole === 'VICE_CAPTAIN';
+      const isViceCaptain = data.teamRole === 'VICE_CAPTAIN' || data.isViceCaptain === true;
+      const isCaptainRole = data.isCaptain === true || data.teamRole === 'CAPTAIN';
+      // Vice Captains are routed to the Captain portal
+      const isCaptain = isCaptainRole || isViceCaptain;
 
       // ── Determine role (mirrors Flutter routing logic) ──
       const isSuperAdmin = roles.some(r =>
         r === 'ROLE_SUPERADMIN' || r === 'ROLE_SUPER_ADMIN' || r === 'SUPERADMIN' || r === 'SUPER_ADMIN'
       );
-      const isAdmin = isSuperAdmin || roles.some(r => r === 'ROLE_ADMIN' || r === 'ADMIN') || userType === 'ADMIN';
+      const isHOD = roles.some(r => r === 'ROLE_HOD' || r === 'HOD') || userType === 'HOD' || (Array.isArray(data.subRoles) && data.subRoles.includes('HOD'));
+      const isAdmin = isSuperAdmin || isHOD || roles.some(r => r === 'ROLE_ADMIN' || r === 'ADMIN') || userType === 'ADMIN';
       const isTeacher = !isAdmin && (roles.includes('ROLE_TEACHER') || roles.includes('ROLE_DISCIPLINE_COMMITTEE') || userType === 'TEACHER');
 
       let finalRole: string;
@@ -126,7 +129,7 @@ export default function LoginPage() {
         finalRole = 'ADMIN';
       } else if (isTeacher) {
         finalRole = 'TEACHER';
-      } else if (isCaptain || userType === 'CAPTAIN') {
+      } else if (isCaptain || userType === 'CAPTAIN' || userType === 'VICE_CAPTAIN') {
         finalRole = 'CAPTAIN';
       } else {
         finalRole = 'STUDENT';
@@ -138,8 +141,10 @@ export default function LoginPage() {
         ...data,
         role: finalRole,
         roles: mergedRoles,
-        isCaptain: finalRole === 'CAPTAIN',
+        isCaptain: finalRole === 'CAPTAIN',   // true for both Captain AND Vice Captain
+        isViceCaptain,                          // distinguish Vice Captain within the portal
         isSuperAdmin,
+        isHOD,
         name: data.fullName ?? data.username,
       };
 
@@ -195,199 +200,295 @@ export default function LoginPage() {
   };
 
   // ─────────────────────────────────────────
-  // Render
+  // Render: 2-Column Enterprise Web View
   // ─────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 px-4 py-8 relative">
-      {/* Top Left Navigation Back to Landing */}
-      <div className="absolute top-6 left-6 z-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 type-fine font-semibold text-slate-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Landing Page</span>
-        </Link>
-      </div>
+    <div className="min-h-screen w-full flex bg-[#0F172A] text-slate-100 overflow-x-hidden">
+      
+      {/* ── LEFT PANEL: Branding & Feature Showcase (Visible on Desktop) ── */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-5/12 bg-gradient-to-br from-[#0B132B] via-[#1C2541] to-[#0F172A] p-10 flex-col justify-between relative border-r border-slate-800 shadow-2xl">
+        {/* Subtle Background Glow Spheres */}
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#1E293B]/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-slate-700/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Ambient glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 my-auto">
-        {/* ── Logo & Title ── */}
-        <div className="flex flex-col items-center mb-8 text-center">
-          <div className="w-24 h-24 rounded-2xl bg-white shadow-lg p-2 flex items-center justify-center overflow-hidden border border-slate-200 mb-4">
-            <img src={logoImg} alt="PragatiX Logo" className="w-full h-full object-contain" />
+        {/* Brand Header */}
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 backdrop-blur-md text-xs font-bold text-slate-300">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>JJCET Official Student Portal</span>
           </div>
-          <h1 className="type-h2 tracking-tight">
-            <span className="text-indigo-600 font-bold">PragatiX</span>{' '}
-            <span className="text-slate-800">Sign In</span>
-          </h1>
-          <p className="mt-1.5 type-body-sm text-slate-500">
-            {step === 'email'
-              ? 'Enter your email to receive an OTP'
-              : 'Enter the 4-digit OTP sent to your email'}
-          </p>
-        </div>
 
-        {/* ── Step indicator ── */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className={`flex-1 h-1 rounded-full transition-all duration-300 ${step === 'email' ? 'bg-indigo-600' : 'bg-indigo-600'}`} />
-          <div className={`flex-1 h-1 rounded-full transition-all duration-300 ${step === 'otp' ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-        </div>
-
-        {/* ── Success Banner ── */}
-        {successMsg && (
-          <div className="mb-5 p-3 bg-green-50 text-green-700 rounded-xl type-body-sm flex items-start gap-2 border border-green-100">
-            <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
-        {/* ── Error Banner ── */}
-        {error && (
-          <div className="mb-5 p-3 bg-red-50 text-red-600 rounded-xl type-body-sm flex items-start gap-2 border border-red-100">
-            <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* ── Step 1: Email Form ── */}
-        {step === 'email' && (
-          <form onSubmit={handleRequestOtp} className="space-y-5">
+          <div className="mt-8 flex items-center gap-3.5">
+            <div className="w-20 h-20 rounded-2xl bg-white p-2.5 flex items-center justify-center border border-slate-700 shadow-xl shrink-0">
+              <img src={logoImg} alt="PragatiX Logo" className="w-full h-full object-contain" />
+            </div>
             <div>
-              <label htmlFor="login-email" className="block type-form-label text-slate-700 mb-1.5">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                <input
-                  id="login-email"
-                  type="email"
-                  autoComplete="email"
-                  autoFocus
-                  value={email}
-                  onChange={e => { setEmail(e.target.value); setError(null); }}
-                  placeholder="e.g. user@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 type-body-sm transition-all"
-                />
+              <h1 className="text-3xl font-black text-white tracking-tight">PragatiX</h1>
+              <p className="text-xs font-mono text-slate-400 font-semibold">Academic Excellence Platform</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Highlights Showcase Grid */}
+        <div className="relative z-10 space-y-4 my-auto py-8">
+          <div className="space-y-2">
+            <h2 className="text-2xl xl:text-3xl font-black text-white tracking-tight leading-tight">
+              Empowering Student Progression & Leadership
+            </h2>
+            <p className="text-xs font-medium text-slate-400 leading-relaxed">
+              Track real-time XP accumulation, milestone stages, squad leaderboards, and verified period attendance.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-slate-700/80 border border-slate-600 flex items-center justify-center text-amber-400 shrink-0">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">XP Progression</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Stage milestones & point reviews</p>
               </div>
             </div>
 
-            <button
-              id="send-otp-btn"
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white type-btn py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200 mt-2 cursor-pointer"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Sending OTP…
-                </>
-              ) : (
-                'Send OTP'
-              )}
-            </button>
-          </form>
-        )}
+            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-slate-700/80 border border-slate-600 flex items-center justify-center text-blue-400 shrink-0">
+                <Award className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Leaderboards</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Departmental & section rankings</p>
+              </div>
+            </div>
 
-        {/* ── Step 2: OTP Form ── */}
-        {step === 'otp' && (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
-            {/* OTP digit boxes */}
-            <div>
-              <label className="block type-form-label text-slate-700 mb-3 text-center">
-                Enter 4-digit OTP
-              </label>
-              <div className="flex justify-center gap-3">
-                {[0, 1, 2, 3].map(i => (
+            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-slate-700/80 border border-slate-600 flex items-center justify-center text-emerald-400 shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Squad Leadership</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Captain & Vice Captain desk</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 backdrop-blur-md flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-slate-700/80 border border-slate-600 flex items-center justify-center text-purple-400 shrink-0">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Attendance Sync</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Period tracking & target calculator</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Left Footer */}
+        <div className="relative z-10 pt-4 border-t border-slate-800 text-[11px] font-medium text-slate-400 flex items-center justify-between">
+          <span>© 2026 PragatiX Portal</span>
+          <span>JJCET Institution</span>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL: Clean Web Auth Form ── */}
+      <div className="w-full lg:w-1/2 xl:w-7/12 bg-[#F8FAFC] text-slate-900 flex flex-col justify-between p-6 sm:p-10 lg:p-12 relative overflow-y-auto min-h-screen">
+        
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between w-full mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors bg-white border border-slate-200 px-3.5 py-2 rounded-xl shadow-xs"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Landing Page</span>
+          </Link>
+
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs">
+            <Lock className="w-3.5 h-3.5 text-slate-700" />
+            <span>Secure Institution Portal</span>
+          </div>
+        </div>
+
+        {/* Main Auth Form Container */}
+        <div className="max-w-md w-full mx-auto bg-white rounded-3xl p-8 sm:p-10 shadow-[0_10px_25px_rgba(0,0,0,0.05)] border border-slate-200 my-auto">
+          
+          {/* Logo & Header */}
+          <div className="flex flex-col items-center mb-6 text-center">
+            <div className="w-28 h-28 rounded-3xl bg-white shadow-lg p-3 flex items-center justify-center border border-slate-200 mb-4">
+              <img src={logoImg} alt="PragatiX Logo" className="w-full h-full object-contain" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              PragatiX <span className="font-medium text-slate-600">Sign In</span>
+            </h2>
+            <p className="mt-1 text-xs font-medium text-slate-500">
+              {step === 'email'
+                ? 'Enter your registered email to receive an authentication OTP'
+                : 'Enter the 4-digit security code sent to your email'}
+            </p>
+          </div>
+
+          {/* Progress Step Bar */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className={`flex-1 h-1.5 rounded-full transition-all duration-300 bg-[#1E293B]`} />
+            <div className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${step === 'otp' ? 'bg-[#1E293B]' : 'bg-slate-200'}`} />
+          </div>
+
+          {/* Success Banner */}
+          {successMsg && (
+            <div className="mb-5 p-3.5 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold flex items-start gap-2 border border-emerald-200 shadow-xs">
+              <CheckCircle className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <div className="mb-5 p-3.5 bg-rose-50 text-rose-800 rounded-xl text-xs font-bold flex items-start gap-2 border border-rose-200 shadow-xs">
+              <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* ── Step 1: Email Input Form ── */}
+          {step === 'email' && (
+            <form onSubmit={handleRequestOtp} className="space-y-5">
+              <div>
+                <label htmlFor="login-email" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Institutional Email
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
-                    key={i}
-                    ref={el => { otpRefs.current[i] = el; }}
-                    id={`otp-digit-${i}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={otp[i]?.trim() ?? ''}
-                    onChange={e => handleOtpChange(i, e.target.value)}
-                    onKeyDown={e => handleOtpKeyDown(i, e)}
-                    autoFocus={i === 0}
-                    className="w-14 h-14 text-center type-h3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 transition-all"
+                    id="login-email"
+                    type="email"
+                    autoComplete="email"
+                    autoFocus
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setError(null); }}
+                    placeholder="e.g. student@jjcet.ac.in"
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#1E293B] focus:border-[#1E293B] outline-none text-slate-900 text-sm font-semibold transition-all bg-slate-50 focus:bg-white"
                   />
-                ))}
+                </div>
               </div>
-            </div>
 
-            {/* ── Timer & Resend ── */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 type-caption">
-                <Timer className={`w-4 h-4 ${secondsRemaining > 0 ? 'text-indigo-600' : 'text-red-500'}`} />
-                {secondsRemaining > 0 ? (
-                  <span className="text-slate-700">Expires in: {formatTimer(secondsRemaining)}</span>
+              <button
+                id="send-otp-btn"
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#1E293B] hover:bg-[#0F172A] active:bg-black text-white text-sm font-extrabold py-3.5 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Sending OTP…</span>
+                  </>
                 ) : (
-                  <span className="text-red-500">OTP expired</span>
+                  <span>Send Security OTP</span>
                 )}
+              </button>
+            </form>
+          )}
+
+          {/* ── Step 2: OTP Verification Form ── */}
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 text-center">
+                  Enter 4-Digit Security Code
+                </label>
+                <div className="flex justify-center gap-3">
+                  {[0, 1, 2, 3].map(i => (
+                    <input
+                      key={i}
+                      ref={el => { otpRefs.current[i] = el; }}
+                      id={`otp-digit-${i}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={otp[i]?.trim() ?? ''}
+                      onChange={e => handleOtpChange(i, e.target.value)}
+                      onKeyDown={e => handleOtpKeyDown(i, e)}
+                      autoFocus={i === 0}
+                      className="w-14 h-14 text-center text-2xl font-black border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-[#1E293B] focus:border-[#1E293B] outline-none text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                    />
+                  ))}
+                </div>
               </div>
+
+              {/* Timer & Resend */}
+              <div className="flex items-center justify-between text-xs font-bold pt-1">
+                <div className="flex items-center gap-1.5">
+                  <Timer className={`w-4 h-4 ${secondsRemaining > 0 ? 'text-[#1E293B]' : 'text-slate-400'}`} />
+                  {secondsRemaining > 0 ? (
+                    <span className="text-slate-700">Expires in: {formatTimer(secondsRemaining)}</span>
+                  ) : (
+                    <span className="text-slate-400">OTP expired</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRequestOtp()}
+                  disabled={secondsRemaining > 0 || isLoading}
+                  className="text-[#1E293B] hover:text-black font-extrabold disabled:text-slate-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  Resend OTP
+                </button>
+              </div>
+
+              {/* Change email link */}
               <button
                 type="button"
-                onClick={() => handleRequestOtp()}
-                disabled={secondsRemaining > 0 || isLoading}
-                className="type-btn text-indigo-600 hover:text-indigo-800 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                onClick={() => {
+                  setStep('email');
+                  setOtp('');
+                  setError(null);
+                  setSuccessMsg(null);
+                  clearTimer();
+                  setSecondsRemaining(0);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer py-1"
               >
-                Resend OTP
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Change Email Address</span>
               </button>
-            </div>
 
-            {/* Change email link */}
-            <button
-              type="button"
-              onClick={() => {
-                setStep('email');
-                setOtp('');
-                setError(null);
-                setSuccessMsg(null);
-                clearTimer();
-                setSecondsRemaining(0);
-              }}
-              className="w-full flex items-center justify-center gap-1.5 type-btn text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Change Email
-            </button>
+              {/* Verify & Sign In */}
+              <button
+                id="verify-otp-btn"
+                type="submit"
+                disabled={isLoading || otp.replace(/\s/g, '').length < 4 || secondsRemaining === 0}
+                className="w-full bg-[#1E293B] hover:bg-[#0F172A] active:bg-black text-white text-sm font-extrabold py-3.5 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md cursor-pointer"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Verifying Code…</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Verify &amp; Enter Portal</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
-            {/* Verify & Sign In */}
-            <button
-              id="verify-otp-btn"
-              type="submit"
-              disabled={isLoading || otp.replace(/\s/g, '').length < 4 || secondsRemaining === 0}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white type-btn py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-indigo-200 cursor-pointer"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Verifying…
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Verify &amp; Sign In
-                </>
-              )}
-            </button>
-          </form>
-        )}
+          <div className="mt-6 pt-4 border-t border-slate-100 text-center">
+            <p className="text-[11px] font-medium text-slate-400">
+              🔒 Official 256-Bit AES-GCM Encrypted Portal Session
+            </p>
+          </div>
+        </div>
 
-        {/* ── Footer ── */}
-        <footer className="mt-8 pt-4 border-t border-slate-100" role="contentinfo">
-          <p className="text-center type-fine text-slate-400">
-            © 2026 PragatiX · JJCET. All rights reserved.
+        {/* Right Footer */}
+        <footer className="mt-8 text-center" role="contentinfo">
+          <p className="text-[11px] font-semibold text-slate-400">
+            © 2026 PragatiX &bull; JJCET Academic Portal. All rights reserved.
           </p>
         </footer>
       </div>
+
     </div>
   );
 }

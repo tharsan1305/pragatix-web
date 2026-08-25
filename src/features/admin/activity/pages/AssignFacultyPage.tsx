@@ -403,21 +403,32 @@ export default function AssignFacultyPage({
   };
 
   return (
-    <div className="flex flex-col min-h-full bg-slate-50 pb-24">
-      {/* Header Bar */}
-      <div className="bg-gradient-to-r from-[#11998E] to-[#38EF7D] text-white px-4 md:px-6 py-4 shadow-md flex items-center justify-between sticky top-0 z-20">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 type-btn hover:bg-white/10 rounded-full transition cursor-pointer">
-            <ArrowLeft className="w-6 h-6 text-white" />
+    <div className="flex flex-col min-h-full bg-bg text-text-primary pb-24">
+      {/* Top Header Bar */}
+      <div className="bg-card text-text-primary px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center space-x-3.5">
+          <button 
+            onClick={onBack} 
+            className="px-3.5 py-2 bg-card border border-border rounded-lg text-text-primary hover:bg-bg transition-colors cursor-pointer flex items-center gap-2 font-bold type-caption"
+            title="Back to Activities"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Activities</span>
           </button>
-          <h1 className="type-h4 text-white">Assign Staff & Departments</h1>
+          <div>
+            <h1 className="type-h3 font-bold text-text-primary tracking-tight">Assign Staff & Evaluators</h1>
+            <p className="type-body-sm text-text-secondary font-medium mt-0.5">
+              Map faculty evaluators across departments or sections
+            </p>
+          </div>
         </div>
         <button
           onClick={loadData}
-          className="p-2 type-btn hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+          className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg transition-colors cursor-pointer"
           title="Refresh"
         >
-          <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+          <span className="type-caption font-bold hidden sm:inline">Refresh</span>
         </button>
       </div>
 
