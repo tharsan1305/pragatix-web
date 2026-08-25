@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ShieldAlert, CheckCircle, ArrowLeft, Loader2, Timer, Sparkles, Award, ShieldCheck, Zap, BookOpen } from 'lucide-react';
 import { useAuth } from '../../store/authContext';
 import { authService, type AuthResponse } from './services/auth.service';
-import logoImg from '../../assets/logo.png';
+import logoImg from '../../assets/logo.jpg';
 
 type Step = 'email' | 'otp';
 

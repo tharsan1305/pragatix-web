@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import jjcetOfficialLogo from '../../assets/jjcet-logo.png';
 import sowdambikaaLogo from '../../assets/sowdambikaa-logo.png';
-import pragatixLogo from '../../assets/logo.png';
+import pragatixLogo from '../../assets/logo.jpg';
 
 interface BrandHeaderProps {
   showLoginButton?: boolean;

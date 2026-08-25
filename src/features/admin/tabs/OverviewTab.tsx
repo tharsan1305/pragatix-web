@@ -103,7 +103,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
 
   return (
     <div className="flex flex-col min-h-full bg-bg pb-16">
-      {/* Header Bar */}
+      {/* Clean White/Grey Header Bar */}
       <div className="bg-card px-6 py-5 border-b border-border text-text-primary sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div className="flex items-center space-x-3">
@@ -151,7 +151,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
           </div>
         ) : (
           <>
-            {/* Quick Launch Analytics Banner (Precision Light) */}
+            {/* Quick Launch Analytics Banner (Clean White/Grey Card) */}
             <div
               onClick={() => onPushView('analytics')}
               className="bg-card text-text-primary rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] cursor-pointer hover:border-accent/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-border group relative overflow-hidden"
@@ -180,22 +180,22 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
               </button>
             </div>
 
-            {/* 4 Primary Metric Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 4 Primary Metric Stat Cards with Vibrant Colors */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
               <StatCard
-                title="Enrolled Students"
+                title="Students"
                 count={stats.students.toString()}
-                subtitle="Active student directory"
+                subtitle="Enrolled Students"
                 icon={Users}
-                tag="Directory"
+                colorScheme="blue"
                 onClick={() => onPushView('students')}
               />
               <StatCard
-                title="Faculty & Mentors"
+                title="Teachers"
                 count={stats.teachers.toString()}
-                subtitle="Teaching & evaluation faculty"
+                subtitle="Faculty & Mentors"
                 icon={School}
-                tag="Faculty"
+                colorScheme="emerald"
                 onClick={() => onPushView('teachers')}
               />
               <StatCard
@@ -203,15 +203,15 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                 count={stats.departments.toString()}
                 subtitle="Academic branches"
                 icon={Building2}
-                tag="Branches"
+                colorScheme="amber"
                 onClick={() => onPushView('departments')}
               />
               <StatCard
-                title="Rankings"
+                title="Leaderboard"
                 count="Live"
-                subtitle="Top performers leaderboard"
+                subtitle="Top performers"
                 icon={Trophy}
-                tag="Standings"
+                colorScheme="rose"
                 onClick={() => handleActionNavigate('leaderboard', 'leaderboard')}
               />
             </div>
@@ -364,29 +364,47 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
   );
 }
 
-function StatCard({ title, count, subtitle, icon: Icon, tag, onClick }: any) {
+function StatCard({ title, count, subtitle, icon: Icon, colorScheme = 'blue', onClick }: any) {
+  const stylesMap: Record<string, { tileBg: string; tileText: string; borderHover: string }> = {
+    blue: {
+      tileBg: 'bg-blue-50/90 border-blue-100',
+      tileText: 'text-blue-600',
+      borderHover: 'hover:border-blue-300',
+    },
+    emerald: {
+      tileBg: 'bg-emerald-50/90 border-emerald-100',
+      tileText: 'text-emerald-600',
+      borderHover: 'hover:border-emerald-300',
+    },
+    amber: {
+      tileBg: 'bg-amber-50/90 border-amber-100',
+      tileText: 'text-amber-600',
+      borderHover: 'hover:border-amber-300',
+    },
+    rose: {
+      tileBg: 'bg-rose-50/90 border-rose-100',
+      tileText: 'text-rose-600',
+      borderHover: 'hover:border-rose-300',
+    },
+  };
+
+  const currentStyle = stylesMap[colorScheme] || stylesMap.blue;
+
   return (
     <div
       onClick={onClick}
-      className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/50 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+      className={`bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 ${currentStyle.borderHover} hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden`}
     >
-      <div className="flex justify-between items-start mb-3">
-        <div className="p-2.5 rounded-xl bg-bg border border-border text-text-primary group-hover:border-accent/30 transition-colors">
-          <Icon className="w-5 h-5 text-accent" />
+      <div className="flex justify-between items-start mb-4">
+        <div className={`p-3 rounded-2xl border ${currentStyle.tileBg} ${currentStyle.tileText} group-hover:scale-105 transition-transform`}>
+          <Icon className="w-6 h-6" />
         </div>
-        <div className="flex items-center gap-1.5">
-          {tag && (
-            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-bg text-text-muted border border-border">
-              {tag}
-            </span>
-          )}
-          <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent group-hover:translate-x-1 transition-all" />
-        </div>
+        <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-1 transition-all" />
       </div>
       <div>
-        <h4 className="text-3xl font-black text-text-primary tracking-tight">{count}</h4>
-        <p className="type-caption font-extrabold text-text-secondary mt-1">{title}</p>
-        {subtitle && <p className="type-fine text-text-muted mt-0.5 font-medium">{subtitle}</p>}
+        <h4 className="text-4xl font-black text-slate-900 tracking-tight mb-0.5">{count}</h4>
+        <p className="text-sm font-extrabold text-slate-600">{title}</p>
+        {subtitle && <p className="text-xs font-semibold text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
     </div>
   );
