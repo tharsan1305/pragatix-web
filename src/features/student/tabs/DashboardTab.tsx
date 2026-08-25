@@ -294,21 +294,21 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
 
         {/* ── Vice Captain / Captain Leadership Banner (if Vice Captain / Captain) ── */}
         {(profile.isCaptain || profile.isViceCaptain) && (
-          <div className="bg-card border border-border rounded-2xl p-4 lg:p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-bg border border-border text-accent flex items-center justify-center shrink-0">
-                {profile.isCaptain ? <Crown className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+          <div className="bg-card border border-border rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50/90 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                {profile.isCaptain ? <Crown className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="type-h4 font-bold text-text-primary">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="type-h4 font-black text-text-primary">
                     {profile.isCaptain ? 'Captain Squad Desk' : 'Vice Captain Co-Leadership Desk'}
                   </h3>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-bg text-text-secondary border border-border uppercase">
+                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 uppercase">
                     {teamDetails?.teamName || 'My Squad'}
                   </span>
                 </div>
-                <p className="type-caption text-text-secondary font-medium">
+                <p className="type-caption text-text-secondary font-medium mt-0.5">
                   {profile.isCaptain
                     ? 'Manage squad roster, track group XP, and lead team progress'
                     : 'Assist team captain in monitoring squad attendance and member performance'}
@@ -317,7 +317,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
             </div>
             <button
               onClick={() => onSelectTab && onSelectTab(myGroupTabIndex)}
-              className="px-4 py-2 bg-accent hover:bg-accent-hover text-card rounded-xl type-caption font-bold flex items-center gap-2 transition-colors cursor-pointer shrink-0"
+              className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-card rounded-xl type-caption font-bold flex items-center gap-2 transition-colors cursor-pointer shrink-0 shadow-none"
             >
               <Users className="w-4 h-4" />
               <span>Open Squad Roster</span>
@@ -334,32 +334,32 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
             {/* KPI Cards Row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Discipline XP', value: displayXp, icon: Shield, color: 'text-text-primary', bg: 'bg-bg', border: 'border-border' },
-                { label: 'Leaderboard Rank', value: `#${profile.rank}`, icon: Trophy, color: 'text-text-secondary', bg: 'bg-bg', border: 'border-border' },
-                { label: 'Current Stage', value: `Stage ${currentStageNum}`, icon: Target, color: 'text-text-secondary', bg: 'bg-bg', border: 'border-border' },
-                { label: 'Active Streaks', value: displayStreak, icon: Flame, color: 'text-text-secondary', bg: 'bg-bg', border: 'border-border' },
+                { label: 'Discipline XP', value: displayXp, icon: Shield, textColor: 'text-blue-600', tileBg: 'bg-blue-50/90 text-blue-600 border-blue-100' },
+                { label: 'Leaderboard Rank', value: `#${profile.rank}`, icon: Trophy, textColor: 'text-purple-600', tileBg: 'bg-purple-50/90 text-purple-600 border-purple-100' },
+                { label: 'Current Stage', value: `Stage ${currentStageNum}`, icon: Target, textColor: 'text-amber-600', tileBg: 'bg-amber-50/90 text-amber-600 border-amber-100' },
+                { label: 'Active Streaks', value: displayStreak, icon: Flame, textColor: 'text-rose-600', tileBg: 'bg-rose-50/90 text-rose-600 border-rose-100' },
               ].map((kpi, i) => (
-                <div key={i} className="bg-card border border-border rounded-2xl p-4 flex flex-col gap-3 hover:shadow-md transition-shadow">
-                  <div className={`w-9 h-9 rounded-xl ${kpi.bg} border ${kpi.border} flex items-center justify-center`}>
-                    <kpi.icon className={`w-4.5 h-4.5 ${kpi.color}`} />
-                  </div>
+                <div key={i} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-shadow group">
                   <div>
-                    <div className={`text-2xl font-black ${kpi.color}`}>{kpi.value}</div>
-                    <div className="text-xs font-semibold text-text-muted mt-0.5">{kpi.label}</div>
+                    <div className="text-xs font-bold text-text-muted uppercase tracking-wider">{kpi.label}</div>
+                    <div className={`text-2xl font-black ${kpi.textColor} tracking-tight mt-1`}>{kpi.value}</div>
+                  </div>
+                  <div className={`w-12 h-12 rounded-2xl ${kpi.tileBg} border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs`}>
+                    <kpi.icon className="w-6 h-6" />
                   </div>
                 </div>
               ))}
             </div>
 
             {/* XP by Category Chart */}
-            <div className="bg-card rounded-2xl border border-border p-5 lg:p-6">
+            <div className="bg-card rounded-2xl border border-border p-5 lg:p-6 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
               <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-accent-tint border border-accent/20 rounded-lg flex items-center justify-center">
-                    <BarChart2 className="w-4 h-4 text-accent" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs">
+                    <BarChart2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-text-primary">XP by Category</h3>
+                    <h3 className="text-base font-black text-text-primary">XP by Category</h3>
                     <p className="text-xs text-text-muted font-medium">Breakdown of earned points</p>
                   </div>
                 </div>
@@ -372,12 +372,12 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
 
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[
-                  { label: 'Individual XP', value: individualXp },
-                  { label: 'Group XP', value: groupXp },
-                  { label: 'MUST XP', value: mustXp },
+                  { label: 'Individual XP', value: individualXp, color: 'text-blue-600', bg: 'bg-blue-50/60 border-blue-100' },
+                  { label: 'Group XP', value: groupXp, color: 'text-indigo-600', bg: 'bg-indigo-50/60 border-indigo-100' },
+                  { label: 'MUST XP', value: mustXp, color: 'text-amber-600', bg: 'bg-amber-50/60 border-amber-100' },
                 ].map((item, i) => (
-                  <div key={i} className="bg-bg border border-border rounded-xl p-3 text-center">
-                    <div className={`text-lg font-black ${i === 0 ? 'text-text-primary' : i === 1 ? 'text-text-secondary' : 'text-text-muted'}`}>{item.value}</div>
+                  <div key={i} className={`${item.bg} border rounded-xl p-3 text-center`}>
+                    <div className={`text-lg font-black ${item.color}`}>{item.value}</div>
                     <div className="text-[10px] font-bold text-text-muted uppercase tracking-wider mt-0.5">{item.label}</div>
                   </div>
                 ))}

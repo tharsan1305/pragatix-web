@@ -12,6 +12,24 @@ import ProfileTab from '../student/tabs/ProfileTab';
 import PageLoader from '../../components/common/PageLoader';
 import { LayoutDashboard, History, Trophy, Users, Ticket, CalendarCheck, Medal, User, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
+const TAB_COLOR_SYSTEM: Record<string, { 
+  activeBg: string; 
+  activeText: string; 
+  activeBorder: string; 
+  iconBg: string; 
+  iconText: string;
+  inactiveIcon: string;
+}> = {
+  'Dashboard': { activeBg: 'bg-blue-50/90', activeText: 'text-blue-700 font-extrabold', activeBorder: 'border-blue-200/80', iconBg: 'bg-blue-100', iconText: 'text-blue-600', inactiveIcon: 'text-blue-500' },
+  'Activities': { activeBg: 'bg-emerald-50/90', activeText: 'text-emerald-700 font-extrabold', activeBorder: 'border-emerald-200/80', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', inactiveIcon: 'text-emerald-500' },
+  'Levels & Badges': { activeBg: 'bg-purple-50/90', activeText: 'text-purple-700 font-extrabold', activeBorder: 'border-purple-200/80', iconBg: 'bg-purple-100', iconText: 'text-purple-600', inactiveIcon: 'text-purple-500' },
+  'Attendance': { activeBg: 'bg-sky-50/90', activeText: 'text-sky-700 font-extrabold', activeBorder: 'border-sky-200/80', iconBg: 'bg-sky-100', iconText: 'text-sky-600', inactiveIcon: 'text-sky-500' },
+  'My Group': { activeBg: 'bg-indigo-50/90', activeText: 'text-indigo-700 font-extrabold', activeBorder: 'border-indigo-200/80', iconBg: 'bg-indigo-100', iconText: 'text-indigo-600', inactiveIcon: 'text-indigo-500' },
+  'Leaderboard': { activeBg: 'bg-amber-50/90', activeText: 'text-amber-700 font-extrabold', activeBorder: 'border-amber-200/80', iconBg: 'bg-amber-100', iconText: 'text-amber-600', inactiveIcon: 'text-amber-500' },
+  'Point Review': { activeBg: 'bg-rose-50/90', activeText: 'text-rose-700 font-extrabold', activeBorder: 'border-rose-200/80', iconBg: 'bg-rose-100', iconText: 'text-rose-600', inactiveIcon: 'text-rose-500' },
+  'Profile': { activeBg: 'bg-violet-50/90', activeText: 'text-violet-700 font-extrabold', activeBorder: 'border-violet-200/80', iconBg: 'bg-violet-100', iconText: 'text-violet-600', inactiveIcon: 'text-violet-500' }
+};
+
 export default function CaptainDashboardPage() {
   const { isViceCaptain } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
@@ -137,21 +155,27 @@ export default function CaptainDashboardPage() {
               {section.items.map((tab) => {
                 const itemIdx = tabs.findIndex(t => t.name === tab.name);
                 const isActive = activeTab === itemIdx;
+                const colors = TAB_COLOR_SYSTEM[tab.name] || TAB_COLOR_SYSTEM['Dashboard'];
+
                 return (
                   <div key={tab.name} className="relative group/navitem">
                     <button
                       onClick={() => handleTabChange(itemIdx)}
-                      className={`w-full flex items-center type-nav transition-all cursor-pointer rounded-lg ${
-                        isSidebarCollapsed ? 'justify-center p-3' : 'px-3.5 py-2.5'
+                      className={`w-full flex items-center transition-all duration-200 cursor-pointer rounded-xl border ${
+                        isSidebarCollapsed ? 'justify-center p-2.5' : 'px-3 py-2'
                       } ${
                         isActive 
-                          ? 'bg-accent-tint text-text-primary font-bold shadow-[inset_2px_0_0_var(--accent)]' 
-                          : 'text-text-secondary hover:bg-bg hover:text-text-primary'
+                          ? `${colors.activeBg} ${colors.activeText} ${colors.activeBorder} shadow-sm` 
+                          : 'border-transparent text-text-secondary hover:bg-bg hover:text-text-primary'
                       }`}
                       title={isSidebarCollapsed ? tab.name : undefined}
                     >
-                      <tab.icon className={`w-5 h-5 shrink-0 ${isSidebarCollapsed ? '' : 'mr-3'} ${isActive ? 'text-accent' : 'text-text-muted group-hover/navitem:text-text-primary'}`} />
-                      {!isSidebarCollapsed && <span className="truncate">{tab.name}</span>}
+                      <div className={`p-1.5 rounded-lg shrink-0 transition-colors ${isSidebarCollapsed ? '' : 'mr-3'} ${
+                        isActive ? `${colors.iconBg} ${colors.iconText}` : `bg-bg/80 ${colors.inactiveIcon} group-hover/navitem:scale-110 transition-transform`
+                      }`}>
+                        <tab.icon className="w-4 h-4" />
+                      </div>
+                      {!isSidebarCollapsed && <span className="truncate text-sm font-bold">{tab.name}</span>}
                     </button>
 
                     {/* Floating Tooltip in Collapsed Mode */}
