@@ -149,35 +149,35 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
 
       {/* Cohort Metric Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="w-12 h-12 rounded-lg bg-bg border border-border text-text-primary flex items-center justify-center shrink-0">
-            <Layers className="w-6 h-6 text-accent" />
+        <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Layers className="w-6 h-6" />
           </div>
           <div>
             <p className="type-fine text-text-muted font-bold uppercase tracking-wider">Active Cohorts</p>
-            <h3 className="type-h4 font-bold text-text-primary mt-0.5">{yearsList.length || 4} Years</h3>
+            <h3 className="type-h4 font-black text-text-primary mt-0.5">{yearsList.length || 4} Years</h3>
             <p className="type-caption text-text-secondary font-medium">Independent progression stages</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="w-12 h-12 rounded-lg bg-bg border border-border text-text-primary flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6 text-accent" />
+        <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Sparkles className="w-6 h-6" />
           </div>
           <div>
             <p className="type-fine text-text-muted font-bold uppercase tracking-wider">Evaluation Engine</p>
-            <h3 className="type-h4 font-bold text-text-primary mt-0.5">Stage &amp; XP Caps</h3>
+            <h3 className="type-h4 font-black text-text-primary mt-0.5">Stage &amp; XP Caps</h3>
             <p className="type-caption text-text-secondary font-medium">Individual &amp; Group thresholds</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5 flex items-center gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="w-12 h-12 rounded-lg bg-bg border border-border text-text-primary flex items-center justify-center shrink-0">
-            <Shield className="w-6 h-6 text-accent" />
+        <div className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50/90 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Shield className="w-6 h-6" />
           </div>
           <div>
             <p className="type-fine text-text-muted font-bold uppercase tracking-wider">Access Scope</p>
-            <h3 className="type-h4 font-bold text-text-primary mt-0.5">Super Admin</h3>
+            <h3 className="type-h4 font-black text-purple-600 mt-0.5">Super Admin</h3>
             <p className="type-caption text-text-secondary font-medium">Full edit &amp; assignment control</p>
           </div>
         </div>

@@ -188,7 +188,7 @@ export default function ActivityTab({ onPushView = () => {}, initialYear = 'FIRS
                   {/* Left: Stage Title & Milestones */}
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center space-x-3 flex-wrap gap-y-1">
-                      <div className="w-8 h-8 rounded-lg bg-text-primary text-card font-bold type-body-sm flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50/90 text-blue-600 border border-blue-100 font-black type-body-sm flex items-center justify-center shrink-0 shadow-sm">
                         {String(displayOrder).padStart(2, '0')}
                       </div>
                       <h3 className="type-h4 font-bold text-text-primary group-hover:text-accent transition-colors">
