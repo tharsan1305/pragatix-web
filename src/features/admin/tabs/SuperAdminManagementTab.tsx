@@ -378,7 +378,7 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3.5">
-                      <div className="w-12 h-12 rounded-xl bg-bg border border-border text-accent font-black type-h4 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-2xl bg-rose-50/90 text-rose-600 border border-rose-100 font-black type-h4 flex items-center justify-center shrink-0 shadow-sm">
                         {admin.fullName ? admin.fullName.charAt(0).toUpperCase() : 'A'}
                       </div>
                       <div>

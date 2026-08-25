@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { UsersRound, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, Check, Award, Plus, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { UsersRound, Users, RefreshCw, ChevronDown, ChevronUp, UserPlus, Edit2, Shield, UserMinus, Crown, Trash2, Eye, X, Search, Check, Award, Plus, ShieldAlert, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
@@ -1154,24 +1154,47 @@ export default function TeacherGroupManagementTab({ onPushView, onBack }: Teache
 
       {/* Squad Allocation Overview KPI Summary */}
       <div className="bg-card px-6 py-4 border-b border-border shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Groups</span>
-            <div className="text-xl font-black text-text-primary">{groups.length} Squads</div>
-          </div>
-          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Members</span>
-            <div className="text-xl font-black text-accent">
-              {groups.reduce((acc, g) => acc + (g.currentMemberCount || (g.teamMembers || g.members || []).length || 0), 0)} Assigned
+        <div className="max-w-[1400px] mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-card p-4 rounded-2xl border border-border flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Groups</span>
+              <div className="text-2xl font-black text-indigo-600 tracking-tight mt-0.5">{groups.length} Squads</div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-indigo-50/90 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <UsersRound className="w-5 h-5" />
             </div>
           </div>
-          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Filtered View</span>
-            <div className="text-xl font-black text-text-primary">{filteredGroups.length} Active</div>
+
+          <div className="bg-card p-4 rounded-2xl border border-border flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Total Members</span>
+              <div className="text-2xl font-black text-blue-600 tracking-tight mt-0.5">
+                {groups.reduce((acc, g) => acc + (g.currentMemberCount || (g.teamMembers || g.members || []).length || 0), 0)} Assigned
+              </div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Users className="w-5 h-5" />
+            </div>
           </div>
-          <div className="bg-bg p-3.5 rounded-xl border border-border flex flex-col items-center">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Role Authority</span>
-            <div className="text-xl font-black text-text-secondary">{canCreateTeam ? 'Full Access' : 'Read Only'}</div>
+
+          <div className="bg-card p-4 rounded-2xl border border-border flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Filtered View</span>
+              <div className="text-2xl font-black text-emerald-600 tracking-tight mt-0.5">{filteredGroups.length} Active</div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <UserPlus className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="bg-card p-4 rounded-2xl border border-border flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Role Authority</span>
+              <div className="text-2xl font-black text-purple-600 tracking-tight mt-0.5">{canCreateTeam ? 'Full Access' : 'Read Only'}</div>
+            </div>
+            <div className="w-11 h-11 rounded-2xl bg-purple-50/90 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Shield className="w-5 h-5" />
+            </div>
           </div>
         </div>
       </div>
@@ -1294,8 +1317,8 @@ export default function TeacherGroupManagementTab({ onPushView, onBack }: Teache
                       className="flex items-center gap-4 min-w-0 flex-1 cursor-pointer"
                       onClick={() => setExpandedGroupId(isExpanded ? null : tId)}
                     >
-                      <div className="w-11 h-11 rounded-lg bg-bg border border-border flex items-center justify-center shrink-0 text-text-primary">
-                        <UsersRound className="w-5 h-5 text-accent" />
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50/90 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0 shadow-sm transition-transform">
+                        <UsersRound className="w-6 h-6" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2.5 flex-wrap">
