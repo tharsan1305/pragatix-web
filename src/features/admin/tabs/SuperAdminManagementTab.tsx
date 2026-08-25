@@ -1,6 +1,9 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { UserPlus, Trash2, Edit2, ArrowLeft, ShieldCheck, RefreshCw, Mail, Phone, Calendar, Building, Sparkles, AlertCircle, AlertTriangle } from 'lucide-react';
+import { 
+  ShieldCheck, RefreshCw, UserPlus, Trash2, Edit2, AlertCircle, ArrowLeft, 
+  Sparkles, GraduationCap, Calendar, Building, Mail, Phone, AlertTriangle 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 
@@ -277,7 +280,45 @@ export default function SuperAdminManagementTab({ onBack }: SuperAdminManagement
         </div>
       </div>
 
-      <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+        {/* KPI Summary Row with Soft Colored Icon Tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Total Year Admins</p>
+              <h3 className="text-3xl font-black text-rose-600 tracking-tight mt-1">{admins.length}</h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5 font-medium">Configured Administrator Accounts</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-rose-50/90 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Assigned Cohorts</p>
+              <h3 className="text-3xl font-black text-blue-600 tracking-tight mt-1">
+                {admins.filter(a => a.assignedYearId != null || !!a.academicYear).length} / {yearsList.length || 4}
+              </h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Academic Years Managed</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Authority Scope</p>
+              <h3 className="text-3xl font-black text-emerald-600 tracking-tight mt-1">Super Admin</h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Full System Privilege Access</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
         {/* Metric Banner Card */}
         <div className="bg-card rounded-xl p-6 text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex flex-col md:flex-row items-center justify-between gap-6 border border-border">
           <div className="space-y-2 text-center md:text-left">

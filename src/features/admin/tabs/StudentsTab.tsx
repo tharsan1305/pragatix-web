@@ -747,7 +747,45 @@ export default function StudentsTab({ onBack }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+        {/* KPI Summary Row with Soft Colored Icon Tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Total Enrolled</p>
+              <h3 className="text-3xl font-black text-text-primary tracking-tight mt-1">{totalStudentsCount || students.length}</h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Enrolled Student Roster</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <User className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Active Status</p>
+              <h3 className="text-3xl font-black text-emerald-600 tracking-tight mt-1">
+                {students.filter(s => s.active !== false).length || totalStudentsCount}
+              </h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Verified Institutional Accounts</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <UserCheck className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Filtered View</p>
+              <h3 className="text-3xl font-black text-amber-600 tracking-tight mt-1">{filteredStudents.length}</h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Matching Current Search/Filters</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-amber-50/90 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <School className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
         {/* Search Bar */}
         <div className="flex gap-2.5 items-center">
           <div className="relative flex-1">

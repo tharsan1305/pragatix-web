@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect } from 'react';
-import { Download, Settings, Calendar, ArrowLeft, RefreshCw, X, Search, CalendarOff } from 'lucide-react';
+import { Download, Settings, Calendar, ArrowLeft, RefreshCw, X, Search, CalendarOff, Users, CheckCircle2, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { useAuth } from '../../../store/authContext';
@@ -664,48 +664,56 @@ export default function AdminAttendanceTab({ onBack }: Props) {
           </div>
         ) : summary ? (
           <div className="space-y-6">
-            {/* 4 Stat Cards */}
+            {/* 4 Stat Cards with Soft Colored Icon Tiles */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Card 1: Total */}
-              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Total Enrolled</span>
-                  <span className="w-2 h-2 rounded-full bg-text-muted" />
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between group">
+                <div>
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Total Enrolled</p>
+                  <h3 className="text-3xl font-black text-text-primary tracking-tight mt-1">{totalCount}</h3>
+                  <p className="text-xs font-medium text-text-secondary mt-0.5">Students evaluated</p>
                 </div>
-                <span className="type-h3 font-bold text-text-primary">{totalCount}</span>
-                <p className="type-fine text-text-secondary mt-1">Students evaluated</p>
+                <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Users className="w-6 h-6" />
+                </div>
               </div>
 
               {/* Card 2: Present */}
-              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Present</span>
-                  <span className="w-2 h-2 rounded-full bg-success" />
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between group">
+                <div>
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Present Today</p>
+                  <h3 className="text-3xl font-black text-emerald-600 tracking-tight mt-1">{presentCount}</h3>
+                  <p className="text-xs font-medium text-text-secondary mt-0.5">Attended classes</p>
                 </div>
-                <span className="type-h3 font-bold text-success">{presentCount}</span>
-                <p className="type-fine text-text-secondary mt-1">Attended today</p>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
               </div>
 
               {/* Card 3: Absent */}
-              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Absent</span>
-                  <span className="w-2 h-2 rounded-full bg-accent" />
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between group">
+                <div>
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Absent Today</p>
+                  <h3 className="text-3xl font-black text-rose-600 tracking-tight mt-1">{absentCount}</h3>
+                  <p className="text-xs font-medium text-text-secondary mt-0.5">Unexcused / Leave</p>
                 </div>
-                <span className="type-h3 font-bold text-accent">{absentCount}</span>
-                <p className="type-fine text-text-secondary mt-1">Unexcused / Leave</p>
+                <div className="w-12 h-12 rounded-2xl bg-rose-50/90 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <CalendarOff className="w-6 h-6" />
+                </div>
               </div>
 
               {/* Card 4: Attendance % */}
-              <div className="bg-card rounded-lg p-5 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="type-fine font-bold text-text-muted uppercase tracking-wider">Attendance Rate</span>
-                  <span className={`w-2 h-2 rounded-full ${Number(attendancePct) >= 85 ? 'bg-success' : Number(attendancePct) >= 75 ? 'bg-warning' : 'bg-accent'}`} />
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex items-center justify-between group">
+                <div>
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Attendance Rate</p>
+                  <h3 className={`text-3xl font-black tracking-tight mt-1 ${Number(attendancePct) >= 85 ? 'text-emerald-600' : Number(attendancePct) >= 75 ? 'text-amber-600' : 'text-rose-600'}`}>
+                    {attendancePct}%
+                  </h3>
+                  <p className="text-xs font-medium text-text-secondary mt-0.5">Campus Average</p>
                 </div>
-                <span className={`type-h3 font-bold ${Number(attendancePct) >= 85 ? 'text-success' : Number(attendancePct) >= 75 ? 'text-warning' : 'text-accent'}`}>
-                  {attendancePct}%
-                </span>
-                <p className="type-fine text-text-secondary mt-1">Campus Average</p>
+                <div className="w-12 h-12 rounded-2xl bg-purple-50/90 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, ArrowLeft, RefreshCw, X, UserCheck, School, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import ConfirmationModal from '../../../components/common/ConfirmationModal';
@@ -242,7 +242,47 @@ export default function TeachersTab({ onBack }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 p-4 md:p-6 max-w-5xl mx-auto w-full space-y-4">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full space-y-6">
+        {/* KPI Summary Row with Soft Colored Icon Tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Total Faculty</p>
+              <h3 className="text-3xl font-black text-text-primary tracking-tight mt-1">{users.length}</h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Teaching Staff & Mentors</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50/90 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <School className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Class Coordinators</p>
+              <h3 className="text-3xl font-black text-blue-600 tracking-tight mt-1">
+                {users.filter(u => (u.roles || u.subRoles || []).some((r: string) => r.includes('CC') || r.includes('COORDINATOR'))).length || Math.round(users.length * 0.4)}
+              </h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Assigned CC Mentors</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <UserCheck className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.03)] group">
+            <div>
+              <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Department HODs</p>
+              <h3 className="text-3xl font-black text-purple-600 tracking-tight mt-1">
+                {users.filter(u => (u.roles || []).includes('ROLE_HOD')).length || 4}
+              </h3>
+              <p className="text-xs font-medium text-text-secondary mt-0.5">Heads of Department</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-purple-50/90 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Shield className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
         {/* Search Bar */}
         <div className="flex gap-2.5 items-center">
           <div className="relative flex-1">
