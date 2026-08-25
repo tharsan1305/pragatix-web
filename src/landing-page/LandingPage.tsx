@@ -79,9 +79,10 @@ export const LandingPage: React.FC = () => {
               <div className="lg:col-span-7 space-y-6 sm:space-y-7 text-left">
                 
                 {/* Gamified Hero Pill */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-extrabold shadow-xs">
-                  <Flame className="w-4 h-4 text-amber-500 fill-amber-400 shrink-0" />
-                  <span>Gamified Student Progression & Skill Engine</span>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-200 text-indigo-900 text-xs font-extrabold shadow-xs relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-amber-400/10 rounded-full animate-pulse-glow" />
+                  <Flame className="w-4 h-4 text-amber-500 fill-amber-400 shrink-0 relative z-10 animate-bounce" />
+                  <span className="relative z-10">Gamified Student Progression & Skill Engine</span>
                 </div>
 
                 {/* Headline */}
@@ -162,7 +163,7 @@ export const LandingPage: React.FC = () => {
                   />
 
                   {/* Floating Gamified XP Card Overlay (Top Right) */}
-                  <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md border border-white/60 p-3 rounded-2xl shadow-xl flex items-center gap-3 text-left">
+                  <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md border border-white/60 p-3 rounded-2xl shadow-xl flex items-center gap-3 text-left animate-float-slow z-20">
                     <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300 flex items-center justify-center text-amber-600 shrink-0">
                       <Trophy className="w-5 h-5 fill-amber-400" />
                     </div>
@@ -221,8 +222,46 @@ export const LandingPage: React.FC = () => {
 
         </section>
 
+        {/* Infinite Live Activity Marquee Ticker */}
+        <div className="py-4 bg-[#0B132B] text-slate-200 border-y border-slate-800 overflow-hidden relative">
+          <div className="flex animate-marquee items-center space-x-8 whitespace-nowrap text-xs font-bold">
+            <span className="flex items-center gap-2 text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+              <Zap className="w-3.5 h-3.5 fill-amber-400" />
+              John Doe (CSE) earned +150 XP for Hackathon Submission
+            </span>
+            <span className="flex items-center gap-2 text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full border border-blue-400/20">
+              <Flame className="w-3.5 h-3.5 fill-blue-400" />
+              Captain Sarah unlocked a 10-Day Streak!
+            </span>
+            <span className="flex items-center gap-2 text-purple-400 bg-purple-400/10 px-3 py-1 rounded-full border border-purple-400/20">
+              <Trophy className="w-3.5 h-3.5 text-purple-400" />
+              ECE Department reached Stage 4 Squad Leader Standing
+            </span>
+            <span className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">
+              <Award className="w-3.5 h-3.5 text-emerald-400" />
+              Class 3B achieved 98.5% Verified Period Attendance
+            </span>
+            <span className="flex items-center gap-2 text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/20">
+              <Zap className="w-3.5 h-3.5 fill-amber-400" />
+              John Doe (CSE) earned +150 XP for Hackathon Submission
+            </span>
+            <span className="flex items-center gap-2 text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full border border-blue-400/20">
+              <Flame className="w-3.5 h-3.5 fill-blue-400" />
+              Captain Sarah unlocked a 10-Day Streak!
+            </span>
+            <span className="flex items-center gap-2 text-purple-400 bg-purple-400/10 px-3 py-1 rounded-full border border-purple-400/20">
+              <Trophy className="w-3.5 h-3.5 text-purple-400" />
+              ECE Department reached Stage 4 Squad Leader Standing
+            </span>
+            <span className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">
+              <Award className="w-3.5 h-3.5 text-emerald-400" />
+              Class 3B achieved 98.5% Verified Period Attendance
+            </span>
+          </div>
+        </div>
+
         {/* 3. GAMIFIED 5-STAGE PROGRESSION ROADMAP SHOWCASE */}
-        <section className="py-12 bg-white border-y border-slate-200">
+        <section className="py-12 bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             <div className="max-w-2xl mx-auto space-y-2">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
