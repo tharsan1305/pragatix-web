@@ -194,7 +194,7 @@ export default function CaptainDashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        <div className="flex-1 overflow-y-auto md:pb-0 pb-20 flex flex-col justify-between">
+        <div className="flex-1 overflow-y-auto pb-16 md:pb-24 flex flex-col justify-between">
           <div>
             {tabs[activeTab].component}
           </div>

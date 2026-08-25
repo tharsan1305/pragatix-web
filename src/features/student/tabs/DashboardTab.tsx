@@ -216,7 +216,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
         </div>
       </div>
 
-      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto">
+      <div className="p-5 lg:p-7 xl:p-8 max-w-[1400px] mx-auto pb-20 lg:pb-28">
 
         {/* ── Hero Welcome Banner ── */}
         <div className="bg-card rounded-2xl border border-border p-5 lg:p-6 mb-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 relative overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
@@ -339,13 +339,13 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                 { label: 'Current Stage', value: `Stage ${currentStageNum}`, icon: Target, textColor: 'text-amber-600', tileBg: 'bg-amber-50/90 text-amber-600 border-amber-100' },
                 { label: 'Active Streaks', value: displayStreak, icon: Flame, textColor: 'text-rose-600', tileBg: 'bg-rose-50/90 text-rose-600 border-rose-100' },
               ].map((kpi, i) => (
-                <div key={i} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-shadow group">
-                  <div>
-                    <div className="text-xs font-bold text-text-muted uppercase tracking-wider">{kpi.label}</div>
-                    <div className={`text-2xl font-black ${kpi.textColor} tracking-tight mt-1`}>{kpi.value}</div>
+                <div key={i} className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between min-h-[100px] shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md transition-all group">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <div className="text-[11px] font-extrabold text-text-muted uppercase tracking-wider truncate">{kpi.label}</div>
+                    <div className={`text-xl sm:text-2xl font-black ${kpi.textColor} tracking-tight mt-1 truncate`}>{kpi.value}</div>
                   </div>
-                  <div className={`w-12 h-12 rounded-2xl ${kpi.tileBg} border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs`}>
-                    <kpi.icon className="w-6 h-6" />
+                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${kpi.tileBg} border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs`}>
+                    <kpi.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
               ))}
@@ -383,7 +383,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                 ))}
               </div>
 
-              <div className="h-[200px]">
+              <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                     <XAxis
@@ -411,20 +411,20 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
               {/* Level Progress */}
               <div className="bg-card rounded-2xl border border-border p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-bg border border-border rounded-lg flex items-center justify-center">
-                      <Stars className="w-4 h-4 text-accent" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-2xl bg-amber-50/90 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
+                      <Stars className="w-4.5 h-4.5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Current Milestone</p>
+                      <p className="text-[10px] font-extrabold text-text-muted uppercase tracking-widest">Current Milestone</p>
                       <h3 className="text-sm font-black text-text-primary">Level {levelNum} — {levelTitle}</h3>
                     </div>
                   </div>
-                  <span className="text-sm font-black text-accent">{Math.round(progress * 100)}%</span>
+                  <span className="text-sm font-black text-amber-600">{Math.round(progress * 100)}%</span>
                 </div>
                 <div className="h-2.5 w-full bg-bg border border-border rounded-full overflow-hidden mb-2">
                   <div
-                    className="h-full bg-accent transition-all duration-700 rounded-full"
+                    className="h-full bg-amber-500 transition-all duration-700 rounded-full"
                     style={{ width: `${Math.min(100, progress * 100)}%` }}
                   />
                 </div>
@@ -444,29 +444,29 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
               ) : (
                 <div className="bg-card rounded-2xl border border-border p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-bg border border-border rounded-lg flex items-center justify-center">
-                        <Target className="w-4 h-4 text-accent" />
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
+                        <Target className="w-4.5 h-4.5" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Active Stage</p>
+                        <p className="text-[10px] font-extrabold text-text-muted uppercase tracking-widest">Active Stage</p>
                         <h3 className="text-sm font-black text-text-primary">Stage {currentStageNum} Progress</h3>
                       </div>
                     </div>
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${stagePct >= 100 ? 'bg-bg text-text-secondary border border-border' : 'bg-bg text-text-secondary border border-border'}`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-text-secondary" />
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                       Active
                     </span>
                   </div>
                   <div className="h-2.5 w-full bg-bg border border-border rounded-full overflow-hidden mb-2">
                     <div
-                      className={`h-full transition-all duration-700 rounded-full ${stagePct >= 100 ? 'bg-text-secondary' : 'bg-accent'}`}
+                      className={`h-full transition-all duration-700 rounded-full ${stagePct >= 100 ? 'bg-emerald-500' : 'bg-blue-600'}`}
                       style={{ width: `${Math.min(100, stagePct)}%` }}
                     />
                   </div>
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-text-muted">{displayXp} / {activeStageExpectedXp} XP</span>
-                    <span className={stagePct >= 100 ? 'text-text-secondary' : 'text-accent'}>{stagePct}% Complete</span>
+                    <span className={stagePct >= 100 ? 'text-emerald-600 font-extrabold' : 'text-blue-600 font-extrabold'}>{stagePct}% Complete</span>
                   </div>
                 </div>
               )}
@@ -475,12 +475,12 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
             {/* Recent Point Actions */}
             <div className="bg-card rounded-2xl border border-border p-5 lg:p-6">
               <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-bg border border-border rounded-lg flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-accent" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-purple-50/90 text-purple-600 border border-purple-100 flex items-center justify-center shrink-0">
+                    <Clock className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-text-primary">Recent Point Actions</h3>
+                    <h3 className="text-base font-black text-text-primary">Recent Point Actions</h3>
                     <p className="text-xs text-text-muted font-medium">Your latest XP activity</p>
                   </div>
                 </div>
@@ -496,7 +496,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                     const isPositive = log.xpPoints > 0;
                     return (
                       <div key={idx} className="flex items-center gap-3 p-3 rounded-xl bg-bg border border-border hover:border-text-muted/30 transition-colors">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isPositive ? 'bg-bg border border-border text-text-secondary' : 'bg-accent-tint text-accent'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isPositive ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}`}>
                           <TrendingUp className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -505,7 +505,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                             {new Date(log.submittedAt).toLocaleDateString()} &bull; {log.status}
                           </div>
                         </div>
-                        <div className={`text-sm font-black ${isPositive ? 'text-text-primary' : 'text-accent'}`}>
+                        <div className={`text-sm font-black ${isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {isPositive ? '+' : ''}{log.xpPoints} XP
                         </div>
                       </div>
@@ -520,18 +520,18 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
           <div className="space-y-6">
 
             {/* My Group Card */}
-            <div className="bg-card rounded-2xl border border-border p-5">
+            <div className="bg-card rounded-2xl border border-border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-bg border border-border rounded-lg flex items-center justify-center">
-                    <Users className="w-4 h-4 text-accent" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-indigo-50/90 text-indigo-600 border border-indigo-100 flex items-center justify-center shrink-0">
+                    <Users className="w-4.5 h-4.5" />
                   </div>
-                  <h3 className="text-sm font-black text-text-primary">My Group</h3>
+                  <h3 className="text-base font-black text-text-primary">My Group</h3>
                 </div>
                 {onSelectTab && (
                   <button
                     onClick={() => onSelectTab(3)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-accent hover:text-accent-hover transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors cursor-pointer"
                   >
                     View <ArrowUpRight className="w-3.5 h-3.5" />
                   </button>
@@ -545,14 +545,14 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="font-black text-text-primary text-base">{teamDetails.teamName || 'Unnamed Team'}</h4>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-bg text-text-primary border border-border uppercase">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase">
                       {teamDetails.stage || 'STAGE 1'}
                     </span>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5">
                     {['🏢 ' + (teamDetails.department || 'N/A'), '👥 ' + (teamDetails.currentMemberCount || 0) + ' Members'].map((t, i) => (
-                      <span key={i} className="px-2 py-0.5 rounded-md bg-bg border border-border text-[11px] font-semibold text-text-secondary">{t}</span>
+                      <span key={i} className="px-2.5 py-0.5 rounded-full bg-bg border border-border text-[11px] font-semibold text-text-secondary">{t}</span>
                     ))}
                   </div>
 
@@ -569,9 +569,9 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between bg-bg border border-border rounded-xl p-3">
-                    <span className="text-xs font-bold text-text-muted">Team Total XP</span>
-                    <span className="text-base font-black text-text-secondary">{teamDetails.totalTeamXp ?? 0} XP</span>
+                  <div className="flex items-center justify-between bg-indigo-50/50 border border-indigo-100 rounded-xl p-3">
+                    <span className="text-xs font-bold text-indigo-900">Team Total XP</span>
+                    <span className="text-base font-black text-indigo-600">{teamDetails.totalTeamXp ?? 0} XP</span>
                   </div>
                 </div>
               ) : (
@@ -583,12 +583,12 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
             </div>
 
             {/* XP Summary Card */}
-            <div className="bg-card rounded-2xl border border-border p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-bg border border-border rounded-lg flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-accent" />
+            <div className="bg-card rounded-2xl border border-border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 rounded-2xl bg-blue-50/90 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0">
+                  <Activity className="w-4.5 h-4.5" />
                 </div>
-                <h3 className="text-sm font-black text-text-primary">XP Summary</h3>
+                <h3 className="text-base font-black text-text-primary">XP Summary</h3>
               </div>
 
               <div className="space-y-2.5">
