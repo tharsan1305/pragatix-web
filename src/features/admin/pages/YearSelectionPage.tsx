@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   ArrowLeft, GraduationCap, RefreshCw, AlertCircle, 
-  Layers, Sparkles, Shield, ArrowRight, Activity, Award
+  Layers, Sparkles, Shield, ArrowRight, Activity, Award, Trophy
 } from 'lucide-react';
 import ActivityTab from '../tabs/ActivityTab';
 import apiClient from '../../../services/apiClient';
@@ -244,33 +244,40 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
                 description: 'Academic and extra-curricular task configurations.',
               };
 
+              const cohortIconStyles: Record<number, { bg: string; text: string; border: string; icon: any }> = {
+                1: { bg: 'bg-blue-50/90', text: 'text-blue-600', border: 'border-blue-100', icon: GraduationCap },
+                2: { bg: 'bg-emerald-50/90', text: 'text-emerald-600', border: 'border-emerald-100', icon: Sparkles },
+                3: { bg: 'bg-amber-50/90', text: 'text-amber-600', border: 'border-amber-100', icon: Award },
+                4: { bg: 'bg-rose-50/90', text: 'text-rose-600', border: 'border-rose-100', icon: Trophy },
+              };
+
+              const style = cohortIconStyles[yearNumber] || cohortIconStyles[1];
+              const IconComp = style.icon;
+
               return (
                 <div
                   key={y.id}
                   onClick={() => handleSelectYear(toEnumValue(y.yearName))}
-                  className="bg-card rounded-lg p-6 border border-border shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-accent/40 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-card rounded-2xl p-6 border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-accent/50 hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                 >
-                  {/* Subtle Top Red Accent Line on Hover */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
-
                   <div>
-                    {/* Top Row: Year Number & Tag */}
-                    <div className="flex items-center justify-between gap-2 mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-text-primary text-card flex items-center justify-center font-bold type-body-sm">
-                          {yearNumber}
+                    {/* Top Row: Soft Colored Icon Badge Tile & Tag */}
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className={`w-12 h-12 rounded-2xl ${style.bg} border ${style.border} ${style.text} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                          <IconComp className="w-6 h-6" />
                         </div>
                         <div>
-                          <h3 className="type-h4 font-bold text-text-primary group-hover:text-accent transition-colors">
+                          <h3 className="type-h4 font-black text-text-primary group-hover:text-accent transition-colors">
                             {y.yearName}
                           </h3>
-                          <span className="type-fine text-text-muted font-bold uppercase tracking-wide">
+                          <span className="type-fine text-text-muted font-extrabold uppercase tracking-wide">
                             {cohortMeta.subtitle}
                           </span>
                         </div>
                       </div>
 
-                      <span className="px-2.5 py-1 rounded-full type-fine font-bold bg-bg border border-border text-text-secondary">
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-bg border border-border text-text-secondary">
                         {cohortMeta.tag}
                       </span>
                     </div>
@@ -282,12 +289,12 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
 
                     {/* Feature Chips */}
                     <div className="flex flex-wrap gap-2 mb-6">
-                      <span className="px-2.5 py-1 rounded-md type-fine font-semibold bg-bg border border-border text-text-secondary flex items-center gap-1.5">
-                        <Activity className="w-3.5 h-3.5 text-accent" />
+                      <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-bg border border-border text-text-secondary flex items-center gap-1.5">
+                        <Activity className={`w-3.5 h-3.5 ${style.text}`} />
                         Stage Workflows
                       </span>
-                      <span className="px-2.5 py-1 rounded-md type-fine font-semibold bg-bg border border-border text-text-secondary flex items-center gap-1.5">
-                        <Award className="w-3.5 h-3.5 text-accent" />
+                      <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-bg border border-border text-text-secondary flex items-center gap-1.5">
+                        <Award className={`w-3.5 h-3.5 ${style.text}`} />
                         XP Thresholds
                       </span>
                     </div>
@@ -295,10 +302,10 @@ export default function YearSelectionPage({ onBack, onPushView }: Props) {
 
                   {/* Bottom Action CTA */}
                   <div className="pt-4 border-t border-border flex items-center justify-between">
-                    <span className="type-caption font-bold text-text-primary group-hover:text-accent transition-colors">
+                    <span className="type-caption font-extrabold text-text-primary group-hover:text-accent transition-colors">
                       Manage Stages &amp; Tasks
                     </span>
-                    <div className="w-8 h-8 rounded-lg bg-bg border border-border group-hover:bg-accent group-hover:border-accent group-hover:text-card text-text-secondary flex items-center justify-center transition-all">
+                    <div className={`w-9 h-9 rounded-xl bg-bg border border-border group-hover:bg-accent group-hover:border-accent group-hover:text-card text-text-secondary flex items-center justify-center transition-all`}>
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
