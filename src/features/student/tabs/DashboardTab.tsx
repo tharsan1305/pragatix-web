@@ -332,20 +332,24 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
           <div className="xl:col-span-2 space-y-6">
 
             {/* KPI Cards Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
               {[
-                { label: 'Discipline XP', value: displayXp, icon: Shield, textColor: 'text-blue-600', tileBg: 'bg-blue-50/90 text-blue-600 border-blue-100' },
+                { label: 'Discipline XP', value: `${displayXp} XP`, icon: Shield, textColor: 'text-blue-600', tileBg: 'bg-blue-50/90 text-blue-600 border-blue-100' },
                 { label: 'Leaderboard Rank', value: `#${profile.rank}`, icon: Trophy, textColor: 'text-purple-600', tileBg: 'bg-purple-50/90 text-purple-600 border-purple-100' },
                 { label: 'Current Stage', value: `Stage ${currentStageNum}`, icon: Target, textColor: 'text-amber-600', tileBg: 'bg-amber-50/90 text-amber-600 border-amber-100' },
-                { label: 'Active Streaks', value: displayStreak, icon: Flame, textColor: 'text-rose-600', tileBg: 'bg-rose-50/90 text-rose-600 border-rose-100' },
+                { label: 'Active Streaks', value: `${displayStreak} Days`, icon: Flame, textColor: 'text-rose-600', tileBg: 'bg-rose-50/90 text-rose-600 border-rose-100' },
               ].map((kpi, i) => (
-                <div key={i} className="bg-card border border-border rounded-2xl p-4 sm:p-5 flex items-center justify-between min-h-[100px] shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md transition-all group">
-                  <div className="min-w-0 flex-1 pr-2">
-                    <div className="text-[11px] font-extrabold text-text-muted uppercase tracking-wider truncate">{kpi.label}</div>
-                    <div className={`text-xl sm:text-2xl font-black ${kpi.textColor} tracking-tight mt-1 truncate`}>{kpi.value}</div>
+                <div key={i} className="bg-card border border-border rounded-2xl p-4 flex flex-col justify-between min-h-[108px] shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md transition-all group">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-extrabold text-text-muted uppercase tracking-wider leading-tight">
+                      {kpi.label}
+                    </span>
+                    <div className={`w-9 h-9 rounded-xl ${kpi.tileBg} border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs`}>
+                      <kpi.icon className="w-4.5 h-4.5" />
+                    </div>
                   </div>
-                  <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${kpi.tileBg} border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs`}>
-                    <kpi.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <div className={`text-xl sm:text-2xl font-black ${kpi.textColor} tracking-tight mt-2 leading-none`}>
+                    {kpi.value}
                   </div>
                 </div>
               ))}
