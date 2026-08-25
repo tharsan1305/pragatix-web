@@ -27,7 +27,6 @@ export default function LeaderboardTab({ onBack }: LeaderboardTabProps) {
   const [filteredList, setFilteredList] = useState<LeaderboardStudent[]>([]);
   
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
   const [studentYearId, setStudentYearId] = useState<string | null>(null);
 
   // Filter state – Department & Section only (showYearFilter is FALSE for students in Flutter)
@@ -94,7 +93,6 @@ export default function LeaderboardTab({ onBack }: LeaderboardTabProps) {
           const user = authRes.data.data;
           const regNo = user.username || user.sprNo || user.regNo || '';
           setCurrentUserId(regNo);
-          setCurrentUserName(user.name || user.fullName || '');
           const yId = user.yearId ? String(user.yearId) : null;
           setStudentYearId(yId);
           await fetchFilters(yId, null);
@@ -126,10 +124,7 @@ export default function LeaderboardTab({ onBack }: LeaderboardTabProps) {
     fetchLeaderboard(studentYearId, selectedDept, selectedSection);
   };
 
-  // ── Current user rank (match Flutter: uses regNo) ──
-  const userRankIndex = currentUserId ? filteredList.findIndex(s => s.regNo === currentUserId) : -1;
-  const userRank = userRankIndex >= 0 ? userRankIndex + 1 : -1;
-  const currentUserScore = userRankIndex >= 0 ? filteredList[userRankIndex].score : 0;
+
 
   if (isLoading) {
     return (

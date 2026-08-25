@@ -1,6 +1,6 @@
 import { logger } from '../../../utils/logger';
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle, Check, CalendarX } from 'lucide-react';
+import { CalendarCheck, Save, UsersRound, RefreshCw, AlertCircle, Check, CalendarX, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/apiClient';
 import { sanitizeAcademicYears } from '../../../utils/academicYearUtils';
@@ -20,7 +20,11 @@ interface LookupOption {
   yearNo?: number;
 }
 
-export default function AttendanceTab() {
+interface AttendanceTabProps {
+  onBack?: () => void;
+}
+
+export default function AttendanceTab({ onBack }: AttendanceTabProps) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -452,10 +456,17 @@ export default function AttendanceTab() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50">
-      <div className="bg-slate-900 md:bg-indigo-600 text-white px-6 py-4 sticky top-0 z-20 shadow-md flex justify-between items-center">
-        <h1 className="type-h4 flex items-center gap-2">
-          <CalendarCheck className="w-6 h-6" /> Mark Attendance
-        </h1>
+      <div className="bg-card text-text-primary px-6 py-4 sticky top-0 z-20 border-b border-border shadow-xs flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button onClick={onBack} className="p-1.5 hover:bg-bg rounded-lg border border-border transition cursor-pointer">
+              <ArrowLeft className="w-5 h-5 text-text-secondary" />
+            </button>
+          )}
+          <h1 className="type-h4 flex items-center gap-2">
+            <CalendarCheck className="w-6 h-6 text-accent" /> Mark Attendance
+          </h1>
+        </div>
       </div>
 
       <div className="p-4 flex flex-col md:flex-row gap-6 h-full overflow-hidden">
@@ -579,6 +590,7 @@ export default function AttendanceTab() {
             (() => {
               const presentCount = students.filter((s) => s.status === 'PRESENT').length;
               const absentCount = students.filter((s) => s.status === 'ABSENT').length;
+              const attendanceRate = students.length > 0 ? Math.round((presentCount / students.length) * 100) : 0;
 
               const visibleStudents = students.filter((s) => {
                 if (statusFilter === 'present' && s.status !== 'PRESENT') return false;
