@@ -230,14 +230,14 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                 {/* 1. Activity & Thresholds */}
                 <div
                   onClick={() => handleActionNavigate('activity')}
-                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/50 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div className="space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50/90 border border-indigo-100 flex items-center justify-center text-indigo-600 group-hover:scale-105 transition-transform">
                       <Activity className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-accent transition-colors">
+                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-indigo-600 transition-colors">
                         Activity & Thresholds
                       </h4>
                       <p className="type-fine text-text-secondary mt-1 font-medium">
@@ -246,7 +246,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-accent">
+                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-indigo-600">
                     <span>Manage Activities</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -255,14 +255,14 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                 {/* 2. Attendance Engine */}
                 <div
                   onClick={() => handleActionNavigate('attendance')}
-                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/50 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-sky-300 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div className="space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-text-primary">
-                      <CalendarCheck className="w-5 h-5 text-accent" />
+                    <div className="w-10 h-10 rounded-xl bg-sky-50/90 border border-sky-100 flex items-center justify-center text-sky-600 group-hover:scale-105 transition-transform">
+                      <CalendarCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-accent transition-colors">
+                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-sky-600 transition-colors">
                         Attendance Engine & AWD
                       </h4>
                       <p className="type-fine text-text-secondary mt-1 font-medium">
@@ -271,7 +271,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-accent">
+                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-sky-600">
                     <span>Attendance Settings</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -280,14 +280,14 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                 {/* 3. Group Management & Captain Rewards */}
                 <div
                   onClick={() => handleActionNavigate('groups')}
-                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/50 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-purple-300 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div className="space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-text-primary">
-                      <Users className="w-5 h-5 text-accent" />
+                    <div className="w-10 h-10 rounded-xl bg-purple-50/90 border border-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-105 transition-transform">
+                      <Users className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-accent transition-colors">
+                      <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-purple-600 transition-colors">
                         Peer Groups & Teams
                       </h4>
                       <p className="type-fine text-text-secondary mt-1 font-medium">
@@ -296,7 +296,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-accent">
+                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-purple-600">
                     <span>Manage Groups</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -305,19 +305,19 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                 {/* 4. Requests & Badge Approval */}
                 <div
                   onClick={() => handleActionNavigate('requests')}
-                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-accent/50 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-card rounded-2xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)] p-5 hover:border-amber-300 transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                 >
                   <div className="space-y-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent-tint border border-accent/20 flex items-center justify-center text-accent">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50/90 border border-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform">
                       <Award className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center justify-between">
-                        <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-accent transition-colors">
+                        <h4 className="type-h5 font-extrabold text-text-primary group-hover:text-amber-600 transition-colors">
                           Badge Approvals
                         </h4>
                         {stats.pendingRequests > 0 && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-accent text-card">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-600 text-white">
                             {stats.pendingRequests} New
                           </span>
                         )}
@@ -328,7 +328,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-accent">
+                  <div className="pt-4 mt-3 border-t border-border-subtle flex items-center justify-between type-caption font-extrabold text-amber-600">
                     <span>Review Requests</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -339,7 +339,7 @@ export default function OverviewTab({ onPushView, onNavigateTab }: Props) {
             {/* Operational Health Footer Card */}
             <div className="bg-card rounded-2xl border border-border p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
               <div className="flex items-center space-x-3.5">
-                <div className="w-10 h-10 rounded-xl bg-bg border border-border flex items-center justify-center text-accent shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50/90 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
