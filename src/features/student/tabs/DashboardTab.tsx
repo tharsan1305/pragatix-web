@@ -131,7 +131,7 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
             setHasActiveStage(false);
           }
         }
-      } catch (_) {}
+      } catch (_) { }
     };
 
     if (token) {
@@ -309,8 +309,8 @@ export default function DashboardTab({ onSelectTab, onOpenStreaks, myGroupTabInd
                   </span>
                 </div>
                 <p className="type-caption text-text-secondary font-medium">
-                  {profile.isCaptain 
-                    ? 'Manage squad roster, track group XP, and lead team progress' 
+                  {profile.isCaptain
+                    ? 'Manage squad roster, track group XP, and lead team progress'
                     : 'Assist team captain in monitoring squad attendance and member performance'}
                 </p>
               </div>
